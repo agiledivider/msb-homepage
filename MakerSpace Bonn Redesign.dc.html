@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;family=Caveat:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background-color:#f1ede2;
+    background-image:linear-gradient(rgba(94,177,48,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(94,177,48,.10) 1px,transparent 1px);
+    background-size:27px 27px;}
+  @keyframes msbfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  /* mobile hero flip-in (single face, stays within ±90° so it is never mirrored) */
+  @keyframes msb-flipin{
+    0%{opacity:0;transform:perspective(1000px) rotateY(-90deg);}
+    55%{opacity:1;}
+    100%{opacity:1;transform:perspective(1000px) rotateY(0deg);}
+  }
+
+  /* hand-drawn pencil sketches scattered in the page gutters */
+  .msb-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
+  .msb-bg img{position:absolute;display:block;}
+  @media(max-width:1420px){.msb-bg{display:none;}}
+
+  /* ---- 3D tilted hero that flips like a rotating prism ---- */
+  .msb-scene{position:relative;height:500px;margin:56px 0 22px;
+    perspective:2400px;perspective-origin:50% 42%;}
+  /* A triangular prism: the tilt and the carousel spin live on ONE preserve-3d
+     element (single 3D level) so backface-visibility culls the rear faces.
+     Pulled back by one apothem so the front face sits on the z=0 plane. */
+  .msb-flip{position:relative;width:100%;height:100%;transform-style:preserve-3d;
+    transform:rotateX(4.5deg) rotateY(8deg)
+      translateZ(calc(var(--tz,322px) * -1)) rotateY(var(--spin,0deg));}
+  .msb-face{position:absolute;inset:0;
+    -webkit-backface-visibility:hidden;backface-visibility:hidden;}
+  .msb-face.f0{transform:rotateY(0deg)   translateZ(var(--tz,322px));}
+  .msb-face.f1{transform:rotateY(120deg) translateZ(var(--tz,322px));}
+  .msb-face.f2{transform:rotateY(240deg) translateZ(var(--tz,322px));}
+  .msb-mat{position:relative;width:100%;height:100%;border-radius:16px;overflow:hidden;
+    padding:40px 44px;background-color:#325725;
+    background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.11) 0 1px,transparent 1px 34px),repeating-linear-gradient(90deg,rgba(255,255,255,.11) 0 1px,transparent 1px 34px);
+    box-shadow:0 42px 82px -40px rgba(20,60,42,.78), inset 0 0 0 2px rgba(255,255,255,.16);}
+  .msb-grid{display:grid;grid-template-columns:1.06fr .94fr;gap:40px;align-items:center;
+    position:relative;z-index:2;padding-left:10px;padding-top:6px;height:100%;}
+  .msb-badge{position:absolute;z-index:6;font-family:'Archivo',sans-serif;font-weight:800;
+    font-size:13px;letter-spacing:.03em;padding:9px 15px;border-radius:22px;
+    box-shadow:0 6px 16px -6px rgba(60,52,30,.5);border:2px solid #fff;
+    background:#e0872e;color:#20170a;}
+  .msb-note{position:absolute;z-index:6;font-family:'Caveat',cursive;font-weight:700;
+    font-size:22px;padding:6px 16px;border-radius:6px;background:#fbf7ec;color:#238811;
+    box-shadow:0 6px 16px -8px rgba(60,52,30,.5);border:1px dashed #238811;}
+  .msb-dots{display:flex;gap:10px;align-items:center;justify-content:center;
+    flex-wrap:wrap;margin:0 0 38px;}
+  .msb-pill{cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+    letter-spacing:.06em;padding:7px 13px;border-radius:20px;border:1px solid #d9d2c1;
+    background:#fbf7ec;transition:all .25s ease;display:inline-flex;gap:7px;align-items:center;}
+  .msb-pill b{font-weight:600;}
+  /* hamburger (mobile only) */
+  .msb-burger{display:none;background:none;border:0;cursor:pointer;padding:0;width:42px;height:42px;
+    flex-direction:column;justify-content:center;align-items:center;gap:5px;}
+  .msb-burger span{display:block;width:24px;height:2.5px;background:#23231f;border-radius:2px;
+    transition:transform .25s ease,opacity .2s ease;}
+  .msb-burger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+  .msb-burger.open span:nth-child(2){opacity:0;}
+  .msb-burger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+  .msb-menu-cta{display:none;}
+  @media (max-width:900px){
+    html,body{overflow-x:hidden;}
+
+    /* NB: this framework is React-based and re-serialises inline styles as
+       "prop: value" (space after the colon) AND reformats values, e.g.
+       repeat(3,1fr) -> repeat(3, 1fr). So selectors match on stable value
+       tokens; setting grid-template-columns on a non-grid is a harmless no-op. */
+
+    /* ---- top info strip: one centred line, drop the address ---- */
+    .msb-addr{display:none!important;}
+    [style*="padding: 8px 32px"]{padding:8px 16px!important;justify-content:center!important;
+      text-align:center;font-size:11.5px!important;}
+
+    /* ---- header: hamburger + dropdown nav ---- */
+    header > div{padding-left:16px!important;padding-right:16px!important;gap:12px!important;position:relative;}
+    .msb-headcta{display:none!important;}
+    .msb-burger{display:flex!important;}
+    .msb-nav{position:absolute;top:100%;left:0;right:0;display:none!important;
+      flex-direction:column!important;align-items:stretch!important;gap:0!important;
+      background:#f4f1e9;border-top:1px solid #e4dfd1;border-bottom:1px solid #d9d2c1;
+      box-shadow:0 18px 34px -18px rgba(60,52,30,.55);padding:6px 0!important;}
+    .msb-nav.open{display:flex!important;}
+    .msb-nav > a{padding:14px 22px!important;font-size:16px!important;border-bottom:1px solid #ece7db;}
+    .msb-nav > a.msb-menu-cta{display:block!important;margin:12px 22px 6px!important;padding:13px!important;
+      text-align:center;font-size:15px!important;border-bottom:0;box-shadow:0 8px 18px -10px rgba(0,0,0,.4);}
+
+    /* ---- container / section paddings ---- */
+    main{padding-left:16px!important;padding-right:16px!important;padding-bottom:48px!important;}
+    [style*="padding: 16px 32px"]{padding-left:16px!important;padding-right:16px!important;}
+    [style*="padding: 52px 32px 34px"]{padding-left:16px!important;padding-right:16px!important;}
+    [style*="padding: 44px"]{padding:28px 22px!important;gap:20px!important;}
+
+    /* ---- collapse every multi-column layout to one column ---- */
+    [style*="1fr 340px"],[style*="1fr 300px"],[style*="1.15fr"],[style*="1fr 1fr"],
+    [style*="repeat(2"],[style*="repeat(3"],[style*="1.4fr"]{grid-template-columns:1fr!important;}
+    aside{position:static!important;top:auto!important;}
+    h1{font-size:clamp(26px,6.4vw,38px)!important;line-height:1.06!important;}
+    [style*="font-size: 74px"]{font-size:44px!important;}
+
+    /* ---- HERO: the 3D prism on mobile too (renders in Blink; WebKit flattens
+       it). Height is set dynamically by _fit()/_measure() via --msb-hero-h so
+       the pills sit just at the fold and the prism fills the rest; text + photo
+       scale via --msb-s. The scene is inset a little so the rotating side faces
+       stay within the viewport (can't clip: overflow!=visible flattens 3D). --- */
+    .msb-scene{height:var(--msb-hero-h, calc(100svh - 176px))!important;
+      margin:10px 20px 12px!important;perspective:2000px!important;perspective-origin:50% 48%!important;}
+    .msb-dots{margin:0 0 12px!important;}
+    .msb-badge,.msb-note{display:none!important;}
+    .msb-mat{padding:calc(15px*var(--msb-s,1)) calc(15px*var(--msb-s,1))!important;border-radius:14px!important;}
+
+    /* face content: vertical stack — photo on top, text, buttons pinned bottom */
+    .msb-grid{display:flex!important;flex-direction:column!important;height:100%!important;
+      gap:calc(9px*var(--msb-s,1))!important;padding:0!important;align-items:stretch!important;}
+    .msb-grid > div:first-child{display:flex!important;flex-direction:column!important;
+      flex:1 1 auto;min-height:0;min-width:0;order:2;}
+    .msb-grid > div:last-child{order:1;flex:0 0 auto;transform:none!important;
+      margin:0 auto!important;width:100%!important;}
+    /* eyebrow chip */
+    .msb-grid > div:first-child > div:first-child{margin-bottom:calc(9px*var(--msb-s,1))!important;
+      font-size:calc(11px*var(--msb-s,1))!important;padding:4px 9px!important;}
+    /* headline + subtitle scale to fit */
+    .msb-scene h1{font-size:max(18px,calc(30px*var(--msb-s,1)))!important;
+      line-height:1.02!important;margin:0 0 calc(7px*var(--msb-s,1))!important;}
+    .msb-grid > div:first-child > p{font-size:max(13px,calc(17px*var(--msb-s,1)))!important;
+      line-height:1.26!important;margin:0!important;}
+    .msb-desc{display:none!important;}                    /* long paragraph / meta */
+    [style*="font-size: 74px"]{font-size:calc(46px*var(--msb-s,1))!important;}  /* event date */
+
+    /* photo (taped polaroid) — shown, scaled */
+    .msb-grid image-slot{height:calc(140px*var(--msb-s,1))!important;width:100%!important;}
+    .msb-grid > div:last-child > div:last-child{padding:calc(7px*var(--msb-s,1))
+      calc(7px*var(--msb-s,1)) calc(24px*var(--msb-s,1))!important;}
+    .msb-grid > div:last-child .cap,.msb-grid > div:last-child [style*="Caveat"]{font-size:calc(15px*var(--msb-s,1))!important;}
+
+    /* buttons pinned to the bottom, stacked full-width, scaled */
+    .msb-cta{margin-top:auto!important;padding-top:calc(8px*var(--msb-s,1))!important;
+      flex-direction:column!important;gap:calc(7px*var(--msb-s,1))!important;}
+    .msb-cta a{flex:0 0 auto;width:100%!important;text-align:center;box-shadow:none!important;
+      font-size:max(12px,calc(14px*var(--msb-s,1)))!important;
+      padding:calc(11px*var(--msb-s,1)) 10px!important;}
+  }
+  @media (max-width:560px){
+    main{padding-left:13px!important;padding-right:13px!important;}
+    [style*="92px 1fr auto"]{grid-template-columns:58px 1fr!important;gap:12px!important;}
+    [style*="92px 1fr auto"] > span:last-child{display:none;}
+  }
+</style>
+</helmet>
+<template id="__bundler_thumbnail" data-bg-color="#f1ede2">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#f1ede2"></rect>
+    <rect x="360" y="210" width="480" height="380" rx="28" fill="#325725"></rect>
+    <g fill="none" stroke="#22dd09" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M540 340 L540 470 L600 420 L660 470 L660 340"></path>
+    </g>
+    <text x="600" y="660" font-family="Archivo, sans-serif" font-weight="800" font-size="52" fill="#23231f" text-anchor="middle">MakerSpace Bonn</text>
+  </svg>
+</template>
+
+<div style="background:transparent;color:#23231f;font-family:'IBM Plex Sans',sans-serif;min-height:100vh;">
+
+  <!-- hand-drawn pencil sketch overlays (gutter watermarks) -->
+  <div class="msb-bg" aria-hidden="true">
+    <img src="./uploads/sketch-3dprinter.png" style="left:-48px;bottom:34px;width:300px;transform:rotate(-6deg);opacity:.16;">
+    <img src="./uploads/sketch-gears.png" style="right:-40px;top:150px;width:250px;transform:rotate(7deg);opacity:.13;">
+    <img src="./uploads/sketch-tools.png" style="right:14px;bottom:80px;width:210px;transform:rotate(-4deg);opacity:.14;">
+  </div>
+
+  <!-- top strip -->
+  <div style="background:#238811;color:#eafaf2;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.03em;padding:8px 32px;display:flex;justify-content:space-between;align-items:center;">
+    <span>● GEÖFFNET · HEUTE 18:00–21:00 UHR</span>
+    <span class="msb-addr" style="opacity:.85;">Kennedyallee 18 · 53175 Bonn · Tel 0228 81286980</span>
+  </div>
+
+  <!-- HEADER / NAV -->
+  <header style="position:sticky;top:0;z-index:20;background:rgba(244,241,233,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e4dfd1;">
+    <div style="max-width:1180px;margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
+      <a onClick="{{ goStart }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none;">
+        <img src="./makerspacebonn_logo.png" alt="MakerSpace Bonn Logo" style="width:40px;height:40px;object-fit:contain;display:block;">
+        <span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;color:#23231f;letter-spacing:-.01em;">MakerSpace <span style="color:#9a9484;font-weight:600;">Bonn</span></span>
+      </a>
+      <nav class="msb-nav {{ menuCls }}" style="display:flex;align-items:center;gap:28px;font-weight:500;font-size:15px;">
+        <a onClick="{{ goStart }}" style="cursor:pointer;text-decoration:none;color: {{ c_start }};">Start</a>
+        <a onClick="{{ goVerein }}" style="cursor:pointer;text-decoration:none;color: {{ c_verein }};">Verein</a>
+        <a onClick="{{ goTools }}" style="cursor:pointer;text-decoration:none;color: {{ c_tools }};">Werkzeug &amp; Räume</a>
+        <a onClick="{{ goEvents }}" style="cursor:pointer;text-decoration:none;color: {{ c_events }};">Events</a>
+        <a onClick="{{ goJoin }}" style="cursor:pointer;text-decoration:none;color: {{ c_join }};">Mitmachen</a>
+        <a onClick="{{ goJoin }}" class="msb-menu-cta" style="cursor:pointer;text-decoration:none;background:#238811;color:#fff;font-weight:700;border-radius:9px;">Mitglied werden →</a>
+      </nav>
+      <a onClick="{{ goJoin }}" class="msb-headcta" style="cursor:pointer;text-decoration:none;background:#238811;color:#fff;font-weight:600;font-size:14px;padding:10px 18px;border-radius:9px;white-space:nowrap;">Mitglied werden</a>
+      <button onClick="{{ toggleMenu }}" class="msb-burger {{ menuCls }}" aria-label="Menü öffnen"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main style="max-width:1180px;margin:0 auto;padding:0 32px 72px;">
+    <!-- ============================ START ============================ -->
+    <sc-if value="{{ isStart }}" hint-placeholder-val="{{ true }}">
+    <div style="animation:msbfade .4s ease both;">
+
+      <!-- HERO: tilted 3D cutting-mat that flips between three faces -->
+      <div class="msb-scene" id="msb-hero-scene">
+        <div class="msb-flip" style="--tz:{{ tz }};transform:{{ flipTf }};transition:{{ trans }};">
+
+          <!-- ===== FACE 0 · WERKSTATT ===== -->
+          <div class="msb-face f0 {{ show0 }}">
+            <div class="msb-badge" style="top:-20px;left:-16px;transform:rotate(-8deg);">SEIT 2018</div>
+            <div class="msb-note" style="top:-16px;right:44px;transform:rotate(6deg);">Hilfe zur Selbsthilfe ✦</div>
+            <div class="msb-mat">
+              <div style="position:absolute;top:0;left:0;right:0;height:16px;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 1px,transparent 1px 17px);"></div>
+              <div style="position:absolute;top:0;bottom:0;left:0;width:16px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.5) 0 1px,transparent 1px 17px);"></div>
+              <div style="position:absolute;bottom:16px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.5);">45°</div>
+              <div class="msb-grid">
+                <div>
+                  <div style="display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.06em;color:#cfe9ad;border:1px solid rgba(207,233,173,.45);padding:5px 11px;border-radius:20px;margin-bottom:22px;">◆ OFFENE WERKSTATT · BONN</div>
+                  <h1 style="font-family:'Archivo',sans-serif;font-weight:900;font-size:58px;line-height:.98;letter-spacing:-.02em;margin:0 0 14px;color:#fff;">Bau, was du dir<br>vorstellst.</h1>
+                  <p style="font-family:'Newsreader',serif;font-style:italic;font-size:21px;color:rgba(255,255,255,.82);margin:0 0 20px;">A place to make things — for everyone in Bonn.</p>
+                  <p class="msb-desc" style="font-size:16.5px;line-height:1.6;color:rgba(255,255,255,.9);max-width:470px;margin:0 0 28px;">Löten, schweißen, fräsen, nähen, 3D-drucken. Sechs Werkstätten, über 40 Maschinen und eine Community, die mit anpackt.</p>
+                  <div class="msb-cta" style="display:flex;gap:13px;flex-wrap:wrap;">
+                    <a onClick="{{ goEvents }}" style="cursor:pointer;background:#fff;color:#325725;font-weight:700;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;box-shadow:0 8px 20px -10px rgba(0,0,0,.4);">Offene Tür besuchen →</a>
+                    <a onClick="{{ goTools }}" style="cursor:pointer;border:1.5px solid rgba(255,255,255,.55);color:#fff;font-weight:600;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;">Werkstätten ansehen</a>
+                  </div>
+                </div>
+                <div style="position:relative;transform:rotate(2.2deg);">
+                  <div style="position:absolute;top:-13px;left:24px;width:78px;height:26px;background:rgba(251,247,236,.72);transform:rotate(-5deg);box-shadow:0 2px 6px -3px rgba(0,0,0,.3);z-index:3;"></div>
+                  <div style="position:absolute;bottom:-11px;right:30px;width:70px;height:24px;background:rgba(251,247,236,.72);transform:rotate(-4deg);box-shadow:0 2px 6px -3px rgba(0,0,0,.3);z-index:3;"></div>
+                  <div style="position:relative;background:#fbf7ec;padding:10px 10px 42px;box-shadow:0 18px 40px -18px rgba(0,0,0,.5);">
+                    <image-slot id="msb-hero" src="./uploads/hero-werkstatt.jpg" style="width:100%;height:320px;display:block;" shape="rect" placeholder="Foto: Maker bei der Arbeit"></image-slot>
+                    <div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-family:'Caveat',cursive;font-weight:600;font-size:20px;color:#3c4a42;">Werkstatt · Kennedyallee 18</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== FACE 1 · BLOG ===== -->
+          <div class="msb-face f1 {{ show1 }}">
+            <div class="msb-badge" style="top:-20px;left:-16px;transform:rotate(-7deg);">NEU IM BLOG</div>
+            <div class="msb-note" style="top:-16px;right:44px;transform:rotate(5deg);">frisch dokumentiert ✦</div>
+            <div class="msb-mat">
+              <div style="position:absolute;top:0;left:0;right:0;height:16px;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 1px,transparent 1px 17px);"></div>
+              <div style="position:absolute;top:0;bottom:0;left:0;width:16px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.5) 0 1px,transparent 1px 17px);"></div>
+              <div style="position:absolute;bottom:16px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.5);">#42</div>
+              <div class="msb-grid">
+                <div>
+                  <div style="display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.06em;color:#f4d7ae;border:1px solid rgba(244,215,174,.5);padding:5px 11px;border-radius:20px;margin-bottom:22px;">✎ AUS DER WERKSTATT · BLOG</div>
+                  <h1 style="font-family:'Archivo',sans-serif;font-weight:900;font-size:50px;line-height:1.0;letter-spacing:-.02em;margin:0 0 14px;color:#fff;">Wie wir die<br>CNC gezähmt haben.</h1>
+                  <p style="font-family:'Newsreader',serif;font-style:italic;font-size:21px;color:rgba(255,255,255,.82);margin:0 0 18px;">Three weekends, one big cut — a build log.</p>
+                  <p class="msb-desc" style="font-size:16.5px;line-height:1.6;color:rgba(255,255,255,.9);max-width:470px;margin:0 0 20px;">Von der ersten Fehlkalibrierung bis zum sauberen Finish: unser Team dokumentiert, wie die Yeti-Smartbench endlich lief — inklusive der Fehler.</p>
+                  <div class="msb-desc" style="display:flex;align-items:center;gap:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#cfe9ad;margin-bottom:26px;"><span>von Jonas K.</span><span style="opacity:.5;">·</span><span>28. JUN 2026</span><span style="opacity:.5;">·</span><span>6 MIN</span></div>
+                  <div class="msb-cta" style="display:flex;gap:13px;flex-wrap:wrap;">
+                    <a onClick="{{ goVerein }}" style="cursor:pointer;background:#e0872e;color:#20170a;font-weight:700;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;box-shadow:0 8px 20px -10px rgba(0,0,0,.4);">Beitrag lesen →</a>
+                    <a onClick="{{ goVerein }}" style="cursor:pointer;border:1.5px solid rgba(255,255,255,.55);color:#fff;font-weight:600;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;">Alle Beiträge</a>
+                  </div>
+                </div>
+                <div style="position:relative;transform:rotate(-2deg);">
+                  <div style="position:absolute;top:-13px;left:30px;width:78px;height:26px;background:rgba(251,247,236,.72);transform:rotate(4deg);box-shadow:0 2px 6px -3px rgba(0,0,0,.3);z-index:3;"></div>
+                  <div style="position:absolute;bottom:-11px;right:24px;width:70px;height:24px;background:rgba(251,247,236,.72);transform:rotate(5deg);box-shadow:0 2px 6px -3px rgba(0,0,0,.3);z-index:3;"></div>
+                  <div style="position:relative;background:#fbf7ec;padding:10px 10px 42px;box-shadow:0 18px 40px -18px rgba(0,0,0,.5);">
+                    <image-slot id="msb-blog" src="./uploads/hero-blog.jpg" style="width:100%;height:320px;display:block;" shape="rect" placeholder="Foto zum Blogbeitrag"></image-slot>
+                    <div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-family:'Caveat',cursive;font-weight:600;font-size:20px;color:#3c4a42;">Logbuch · Eintrag #42</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== FACE 2 · EVENT ===== -->
+          <div class="msb-face f2 {{ show2 }}">
+            <div class="msb-badge" style="top:-20px;left:-16px;transform:rotate(-7deg);">MO 06. JULI</div>
+            <div class="msb-note" style="top:-16px;right:44px;transform:rotate(6deg);">kostenlos ✦</div>
+            <div class="msb-mat">
+              <div style="position:absolute;top:0;left:0;right:0;height:16px;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 1px,transparent 1px 17px);"></div>
+              <div style="position:absolute;top:0;bottom:0;left:0;width:16px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.5) 0 1px,transparent 1px 17px);"></div>
+              <div style="position:absolute;bottom:16px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,.5);">10:00</div>
+              <div class="msb-grid">
+                <div>
+                  <div style="display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.06em;color:#cfe9ad;border:1px solid rgba(207,233,173,.45);padding:5px 11px;border-radius:20px;margin-bottom:22px;">◆ NÄCHSTER TERMIN · EVENT</div>
+                  <div style="display:flex;align-items:flex-end;gap:16px;margin:0 0 12px;">
+                    <div style="font-family:'Archivo',sans-serif;font-weight:900;font-size:74px;line-height:.85;color:#fff;">06</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#cfe9ad;line-height:1.5;padding-bottom:8px;">JULI<br>MONTAG</div>
+                  </div>
+                  <h1 style="font-family:'Archivo',sans-serif;font-weight:900;font-size:38px;line-height:1.02;letter-spacing:-.01em;margin:0 0 12px;color:#fff;">Offene Tür — Führung durch die Werkstätten</h1>
+                  <p class="msb-desc" style="font-size:16.5px;line-height:1.6;color:rgba(255,255,255,.9);max-width:470px;margin:0 0 22px;">Du willst wissen, was bei uns geht? Komm vorbei, lern uns kennen — kostenlose Führung durch alle sechs Werkstätten. Ab 10:00 Uhr, für alle.</p>
+                  <div class="msb-cta" style="display:flex;gap:13px;flex-wrap:wrap;">
+                    <a onClick="{{ goEvents }}" style="cursor:pointer;background:#fff;color:#325725;font-weight:700;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;box-shadow:0 8px 20px -10px rgba(0,0,0,.4);">Platz sichern →</a>
+                    <a onClick="{{ goEvents }}" style="cursor:pointer;border:1.5px solid rgba(255,255,255,.55);color:#fff;font-weight:600;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;">Alle Events</a>
+                  </div>
+                </div>
+                <div style="position:relative;transform:rotate(1.8deg);">
+                  <div style="position:absolute;top:-13px;left:26px;width:78px;height:26px;background:rgba(251,247,236,.72);transform:rotate(-4deg);box-shadow:0 2px 6px -3px rgba(0,0,0,.3);z-index:3;"></div>
+                  <div style="position:absolute;bottom:-11px;right:28px;width:70px;height:24px;background:rgba(251,247,236,.72);transform:rotate(-5deg);box-shadow:0 2px 6px -3px rgba(0,0,0,.3);z-index:3;"></div>
+                  <div style="position:relative;background:#fbf7ec;padding:10px 10px 42px;box-shadow:0 18px 40px -18px rgba(0,0,0,.5);">
+                    <image-slot id="msb-event" src="./uploads/hero-event.jpg" style="width:100%;height:320px;display:block;" shape="rect" placeholder="Foto von der Offenen Tür"></image-slot>
+                    <div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-family:'Caveat',cursive;font-weight:600;font-size:20px;color:#3c4a42;">Offene Tür · Kennedyallee 18</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- flip indicator pills -->
+      <div class="msb-dots">
+        <span onClick="{{ goHero0 }}" class="msb-pill" style="border-color:{{ pb0 }};color:{{ pc0 }};background:{{ pg0 }};"><b>01</b> WERKSTATT</span>
+        <span onClick="{{ goHero1 }}" class="msb-pill" style="border-color:{{ pb1 }};color:{{ pc1 }};background:{{ pg1 }};"><b>02</b> BLOG</span>
+        <span onClick="{{ goHero2 }}" class="msb-pill" style="border-color:{{ pb2 }};color:{{ pc2 }};background:{{ pg2 }};"><b>03</b> EVENT</span>
+      </div>
+
+      <!-- MAIN GRID: feed + sidebar -->
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:40px;padding-top:8px;align-items:start;">
+
+        <!-- LEFT: WAS LÄUFT (feed) -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #23231f;padding-bottom:12px;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.08em;background:#238811;color:#fff;padding:5px 10px;border-radius:3px;transform:rotate(-2deg);box-shadow:0 3px 8px -4px rgba(0,0,0,.35);">PINNWAND</span>
+              <h2 style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;margin:0;">Was läuft</h2>
+            </div>
+            <a onClick="{{ goEvents }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#238811;text-decoration:none;">alle Events →</a>
+          </div>
+
+          <a onClick="{{ goEvents }}" style="cursor:pointer;text-decoration:none;color:inherit;display:grid;grid-template-columns:96px 1fr;gap:20px;padding:24px 0;border-bottom:1px solid #e4dfd1;">
+            <div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:34px;line-height:1;color:#238811;">06</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#9a9484;">JUL · MO</div></div>
+            <div>
+              <div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#eaf3dd;color:#238811;padding:3px 8px;border-radius:5px;margin-bottom:8px;">FÜR ALLE · KOSTENLOS</div>
+              <h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:20px;margin:0 0 6px;">Offene Tür — Führung durch die Werkstätten</h3>
+              <p style="font-size:14.5px;color:#736e62;line-height:1.55;margin:0;">Du willst wissen, was man bei uns machen kann? Komm vorbei, lern uns kennen — kostenlose Führung inklusive. Ab 10:00 Uhr.</p>
+            </div>
+          </a>
+
+          <a onClick="{{ goEvents }}" style="cursor:pointer;text-decoration:none;color:inherit;display:grid;grid-template-columns:96px 1fr;gap:20px;padding:24px 0;border-bottom:1px solid #e4dfd1;">
+            <div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:34px;line-height:1;color:#238811;">05</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#9a9484;">JUL · SO</div></div>
+            <div>
+              <div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#f3ead9;color:#a06a1f;padding:3px 8px;border-radius:5px;margin-bottom:8px;">HANDARBEIT</div>
+              <h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:20px;margin:0 0 6px;">Handarbeitstreff &amp; Makerbrunch</h3>
+              <p style="font-size:14.5px;color:#736e62;line-height:1.55;margin:0;">Nähmaschinen, Stick- &amp; Strickmaschine, Folienplotter, Textilveredelung — fachsimpeln, ratschen, Spaß haben. Parallel Brunch (jede:r bringt was mit). Ab 10:00.</p>
+            </div>
+          </a>
+
+          <a onClick="{{ goEvents }}" style="cursor:pointer;text-decoration:none;color:inherit;display:grid;grid-template-columns:96px 1fr;gap:20px;padding:24px 0;border-bottom:1px solid #e4dfd1;">
+            <div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:34px;line-height:1;color:#238811;">21</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#9a9484;">JUL · DI</div></div>
+            <div>
+              <div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#eaf3dd;color:#238811;padding:3px 8px;border-radius:5px;margin-bottom:8px;">FÜR ALLE</div>
+              <h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:20px;margin:0 0 6px;">Spieleabend</h3>
+              <p style="font-size:14.5px;color:#736e62;line-height:1.55;margin:0;">Jeden dritten Dienstag im Monat. Ein paar Spiele sind da — eigene gerne mitbringen. 19:00–21:00.</p>
+            </div>
+          </a>
+
+          <a onClick="{{ goEvents }}" style="cursor:pointer;text-decoration:none;color:inherit;display:grid;grid-template-columns:96px 1fr;gap:20px;padding:24px 0;border-bottom:1px solid #e4dfd1;">
+            <div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;line-height:1.05;color:#238811;">15–16</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#9a9484;">AUG</div></div>
+            <div>
+              <div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#ece7dd;color:#736e62;padding:3px 8px;border-radius:5px;margin-bottom:8px;">EXTERN</div>
+              <h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:20px;margin:0 0 6px;">FrOSCon 2026 — Sankt Augustin</h3>
+              <p style="font-size:14.5px;color:#736e62;line-height:1.55;margin:0;">Wir sind dabei. Die große Open-Source-Konferenz der Region.</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- RIGHT: sticky sidebar -->
+        <aside style="position:sticky;top:96px;display:flex;flex-direction:column;gap:18px;">
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px -28px rgba(60,52,30,.4);">
+            <div style="background:#238811;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;">Öffnungszeiten</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;opacity:.85;">DIESE WOCHE</span>
+            </div>
+            <div style="padding:6px 18px 14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #efeadd;"><span style="font-size:14px;"><strong>Do 02.</strong> <span style="color:#9a9484;">Offen</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#736e62;">18–21</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #efeadd;"><span style="font-size:14px;"><strong>Sa 05.</strong> <span style="color:#9a9484;">Handarbeit</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#736e62;">10–14</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #efeadd;background:#edf6e0;margin:0 -18px;padding-left:18px;padding-right:18px;"><span style="font-size:14px;color:#238811;"><strong>Mo 06.</strong> Offene Tür</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#238811;">ab 10</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #efeadd;"><span style="font-size:14px;"><strong>Di 07.</strong> <span style="color:#9a9484;">Offen</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#736e62;">18–21</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;"><span style="font-size:14px;"><strong>Mi 08.</strong> <span style="color:#9a9484;">Offen</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#736e62;">18:30–21</span></div>
+              <p style="font-size:12.5px;color:#9a9484;line-height:1.5;margin:12px 0 0;">„Offen" = für Mitglieder. Die <strong style="color:#238811;">Offene Tür</strong> ist für alle &amp; kostenlos.</p>
+            </div>
+          </div>
+
+          <div style="background:#F5E6C9;border:1px solid #e8d3a6;border-radius:14px;padding:18px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:#238811;margin-bottom:10px;">NEU HIER?</div>
+            <p style="font-size:14px;line-height:1.55;color:#4c4a42;margin:0 0 14px;">Komm einfach zur Offenen Tür — unverbindliche Führung durch alle Werkstätten inklusive.</p>
+            <a onClick="{{ goVerein }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#238811;text-decoration:none;border-bottom:1px solid #238811;padding-bottom:2px;">Mehr über uns →</a>
+          </div>
+        </aside>
+      </div>
+
+      <!-- WERKSTÄTTEN preview: pegboard -->
+      <div style="padding:56px 0 8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.08em;background:#e0872e;color:#20170a;padding:5px 10px;border-radius:3px;transform:rotate(-2deg);box-shadow:0 3px 8px -4px rgba(0,0,0,.35);">WERKSTATT-WAND</span>
+            <h2 style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;margin:0;">Werkzeug &amp; Räume</h2>
+          </div>
+          <a onClick="{{ goTools }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#238811;text-decoration:none;">alle 6 Werkstätten →</a>
+        </div>
+
+        <div style="position:relative;border-radius:14px;padding:34px 30px;border:1px solid #d7c9a8;
+          background-color:#e9dfc9;
+          background-image:radial-gradient(circle,rgba(48,35,16,.40) 0 3px,transparent 3.6px),radial-gradient(circle,rgba(48,35,16,.20) 0 4.3px,transparent 4.9px),radial-gradient(circle,rgba(255,253,247,.9) 0 4.3px,transparent 4.9px);
+          background-size:38px 38px;background-position:0 0,1.4px 1.4px,-1.4px -1.4px;
+          box-shadow:inset 0 2px 18px rgba(70,55,25,.16),inset 0 0 0 1px rgba(255,255,255,.25);">
+          <div style="position:absolute;top:-14px;right:26px;font-family:'Caveat',cursive;font-weight:700;font-size:23px;color:#238811;transform:rotate(-3deg);">über 40 Maschinen ↴</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+            <div style="position:relative;background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:18px 18px 16px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="position:absolute;top:8px;right:12px;display:flex;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A1</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px;">Elektronik &amp; Löten</div><p style="font-size:13px;color:#736e62;margin:0;line-height:1.5;">Lötstationen · Oszilloskope · Reflowofen</p></div>
+            <div style="position:relative;background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:18px 18px 16px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="position:absolute;top:8px;right:12px;display:flex;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A2</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px;">Metallwerkstatt</div><p style="font-size:13px;color:#736e62;margin:0;line-height:1.5;">Schweißgerät · Drehmaschine · Bandsäge</p></div>
+            <div style="position:relative;background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:18px 18px 16px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="position:absolute;top:8px;right:12px;display:flex;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A3</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px;">Holzwerkstatt</div><p style="font-size:13px;color:#736e62;margin:0;line-height:1.5;">Formatkreissäge · Absauganlage</p></div>
+            <div style="position:relative;background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:18px 18px 16px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="position:absolute;top:8px;right:12px;display:flex;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A4</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px;">Textil &amp; Handarbeit</div><p style="font-size:13px;color:#736e62;margin:0;line-height:1.5;">Nähmaschinen · Stickmaschine · Folienplotter</p></div>
+            <div style="position:relative;background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:18px 18px 16px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="position:absolute;top:8px;right:12px;display:flex;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A5</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px;">3D-Druck &amp; CNC</div><p style="font-size:13px;color:#736e62;margin:0;line-height:1.5;">3D-Drucker · Yeti Smartbench CNC-Fräse</p></div>
+            <div style="position:relative;background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:18px 18px 16px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="position:absolute;top:8px;right:12px;display:flex;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span><span style="width:6px;height:6px;border-radius:50%;background:#c9bfa4;"></span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A6</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px;">CAD &amp; Digital</div><p style="font-size:13px;color:#736e62;margin:0;line-height:1.5;">FreeCAD · Fusion 360 · EstlCAM</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MITMACHEN band -->
+      <div style="margin-top:52px;background:#238811;color:#eafaf2;border-radius:18px;padding:44px;display:flex;align-items:center;justify-content:space-between;gap:36px;flex-wrap:wrap;">
+        <div>
+          <h2 style="font-family:'Archivo',sans-serif;font-weight:800;font-size:32px;margin:0 0 8px;color:#fff;">Mach mit. Bau mit.</h2>
+          <p style="font-size:16px;margin:0;max-width:460px;opacity:.9;">Werde Mitglied, unterstütze als Fördermitglied oder spende — jede Hilfe zählt.</p>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <a onClick="{{ goJoin }}" style="cursor:pointer;background:#fff;color:#238811;font-weight:700;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;">Mitglied werden →</a>
+          <a onClick="{{ goJoin }}" style="cursor:pointer;border:1.5px solid rgba(255,255,255,.6);color:#fff;font-weight:600;font-size:15px;padding:14px 24px;border-radius:10px;text-decoration:none;">Spenden</a>
+        </div>
+      </div>
+
+    </div>
+    </sc-if>
+
+    <!-- ============================ VEREIN ============================ -->
+    <sc-if value="{{ isVerein }}" hint-placeholder-val="{{ false }}">
+    <div style="animation:msbfade .4s ease both;padding:44px 0 8px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.08em;background:#238811;color:#fff;padding:5px 10px;border-radius:3px;transform:rotate(-2deg);box-shadow:0 3px 8px -4px rgba(0,0,0,.35);">DER VEREIN</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#9a9484;">seit 03.03.2018 · gemeinnützig</span>
+      </div>
+      <h1 style="font-family:'Archivo',sans-serif;font-weight:900;font-size:48px;line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;max-width:800px;">Eine offene Werkstatt für Bonn. Für alle.</h1>
+      <p style="font-family:'Newsreader',serif;font-style:italic;font-size:20px;color:#7c766a;margin:0 0 36px;max-width:640px;">An open workshop where a curious community creates, gets inspired and learns from one another.</p>
+
+      <div style="display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:start;">
+        <div>
+          <p style="font-size:16.5px;line-height:1.7;color:#4c4a42;margin:0 0 16px;">Bei uns findet eine Community von engagierten, neugierigen Menschen zusammen, die kreativ Neues erschaffen. Wenn wir geöffnet haben, kann jede:r kommen und am eigenen Projekt arbeiten — unsere Infrastruktur und unser Werkzeug stehen bereit.</p>
+          <p style="font-size:16.5px;line-height:1.7;color:#4c4a42;margin:0 0 16px;">Brauchst du Hilfe, unterstützen wir gern mit Rat und Denkanstößen — nach dem Motto <strong>Hilfe zur Selbsthilfe</strong>. Und am meisten freuen wir uns, wenn du dein Wissen weitergibst, einen Kurs hältst oder andere an deinen Ideen teilhaben lässt.</p>
+          <div style="margin-top:26px;border-left:3px solid #238811;padding:4px 0 4px 20px;">
+            <p style="font-family:'Newsreader',serif;font-size:22px;line-height:1.4;color:#23231f;margin:0;">„Bonn hat mit uns eine offene Werkstatt, in der Menschen kreativ und neugierig Neues erschaffen — und voneinander lernen."</p>
+          </div>
+        </div>
+        <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:14px;padding:24px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:#9a9484;margin-bottom:16px;">DIE KURZE GESCHICHTE</div>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <div style="display:grid;grid-template-columns:64px 1fr;gap:14px;padding-bottom:16px;border-left:2px solid #e4dfd1;margin-left:8px;padding-left:18px;position:relative;"><span style="font-family:'Archivo',sans-serif;font-weight:800;color:#238811;font-size:16px;">2018</span><span style="font-size:14px;color:#4c4a42;line-height:1.5;">Vereinsgründung, Gemeinnützigkeit &amp; Eröffnung am 3. März — mit vielen Gästen.</span></div>
+            <div style="display:grid;grid-template-columns:64px 1fr;gap:14px;padding-bottom:16px;border-left:2px solid #e4dfd1;margin-left:8px;padding-left:18px;"><span style="font-family:'Archivo',sans-serif;font-weight:800;color:#238811;font-size:16px;">2019</span><span style="font-size:14px;color:#4c4a42;line-height:1.5;">Öffnungszeiten ausgeweitet, Kernteam wächst, erste Workshop-Reihen.</span></div>
+            <div style="display:grid;grid-template-columns:64px 1fr;gap:14px;border-left:2px solid transparent;margin-left:8px;padding-left:18px;"><span style="font-family:'Archivo',sans-serif;font-weight:800;color:#238811;font-size:16px;">heute</span><span style="font-size:14px;color:#4c4a42;line-height:1.5;">6 Werkstätten, über 40 Maschinen, regelmäßige offene Türen &amp; Kurse.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;">
+        <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:12px;padding:22px;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;margin-bottom:8px;">Für alle</div><p style="font-size:14px;color:#736e62;line-height:1.55;margin:0;">Anfänger:innen bis Profis, jung bis alt — jede:r ist willkommen.</p></div>
+        <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:12px;padding:22px;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;margin-bottom:8px;">Hilfe zur Selbsthilfe</div><p style="font-size:14px;color:#736e62;line-height:1.55;margin:0;">Wir helfen ein Stück weiter — bauen tust du selbst.</p></div>
+        <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:12px;padding:22px;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;margin-bottom:8px;">Wissen teilen</div><p style="font-size:14px;color:#736e62;line-height:1.55;margin:0;">Workshops, Themenabende &amp; gegenseitiges Lernen.</p></div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============================ TOOLS ============================ -->
+    <sc-if value="{{ isTools }}" hint-placeholder-val="{{ false }}">
+    <div style="animation:msbfade .4s ease both;padding:44px 0 8px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.08em;background:#e0872e;color:#20170a;padding:5px 10px;border-radius:3px;transform:rotate(-2deg);box-shadow:0 3px 8px -4px rgba(0,0,0,.35);">AUSSTATTUNG</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#9a9484;">6 Werkstätten · 40+ Maschinen</span>
+      </div>
+      <h1 style="font-family:'Archivo',sans-serif;font-weight:900;font-size:48px;line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;">Werkzeug &amp; Räume</h1>
+      <p style="font-family:'Newsreader',serif;font-style:italic;font-size:20px;color:#7c766a;margin:0 0 32px;max-width:640px;">Everything you need to build — you may use all tools once you've been briefed.</p>
+
+      <div style="position:relative;border-radius:14px;padding:34px 30px;border:1px solid #d7c9a8;background-color:#e9dfc9;background-image:radial-gradient(circle,rgba(48,35,16,.40) 0 3px,transparent 3.6px),radial-gradient(circle,rgba(48,35,16,.20) 0 4.3px,transparent 4.9px),radial-gradient(circle,rgba(255,253,247,.9) 0 4.3px,transparent 4.9px);background-size:38px 38px;background-position:0 0,1.4px 1.4px,-1.4px -1.4px;box-shadow:inset 0 2px 18px rgba(70,55,25,.16),inset 0 0 0 1px rgba(255,255,255,.25);">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:22px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A1 · ELEKTRONIK</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;margin-bottom:8px;">Elektronik &amp; Löten</div><p style="font-size:14px;color:#736e62;margin:0;line-height:1.6;">3 Lötstationen, Entlötpumpen, mehrere Oszilloskope, Digitalmultimeter, Labornetzteile, Reflowofen, Breadboards, große LED-Lupe. Hardware: Raspberry Pi, Arduino, Calliope, BOB3.</p></div>
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:22px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A2 · METALL</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;margin-bottom:8px;">Metallwerkstatt</div><p style="font-size:14px;color:#736e62;margin:0;line-height:1.6;">Schweißgerät MIG/MAG Puls (AC/DC), Metallbandsäge, Abkantbank, Drehmaschine, Tischfräse. Plus Schraubenschlüssel- &amp; Bitsätze.</p></div>
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:22px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A3 · HOLZ</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;margin-bottom:8px;">Holzwerkstatt</div><p style="font-size:14px;color:#736e62;margin:0;line-height:1.6;">Formatkreissäge, Kreissäge und leistungsfähige Absauganlage für sauberes Arbeiten.</p></div>
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:22px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A4 · TEXTIL</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;margin-bottom:8px;">Textil &amp; Handarbeit</div><p style="font-size:14px;color:#736e62;margin:0;line-height:1.6;">Nähmaschinen, Stickmaschine, Strickmaschine, Folienplotter &amp; Textilveredelung. Jeden Sonntag Handarbeitstreff.</p></div>
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:22px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A5 · CNC / 3D</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;margin-bottom:8px;">3D-Druck &amp; CNC</div><p style="font-size:14px;color:#736e62;margin:0;line-height:1.6;">3D-Drucker und Yeti-Smartbench CNC-Fräse für Holz, Acryl u.v.m. Einweisung im CNC-Workshop inklusive.</p></div>
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:10px;padding:22px;box-shadow:0 10px 22px -14px rgba(60,52,30,.5);"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#238811;margin-bottom:5px;">A6 · DIGITAL</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;margin-bottom:8px;">CAD &amp; Digital</div><p style="font-size:14px;color:#736e62;margin:0;line-height:1.6;">Konstruieren mit FreeCAD, Fusion 360 &amp; EstlCAM — regelmäßige Einführungs-Workshops, auch als Webinar.</p></div>
+        </div>
+      </div>
+      <p style="font-size:13.5px;color:#9a9484;margin:16px 0 0;font-family:'IBM Plex Mono',monospace;">⚠ Maschinen dürfen nach einer Einweisung selbstständig genutzt werden. Sicherheit geht vor.</p>
+    </div>
+    </sc-if>
+
+    <!-- ============================ EVENTS ============================ -->
+    <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+    <div style="animation:msbfade .4s ease both;padding:44px 0 8px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.08em;background:#238811;color:#fff;padding:5px 10px;border-radius:3px;transform:rotate(-2deg);box-shadow:0 3px 8px -4px rgba(0,0,0,.35);">TERMINE</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#9a9484;">Workshops · offene Türen · Treffs</span>
+      </div>
+      <h1 style="font-family:'Archivo',sans-serif;font-weight:900;font-size:48px;line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;">Events &amp; Workshops</h1>
+      <p style="font-family:'Newsreader',serif;font-style:italic;font-size:20px;color:#7c766a;margin:0 0 32px;max-width:640px;">Come by, learn something, meet the community.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:36px;align-items:start;">
+        <div>
+          <div style="display:grid;grid-template-columns:92px 1fr auto;gap:18px;align-items:center;padding:20px 0;border-top:1px solid #e4dfd1;"><div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;color:#238811;line-height:1;">06</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9a9484;">JUL · MO</div></div><div><div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#eaf3dd;color:#238811;padding:3px 8px;border-radius:5px;margin-bottom:6px;">FÜR ALLE · KOSTENLOS</div><h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;margin:0 0 4px;">Offene Tür — Führung durch die Werkstätten</h3><p style="font-size:14px;color:#736e62;margin:0;line-height:1.5;">Lern uns kennen, unverbindlich. Ab 10:00 Uhr.</p></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#736e62;">ab 10</span></div>
+
+          <div style="display:grid;grid-template-columns:92px 1fr auto;gap:18px;align-items:center;padding:20px 0;border-top:1px solid #e4dfd1;"><div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;color:#238811;line-height:1;">05</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9a9484;">JUL · SO</div></div><div><div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#f3ead9;color:#a06a1f;padding:3px 8px;border-radius:5px;margin-bottom:6px;">HANDARBEIT</div><h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;margin:0 0 4px;">Handarbeitstreff &amp; Makerbrunch</h3><p style="font-size:14px;color:#736e62;margin:0;line-height:1.5;">Nähen, sticken, stricken, reparieren — plus gemeinsames Brunch.</p></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#736e62;">10–14</span></div>
+
+          <div style="display:grid;grid-template-columns:92px 1fr auto;gap:18px;align-items:center;padding:20px 0;border-top:1px solid #e4dfd1;"><div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;color:#238811;line-height:1;">21</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9a9484;">JUL · DI</div></div><div><div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#eaf3dd;color:#238811;padding:3px 8px;border-radius:5px;margin-bottom:6px;">FÜR ALLE</div><h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;margin:0 0 4px;">Spieleabend</h3><p style="font-size:14px;color:#736e62;margin:0;line-height:1.5;">Jeden dritten Dienstag im Monat. Eigene Spiele gerne mitbringen.</p></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#736e62;">19–21</span></div>
+
+          <div style="display:grid;grid-template-columns:92px 1fr auto;gap:18px;align-items:center;padding:20px 0;border-top:1px solid #e4dfd1;"><div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;color:#238811;line-height:1;">12</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9a9484;">MAI · DI</div></div><div><div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#ece7dd;color:#736e62;padding:3px 8px;border-radius:5px;margin-bottom:6px;">GAST-EVENT</div><h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;margin:0 0 4px;">132. Scrumtisch Bonn</h3><p style="font-size:14px;color:#736e62;margin:0;line-height:1.5;">Offener Treff rund um Agile, Scrum, Kanban &amp; Co. Get-Together ab 19:00.</p></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#736e62;">ab 19</span></div>
+
+          <div style="display:grid;grid-template-columns:92px 1fr auto;gap:18px;align-items:center;padding:20px 0;border-top:1px solid #e4dfd1;border-bottom:1px solid #e4dfd1;"><div style="text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;color:#238811;line-height:1;">29</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9a9484;">APR · MI</div></div><div><div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#f3ead9;color:#a06a1f;padding:3px 8px;border-radius:5px;margin-bottom:6px;">WORKSHOP · TICKET</div><h3 style="font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;margin:0 0 4px;">Schmieden leicht gemacht — 101</h3><p style="font-size:14px;color:#736e62;margin:0;line-height:1.5;">Grundlagen &amp; Schutzmaßnahmen, eigenes Werkstück. 10 € / Ticket.</p></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#736e62;">14:00</span></div>
+        </div>
+
+        <aside style="position:sticky;top:96px;display:flex;flex-direction:column;gap:16px;">
+          <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:14px;padding:20px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:#9a9484;margin-bottom:12px;">GRÖSSERE EVENTS</div>
+            <div style="padding-bottom:12px;border-bottom:1px solid #efeadd;margin-bottom:12px;"><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;">FrOSCon 2026</div><div style="font-size:13px;color:#736e62;">15.–16. Aug · Sankt Augustin</div></div>
+            <div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;">Maker Faire Hannover</div><div style="font-size:13px;color:#736e62;">2026 · Hannover</div></div>
+          </div>
+          <div style="background:#F5E6C9;border:1px solid #e8d3a6;border-radius:14px;padding:20px;">
+            <div style="font-family:'Caveat',cursive;font-weight:700;font-size:22px;color:#238811;margin-bottom:6px;">Neu hier?</div>
+            <p style="font-size:14px;color:#4c4a42;line-height:1.55;margin:0 0 12px;">Die Offene Tür ist der beste Einstieg — kostenlos &amp; ohne Anmeldung.</p>
+            <a onClick="{{ goJoin }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#238811;text-decoration:none;border-bottom:1px solid #238811;padding-bottom:2px;">Mitmachen →</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============================ JOIN ============================ -->
+    <sc-if value="{{ isJoin }}" hint-placeholder-val="{{ false }}">
+    <div style="animation:msbfade .4s ease both;padding:44px 0 8px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.08em;background:#e0872e;color:#20170a;padding:5px 10px;border-radius:3px;transform:rotate(-2deg);box-shadow:0 3px 8px -4px rgba(0,0,0,.35);">MITMACHEN</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#9a9484;">Mitglied · Fördern · Spenden</span>
+      </div>
+      <h1 style="font-family:'Archivo',sans-serif;font-weight:900;font-size:48px;line-height:1.02;letter-spacing:-.02em;margin:0 0 14px;">Mach mit. Bau mit.</h1>
+      <p style="font-family:'Newsreader',serif;font-style:italic;font-size:20px;color:#7c766a;margin:0 0 32px;max-width:640px;">Join us, support us as a sustaining member, or donate — every bit helps.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;">
+        <div style="background:#238811;color:#eafaf2;border-radius:14px;padding:26px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;opacity:.85;margin-bottom:10px;">01 · AKTIV</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#fff;margin-bottom:8px;">Mitglied werden</div><p style="font-size:14px;line-height:1.6;margin:0 0 16px;opacity:.92;">Nutze Werkstatt &amp; Maschinen zu allen Öffnungszeiten, arbeite an eigenen Projekten und bring dich in die Community ein.</p><a style="cursor:pointer;display:inline-block;background:#fff;color:#238811;font-weight:700;font-size:14px;padding:11px 18px;border-radius:9px;text-decoration:none;">Antrag stellen →</a></div>
+        <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:14px;padding:26px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:#9a9484;margin-bottom:10px;">02 · FÖRDERN</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;margin-bottom:8px;">Fördermitglied</div><p style="font-size:14px;line-height:1.6;color:#736e62;margin:0 0 16px;">Du willst uns unterstützen, ohne selbst zu basteln? Als Fördermitglied hältst du den MakerSpace am Laufen.</p><a style="cursor:pointer;display:inline-block;border:1px solid #cfc9ba;color:#23231f;font-weight:600;font-size:14px;padding:11px 18px;border-radius:9px;text-decoration:none;">Fördern →</a></div>
+        <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:14px;padding:26px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:#9a9484;margin-bottom:10px;">03 · SPENDEN</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;margin-bottom:8px;">Geld- &amp; Sachspende</div><p style="font-size:14px;line-height:1.6;color:#736e62;margin:0 0 16px;">Über Geld- und Sachspenden freuen wir uns immer. Ab 100 € gern auch gegen Spendenquittung.</p><a style="cursor:pointer;display:inline-block;border:1px solid #cfc9ba;color:#23231f;font-weight:600;font-size:14px;padding:11px 18px;border-radius:9px;text-decoration:none;">Spenden →</a></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="background:#fffdf8;border:1px solid #e4dfd1;border-radius:14px;padding:26px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:#9a9484;margin-bottom:12px;">SO FINDEST DU UNS</div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:20px;margin-bottom:4px;">Kennedyallee 18</div>
+          <div style="font-size:15px;color:#4c4a42;margin-bottom:14px;">53175 Bonn · Tel +49 (228) 81 28 69 80</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#736e62;line-height:1.8;">Linie 16 / 63 → Hochkreuz / Deutsches Museum<br>Linie 610 / 611 → Kennedyallee</div>
+        </div>
+        <image-slot id="msb-map" style="width:100%;height:210px;" shape="rounded" radius="14" placeholder="Karte / Foto vom Eingang"></image-slot>
+      </div>
+    </div>
+    </sc-if>
+  </main>
+
+  <!-- FOOTER -->
+  <footer style="background:#325725;color:#d7d2c4;">
+    <div style="max-width:1180px;margin:0 auto;padding:52px 32px 34px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
+          <img src="./makerspacebonn_logo.png" alt="MakerSpace Bonn Logo" style="width:36px;height:36px;object-fit:contain;display:block;">
+          <span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:#fff;">MakerSpace Bonn e.V.</span>
+        </div>
+        <p style="font-size:14px;line-height:1.65;color:#a49f92;max-width:320px;margin:0 0 14px;">Eine offene Werkstatt für Bonn. Für alle. <span style="font-style:italic;">An open workshop for everyone.</span></p>
+        <p style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8f8a7d;line-height:1.7;margin:0;">Kennedyallee 18 · 53175 Bonn<br>Tel: +49 (228) 81 28 69 80<br>ÖPNV: Linie 16/63 Hochkreuz/Deutsches Museum</p>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;color:#7f7a6d;margin-bottom:14px;">SEITEN</div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:14px;">
+          <a onClick="{{ goVerein }}" style="cursor:pointer;text-decoration:none;color:#d7d2c4;">Der Verein</a>
+          <a onClick="{{ goTools }}" style="cursor:pointer;text-decoration:none;color:#d7d2c4;">Werkzeug &amp; Räume</a>
+          <a onClick="{{ goEvents }}" style="cursor:pointer;text-decoration:none;color:#d7d2c4;">Events &amp; Workshops</a>
+          <a onClick="{{ goJoin }}" style="cursor:pointer;text-decoration:none;color:#d7d2c4;">Mitmachen</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;color:#7f7a6d;margin-bottom:14px;">MITMACHEN</div>
+        <p style="font-size:14px;line-height:1.6;color:#a49f92;margin:0 0 14px;">Werde Mitglied oder unterstütze uns mit einer Spende.</p>
+        <a onClick="{{ goJoin }}" style="cursor:pointer;text-decoration:none;display:inline-block;background:#5EB130;color:#23231f;font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:8px;">Jetzt unterstützen →</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid #24401c;">
+      <div style="max-width:1180px;margin:0 auto;padding:16px 32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#7f7a6d;">
+        <span>© 2026 MakerSpace Bonn e.V. · Gemeinnützig seit 2018</span>
+        <span style="display:flex;gap:18px;"><a style="color:#7f7a6d;text-decoration:none;cursor:pointer;">Impressum</a><a style="color:#7f7a6d;text-decoration:none;cursor:pointer;">Datenschutz</a><a style="color:#7f7a6d;text-decoration:none;cursor:pointer;">Haftung</a></span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // The mat is a triangular prism. `step` counts flips; the prism spins
+  // -120deg per step so the next face rotates to the front. spin winds up the
+  // other way first (Anlauf), then swings to the target with an overshoot.
+  // sw = measured scene width, used for the prism apothem (--tz).
+  state = { page: 'start', step: 0, spin: 0, trans: 'none', sw: 0, menuOpen: false };
+  go(p){ this.setState({ page: p, menuOpen: false }); }
+  toggleMenu(){ this.setState({ menuOpen: !this.state.menuOpen }); }
+
+  cur(){ return ((this.state.step % 3) + 3) % 3; }
+
+  doFlip(delta){
+    if (this._flipping || delta === 0) return;
+    this._flipping = true;
+    const self = this;
+    const step = this.state.step + delta;
+    const target = -step * 120;              // final resting spin (exact multiple)
+    // 1 · anticipation — small wind-up the opposite way
+    this.setState({ spin: this.state.spin + 13, trans: 'transform .34s cubic-bezier(.3,.7,.35,1)' });
+    // 2 · rotate to the next face and land with an ease-out overshoot
+    setTimeout(function(){ self.setState({ step: step, spin: target, trans: 'transform 1.5s cubic-bezier(.32,1.28,.48,1)' }); }, 340);
+    setTimeout(function(){ self._flipping = false; }, 1950);
+  }
+  nextHero(){
+    if (this._paused || this._flipping || this.state.page !== 'start') return;
+    this.doFlip(1);
+  }
+  goHero(i){
+    const delta = ((i - this.cur()) % 3 + 3) % 3;   // always rotate forward
+    if (delta === 0) return;
+    this.doFlip(delta);
+    this._restart();
+  }
+  _start(){
+    if (this._timer || this._paused || typeof window === 'undefined') return;
+    this._timer = setInterval(() => this.nextHero(), 5400);
+  }
+  _restart(){
+    if (this._timer) { clearInterval(this._timer); this._timer = null; }
+    this._start();
+  }
+  _measure(){
+    if (typeof document === 'undefined') return;
+    const sc = document.getElementById('msb-hero-scene');
+    if (!sc) return;
+    const w = Math.round(sc.clientWidth);
+    if (w && Math.abs(w - this.state.sw) > 1) this.setState({ sw: w });
+    // --- mobile: dynamic hero height so the pills sit just at the fold, and a
+    //     content scale factor so text + photo shrink/grow to fit the screen ---
+    const root = document.documentElement;
+    if ((window.innerWidth || 1000) > 900){
+      root.style.removeProperty('--msb-hero-h');
+      root.style.removeProperty('--msb-s');
+      return;
+    }
+    const header = document.querySelector('header');
+    const strip  = header ? header.previousElementSibling : null;
+    const dots   = document.querySelector('.msb-dots');
+    const chrome = (strip ? strip.offsetHeight : 30)
+                 + (header ? header.offsetHeight : 60)
+                 + (dots ? dots.offsetHeight : 40)
+                 + 34; /* scene margins + dots margin + safety */
+    const h = Math.max(300, Math.min(720, Math.round((window.innerHeight || 640) - chrome)));
+    const s = Math.max(0.72, Math.min(1.12, h / 468));
+    root.style.setProperty('--msb-hero-h', h + 'px');
+    root.style.setProperty('--msb-s', s.toFixed(3));
+  }
+  _bindHover(){
+    if (this._bound || typeof document === 'undefined') return;
+    const self = this;
+    setTimeout(function(){
+      self._measure();
+      const sc = document.getElementById('msb-hero-scene');
+      if (!sc || sc.__msbBound) return;
+      sc.__msbBound = true; self._bound = true;
+      sc.addEventListener('mouseenter', function(){ self._paused = true; if (self._timer){ clearInterval(self._timer); self._timer = null; } });
+      sc.addEventListener('mouseleave', function(){ self._paused = false; self._start(); });
+      window.addEventListener('resize', function(){ self._measure(); });
+      window.addEventListener('orientationchange', function(){ setTimeout(function(){ self._measure(); }, 120); });
+    }, 80);
+    setTimeout(function(){ self._measure(); }, 420);   // re-measure once fonts/layout settle
+  }
+  componentWillUnmount(){ if (this._timer){ clearInterval(this._timer); this._timer = null; } }
+
+  renderVals(){
+    this._start();      // lazily arm the auto-flip on first render
+    this._bindHover();  // measure width + pause on hover
+
+    const p = this.state.page, cur = this.cur();
+    const active = '#238811', idle = '#54503f';
+    // apothem of an equilateral-triangle prism = (width/2) / tan(60°) = width * 0.2887
+    const tz = (this.state.sw > 0 ? Math.round(this.state.sw * 0.2887) : 322) + 'px';
+    const on = (i) => i === cur;
+    const pillBorder = (i) => on(i) ? '#238811' : '#d9d2c1';
+    const pillColor  = (i) => on(i) ? '#238811' : '#7c766a';
+    const pillBg     = (i) => on(i) ? '#eaf3dd' : '#fbf7ec';
+    return {
+      goStart: () => this.go('start'),
+      goVerein: () => this.go('verein'),
+      goTools: () => this.go('tools'),
+      goEvents: () => this.go('events'),
+      goJoin: () => this.go('join'),
+      toggleMenu: () => this.toggleMenu(),
+      menuCls: this.state.menuOpen ? 'open' : '',
+      isStart: p==='start', isVerein: p==='verein', isTools: p==='tools', isEvents: p==='events', isJoin: p==='join',
+      c_start: p==='start'?active:idle,
+      c_verein: p==='verein'?active:idle,
+      c_tools: p==='tools'?active:idle,
+      c_events: p==='events'?active:idle,
+      c_join: p==='join'?active:idle,
+
+      // hero prism flip — full transform inline (literal spin) so `transition:
+      // transform` interpolates reliably in every engine. Mobile uses a gentler,
+      // side-tilt-free tilt so the narrow prism doesn't overflow the viewport.
+      tz: tz,
+      flipTf: (typeof window !== 'undefined' && window.innerWidth <= 900
+                ? 'rotateX(4deg) rotateY(0deg)' : 'rotateX(4.5deg) rotateY(8deg)')
+              + ' translateZ(calc(var(--tz) * -1)) rotateY(' + this.state.spin + 'deg)',
+      trans: this.state.trans,
+      show0: on(0)?'msb-show':'', show1: on(1)?'msb-show':'', show2: on(2)?'msb-show':'',
+      goHero0: () => this.goHero(0), goHero1: () => this.goHero(1), goHero2: () => this.goHero(2),
+      pb0: pillBorder(0), pb1: pillBorder(1), pb2: pillBorder(2),
+      pc0: pillColor(0), pc1: pillColor(1), pc2: pillColor(2),
+      pg0: pillBg(0), pg1: pillBg(1), pg2: pillBg(2),
+    };
+  }
+}
+</script>
+</body>
+</html>
