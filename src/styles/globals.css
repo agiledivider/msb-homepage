@@ -4,9 +4,51 @@
    prism hero, the pegboard texture, and the mobile fit rules that the hero's
    client script drives via CSS custom properties (--msb-s, --msb-hero-h, …).
    ------------------------------------------------------------------------- */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Design tokens (Tailwind v4, CSS-first config). Colours → bg-green / text-ink /
+   …; fonts → font-display / font-hand / …; --container-shell → max-w-shell;
+   --animate-msbfade → animate-msbfade. */
+@theme {
+  --color-ink: #23231f;
+  --color-paper: #f1ede2;
+  --color-card: #fffdf8;
+  --color-cream: #fbf7ec;
+  --color-muted: #736e62;
+  --color-faint: #9a9484;
+  --color-line: #e4dfd1;
+  --color-green: #238811;
+  --color-green-deep: #325725;
+  --color-green-lime: #5eb130;
+  --color-green-pale: #eaf3dd;
+  --color-green-mint: #edf6e0;
+  --color-green-soft: #cfe9ad;
+  --color-orange: #e0872e;
+  --color-orange-ink: #20170a;
+  --color-orange-soft: #f4d7ae;
+  --color-sand: #f5e6c9;
+
+  /* families resolve the --font-* vars next/font sets on <html> */
+  --font-display: var(--font-archivo), 'Archivo', sans-serif;
+  --font-sans: var(--font-plex-sans), 'IBM Plex Sans', sans-serif;
+  --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
+  --font-serif: var(--font-newsreader), 'Newsreader', serif;
+  --font-hand: var(--font-caveat), 'Caveat', cursive;
+
+  --container-shell: 1180px;
+
+  --animate-msbfade: msbfade 0.4s ease both;
+  @keyframes msbfade {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
 
 /* Fonts are loaded with next/font in src/app/(frontend)/layout.tsx, which sets
    the --font-archivo / --font-plex-sans / --font-plex-mono / --font-newsreader /
@@ -136,7 +178,7 @@ body {
    Mobile: the prism stays 3D (Blink), sized by the client script via
    --msb-hero-h / --msb-s / --msb-photo-h so the pills sit at the fold.
    ========================================================================= */
-@media (max-width: 900px) {
+@media (max-width: 1023.98px) {
   html, body { overflow-x: hidden; }
 
   .msb-scene {

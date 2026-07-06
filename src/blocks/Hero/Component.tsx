@@ -60,7 +60,7 @@ function FaceContent({ face }: { face: Face }) {
   const isEvent = face.variant === 'event'
   return (
     <CuttingMat cornerLabel={face.cornerLabel}>
-      <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] min-[900px]:grid min-[900px]:grid-cols-[1.06fr_.94fr] min-[900px]:items-center min-[900px]:gap-10 min-[900px]:pl-2.5 min-[900px]:pt-1.5">
+      <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] lg:grid lg:grid-cols-[1.06fr_.94fr] lg:items-center lg:gap-10 lg:pl-2.5 lg:pt-1.5">
         {/* text column */}
         <div className="msb-face__text">
           {face.eyebrow ? (
@@ -128,7 +128,7 @@ function FaceContent({ face }: { face: Face }) {
           image={face.image}
           placeholder={face.imagePlaceholder ?? 'Foto'}
           caption={face.caption}
-          sizes="(max-width:900px) 100vw, 460px"
+          sizes="(max-width:1023.98px) 100vw, 460px"
         />
       </div>
     </CuttingMat>
@@ -198,7 +198,7 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
     if (!sc) return
     const w = Math.round(sc.clientWidth)
     setSw((prev) => (Math.abs(w - prev) > 1 ? w : prev))
-    setIsMobile((typeof window !== 'undefined' ? window.innerWidth : 1000) <= 900)
+    setIsMobile((typeof window !== 'undefined' ? window.innerWidth : 1000) < 1024)
   }, [])
 
   // rAF: drives auto-flip and the countdown bar together

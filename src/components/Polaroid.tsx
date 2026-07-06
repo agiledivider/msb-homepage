@@ -15,11 +15,10 @@ function TapeStrip({ style }: { style: CSSProperties }) {
  * A taped polaroid: a cream photo frame with two corner tapes, a caption in the
  * bottom margin, and an optional tilt.
  *
- * Mobile-first and responsive: below 900px it sits flat with a compact frame and
- * a viewport-relative image height; from 900px up it gains the tilt, a roomier
- * frame and a fixed image height. The 900px breakpoint matches the hero's layout
- * switch. Pass `rotate` for the desktop tilt; width/placement are left to the
- * parent (e.g. the hero grid).
+ * Mobile-first and responsive: below the `lg` breakpoint (1024px) it sits flat
+ * with a compact frame and a viewport-relative image height; from `lg` up it
+ * gains the tilt, a roomier frame and a fixed image height. Pass `rotate` for the
+ * desktop tilt; width/placement are left to the parent (e.g. the hero grid).
  */
 export function Polaroid({
   image,
@@ -31,26 +30,26 @@ export function Polaroid({
   image?: MediaResource
   placeholder?: string
   caption?: string | null
-  /** tilt in degrees, applied from the 900px breakpoint up (flat on mobile) */
+  /** tilt in degrees, applied from the lg breakpoint (1024px) up (flat on mobile) */
   rotate?: number
   sizes?: string
 }) {
   return (
     <div
-      className={`relative${rotate ? ' min-[900px]:rotate-[var(--pl-rot)]' : ''}`}
+      className={`relative${rotate ? ' lg:rotate-[var(--pl-rot)]' : ''}`}
       style={rotate ? ({ '--pl-rot': `${rotate}deg` } as CSSProperties) : undefined}
     >
       <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
       <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
-      <div className="relative bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] min-[900px]:px-2.5 min-[900px]:pt-2.5 min-[900px]:pb-[42px]">
+      <div className="relative bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] lg:px-2.5 lg:pt-2.5 lg:pb-[42px]">
         <Media
           resource={image}
           placeholder={placeholder}
-          className="block h-[42vw] w-full min-[900px]:h-[320px]"
+          className="block h-[42vw] w-full lg:h-[320px]"
           sizes={sizes}
         />
         {caption ? (
-          <div className="absolute inset-x-0 bottom-3 text-center font-hand text-[15px] font-semibold text-[#3c4a42] min-[900px]:text-[20px]">
+          <div className="absolute inset-x-0 bottom-3 text-center font-hand text-[15px] font-semibold text-[#3c4a42] lg:text-[20px]">
             {caption}
           </div>
         ) : null}

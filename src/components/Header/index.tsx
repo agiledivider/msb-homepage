@@ -79,11 +79,11 @@ export function Header({
           className="flex h-[42px] w-[42px] flex-col items-center justify-center gap-[5px] md:hidden"
         >
           <span
-            className={`block h-[2.5px] w-6 rounded bg-ink transition ${open ? 'translate-y-[7.5px] rotate-45' : ''}`}
+            className={`block h-[2.5px] w-6 rounded-sm bg-ink transition ${open ? 'translate-y-[7.5px] rotate-45' : ''}`}
           />
-          <span className={`block h-[2.5px] w-6 rounded bg-ink transition ${open ? 'opacity-0' : ''}`} />
+          <span className={`block h-[2.5px] w-6 rounded-sm bg-ink transition ${open ? 'opacity-0' : ''}`} />
           <span
-            className={`block h-[2.5px] w-6 rounded bg-ink transition ${open ? '-translate-y-[7.5px] -rotate-45' : ''}`}
+            className={`block h-[2.5px] w-6 rounded-sm bg-ink transition ${open ? '-translate-y-[7.5px] -rotate-45' : ''}`}
           />
         </button>
       </div>
