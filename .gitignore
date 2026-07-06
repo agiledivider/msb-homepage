@@ -1,2 +1,26 @@
 .DS_Store
 .playwright-mcp/
+
+# dependencies
+node_modules/
+
+# next / build
+.next/
+build/
+dist/
+next-env.d.ts
+*.tsbuildinfo
+
+# payload
+/public/media/
+src/payload-types.ts
+
+# sqlite database
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# env
+.env
+.env*.local
