@@ -60,7 +60,7 @@ function FaceContent({ face }: { face: Face }) {
   const isEvent = face.variant === 'event'
   return (
     <CuttingMat cornerLabel={face.cornerLabel}>
-      <div className="msb-grid">
+      <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] min-[900px]:grid min-[900px]:grid-cols-[1.06fr_.94fr] min-[900px]:items-center min-[900px]:gap-10 min-[900px]:pl-2.5 min-[900px]:pt-1.5">
         {/* text column */}
         <div className="msb-face__text">
           {face.eyebrow ? (

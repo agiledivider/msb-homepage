@@ -72,17 +72,6 @@ body {
 .msb-face.f1 { transform: rotateY(120deg) translateZ(var(--tz, 322px)); }
 .msb-face.f2 { transform: rotateY(240deg) translateZ(var(--tz, 322px)); }
 
-.msb-grid {
-  display: grid;
-  grid-template-columns: 1.06fr 0.94fr;
-  gap: 40px;
-  align-items: center;
-  position: relative;
-  z-index: 2;
-  padding-left: 10px;
-  padding-top: 6px;
-  height: 100%;
-}
 .msb-badge {
   position: absolute;
   z-index: 6;
@@ -159,17 +148,10 @@ body {
   .msb-dots { margin: 0 0 12px; }
   .msb-badge, .msb-note { display: none; }
 
-  /* face content: photo on top, text, buttons pinned to the bottom */
-  .msb-grid {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: calc(9px * var(--msb-s, 1));
-    padding: 0;
-    align-items: stretch;
-  }
+  /* Face content stacks: photo on top (Polaroid keeps its default order), text
+     below. The grid/flex layout itself is Tailwind on the element in
+     Hero/Component.tsx; only the text column's order is set here. */
   .msb-face__text { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; min-width: 0; order: 2; }
-  /* the photo column (Polaroid, order:1) styles itself via its `fitMobile` prop */
 
   .msb-eyebrow { margin-bottom: calc(9px * var(--msb-s, 1)) !important; font-size: calc(11px * var(--msb-s, 1)) !important; padding: 4px 9px !important; }
   .msb-headline { font-size: max(18px, calc(30px * var(--msb-s, 1))) !important; line-height: 1.02 !important; margin: 0 0 calc(7px * var(--msb-s, 1)) !important; }
