@@ -10,16 +10,14 @@ import type { ReactNode } from 'react'
  */
 export function CuttingMat({
   cornerLabel,
-  className,
   children,
 }: {
   cornerLabel?: string | null
-  className?: string
   children: ReactNode
 }) {
   return (
     <div
-      className={`relative h-full w-full overflow-hidden rounded-[14px] bg-green-deep p-[15px] shadow-[0_42px_82px_-40px_rgba(20,60,42,.78),inset_0_0_0_2px_rgba(255,255,255,.16)] bg-[repeating-linear-gradient(0deg,rgba(255,255,255,.11)_0_1px,transparent_1px_34px),repeating-linear-gradient(90deg,rgba(255,255,255,.11)_0_1px,transparent_1px_34px)] min-[900px]:rounded-2xl min-[900px]:px-11 min-[900px]:py-10${className ? ` ${className}` : ''}`}
+      className="relative h-full w-full overflow-hidden rounded-[14px] bg-green-deep p-[15px] shadow-[0_42px_82px_-40px_rgba(20,60,42,.78),inset_0_0_0_2px_rgba(255,255,255,.16)] bg-[repeating-linear-gradient(0deg,rgba(255,255,255,.11)_0_1px,transparent_1px_34px),repeating-linear-gradient(90deg,rgba(255,255,255,.11)_0_1px,transparent_1px_34px)] min-[900px]:rounded-2xl min-[900px]:px-11 min-[900px]:py-10"
     >
       {/* ruled edges */}
       <div className="absolute inset-x-0 top-0 h-4 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,.5)_0_1px,transparent_1px_17px)]" />

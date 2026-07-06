@@ -26,8 +26,6 @@ export function Polaroid({
   placeholder = 'Foto',
   caption,
   rotate,
-  className,
-  imageClassName,
   sizes = '100vw',
 }: {
   image?: MediaResource
@@ -35,13 +33,11 @@ export function Polaroid({
   caption?: string | null
   /** tilt in degrees, applied from the 900px breakpoint up (flat on mobile) */
   rotate?: number
-  className?: string
-  imageClassName?: string
   sizes?: string
 }) {
   return (
     <div
-      className={`relative${rotate ? ' min-[900px]:rotate-[var(--pl-rot)]' : ''}${className ? ` ${className}` : ''}`}
+      className={`relative${rotate ? ' min-[900px]:rotate-[var(--pl-rot)]' : ''}`}
       style={rotate ? ({ '--pl-rot': `${rotate}deg` } as CSSProperties) : undefined}
     >
       <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
@@ -50,7 +46,7 @@ export function Polaroid({
         <Media
           resource={image}
           placeholder={placeholder}
-          className={`block h-[42vw] w-full min-[900px]:h-[320px]${imageClassName ? ` ${imageClassName}` : ''}`}
+          className="block h-[42vw] w-full min-[900px]:h-[320px]"
           sizes={sizes}
         />
         {caption ? (
