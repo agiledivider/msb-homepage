@@ -2,7 +2,8 @@
 
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Media, type MediaResource } from '../../components/Media'
+import type { MediaResource } from '../../components/Media'
+import { Polaroid } from '../../components/Polaroid'
 import type { LinkValue } from '../fields'
 
 export type Face = {
@@ -50,15 +51,6 @@ function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boole
     <Link href={link.url || '#'} className={`${base} ${cls}`}>
       {link.label}
     </Link>
-  )
-}
-
-function TapeStrip({ style }: { style: React.CSSProperties }) {
-  return (
-    <div
-      className="absolute z-[3] bg-[rgba(251,247,236,.72)] shadow-[0_2px_6px_-3px_rgba(0,0,0,.3)]"
-      style={style}
-    />
   )
 }
 
@@ -137,23 +129,14 @@ function FaceContent({ face }: { face: Face }) {
         </div>
 
         {/* photo column (taped polaroid) */}
-        <div className="msb-face__photo relative" style={{ transform: `rotate(${isEvent ? 1.8 : 2.2}deg)` }}>
-          <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
-          <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
-          <div className="msb-photo-frame relative bg-cream p-2.5 pb-[42px] shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)]">
-            <Media
-              resource={face.image}
-              placeholder={face.imagePlaceholder ?? 'Foto'}
-              className="msb-photo-img block h-[320px] w-full"
-              sizes="(max-width:900px) 100vw, 460px"
-            />
-            {face.caption ? (
-              <div className="msb-photo-caption absolute inset-x-0 bottom-3 text-center font-hand text-[20px] font-semibold text-[#3c4a42]">
-                {face.caption}
-              </div>
-            ) : null}
-          </div>
-        </div>
+        <Polaroid
+          className="msb-face__photo"
+          rotate={isEvent ? 1.8 : 2.2}
+          image={face.image}
+          placeholder={face.imagePlaceholder ?? 'Foto'}
+          caption={face.caption}
+          sizes="(max-width:900px) 100vw, 460px"
+        />
       </div>
     </div>
   )
