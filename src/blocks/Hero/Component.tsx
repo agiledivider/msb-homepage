@@ -130,7 +130,6 @@ function FaceContent({ face }: { face: Face }) {
 
         {/* photo column (taped polaroid) */}
         <Polaroid
-          fitMobile
           rotate={isEvent ? 1.8 : 2.2}
           image={face.image}
           placeholder={face.imagePlaceholder ?? 'Foto'}

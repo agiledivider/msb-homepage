@@ -13,13 +13,13 @@ function TapeStrip({ style }: { style: CSSProperties }) {
 
 /**
  * A taped polaroid: a cream photo frame with two corner tapes, a caption in the
- * bottom margin, and an optional tilt. All styling (including the hero's mobile
- * fit) lives here as Tailwind classes.
+ * bottom margin, and an optional tilt.
  *
- * `fitMobile` applies the hero's below-900px behaviour: reset the tilt, order the
- * photo above the text in the stacked layout, shrink the frame padding and give
- * the image a responsive height. Standalone polaroids leave it off and keep their
- * base look on every screen.
+ * Mobile-first and responsive: below 900px it sits flat with a compact frame and
+ * a viewport-relative image height; from 900px up it gains the tilt, a roomier
+ * frame and a fixed image height. The 900px breakpoint matches the hero's layout
+ * switch. Pass `rotate` for the desktop tilt; width/placement are left to the
+ * parent (e.g. the hero grid).
  */
 export function Polaroid({
   image,
@@ -29,44 +29,32 @@ export function Polaroid({
   className,
   imageClassName,
   sizes = '100vw',
-  fitMobile = false,
 }: {
   image?: MediaResource
   placeholder?: string
   caption?: string | null
-  /** tilt in degrees */
+  /** tilt in degrees, applied from the 900px breakpoint up (flat on mobile) */
   rotate?: number
   className?: string
   imageClassName?: string
   sizes?: string
-  /** apply the hero's mobile fit (reset tilt, shrink frame, responsive height) below 900px */
-  fitMobile?: boolean
 }) {
-  const rootFit = fitMobile
-    ? ' max-[900px]:order-1 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:flex-none max-[900px]:!transform-none'
-    : ''
-  const frameFit = fitMobile ? ' max-[900px]:!px-[7px] max-[900px]:!pt-[7px] max-[900px]:!pb-6' : ''
-  const imgFit = fitMobile ? ' max-[900px]:!h-[42vw]' : ''
-  const captionFit = fitMobile ? ' max-[900px]:!text-[15px]' : ''
-
   return (
     <div
-      className={`relative${className ? ` ${className}` : ''}${rootFit}`}
-      style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
+      className={`relative${rotate ? ' min-[900px]:rotate-[var(--pl-rot)]' : ''}${className ? ` ${className}` : ''}`}
+      style={rotate ? ({ '--pl-rot': `${rotate}deg` } as CSSProperties) : undefined}
     >
       <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
       <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
-      <div className={`relative bg-cream p-2.5 pb-[42px] shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)]${frameFit}`}>
+      <div className="relative bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] min-[900px]:px-2.5 min-[900px]:pt-2.5 min-[900px]:pb-[42px]">
         <Media
           resource={image}
           placeholder={placeholder}
-          className={`block h-[320px] w-full${imgFit}${imageClassName ? ` ${imageClassName}` : ''}`}
+          className={`block h-[42vw] w-full min-[900px]:h-[320px]${imageClassName ? ` ${imageClassName}` : ''}`}
           sizes={sizes}
         />
         {caption ? (
-          <div
-            className={`absolute inset-x-0 bottom-3 text-center font-hand text-[20px] font-semibold text-[#3c4a42]${captionFit}`}
-          >
+          <div className="absolute inset-x-0 bottom-3 text-center font-hand text-[15px] font-semibold text-[#3c4a42] min-[900px]:text-[20px]">
             {caption}
           </div>
         ) : null}
