@@ -168,16 +168,19 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
   const [trans, setTrans] = useState('none')
   const [sw, setSw] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [userPaused, setUserPaused] = useState(false)
 
   const sceneRef = useRef<HTMLDivElement>(null)
   const dotsRef = useRef<HTMLDivElement>(null)
   const flipping = useRef(false)
   const paused = useRef(false)
+  const userPausedRef = useRef(false)
   const elapsed = useRef(0)
   const stepRef = useRef(0)
   const spinRef = useRef(0)
   stepRef.current = step
   spinRef.current = spin
+  userPausedRef.current = userPaused
 
   const cur = ((step % 3) + 3) % 3
 
@@ -235,7 +238,8 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
       }
       const dt = Math.min(100, ts - last)
       last = ts
-      if (!paused.current) {
+      // freeze on hover (paused) or when the user explicitly paused
+      if (!paused.current && !userPausedRef.current) {
         elapsed.current += dt
         if (elapsed.current >= DUR) doFlip(1)
       }
@@ -325,6 +329,27 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
               </span>
             )
           })}
+
+          <button
+            type="button"
+            onClick={() => setUserPaused((v) => !v)}
+            aria-label={userPaused ? 'Automatisches Wechseln fortsetzen' : 'Automatisches Wechseln pausieren'}
+            aria-pressed={userPaused}
+            title={userPaused ? 'Fortsetzen' : 'Pausieren'}
+            className="msb-pill inline-flex h-[30px] w-[30px] items-center justify-center !p-0"
+            style={{ borderColor: '#d9d2c1', color: '#238811', background: '#fbf7ec' }}
+          >
+            {userPaused ? (
+              <svg width="11" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M2.5 1.5v9l7.5-4.5z" fill="currentColor" />
+              </svg>
+            ) : (
+              <svg width="11" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                <rect x="2.5" y="1.5" width="2.6" height="9" fill="currentColor" />
+                <rect x="6.9" y="1.5" width="2.6" height="9" fill="currentColor" />
+              </svg>
+            )}
+          </button>
         </div>
       ) : null}
     </>
