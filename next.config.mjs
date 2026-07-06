@@ -6,6 +6,10 @@ const nextConfig = {
   // infer the home directory as the root.
   turbopack: { root: import.meta.dirname },
   outputFileTracingRoot: import.meta.dirname,
+  // allow testing the dev server from a physical device over the LAN — Next
+  // otherwise treats the LAN-IP origin as cross-origin and blocks /_next/*
+  // (HMR socket + JS chunks). Add your Mac's LAN IP / subnet here.
+  allowedDevOrigins: ['192.168.178.46', '192.168.178.*'],
 }
 
 export default withPayload(nextConfig)
