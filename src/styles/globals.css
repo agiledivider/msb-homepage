@@ -178,7 +178,7 @@ body {
    Mobile: the prism stays 3D (Blink), sized by the client script via
    --msb-hero-h / --msb-s / --msb-photo-h so the pills sit at the fold.
    ========================================================================= */
-@media (max-width: 1023.98px) {
+@media (max-width: 767.98px) {
   html, body { overflow-x: hidden; }
 
   .msb-scene {
