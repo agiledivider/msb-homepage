@@ -4,26 +4,20 @@
    prism hero, the pegboard texture, and the mobile fit rules that the hero's
    client script drives via CSS custom properties (--msb-s, --msb-hero-h, …).
    ------------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Caveat:wght@500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* If you load these with next/font instead of the @import above, point the
-   CSS vars at the generated font families and drop the import. */
-:root {
-  --font-archivo: 'Archivo', sans-serif;
-  --font-plex-sans: 'IBM Plex Sans', sans-serif;
-  --font-plex-mono: 'IBM Plex Mono', monospace;
-  --font-newsreader: 'Newsreader', serif;
-  --font-caveat: 'Caveat', cursive;
-}
+/* Fonts are loaded with next/font in src/app/(frontend)/layout.tsx, which sets
+   the --font-archivo / --font-plex-sans / --font-plex-mono / --font-newsreader /
+   --font-caveat variables on <html>. Do NOT define them here (a :root definition
+   would tie on specificity and could shadow next/font). A remote CSS @import is
+   stripped by Turbopack, so it must not be used for the fonts either. */
 
 body {
   margin: 0;
   color: #23231f;
-  font-family: var(--font-plex-sans);
+  font-family: var(--font-plex-sans), 'IBM Plex Sans', sans-serif;
   background-color: #f1ede2;
   background-image:
     linear-gradient(rgba(94, 177, 48, 0.1) 1px, transparent 1px),
