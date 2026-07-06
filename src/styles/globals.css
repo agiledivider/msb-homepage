@@ -179,7 +179,10 @@ body {
    --msb-hero-h / --msb-s / --msb-photo-h so the pills sit at the fold.
    ========================================================================= */
 @media (max-width: 767.98px) {
-  html, body { overflow-x: hidden; }
+  /* NB: do NOT add `overflow-x: hidden` on html/body here. With overflow-y
+     visible it computes to `auto`, establishing a scroll container that FLATTENS
+     the preserve-3d prism in WebKit (iOS Safari) — the flip breaks on iPhone.
+     Horizontal scroll is prevented instead by insetting .msb-scene (margin). */
 
   .msb-scene {
     height: var(--msb-hero-h, calc(100svh - 176px));
