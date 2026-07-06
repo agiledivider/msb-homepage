@@ -286,9 +286,11 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
           {list.map((face, i) => {
             const on = i === cur
             return (
-              <span
+              <button
                 key={i}
+                type="button"
                 onClick={() => goHero(i)}
+                aria-current={on}
                 className={`msb-pill ${on ? 'active' : ''}`}
                 style={{
                   borderColor: on ? '#238811' : '#d9d2c1',
@@ -302,7 +304,7 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
                   .split('·')[0]
                   .trim()
                   .toUpperCase()}
-              </span>
+              </button>
             )
           })}
 
