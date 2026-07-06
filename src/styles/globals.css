@@ -72,19 +72,6 @@ body {
 .msb-face.f1 { transform: rotateY(120deg) translateZ(var(--tz, 322px)); }
 .msb-face.f2 { transform: rotateY(240deg) translateZ(var(--tz, 322px)); }
 
-.msb-mat {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  padding: 40px 44px;
-  background-color: #325725;
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.11) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.11) 0 1px, transparent 1px 34px);
-  box-shadow: 0 42px 82px -40px rgba(20, 60, 42, 0.78), inset 0 0 0 2px rgba(255, 255, 255, 0.16);
-}
 .msb-grid {
   display: grid;
   grid-template-columns: 1.06fr 0.94fr;
@@ -171,7 +158,6 @@ body {
   }
   .msb-dots { margin: 0 0 12px; }
   .msb-badge, .msb-note { display: none; }
-  .msb-mat { padding: calc(15px * var(--msb-s, 1)); border-radius: 14px; }
 
   /* face content: photo on top, text, buttons pinned to the bottom */
   .msb-grid {

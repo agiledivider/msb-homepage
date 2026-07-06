@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { MediaResource } from '../../components/Media'
+import { CuttingMat } from '../../components/CuttingMat'
 import { Polaroid } from '../../components/Polaroid'
 import type { LinkValue } from '../fields'
 
@@ -58,14 +59,7 @@ function FaceContent({ face }: { face: Face }) {
   const eb = EYEBROW[face.accent ?? 'green']
   const isEvent = face.variant === 'event'
   return (
-    <div className="msb-mat">
-      {/* ruler edges */}
-      <div className="absolute inset-x-0 top-0 h-4 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,.5)_0_1px,transparent_1px_17px)]" />
-      <div className="absolute inset-y-0 left-0 w-4 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,.5)_0_1px,transparent_1px_17px)]" />
-      {face.cornerLabel ? (
-        <div className="absolute bottom-4 right-5 font-mono text-[11px] text-white/50">{face.cornerLabel}</div>
-      ) : null}
-
+    <CuttingMat cornerLabel={face.cornerLabel}>
       <div className="msb-grid">
         {/* text column */}
         <div className="msb-face__text">
@@ -137,7 +131,7 @@ function FaceContent({ face }: { face: Face }) {
           sizes="(max-width:900px) 100vw, 460px"
         />
       </div>
-    </div>
+    </CuttingMat>
   )
 }
 
