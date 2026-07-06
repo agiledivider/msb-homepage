@@ -130,7 +130,7 @@ function FaceContent({ face }: { face: Face }) {
 
         {/* photo column (taped polaroid) */}
         <Polaroid
-          className="msb-face__photo"
+          fitMobile
           rotate={isEvent ? 1.8 : 2.2}
           image={face.image}
           placeholder={face.imagePlaceholder ?? 'Foto'}

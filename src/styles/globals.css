@@ -183,17 +183,13 @@ body {
     align-items: stretch;
   }
   .msb-face__text { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; min-width: 0; order: 2; }
-  .msb-face__photo { order: 1; flex: 0 0 auto; transform: none !important; margin: 0 auto; width: 100%; }
+  /* the photo column (Polaroid, order:1) styles itself via its `fitMobile` prop */
 
   .msb-eyebrow { margin-bottom: calc(9px * var(--msb-s, 1)) !important; font-size: calc(11px * var(--msb-s, 1)) !important; padding: 4px 9px !important; }
   .msb-headline { font-size: max(18px, calc(30px * var(--msb-s, 1))) !important; line-height: 1.02 !important; margin: 0 0 calc(7px * var(--msb-s, 1)) !important; }
   .msb-lede { font-size: max(13px, calc(17px * var(--msb-s, 1))) !important; line-height: 1.26 !important; margin: 0 !important; }
   .msb-desc { display: none !important; }
   .msb-eventdate { font-size: calc(46px * var(--msb-s, 1)) !important; }
-
-  .msb-face__photo .msb-photo-img { height: var(--msb-photo-h, 42vw) !important; width: 100% !important; }
-  .msb-face__photo .msb-photo-frame { padding: calc(7px * var(--msb-s, 1)) calc(7px * var(--msb-s, 1)) calc(24px * var(--msb-s, 1)) !important; }
-  .msb-face__photo .msb-photo-caption { font-size: calc(15px * var(--msb-s, 1)) !important; }
 
   .msb-cta { margin-top: auto !important; padding-top: calc(8px * var(--msb-s, 1)) !important; flex-direction: column !important; gap: calc(7px * var(--msb-s, 1)) !important; }
   .msb-cta a { flex: 0 0 auto; width: 100% !important; text-align: center; box-shadow: none !important; font-size: max(12px, calc(14px * var(--msb-s, 1))) !important; padding: calc(11px * var(--msb-s, 1)) 10px !important; }

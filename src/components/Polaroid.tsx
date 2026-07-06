@@ -13,9 +13,13 @@ function TapeStrip({ style }: { style: CSSProperties }) {
 
 /**
  * A taped polaroid: a cream photo frame with two corner tapes, a caption in the
- * bottom margin, and an optional tilt. Renders the `msb-photo-*` classes so the
- * hero's mobile-fit CSS (scoped under `.msb-face__photo`) still applies; used
- * standalone elsewhere, those rules simply don't match and it keeps its base size.
+ * bottom margin, and an optional tilt. All styling (including the hero's mobile
+ * fit) lives here as Tailwind classes.
+ *
+ * `fitMobile` applies the hero's below-900px behaviour: reset the tilt, order the
+ * photo above the text in the stacked layout, shrink the frame padding and give
+ * the image a responsive height. Standalone polaroids leave it off and keep their
+ * base look on every screen.
  */
 export function Polaroid({
   image,
@@ -25,33 +29,44 @@ export function Polaroid({
   className,
   imageClassName,
   sizes = '100vw',
+  fitMobile = false,
 }: {
   image?: MediaResource
   placeholder?: string
   caption?: string | null
-  /** tilt in degrees (overridden to none on mobile inside the hero) */
+  /** tilt in degrees */
   rotate?: number
-  /** applied to the outer wrapper — the hero passes `msb-face__photo` */
   className?: string
   imageClassName?: string
   sizes?: string
+  /** apply the hero's mobile fit (reset tilt, shrink frame, responsive height) below 900px */
+  fitMobile?: boolean
 }) {
+  const rootFit = fitMobile
+    ? ' max-[900px]:order-1 max-[900px]:mx-auto max-[900px]:w-full max-[900px]:flex-none max-[900px]:!transform-none'
+    : ''
+  const frameFit = fitMobile ? ' max-[900px]:!px-[7px] max-[900px]:!pt-[7px] max-[900px]:!pb-6' : ''
+  const imgFit = fitMobile ? ' max-[900px]:!h-[42vw]' : ''
+  const captionFit = fitMobile ? ' max-[900px]:!text-[15px]' : ''
+
   return (
     <div
-      className={`relative${className ? ` ${className}` : ''}`}
+      className={`relative${className ? ` ${className}` : ''}${rootFit}`}
       style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
     >
       <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
       <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
-      <div className="msb-photo-frame relative bg-cream p-2.5 pb-[42px] shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)]">
+      <div className={`relative bg-cream p-2.5 pb-[42px] shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)]${frameFit}`}>
         <Media
           resource={image}
           placeholder={placeholder}
-          className={`msb-photo-img block h-[320px] w-full${imageClassName ? ` ${imageClassName}` : ''}`}
+          className={`block h-[320px] w-full${imgFit}${imageClassName ? ` ${imageClassName}` : ''}`}
           sizes={sizes}
         />
         {caption ? (
-          <div className="msb-photo-caption absolute inset-x-0 bottom-3 text-center font-hand text-[20px] font-semibold text-[#3c4a42]">
+          <div
+            className={`absolute inset-x-0 bottom-3 text-center font-hand text-[20px] font-semibold text-[#3c4a42]${captionFit}`}
+          >
             {caption}
           </div>
         ) : null}
