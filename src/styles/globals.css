@@ -1,12 +1,12 @@
 /* -------------------------------------------------------------------------
-   MakerSpace Bonn — global styles
-   Fonts + the bits that Tailwind utilities can't cleanly express: the 3D
-   prism hero, the pegboard texture, and the mobile fit rules that the hero's
-   client script drives via CSS custom properties (--msb-s, --msb-hero-h, …).
+   MakerSpace Bonn — global styles.
+   Just the Tailwind entrypoint + design tokens. Everything else (the 3D prism
+   hero, the pegboard texture, badges, pills, the body background, and the mobile
+   fit rules) lives on the components as Tailwind v4 utilities.
    ------------------------------------------------------------------------- */
 @import 'tailwindcss';
 
-/* Design tokens (Tailwind v4, CSS-first config). Colours → bg-green / text-ink /
+/* Design tokens (Tailwind v4, CSS-first config). Colours → bg-brand / text-ink /
    …; fonts → font-display / font-hand / …; --container-shell → max-w-shell;
    --animate-msbfade → animate-msbfade. */
 @theme {
@@ -26,14 +26,14 @@
   --color-ink-muted: #595959;    /* captions / secondary */
   --color-line: #e0e0e0;         /* hairlines */
 
-  /* ---- homepage surface + legacy tokens (kept until the component pass) ---- */
+  /* ---- homepage surface + legacy tokens ---- */
   --color-paper: #f1ede2;        /* graph-paper background */
   --color-card: #fffdf8;
   --color-cream: #fbf7ec;
   --color-muted: #736e62;        /* warm secondary (legacy) */
   --color-faint: #9a9484;
   --color-sand: #f5e6c9;         /* = fond */
-  --color-green: #238811;        /* = brand-text (used across components) */
+  --color-green: #238811;        /* = brand-text */
   --color-green-deep: #325725;   /* = fond-dark */
   --color-green-lime: #5eb130;   /* = brand */
   --color-green-pale: #eaf3dd;
@@ -43,7 +43,8 @@
   /* Fonts — IBM Plex Sans is the brand typeface for body/UI; Archivo (Black/900)
      is the display face for thick headlines (Plex Sans caps at Bold/700).
      Montserrat is logo-only and baked into the logo images (no webfont). The
-     --font-* vars are set by next/font on <html>. */
+     --font-* vars are set by next/font on <html> — do NOT define them here (a
+     :root definition would tie on specificity; a remote @import is Turbopack-stripped). */
   --font-display: var(--font-archivo), 'Archivo', system-ui, sans-serif;
   --font-sans: var(--font-plex-sans), 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
@@ -63,162 +64,4 @@
       transform: none;
     }
   }
-}
-
-/* Fonts are loaded with next/font in src/app/(frontend)/layout.tsx, which sets
-   the --font-archivo / --font-plex-sans / --font-plex-mono / --font-newsreader /
-   --font-caveat variables on <html>. Do NOT define them here (a :root definition
-   would tie on specificity and could shadow next/font). A remote CSS @import is
-   stripped by Turbopack, so it must not be used for the fonts either. */
-
-body {
-  margin: 0;
-  color: #23231f;
-  font-family: var(--font-plex-sans), 'IBM Plex Sans', sans-serif;
-  background-color: #f1ede2;
-  background-image:
-    linear-gradient(rgba(94, 177, 48, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(94, 177, 48, 0.1) 1px, transparent 1px);
-  background-size: 27px 27px;
-}
-
-/* ---- hand-drawn pencil sketches scattered in the page gutters ---- */
-.msb-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
-.msb-bg img { position: absolute; display: block; }
-@media (max-width: 1420px) { .msb-bg { display: none; } }
-
-/* ---- pegboard texture (workshop wall) ---- */
-.msb-pegboard {
-  background-color: #e9dfc9;
-  background-image:
-    radial-gradient(circle, rgba(48, 35, 16, 0.4) 0 3px, transparent 3.6px),
-    radial-gradient(circle, rgba(48, 35, 16, 0.2) 0 4.3px, transparent 4.9px),
-    radial-gradient(circle, rgba(255, 253, 247, 0.9) 0 4.3px, transparent 4.9px);
-  background-size: 38px 38px;
-  background-position: 0 0, 1.4px 1.4px, -1.4px -1.4px;
-  box-shadow: inset 0 2px 18px rgba(70, 55, 25, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-}
-
-/* =========================================================================
-   3D tilted hero that flips like a rotating triangular prism.
-   The tilt and the carousel spin live on ONE preserve-3d element so
-   backface-visibility culls the rear faces. Renders in Blink; WebKit
-   flattens preserve-3d, so it degrades to a plain stacked face there.
-   ========================================================================= */
-.msb-scene {
-  position: relative;
-  height: 500px;
-  margin: 56px 0 22px;
-  perspective: 2400px;
-  perspective-origin: 50% 42%;
-}
-.msb-flip {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  /* transform + transition are set inline by the client component */
-}
-.msb-face {
-  position: absolute;
-  inset: 0;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-.msb-face.f0 { transform: rotateY(0deg) translateZ(var(--tz, 322px)); }
-.msb-face.f1 { transform: rotateY(120deg) translateZ(var(--tz, 322px)); }
-.msb-face.f2 { transform: rotateY(240deg) translateZ(var(--tz, 322px)); }
-
-.msb-badge {
-  position: absolute;
-  z-index: 6;
-  font-family: var(--font-archivo);
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.03em;
-  padding: 9px 15px;
-  border-radius: 22px;
-  box-shadow: 0 6px 16px -6px rgba(60, 52, 30, 0.5);
-  border: 2px solid #fff;
-  background: #e0872e;
-  color: #20170a;
-}
-.msb-note {
-  position: absolute;
-  z-index: 6;
-  font-family: var(--font-caveat);
-  font-weight: 700;
-  font-size: 22px;
-  padding: 6px 16px;
-  border-radius: 6px;
-  background: #fbf7ec;
-  color: #238811;
-  box-shadow: 0 6px 16px -8px rgba(60, 52, 30, 0.5);
-  border: 1px dashed #238811;
-}
-
-/* flip-indicator pills with a per-face countdown bar driven by --msb-p */
-.msb-dots { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 0 0 38px; }
-.msb-pill {
-  cursor: pointer;
-  font-family: var(--font-plex-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  padding: 7px 13px;
-  border-radius: 20px;
-  border: 1px solid #d9d2c1;
-  background: #fbf7ec;
-  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
-  display: inline-flex;
-  gap: 7px;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-}
-.msb-pill b { font-weight: 600; }
-.msb-pill::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 3px;
-  width: 0;
-  background: #238811;
-  border-radius: 2px;
-  pointer-events: none;
-}
-.msb-pill.active::after { width: calc(var(--msb-p, 0) * 100%); }
-
-/* =========================================================================
-   Mobile: the prism stays 3D (Blink), sized by the client script via
-   --msb-hero-h / --msb-s / --msb-photo-h so the pills sit at the fold.
-   ========================================================================= */
-@media (max-width: 767.98px) {
-  /* NB: do NOT add `overflow-x: hidden` on html/body here. With overflow-y
-     visible it computes to `auto`, establishing a scroll container that FLATTENS
-     the preserve-3d prism in WebKit (iOS Safari) — the flip breaks on iPhone.
-     Horizontal scroll is prevented instead by insetting .msb-scene (margin). */
-
-  .msb-scene {
-    height: var(--msb-hero-h, calc(100svh - 176px));
-    margin: 10px 20px 12px;
-    perspective: 2000px;
-    perspective-origin: 50% 48%;
-  }
-  .msb-dots { margin: 0 0 12px; }
-  .msb-badge, .msb-note { display: none; }
-
-  /* Face content stacks: photo on top (Polaroid keeps its default order), text
-     below. The grid/flex layout itself is Tailwind on the element in
-     Hero/Component.tsx; only the text column's order is set here. */
-  .msb-face__text { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; min-width: 0; order: 2; }
-
-  .msb-eyebrow { margin-bottom: calc(9px * var(--msb-s, 1)) !important; font-size: calc(11px * var(--msb-s, 1)) !important; padding: 4px 9px !important; }
-  .msb-headline { font-size: max(18px, calc(30px * var(--msb-s, 1))) !important; line-height: 1.02 !important; margin: 0 0 calc(7px * var(--msb-s, 1)) !important; }
-  .msb-lede { font-size: max(13px, calc(17px * var(--msb-s, 1))) !important; line-height: 1.26 !important; margin: 0 !important; }
-  .msb-desc { display: none !important; }
-  .msb-eventdate { font-size: calc(46px * var(--msb-s, 1)) !important; }
-
-  .msb-cta { margin-top: auto !important; padding-top: calc(8px * var(--msb-s, 1)) !important; flex-direction: column !important; gap: calc(7px * var(--msb-s, 1)) !important; }
-  .msb-cta a { flex: 0 0 auto; width: 100% !important; text-align: center; box-shadow: none !important; font-size: max(12px, calc(14px * var(--msb-s, 1))) !important; padding: calc(11px * var(--msb-s, 1)) 10px !important; }
 }

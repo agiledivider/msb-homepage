@@ -39,14 +39,27 @@ const EYEBROW = {
   orange: { color: '#fbe3a0', border: 'rgba(251,227,160,.5)' }, // soft UGC-yellow
 }
 
+// Each prism face: rotate into place, then push out by the apothem (--tz, set
+// inline on the flip element). Arbitrary transform keeps the exact
+// rotateY→translateZ order (v4's rotate-y/translate-z would reorder it).
+const FACE_TF = [
+  'transform-[rotateY(0deg)_translateZ(var(--tz,322px))]',
+  'transform-[rotateY(120deg)_translateZ(var(--tz,322px))]',
+  'transform-[rotateY(240deg)_translateZ(var(--tz,322px))]',
+]
+
+// pill / nav-dot base (the countdown bar is an ::after on the active one)
+const PILL_BASE =
+  'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-[13px] py-[7px] font-mono text-[11.5px] tracking-[.06em] transition-[border-color,color,background] duration-[250ms] [&_b]:font-semibold'
+
 function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boolean; style?: 'white' | 'orange' }) {
   if (!link?.label) return null
   const base =
-    'msb-cta-btn cursor-pointer rounded-[10px] px-6 py-3.5 text-[15px] no-underline transition'
+    'cursor-pointer rounded-[10px] no-underline transition w-full px-2.5 py-[11px] text-center text-[14px] md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
   const cls = primary
     ? style === 'orange'
-      ? 'bg-yellow text-ink font-bold shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // UGC-yellow
-      : 'bg-white text-brand-text font-bold shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]'
+      ? 'bg-yellow text-ink font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // UGC-yellow
+      : 'bg-white text-brand-text font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]'
     : 'border-[1.5px] border-white/[.55] text-white font-semibold'
   return (
     <Link href={link.url || '#'} className={`${base} ${cls}`}>
@@ -61,11 +74,11 @@ function FaceContent({ face }: { face: Face }) {
   return (
     <CuttingMat cornerLabel={face.cornerLabel}>
       <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] md:grid md:grid-cols-[1.06fr_.94fr] md:items-center md:gap-10 md:pl-2.5 md:pt-1.5">
-        {/* text column */}
-        <div className="msb-face__text">
+        {/* text column (mobile: stacked below the photo, order-2) */}
+        <div className="max-md:order-2 max-md:flex max-md:min-h-0 max-md:min-w-0 max-md:flex-1 max-md:flex-col">
           {face.eyebrow ? (
             <div
-              className="msb-eyebrow mb-[22px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[11px] py-[5px] font-mono text-[12.5px] tracking-[.06em]"
+              className="mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[11px] tracking-[.06em] md:mb-[22px] md:px-[11px] md:py-[5px] md:text-[12.5px]"
               style={{ color: eb.color, borderColor: eb.border }}
             >
               {face.eyebrow}
@@ -74,7 +87,7 @@ function FaceContent({ face }: { face: Face }) {
 
           {isEvent && face.eventDay ? (
             <div className="mb-3 flex items-end gap-4">
-              <div className="msb-eventdate font-display text-[74px] font-black leading-[.85] text-white">
+              <div className="font-display text-[46px] font-black leading-[.85] text-white md:text-[74px]">
                 {face.eventDay}
               </div>
               <div className="pb-2 font-mono text-[14px] leading-[1.5] text-green-soft">
@@ -86,8 +99,9 @@ function FaceContent({ face }: { face: Face }) {
           ) : null}
 
           <h1
-            className="msb-headline mb-3.5 font-display font-black leading-[.98] tracking-[-.02em] text-white"
-            style={{ fontSize: isEvent ? 38 : 56 }}
+            className={`mb-[7px] font-display font-black leading-[1.02] tracking-[-.02em] text-white text-[30px] md:mb-3.5 md:leading-[.98] ${
+              isEvent ? 'md:text-[38px]' : 'md:text-[56px]'
+            }`}
           >
             {face.headline.split('\n').map((line, i) => (
               <Fragment key={i}>
@@ -98,15 +112,17 @@ function FaceContent({ face }: { face: Face }) {
           </h1>
 
           {face.lede ? (
-            <p className="msb-lede mb-5 font-serif text-[21px] italic text-white/80">{face.lede}</p>
+            <p className="m-0 font-serif text-[17px] italic leading-[1.26] text-white/80 md:mb-5 md:text-[21px] md:leading-normal">
+              {face.lede}
+            </p>
           ) : null}
           {face.description ? (
-            <p className="msb-desc mb-6 max-w-[470px] text-[16.5px] leading-[1.6] text-white/90">
+            <p className="mb-6 hidden max-w-[470px] text-[16.5px] leading-[1.6] text-white/90 md:block">
               {face.description}
             </p>
           ) : null}
           {face.meta?.length ? (
-            <div className="msb-desc mb-6 flex items-center gap-3.5 font-mono text-[12px] text-green-soft">
+            <div className="mb-6 hidden items-center gap-3.5 font-mono text-[12px] text-green-soft md:flex">
               {face.meta.map((m, i) => (
                 <Fragment key={i}>
                   {i > 0 ? <span className="opacity-50">·</span> : null}
@@ -116,7 +132,7 @@ function FaceContent({ face }: { face: Face }) {
             </div>
           ) : null}
 
-          <div className="msb-cta flex flex-wrap gap-3">
+          <div className="mt-auto flex flex-col gap-[7px] pt-2 md:mt-0 md:flex-row md:flex-wrap md:gap-3 md:pt-0">
             <Cta link={face.primary} primary style={face.primaryStyle ?? 'white'} />
             <Cta link={face.secondary} primary={false} />
           </div>
@@ -254,9 +270,12 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
 
   return (
     <>
-      <div className="msb-scene" ref={sceneRef}>
+      <div
+        className="relative mx-5 mt-2.5 mb-3 h-[calc(100svh-176px)] perspective-[2000px] [perspective-origin:50%_48%] md:mx-0 md:mt-14 md:mb-[22px] md:h-[500px] md:perspective-[2400px] md:[perspective-origin:50%_42%]"
+        ref={sceneRef}
+      >
         <div
-          className="msb-flip"
+          className="relative h-full w-full transform-3d"
           style={
             carousel
               ? ({ '--tz': tz, transform: flipTf, transition: trans } as React.CSSProperties)
@@ -264,14 +283,20 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
           }
         >
           {list.map((face, i) => (
-            <div key={i} className={`msb-face f${i} ${carousel && i === cur ? 'msb-show' : ''}`}>
+            <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>
               {face.badge ? (
-                <div className="msb-badge" style={{ top: -20, left: -16, transform: `rotate(${badgeRot[i]})` }}>
+                <div
+                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-yellow px-[15px] py-[9px] font-display text-[13px] font-extrabold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
+                  style={{ top: -20, left: -16, transform: `rotate(${badgeRot[i]})` }}
+                >
                   {face.badge}
                 </div>
               ) : null}
               {face.note ? (
-                <div className="msb-note" style={{ top: -16, right: 44, transform: 'rotate(6deg)' }}>
+                <div
+                  className="absolute z-[6] rounded-md border border-dashed border-brand-text bg-cream px-4 py-1.5 font-hand text-[22px] font-bold text-brand-text shadow-[0_6px_16px_-8px_rgba(60,52,30,.5)] max-md:hidden"
+                  style={{ top: -16, right: 44, transform: 'rotate(6deg)' }}
+                >
                   {face.note}
                 </div>
               ) : null}
@@ -282,7 +307,7 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
       </div>
 
       {carousel ? (
-        <div className="msb-dots" ref={dotsRef}>
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-2.5 md:mb-[38px]" ref={dotsRef}>
           {list.map((face, i) => {
             const on = i === cur
             return (
@@ -291,7 +316,9 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
                 type="button"
                 onClick={() => goHero(i)}
                 aria-current={on}
-                className={`msb-pill ${on ? 'active' : ''}`}
+                className={`${PILL_BASE} after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-0 after:rounded-[2px] after:bg-brand-text ${
+                  on ? 'after:w-[calc(var(--msb-p,0)*100%)]' : ''
+                }`}
                 style={{
                   borderColor: on ? '#238811' : '#d9d2c1',
                   color: on ? '#238811' : '#7c766a',
@@ -314,7 +341,7 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
             aria-label={userPaused ? 'Automatisches Wechseln fortsetzen' : 'Automatisches Wechseln pausieren'}
             aria-pressed={userPaused}
             title={userPaused ? 'Fortsetzen' : 'Pausieren'}
-            className="msb-pill inline-flex h-[30px] w-[30px] items-center justify-center !p-0"
+            className={`${PILL_BASE} h-[30px] w-[30px] justify-center !px-0 !py-0`}
             style={{ borderColor: '#d9d2c1', color: '#238811', background: '#fbf7ec' }}
           >
             {userPaused ? (

@@ -38,7 +38,7 @@ export function WorkshopsComponent({
         />
       ) : null}
 
-      <div className="msb-pegboard relative rounded-[14px] border border-[#d7c9a8] px-[30px] py-[34px]">
+      <div className="relative rounded-[14px] border border-[#d7c9a8] bg-[#e9dfc9] px-[30px] py-[34px] shadow-[inset_0_2px_18px_rgba(70,55,25,.16),inset_0_0_0_1px_rgba(255,255,255,.25)] [background-image:radial-gradient(circle,rgba(48,35,16,.4)_0_3px,transparent_3.6px),radial-gradient(circle,rgba(48,35,16,.2)_0_4.3px,transparent_4.9px),radial-gradient(circle,rgba(255,253,247,.9)_0_4.3px,transparent_4.9px)] [background-size:38px_38px] [background-position:0_0,1.4px_1.4px,-1.4px_-1.4px]">
         {note ? (
           <div className="absolute -top-3.5 right-[26px] -rotate-3 font-hand text-[23px] font-bold text-brand-text">
             {note}

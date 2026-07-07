@@ -45,7 +45,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
 
   return (
     <html lang="de" className={fontVars}>
-      <body>
+      <body className="m-0 bg-paper font-sans text-ink [background-image:linear-gradient(rgba(94,177,48,.1)_1px,transparent_1px),linear-gradient(90deg,rgba(94,177,48,.1)_1px,transparent_1px)] [background-size:27px_27px]">
         <TopStrip status={site?.topStrip?.status ?? undefined} address={site?.topStrip?.address ?? undefined} />
         <Header nav={navFrom(site)} cta={ctaFrom(site)} />
         {children}
