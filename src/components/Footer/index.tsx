@@ -9,7 +9,7 @@ const DEFAULT_LINKS: NavItem[] = [
 ]
 
 export function Footer({
-  logoSrc = '/makerspacebonn_logo.png',
+  logoSrc = '/logo/logo-horizontal-white.png',
   links = DEFAULT_LINKS,
 }: {
   logoSrc?: string
@@ -19,10 +19,9 @@ export function Footer({
     <footer className="bg-green-deep text-[#d7d2c4]">
       <div className="mx-auto grid max-w-shell grid-cols-1 gap-10 px-8 pb-[34px] pt-[52px] md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <div className="mb-3.5 flex items-center gap-3">
+          <div className="mb-3.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoSrc} alt="MakerSpace Bonn Logo" className="block h-9 w-9 object-contain" />
-            <span className="font-display text-[17px] font-extrabold text-white">MakerSpace Bonn e.V.</span>
+            <img src={logoSrc} alt="MakerSpace Bonn" className="block h-8 w-auto" />
           </div>
           <p className="m-0 mb-3.5 max-w-[320px] text-[14px] leading-[1.65] text-[#a49f92]">
             Eine offene Werkstatt für Bonn. Für alle. <span className="italic">An open workshop for everyone.</span>

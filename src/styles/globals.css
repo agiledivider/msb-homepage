@@ -10,27 +10,44 @@
    …; fonts → font-display / font-hand / …; --container-shell → max-w-shell;
    --animate-msbfade → animate-msbfade. */
 @theme {
-  --color-ink: #23231f;
-  --color-paper: #f1ede2;
+  /* ===== Official MakerSpace Bonn palette (Styleguide V2026-02-15) ===== */
+  /* brand green */
+  --color-brand: #5eb130;        /* MakerSpace Grün — logo, areas, buttons */
+  --color-brand-text: #238811;   /* accessible green for type & links (AA/AAA) */
+  /* fond (backgrounds) */
+  --color-fond: #f5e6c9;         /* cream info boxes */
+  --color-fond-dark: #325725;    /* dark green */
+  /* area accents */
+  --color-violet: #6d3e91;       /* MINT accent · text on it = white */
+  --color-mint: #e6f5fc;         /* MINT light fond (pale tint) */
+  --color-yellow: #fcbd30;       /* UGC accent · text on it = black */
+  /* neutrals (aligned to spec) */
+  --color-ink: #1a1a1a;          /* headlines / body */
+  --color-ink-muted: #595959;    /* captions / secondary */
+  --color-line: #e0e0e0;         /* hairlines */
+
+  /* ---- homepage surface + legacy tokens (kept until the component pass) ---- */
+  --color-paper: #f1ede2;        /* graph-paper background */
   --color-card: #fffdf8;
   --color-cream: #fbf7ec;
-  --color-muted: #736e62;
+  --color-muted: #736e62;        /* warm secondary (legacy) */
   --color-faint: #9a9484;
-  --color-line: #e4dfd1;
-  --color-green: #238811;
-  --color-green-deep: #325725;
-  --color-green-lime: #5eb130;
+  --color-sand: #f5e6c9;         /* = fond */
+  --color-green: #238811;        /* = brand-text (used across components) */
+  --color-green-deep: #325725;   /* = fond-dark */
+  --color-green-lime: #5eb130;   /* = brand */
   --color-green-pale: #eaf3dd;
   --color-green-mint: #edf6e0;
   --color-green-soft: #cfe9ad;
-  --color-orange: #e0872e;
+  --color-orange: #e0872e;       /* legacy accent — not in the brand */
   --color-orange-ink: #20170a;
   --color-orange-soft: #f4d7ae;
-  --color-sand: #f5e6c9;
 
-  /* families resolve the --font-* vars next/font sets on <html> */
-  --font-display: var(--font-archivo), 'Archivo', sans-serif;
-  --font-sans: var(--font-plex-sans), 'IBM Plex Sans', sans-serif;
+  /* Fonts — IBM Plex Sans is the brand typeface (headings + body). Montserrat is
+     logo-only and baked into the logo images, so it is NOT loaded as a webfont.
+     The --font-* vars are set by next/font on <html>. */
+  --font-display: var(--font-plex-sans), 'IBM Plex Sans', system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), 'IBM Plex Mono', monospace;
   --font-serif: var(--font-newsreader), 'Newsreader', serif;
   --font-hand: var(--font-caveat), 'Caveat', cursive;
@@ -117,7 +134,7 @@ body {
 .msb-badge {
   position: absolute;
   z-index: 6;
-  font-family: var(--font-archivo);
+  font-family: var(--font-plex-sans);
   font-weight: 800;
   font-size: 13px;
   letter-spacing: 0.03em;

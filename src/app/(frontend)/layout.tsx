@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
-import { Archivo, IBM_Plex_Sans, IBM_Plex_Mono, Newsreader, Caveat } from 'next/font/google'
+import { IBM_Plex_Sans, IBM_Plex_Mono, Newsreader, Caveat } from 'next/font/google'
 import '@/styles/globals.css'
 import { getPayloadClient } from '@/lib/getPayload'
 
 // self-hosted, Turbopack-safe fonts; each exposes a --font-* CSS var that the
-// Tailwind config and globals.css reference.
-const archivo = Archivo({ subsets: ['latin'], variable: '--font-archivo', display: 'swap' })
+// Tailwind theme references. IBM Plex Sans is the MSB brand typeface (headings +
+// body). Montserrat (logo) is baked into the logo images, so it isn't loaded here.
 const plexSans = IBM_Plex_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700'],
   variable: '--font-plex-sans',
   display: 'swap',
 })
@@ -26,7 +26,7 @@ const newsreader = Newsreader({
 })
 const caveat = Caveat({ subsets: ['latin'], variable: '--font-caveat', display: 'swap' })
 
-const fontVars = `${archivo.variable} ${plexSans.variable} ${plexMono.variable} ${newsreader.variable} ${caveat.variable}`
+const fontVars = `${plexSans.variable} ${plexMono.variable} ${newsreader.variable} ${caveat.variable}`
 import { TopStrip } from '@/components/TopStrip'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'

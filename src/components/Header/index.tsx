@@ -15,7 +15,7 @@ const DEFAULT_NAV: NavItem[] = [
 ]
 
 export function Header({
-  logoSrc = '/makerspacebonn_logo.png',
+  logoSrc = '/logo/logo-horizontal-no-claim.png',
   nav = DEFAULT_NAV,
   cta = { label: 'Mitglied werden', href: '/mitmachen' },
 }: {
@@ -30,12 +30,9 @@ export function Header({
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-[rgba(244,241,233,.92)] backdrop-blur-[8px]">
       <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:px-8">
-        <Link href="/" className="flex items-center gap-3 no-underline">
+        <Link href="/" className="flex items-center no-underline">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoSrc} alt="MakerSpace Bonn Logo" className="block h-10 w-10 object-contain" />
-          <span className="font-display text-[19px] font-extrabold tracking-[-.01em] text-ink">
-            MakerSpace <span className="font-semibold text-faint">Bonn</span>
-          </span>
+          <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto" />
         </Link>
 
         <nav
