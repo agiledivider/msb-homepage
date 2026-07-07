@@ -36,16 +36,18 @@ export function Polaroid({
 }) {
   return (
     <div
-      className={`relative${rotate ? ' md:rotate-[var(--pl-rot)]' : ''}`}
+      className={`relative max-md:mx-auto max-md:w-fit${rotate ? ' md:rotate-[var(--pl-rot)]' : ''}`}
       style={rotate ? ({ '--pl-rot': `${rotate}deg` } as CSSProperties) : undefined}
     >
       <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
       <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
-      <div className="relative bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] md:px-2.5 md:pt-2.5 md:pb-[42px]">
+      <div className="relative bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] max-md:mx-auto max-md:w-fit md:px-2.5 md:pt-2.5 md:pb-[42px]">
+        {/* image is a fixed 4:3; on mobile its width is capped so height stays ≤ half
+            the mat (leaving mat space on the sides rather than stretching it) */}
         <Media
           resource={image}
           placeholder={placeholder}
-          className="block h-[42vw] w-full md:h-[320px]"
+          className="block aspect-[4/3] w-[min(calc(100vw_-_110px),calc((100svh_-_176px)*2/3))] md:w-full"
           sizes={sizes}
         />
         {caption ? (
