@@ -39,16 +39,17 @@ export function Polaroid({
       className={`relative${rotate ? ' md:rotate-[var(--pl-rot)]' : ''}`}
       style={rotate ? ({ '--pl-rot': `${rotate}deg` } as CSSProperties) : undefined}
     >
-      <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
-      <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
-      <div className="relative bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] md:px-2.5 md:pt-2.5 md:pb-[42px]">
-        {/* Fixed 4:3. Width is `w-full` (a % of the frame → mat, so it can never be
-            wider than the mat). max-w caps the height to ≤ half the mat on short
-            screens, shrinking + centering the image (space on the sides). */}
+      {/* The cream frame itself caps its width + centers on mobile (max-w on this
+          block — reliable, unlike max-w on a flex item), so it hugs the 4:3 image
+          and spare space shows the mat, not stretched cream. Tapes live inside the
+          frame so they track it as it shrinks. */}
+      <div className="relative mx-auto bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] max-md:w-full max-md:max-w-[calc((100svh_-_176px)_/_1.5_+_14px)] md:px-2.5 md:pt-2.5 md:pb-[42px]">
+        <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
+        <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
         <Media
           resource={image}
           placeholder={placeholder}
-          className="mx-auto block aspect-[4/3] w-full max-w-[calc((100svh_-_176px)_/_1.5)] md:max-w-none"
+          className="block aspect-[4/3] w-full"
           sizes={sizes}
         />
         {caption ? (
