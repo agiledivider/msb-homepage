@@ -7,7 +7,7 @@ export function TopStrip({
   address?: string
 }) {
   return (
-    <div className="flex items-center justify-center gap-4 bg-green px-4 py-2 font-mono text-[11.5px] tracking-[.03em] text-[#eafaf2] md:justify-between md:px-8 md:text-[12.5px]">
+    <div className="flex items-center justify-center gap-4 bg-brand px-4 py-2 font-mono text-[11.5px] tracking-[.03em] text-white md:justify-between md:px-8 md:text-[12.5px]">
       <span>{status}</span>
       {address ? <span className="hidden opacity-85 md:inline">{address}</span> : null}
     </div>

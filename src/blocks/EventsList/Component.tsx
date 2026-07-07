@@ -38,7 +38,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
             }`}
           >
             <div className="text-center">
-              <div className="font-display text-[30px] font-extrabold leading-none text-green">{e.day}</div>
+              <div className="font-display text-[30px] font-extrabold leading-none text-brand-text">{e.day}</div>
               <div className="font-mono text-[11px] text-faint">{e.sub}</div>
             </div>
             <div>
@@ -85,12 +85,12 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
 
         {sidebar?.infoText ? (
           <div className="rounded-[14px] border border-[#e8d3a6] bg-sand p-5">
-            <div className="mb-1.5 font-hand text-[22px] font-bold text-green">{sidebar.infoTitle}</div>
+            <div className="mb-1.5 font-hand text-[22px] font-bold text-brand-text">{sidebar.infoTitle}</div>
             <p className="m-0 mb-3 text-[14px] leading-[1.55] text-[#4c4a42]">{sidebar.infoText}</p>
             {sidebar.infoLink?.label ? (
               <Link
                 href={sidebar.infoLink.url || '#'}
-                className="border-b border-green pb-0.5 font-mono text-[13px] text-green no-underline"
+                className="border-b border-brand-text pb-0.5 font-mono text-[13px] text-brand-text no-underline"
               >
                 {sidebar.infoLink.label}
               </Link>

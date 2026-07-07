@@ -25,7 +25,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
             />
           ) : null}
           {quote ? (
-            <div className="mt-[26px] border-l-[3px] border-green py-1 pl-5">
+            <div className="mt-[26px] border-l-[3px] border-brand-text py-1 pl-5">
               <p className="m-0 font-serif text-[22px] leading-[1.4] text-ink">{quote}</p>
             </div>
           ) : null}
@@ -44,7 +44,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
                       last ? 'border-l-2 border-transparent' : 'border-l-2 border-line pb-4'
                     }`}
                   >
-                    <span className="font-display text-[16px] font-extrabold text-green">{m.year}</span>
+                    <span className="font-display text-[16px] font-extrabold text-brand-text">{m.year}</span>
                     <span className="text-[14px] leading-[1.5] text-[#4c4a42]">{m.text}</span>
                   </div>
                 )

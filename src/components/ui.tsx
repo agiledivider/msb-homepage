@@ -9,7 +9,8 @@ export function TapeTag({
   children: React.ReactNode
   color?: 'green' | 'orange'
 }) {
-  const bg = color === 'orange' ? 'bg-orange text-orange-ink' : 'bg-green text-white'
+  // 'orange' = the warm brand accent (UGC yellow #FCBD30, black label)
+  const bg = color === 'orange' ? 'bg-yellow text-ink' : 'bg-brand text-white'
   return (
     <span
       className={`${bg} inline-block -rotate-2 rounded-[3px] px-2.5 py-[5px] font-mono text-[11.5px] font-semibold tracking-[.08em] shadow-[0_3px_8px_-4px_rgba(0,0,0,.35)]`}
@@ -43,7 +44,7 @@ export function SectionHeading({
         {meta ? <span className="font-mono text-[13px] text-faint">{meta}</span> : null}
       </div>
       {link?.label ? (
-        <Link href={link.url || '#'} className="font-mono text-[13px] text-green no-underline">
+        <Link href={link.url || '#'} className="font-mono text-[13px] text-brand-text no-underline">
           {link.label}
         </Link>
       ) : null}
@@ -53,7 +54,7 @@ export function SectionHeading({
 
 export const eventTagClasses = (color?: string | null) =>
   color === 'orange'
-    ? 'bg-[#f3ead9] text-[#a06a1f]'
+    ? 'bg-[#fdf2d6] text-[#8a6200]' // soft UGC-yellow tag
     : color === 'neutral'
       ? 'bg-[#ece7dd] text-muted'
-      : 'bg-green-pale text-green'
+      : 'bg-green-pale text-brand-text'

@@ -39,9 +39,6 @@
   --color-green-pale: #eaf3dd;
   --color-green-mint: #edf6e0;
   --color-green-soft: #cfe9ad;
-  --color-orange: #e0872e;       /* legacy accent — not in the brand */
-  --color-orange-ink: #20170a;
-  --color-orange-soft: #f4d7ae;
 
   /* Fonts — IBM Plex Sans is the brand typeface for body/UI; Archivo (Black/900)
      is the display face for thick headlines (Plex Sans caps at Bold/700).

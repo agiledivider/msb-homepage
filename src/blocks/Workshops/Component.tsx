@@ -40,7 +40,7 @@ export function WorkshopsComponent({
 
       <div className="msb-pegboard relative rounded-[14px] border border-[#d7c9a8] px-[30px] py-[34px]">
         {note ? (
-          <div className="absolute -top-3.5 right-[26px] -rotate-3 font-hand text-[23px] font-bold text-green">
+          <div className="absolute -top-3.5 right-[26px] -rotate-3 font-hand text-[23px] font-bold text-brand-text">
             {note}
           </div>
         ) : null}
@@ -56,7 +56,7 @@ export function WorkshopsComponent({
                   <span className="h-1.5 w-1.5 rounded-full bg-[#c9bfa4]" />
                 </div>
               ) : null}
-              {it.code ? <div className="mb-1.5 font-mono text-[11px] text-green">{it.code}</div> : null}
+              {it.code ? <div className="mb-1.5 font-mono text-[11px] text-brand-text">{it.code}</div> : null}
               <div className={`mb-1.5 font-display font-bold ${detailed ? 'text-[21px] font-extrabold' : 'text-[18px]'}`}>
                 {it.title}
               </div>

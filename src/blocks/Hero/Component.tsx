@@ -36,7 +36,7 @@ const DUR = 5400 // ms per face before auto-flip
 
 const EYEBROW = {
   green: { color: '#cfe9ad', border: 'rgba(207,233,173,.45)' },
-  orange: { color: '#f4d7ae', border: 'rgba(244,215,174,.5)' },
+  orange: { color: '#fbe3a0', border: 'rgba(251,227,160,.5)' }, // soft UGC-yellow
 }
 
 function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boolean; style?: 'white' | 'orange' }) {
@@ -45,8 +45,8 @@ function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boole
     'msb-cta-btn cursor-pointer rounded-[10px] px-6 py-3.5 text-[15px] no-underline transition'
   const cls = primary
     ? style === 'orange'
-      ? 'bg-orange text-orange-ink font-bold shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]'
-      : 'bg-white text-green-deep font-bold shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]'
+      ? 'bg-yellow text-ink font-bold shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // UGC-yellow
+      : 'bg-white text-brand-text font-bold shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]'
     : 'border-[1.5px] border-white/[.55] text-white font-semibold'
   return (
     <Link href={link.url || '#'} className={`${base} ${cls}`}>

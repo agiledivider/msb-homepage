@@ -34,7 +34,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
             <div
               key={i}
               className={`rounded-[14px] p-[26px] ${
-                green ? 'bg-green text-[#eafaf2]' : 'border border-line bg-[#fffdf8]'
+                green ? 'bg-brand text-white' : 'border border-line bg-[#fffdf8]'
               }`}
             >
               <div
@@ -56,7 +56,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
                   href={o.link.url || '#'}
                   className={`inline-block rounded-[9px] px-[18px] py-[11px] text-[14px] no-underline ${
                     green
-                      ? 'bg-white font-bold text-green'
+                      ? 'bg-white font-bold text-brand-text'
                       : 'border border-[#cfc9ba] font-semibold text-ink'
                   }`}
                 >
