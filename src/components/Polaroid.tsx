@@ -53,7 +53,9 @@ export function Polaroid({
           sizes={sizes}
         />
         {caption ? (
-          <div className="absolute inset-x-0 bottom-3 text-center font-hand text-[15px] font-semibold text-[#3c4a42] md:text-[20px]">
+          // Sits in the bottom white margin band (== the frame's pb) and centres
+          // within it, so the line box never rides up over the photo on small frames.
+          <div className="absolute inset-x-0 bottom-0 flex h-6 items-center justify-center px-2 text-center font-hand text-[15px] font-semibold leading-none text-[#3c4a42] md:h-[42px] md:text-[20px]">
             {caption}
           </div>
         ) : null}
