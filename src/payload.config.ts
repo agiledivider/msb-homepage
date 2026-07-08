@@ -12,6 +12,7 @@ import { Events } from './collections/Events'
 import { Pages } from './collections/Pages'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
+import { editorialWorkflow } from './plugins/editorial'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -26,8 +27,19 @@ export default buildConfig({
   globals: [HeroSettings, SiteSettings],
   db: sqliteAdapter({
     client: { url: process.env.DATABASE_URI || 'file:./msb.db' },
-    push: true, // dev: auto-sync schema. Switch to migrations for production.
+    // Schema is already in sync (incl. the editorial review columns). Push is off
+    // because drizzle push re-issues CREATE INDEX for existing indexes on libsql
+    // and aborts init. Re-enable temporarily against a fresh DB when adding fields,
+    // or move to migrations (payload migrate) for production.
+    push: false,
   }),
+  plugins: [
+    editorialWorkflow({
+      collections: ['blog', 'events', 'pages'],
+      // fields only reviewers may edit (editors see them locked)
+      lockedFields: { blog: ['publishedAt'] },
+    }),
+  ],
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
