@@ -68,7 +68,7 @@ function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boole
   )
 }
 
-function FaceContent({ face }: { face: Face }) {
+function FaceContent({ face, priority = false }: { face: Face; priority?: boolean }) {
   const eb = EYEBROW[face.accent ?? 'green']
   const isEvent = face.variant === 'event'
   return (
@@ -145,6 +145,7 @@ function FaceContent({ face }: { face: Face }) {
           placeholder={face.imagePlaceholder ?? 'Foto'}
           caption={face.caption}
           sizes="(max-width:767.98px) 100vw, 460px"
+          priority={priority}
         />
       </div>
     </CuttingMat>
@@ -309,7 +310,9 @@ export function HeroComponent({
                   {face.note}
                 </div>
               ) : null}
-              <FaceContent face={face} />
+              {/* eager-load the visible face's photo — 3D transforms confuse native
+                  lazy loading, so the front face's image otherwise waits for a flip */}
+              <FaceContent face={face} priority={i === cur} />
             </div>
           ))}
         </div>

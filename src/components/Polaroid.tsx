@@ -26,6 +26,7 @@ export function Polaroid({
   caption,
   rotate,
   sizes = '100vw',
+  priority = false,
 }: {
   image?: MediaResource
   placeholder?: string
@@ -33,6 +34,7 @@ export function Polaroid({
   /** tilt in degrees, applied from the md breakpoint (768px) up (flat on mobile) */
   rotate?: number
   sizes?: string
+  priority?: boolean
 }) {
   return (
     <div
@@ -51,6 +53,7 @@ export function Polaroid({
           placeholder={placeholder}
           className="block aspect-[4/3] w-full"
           sizes={sizes}
+          priority={priority}
         />
         {caption ? (
           // Sits in the bottom white margin band (== the frame's pb) and centres

@@ -21,12 +21,15 @@ export function Media({
   className,
   style,
   sizes = '100vw',
+  priority = false,
 }: {
   resource: MediaResource
   placeholder?: string
   className?: string
   style?: CSSProperties
   sizes?: string
+  /** eager-load + preload (e.g. the active hero face, which 3D-transforms confuse lazy loading on) */
+  priority?: boolean
 }) {
   const src = resource && typeof resource === 'object' ? resource.url : undefined
 
@@ -49,7 +52,7 @@ export function Media({
 
   return (
     <div className={className} style={{ position: 'relative', ...style }}>
-      <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
+      <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" priority={priority} />
     </div>
   )
 }
