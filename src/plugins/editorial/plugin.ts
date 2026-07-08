@@ -26,9 +26,9 @@ export const editorialWorkflow =
     const authSlug = config.admin?.user ?? 'users'
 
     const collections = (config.collections ?? []).map((col) => {
-      // 1. inject `roles` into the auth collection
+      // 1. inject `editorialRoles` into the auth collection
       if (col.slug === authSlug) {
-        return hasField(col.fields, 'roles') ? col : { ...col, fields: [...col.fields, rolesField()] }
+        return hasField(col.fields, 'editorialRoles') ? col : { ...col, fields: [...col.fields, rolesField()] }
       }
 
       if (!targets.has(col.slug)) return col

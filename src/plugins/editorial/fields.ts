@@ -1,11 +1,14 @@
 import type { Field } from 'payload'
 import { isAdmin } from './access'
 
-/** `roles` select injected into the auth collection (editor/reviewer/admin). */
+/** `editorialRoles` select injected into the auth collection (editor/reviewer/admin).
+ *  Named `editorialRoles` (not `roles`) to avoid colliding with general-purpose
+ *  RBAC plugins that add their own `roles` field. */
 export const rolesField = (): Field => ({
-  name: 'roles',
+  name: 'editorialRoles',
   type: 'select',
   hasMany: true,
+  label: 'Redaktions-Rollen',
   saveToJWT: true, // available on req.user without a DB lookup
   defaultValue: ['editor'],
   options: [

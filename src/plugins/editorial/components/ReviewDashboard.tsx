@@ -86,7 +86,7 @@ function SectionBox({ section }: { section: Section }) {
  * überarbeiten" (changes_requested); someone with both roles sees both.
  */
 export async function ReviewDashboard({ payload, user }: Props) {
-  const roles = ((user as { roles?: string[] } | undefined)?.roles) ?? []
+  const roles = ((user as { editorialRoles?: string[] } | undefined)?.editorialRoles) ?? []
   if (roles.length === 0) return null
 
   const bases: Omit<Section, 'groups' | 'total'>[] = []

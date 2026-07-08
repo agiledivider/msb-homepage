@@ -17,10 +17,10 @@ const ensureUser = async (
 ) => {
   const existing = await payload.find({ collection: 'users', where: { email: { equals: email } }, limit: 1 })
   if (existing.totalDocs > 0) {
-    await payload.update({ collection: 'users', id: existing.docs[0].id, data: { roles } as never })
+    await payload.update({ collection: 'users', id: existing.docs[0].id, data: { editorialRoles: roles } as never })
     payload.logger.info(`updated ${email} → [${roles.join(', ')}]`)
   } else {
-    await payload.create({ collection: 'users', data: { email, password, name, roles } as never })
+    await payload.create({ collection: 'users', data: { email, password, name, editorialRoles: roles } as never })
     payload.logger.info(`created ${email} → [${roles.join(', ')}]`)
   }
 }

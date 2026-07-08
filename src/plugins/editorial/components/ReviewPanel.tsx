@@ -44,7 +44,7 @@ export function ReviewPanel() {
 
   const status = (savedDocumentData?.reviewStatus as string) ?? 'draft'
   const reviewNote = savedDocumentData?.reviewNote as string | undefined
-  const roles = (user?.roles as string[] | undefined) ?? []
+  const roles = (user?.editorialRoles as string[] | undefined) ?? []
   const isReviewer = roles.some((r) => REVIEWER_ROLES.includes(r))
   const meta = STATUS[status] ?? STATUS.draft
 

@@ -1,10 +1,10 @@
 /**
  * Role helpers. They accept `unknown` so callers can pass `req.user` / the admin
- * `ClientUser` directly — `roles` is injected by this plugin at runtime and may
- * not exist on the generated `User` type yet, so we read it defensively.
+ * `ClientUser` directly — `editorialRoles` is injected by this plugin at runtime
+ * and may not exist on the generated `User` type yet, so we read it defensively.
  */
 const roleSet = (user: unknown): Set<string> => {
-  const roles = (user as { roles?: unknown } | null | undefined)?.roles
+  const roles = (user as { editorialRoles?: unknown } | null | undefined)?.editorialRoles
   const arr = Array.isArray(roles) ? roles : []
   return new Set(arr.filter((r): r is string => typeof r === 'string'))
 }
