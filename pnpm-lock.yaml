@@ -32,6 +32,9 @@ importers:
       payload:
         specifier: 3.85.2
         version: 3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6)
+      payload-rbac-plugin:
+        specifier: 1.1.0
+        version: 1.1.0(payload@3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6))
       react:
         specifier: 19.2.7
         version: 19.2.7
@@ -2277,6 +2280,12 @@ packages:
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
+
+  payload-rbac-plugin@1.1.0:
+    resolution: {integrity: sha512-2c+o5lHOZkOG8JxPqkcRSPKv3T3iIpp1SYH2Q4xw/yMsYd+P+c9Keds+hKzKGYxIvIJRoQvgekhrCUjxkcUQ8Q==}
+    engines: {node: ^18.20.2 || >=20.9.0, pnpm: ^9 || ^10}
+    peerDependencies:
+      payload: ^3.85.0
 
   payload@3.85.2:
     resolution: {integrity: sha512-sgqW6+/6cY3hy0cDDcki0HUmUlEfzyr0i8LGJN23waLeiva62i6ufUNG7lNlFrnuU/CjDfkI7MbySayQpikHgg==}
@@ -4851,6 +4860,10 @@ snapshots:
   path-to-regexp@6.3.0: {}
 
   path-type@4.0.0: {}
+
+  payload-rbac-plugin@1.1.0(payload@3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6)):
+    dependencies:
+      payload: 3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6)
 
   payload@3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6):
     dependencies:

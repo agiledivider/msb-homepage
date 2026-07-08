@@ -13,6 +13,7 @@ import { Pages } from './collections/Pages'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { editorialWorkflow } from './plugins/editorial'
+import { rbac } from 'payload-rbac-plugin'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -27,11 +28,10 @@ export default buildConfig({
   globals: [HeroSettings, SiteSettings],
   db: sqliteAdapter({
     client: { url: process.env.DATABASE_URI || 'file:./msb.db' },
-    // Schema is already in sync (incl. the editorial review columns). Push is off
-    // because drizzle push re-issues CREATE INDEX for existing indexes on libsql
-    // and aborts init. Re-enable temporarily against a fresh DB when adding fields,
-    // or move to migrations (payload migrate) for production.
-    push: false,
+    // Push works against a clean DB (drift-free). If it ever aborts on an
+    // "index already exists" error, the schema has drifted — recreate msb.db and
+    // re-seed, or move to migrations (payload migrate) for production.
+    push: true,
   }),
   plugins: [
     editorialWorkflow({
@@ -39,6 +39,8 @@ export default buildConfig({
       // fields only reviewers may edit (editors see them locked)
       lockedFields: { blog: ['publishedAt'] },
     }),
+    // UI-configurable roles & permissions (Roles + Permissions collections).
+    rbac({ enabled: true }),
   ],
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,

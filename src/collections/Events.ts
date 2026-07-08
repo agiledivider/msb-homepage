@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
+import { checkPermission } from 'payload-rbac-plugin'
 
 /** Events. The next upcoming event drives hero face 2; the collection also
  *  feeds the Start "Was läuft" feed and the /events list. */
@@ -13,7 +14,12 @@ export const Events: CollectionConfig = {
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/events/${data?.slug}` }) },
     preview: (data) => generatePreviewPath({ path: `/events/${data?.slug}` }),
   },
-  access: { read: () => true },
+  access: {
+    read: () => true, // public frontend
+    create: checkPermission('events:create'),
+    update: checkPermission('events:update'),
+    delete: checkPermission('events:delete'),
+  },
   versions: { drafts: true },
   fields: [
     { name: 'title', type: 'text', required: true },

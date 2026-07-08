@@ -3,6 +3,7 @@ import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { slugField } from '../fields/slug'
 import { PolaroidCard } from '../blocks/PolaroidCard/config'
 import { generatePreviewPath } from '../lib/preview'
+import { checkPermission } from 'payload-rbac-plugin'
 
 /** Blog posts. The newest published post drives hero face 1. */
 export const Blog: CollectionConfig = {
@@ -14,7 +15,12 @@ export const Blog: CollectionConfig = {
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/blog/${data?.slug}` }) },
     preview: (data) => generatePreviewPath({ path: `/blog/${data?.slug}` }),
   },
-  access: { read: () => true },
+  access: {
+    read: () => true, // public frontend
+    create: checkPermission('blog:create'),
+    update: checkPermission('blog:update'),
+    delete: checkPermission('blog:delete'),
+  },
   versions: { drafts: true },
   fields: [
     { name: 'title', type: 'text', required: true },

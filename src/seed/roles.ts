@@ -28,8 +28,8 @@ const ensureUser = async (
 const run = async () => {
   const payload = await getPayload({ config })
   await ensureUser(payload, 'falk@kuehnel.eu', 'test', 'Falk Kühnel', ['admin'])
-  await ensureUser(payload, 'editor@test', 'test', 'Test Editor', ['editor'])
-  await ensureUser(payload, 'reviewer@test', 'test', 'Test Reviewer', ['reviewer'])
+  await ensureUser(payload, 'editor@test.de', 'test', 'Test Editor', ['editor'])
+  await ensureUser(payload, 'reviewer@test.de', 'test', 'Test Reviewer', ['reviewer'])
   payload.logger.info('✓ roles seeded')
 }
 

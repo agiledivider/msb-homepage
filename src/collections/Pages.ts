@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { msbBlocks } from '../blocks'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
+import { checkPermission } from 'payload-rbac-plugin'
 
 /** Editable pages composed from the MSB blocks (Verein / Werkzeug / Mitmachen). */
 export const Pages: CollectionConfig = {
@@ -13,7 +14,12 @@ export const Pages: CollectionConfig = {
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/${data?.slug}` }) },
     preview: (data) => generatePreviewPath({ path: `/${data?.slug}` }),
   },
-  access: { read: () => true },
+  access: {
+    read: () => true, // public frontend
+    create: checkPermission('pages:create'),
+    update: checkPermission('pages:update'),
+    delete: checkPermission('pages:delete'),
+  },
   versions: { drafts: true },
   fields: [
     { name: 'title', type: 'text', required: true },

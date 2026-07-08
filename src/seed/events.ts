@@ -66,7 +66,7 @@ const run = async () => {
         location: 'Kennedyallee 18',
         category: cat.category,
         tagColor: cat.tagColor,
-        image: (i % 5) + 1, // cycle media ids 1–5
+        image: (i % 3) + 1, // cycle the seeded media (ids 1–3)
         description:
           'Automatisch generierter Beispieltermin für die Events-Übersicht (Liste, Kalender & Kacheln).',
         _status: 'published',
