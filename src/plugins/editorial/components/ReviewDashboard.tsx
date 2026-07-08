@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 import { isReviewer } from '../access'
 import { REVIEWER_ROLES_DEFAULT } from '../types'
+import { DashboardActions } from './DashboardActions'
 
 type Props = { payload: Payload; user?: unknown }
 
@@ -60,15 +61,22 @@ function SectionBox({ section }: { section: Section }) {
                 >
                   {g.slug} · {g.docs.length}
                 </div>
-                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {g.docs.map((doc) => (
-                    <li key={doc.id}>
+                    <li
+                      key={doc.id}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
+                    >
                       <a
                         href={`/admin/collections/${g.slug}/${doc.id}`}
-                        style={{ color: 'var(--theme-text)', textDecoration: 'none', fontSize: 14 }}
+                        style={{ color: 'var(--theme-text)', textDecoration: 'none', fontSize: 14, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                       >
                         › {doc.title ?? `#${doc.id}`}
                       </a>
+                      {/* Reviewer queue: diff + approve straight from the card */}
+                      {section.status === 'in_review' ? (
+                        <DashboardActions collectionSlug={g.slug} id={doc.id} />
+                      ) : null}
                     </li>
                   ))}
                 </ul>
