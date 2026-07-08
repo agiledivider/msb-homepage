@@ -14,6 +14,9 @@ import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { editorialWorkflow } from './plugins/editorial'
 import { rbac } from 'payload-rbac-plugin'
+import { adminOnly, hideForNonAdmins } from './access/admin'
+import { isAdmin } from './plugins/editorial/access'
+import type { Field } from 'payload'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -40,7 +43,34 @@ export default buildConfig({
       lockedFields: { blog: ['publishedAt'] },
     }),
     // UI-configurable roles & permissions (Roles + Permissions collections).
-    rbac({ enabled: true }),
+    // Locked to admins so the permission system can't be edited by others.
+    rbac({
+      enabled: true,
+      rolesAccess: { read: adminOnly, create: adminOnly, update: adminOnly, delete: adminOnly },
+      permissionsAccess: { read: adminOnly, create: adminOnly, update: adminOnly, delete: adminOnly },
+      hideRoles: hideForNonAdmins,
+      hidePermissions: hideForNonAdmins,
+    }),
+    // The RBAC `roles` field ships without field access — lock its editing to
+    // admins so a self-service update can't grant roles (privilege escalation).
+    (config) => ({
+      ...config,
+      collections: config.collections?.map((c) =>
+        c.slug !== 'users'
+          ? c
+          : {
+              ...c,
+              fields: c.fields.map((f): Field =>
+                'name' in f && f.name === 'roles'
+                  ? ({
+                      ...f,
+                      access: { ...('access' in f ? f.access : {}), update: ({ req }) => isAdmin(req.user) },
+                    } as Field)
+                  : f,
+              ),
+            },
+      ),
+    }),
   ],
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,
