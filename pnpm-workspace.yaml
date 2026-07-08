@@ -1,3 +1,6 @@
+# pnpm 11 approves dependency build scripts here (map of package → bool). Without
+# it a fresh install skips them and can abort (ERR_PNPM_IGNORED_BUILDS). The
+# Docker build additionally passes --config.dangerouslyAllowAllBuilds=true.
 allowBuilds:
   bufferutil: true
   esbuild: true

@@ -1,0 +1,30 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# local sqlite DBs (prod uses a volume)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# runtime uploads (prod uses a volume)
+public/media
+
+# local env & editor cruft
+.env
+.env.*
+.DS_Store
+.vscode
+.idea
+
+# scratch / design sources not needed in the image
+scrap
+.playwright-mcp
+*.dc.html
+"MakerSpace Bonn Redesign (standalone).html"

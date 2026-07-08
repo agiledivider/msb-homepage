@@ -1,0 +1,35 @@
+# Production stack: the app plus a persistent SQLite DB and media on named volumes.
+#
+#   1) build & push:   docker build -t <registry>/msb-homepage:TAG .
+#                      docker push <registry>/msb-homepage:TAG
+#   2) on the server:  put IMAGE + secrets in a `.env` next to this file, then
+#                      docker compose -f docker-compose.prod.yml up -d
+#
+# First start on a fresh `db` volume: open /admin and create the first user.
+
+services:
+  web:
+    image: ${IMAGE:-msb-homepage:latest}
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      NODE_ENV: production
+      # SQLite file lives on the `db` volume
+      DATABASE_URI: file:/app/data/msb.db
+      # uploaded media lives on the `media` volume
+      MEDIA_DIR: /app/public/media
+      # required — generate with: openssl rand -hex 32
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env}
+      # required — public URL of this deployment (used by live preview)
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:?set NEXT_PUBLIC_SERVER_URL in .env}
+      # simple Basic-Auth gate in front of everything (unset both to make it public)
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-msb}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:?set BASIC_AUTH_PASSWORD in .env}
+    volumes:
+      - db:/app/data
+      - media:/app/public/media
+
+volumes:
+  db:
+  media:

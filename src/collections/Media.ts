@@ -9,7 +9,9 @@ export const Media: CollectionConfig = {
   access: { read: () => true },
   admin: { useAsTitle: 'alt' },
   upload: {
-    staticDir: path.resolve(dirname, '../../public/media'),
+    // MEDIA_DIR lets prod point uploads at a mounted volume (standalone builds
+    // resolve import.meta paths unpredictably); falls back to public/media in dev.
+    staticDir: process.env.MEDIA_DIR || path.resolve(dirname, '../../public/media'),
     imageSizes: [
       { name: 'thumbnail', width: 400 },
       { name: 'card', width: 768 },
