@@ -14,6 +14,7 @@ export const Blog: CollectionConfig = {
     defaultColumns: ['title', 'author', '_status', 'publishedAt'],
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/blog/${data?.slug}` }) },
     preview: (data) => generatePreviewPath({ path: `/blog/${data?.slug}` }),
+    components: { edit: { beforeDocumentControls: ['/components/HeroPreviewButton#HeroPreviewButton'] } },
   },
   access: {
     read: () => true, // public frontend

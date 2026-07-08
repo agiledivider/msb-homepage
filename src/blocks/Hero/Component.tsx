@@ -151,12 +151,21 @@ function FaceContent({ face }: { face: Face }) {
   )
 }
 
-export function HeroComponent({ faces }: { faces?: Face[] | null }) {
+export function HeroComponent({
+  faces,
+  initialFace = 0,
+  autoPlay = true,
+}: {
+  faces?: Face[] | null
+  initialFace?: number
+  autoPlay?: boolean
+}) {
   const list = (faces ?? []).slice(0, 3)
   const carousel = list.length === 3
 
-  const [step, setStep] = useState(0)
-  const [spin, setSpin] = useState(0)
+  const [step, setStep] = useState(initialFace)
+  // start rotated to the initial face (each face is 120° apart)
+  const [spin, setSpin] = useState(-initialFace * 120)
   const [trans, setTrans] = useState('none')
   const [sw, setSw] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
@@ -219,7 +228,7 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
 
   // rAF: drives auto-flip and the countdown bar together
   useEffect(() => {
-    if (!carousel) return
+    if (!carousel || !autoPlay) return
     let raf = 0
     let last: number | null = null
     const loop = (ts: number) => {
@@ -239,7 +248,7 @@ export function HeroComponent({ faces }: { faces?: Face[] | null }) {
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [carousel, doFlip])
+  }, [carousel, doFlip, autoPlay])
 
   // measure + hover pause + resize
   useEffect(() => {

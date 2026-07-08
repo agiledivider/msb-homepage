@@ -13,6 +13,7 @@ export const Events: CollectionConfig = {
     defaultColumns: ['title', 'date', 'category', '_status'],
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/events/${data?.slug}` }) },
     preview: (data) => generatePreviewPath({ path: `/events/${data?.slug}` }),
+    components: { edit: { beforeDocumentControls: ['/components/HeroPreviewButton#HeroPreviewButton'] } },
   },
   access: {
     read: () => true, // public frontend
