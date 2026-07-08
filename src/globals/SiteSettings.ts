@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { linkField } from '../blocks/fields'
+import { generatePreviewPath } from '../lib/preview'
 
 /** SiteSettings — chrome: top strip, nav, footer. Components fall back to
  *  their built-in defaults when a field is empty. */
@@ -7,6 +8,10 @@ export const SiteSettings: GlobalConfig = {
   slug: 'siteSettings',
   label: 'Website-Einstellungen',
   access: { read: () => true },
+  admin: {
+    livePreview: { url: () => generatePreviewPath({ path: '/' }) },
+    preview: () => generatePreviewPath({ path: '/' }),
+  },
   fields: [
     {
       name: 'topStrip',

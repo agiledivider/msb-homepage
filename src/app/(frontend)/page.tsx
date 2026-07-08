@@ -1,3 +1,4 @@
+import { draftMode } from 'next/headers'
 import { getPayloadClient } from '@/lib/getPayload'
 import { HeroComponent, type Face } from '@/blocks/Hero/Component'
 import { WorkshopsComponent } from '@/blocks/Workshops/Component'
@@ -17,11 +18,12 @@ import {
 export const dynamic = 'force-dynamic' // always reflect the latest content
 
 export default async function StartPage() {
+  const { isEnabled: draft } = await draftMode()
   const payload = await getPayloadClient()
   const now = new Date().toISOString()
 
   const [hero, blogRes, upcomingRes, feedRes] = await Promise.all([
-    payload.findGlobal({ slug: 'heroSettings', depth: 2 }),
+    payload.findGlobal({ slug: 'heroSettings', depth: 2, draft }),
     payload.find({
       collection: 'blog',
       where: { _status: { equals: 'published' } },

@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { linkField } from '../blocks/fields'
+import { generatePreviewPath } from '../lib/preview'
 
 /** HeroSettings — the editable content for hero face 0 (Werkstatt).
  *  Fields mirror the Hero `Face` contract so the value maps straight through. */
@@ -7,6 +8,10 @@ export const HeroSettings: GlobalConfig = {
   slug: 'heroSettings',
   label: 'Hero (Startseite)',
   access: { read: () => true },
+  admin: {
+    livePreview: { url: () => generatePreviewPath({ path: '/' }) },
+    preview: () => generatePreviewPath({ path: '/' }),
+  },
   fields: [
     {
       type: 'row',

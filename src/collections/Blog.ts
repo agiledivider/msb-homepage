@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { slugField } from '../fields/slug'
 import { PolaroidCard } from '../blocks/PolaroidCard/config'
+import { generatePreviewPath } from '../lib/preview'
 
 /** Blog posts. The newest published post drives hero face 1. */
 export const Blog: CollectionConfig = {
@@ -10,6 +11,8 @@ export const Blog: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'author', '_status', 'publishedAt'],
+    livePreview: { url: ({ data }) => generatePreviewPath({ path: `/blog/${data?.slug}` }) },
+    preview: (data) => generatePreviewPath({ path: `/blog/${data?.slug}` }),
   },
   access: { read: () => true },
   versions: { drafts: true },

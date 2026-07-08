@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
+import { draftMode } from 'next/headers'
 import { Archivo, IBM_Plex_Sans, IBM_Plex_Mono, Newsreader, Caveat } from 'next/font/google'
 import '@/styles/globals.css'
 import { getPayloadClient } from '@/lib/getPayload'
+import { RefreshRouteOnSave } from '@/components/RefreshRouteOnSave'
 
 // self-hosted, Turbopack-safe fonts; each exposes a --font-* CSS var that the
 // Tailwind theme references. IBM Plex Sans is the MSB brand typeface for body/UI;
@@ -40,12 +42,14 @@ export const metadata: Metadata = {
 }
 
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
+  const { isEnabled: draft } = await draftMode()
   const payload = await getPayloadClient()
-  const site = await payload.findGlobal({ slug: 'siteSettings' }).catch(() => null)
+  const site = await payload.findGlobal({ slug: 'siteSettings', draft }).catch(() => null)
 
   return (
     <html lang="de" className={fontVars}>
       <body className="m-0 bg-paper font-sans text-ink [background-image:linear-gradient(rgba(94,177,48,.1)_1px,transparent_1px),linear-gradient(90deg,rgba(94,177,48,.1)_1px,transparent_1px)] [background-size:27px_27px]">
+        {draft ? <RefreshRouteOnSave /> : null}
         <TopStrip status={site?.topStrip?.status ?? undefined} address={site?.topStrip?.address ?? undefined} />
         <Header nav={navFrom(site)} cta={ctaFrom(site)} />
         {children}

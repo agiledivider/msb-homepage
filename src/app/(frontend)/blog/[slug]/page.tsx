@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { draftMode } from 'next/headers'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { getPayloadClient } from '@/lib/getPayload'
@@ -9,12 +10,15 @@ export const dynamic = 'force-dynamic'
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const { isEnabled: draft } = await draftMode()
   const payload = await getPayloadClient()
   const res = await payload.find({
     collection: 'blog',
     where: { slug: { equals: slug } },
     limit: 1,
     depth: 2,
+    draft,
+    overrideAccess: draft,
   })
   const post = res.docs[0]
   if (!post) notFound()

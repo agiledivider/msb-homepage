@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { slugField } from '../fields/slug'
+import { generatePreviewPath } from '../lib/preview'
 
 /** Events. The next upcoming event drives hero face 2; the collection also
  *  feeds the Start "Was läuft" feed and the /events list. */
@@ -9,6 +10,8 @@ export const Events: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'date', 'category', '_status'],
+    livePreview: { url: ({ data }) => generatePreviewPath({ path: `/events/${data?.slug}` }) },
+    preview: (data) => generatePreviewPath({ path: `/events/${data?.slug}` }),
   },
   access: { read: () => true },
   versions: { drafts: true },
