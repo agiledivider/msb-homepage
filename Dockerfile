@@ -45,7 +45,7 @@ RUN mkdir -p /app/data /app/public/media && chown -R nextjs:nodejs /app/data /ap
 
 USER nextjs
 EXPOSE 3000
-# apply DB migrations (creates the schema on a fresh volume; no-op once applied),
-# then start. Payload `push` is dev-only, so prod relies on migrations. Use the
-# binaries directly to avoid a corepack/pnpm download at runtime.
-CMD ["sh", "-c", "node_modules/.bin/payload migrate && node_modules/.bin/next start"]
+# migrate (schema) → seed roles/permissions (+ optional init admin) → start.
+# All idempotent. Payload `push` is dev-only, so prod relies on migrations.
+# Binaries run directly to avoid a corepack/pnpm download at runtime.
+CMD ["sh", "-c", "node_modules/.bin/payload migrate && node_modules/.bin/payload run src/seed/prod.ts && node_modules/.bin/next start"]

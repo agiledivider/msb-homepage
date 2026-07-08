@@ -33,9 +33,15 @@ buildx, e.g. `docker buildx build --platform linux/amd64 -t ... --push .`
    docker compose -f docker-compose.prod.yml up -d
    ```
 
-On boot the container **runs DB migrations** (creates the schema on a fresh `db`
-volume; a no-op afterwards), then starts the server. Open `/admin` and create the
-first user.
+On boot the container **runs DB migrations** (schema), then a **seed** (RBAC
+permissions + `Administrator`/`Redakteur` roles — idempotent), then starts.
+
+**Set `INIT_ADMIN_EMAIL` + `INIT_ADMIN_PASSWORD` for the first deploy.** On a fresh
+DB that creates a ready admin (admin role + full permissions) so you can log
+straight into `/admin`. Without it, a user created via the `/admin` first-user
+screen starts as a plain editor with no permissions — and since there's no
+existing admin to grant them a role yet, you'd be locked out. Once you have one
+admin, you can drop the `INIT_ADMIN_*` vars.
 
 ## What persists
 
