@@ -9,7 +9,7 @@ const nextConfig = {
   // allow testing the dev server from a physical device over the LAN — Next
   // otherwise treats the LAN-IP origin as cross-origin and blocks /_next/*
   // (HMR socket + JS chunks). Add your Mac's LAN IP / subnet here.
-  allowedDevOrigins: ['192.168.178.46', '192.168.178.*'],
+  allowedDevOrigins: ['192.168.178.46', '192.168.178.*', '192.168.10.*'],
 }
 
 export default withPayload(nextConfig)

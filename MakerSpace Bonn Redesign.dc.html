@@ -61,8 +61,14 @@
     flex-wrap:wrap;margin:0 0 38px;}
   .msb-pill{cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11.5px;
     letter-spacing:.06em;padding:7px 13px;border-radius:20px;border:1px solid #d9d2c1;
-    background:#fbf7ec;transition:all .25s ease;display:inline-flex;gap:7px;align-items:center;}
+    background:#fbf7ec;transition:border-color .25s ease,color .25s ease,background .25s ease;
+    display:inline-flex;gap:7px;align-items:center;position:relative;overflow:hidden;}
   .msb-pill b{font-weight:600;}
+  /* countdown-to-next-switch: a bar that fills across the active pill, driven by
+     --msb-p (0..1) set each frame on .msb-dots by the rAF timer */
+  .msb-pill::after{content:'';position:absolute;left:0;bottom:0;height:3px;width:0;
+    background:#238811;border-radius:2px;pointer-events:none;}
+  .msb-pill.active::after{width:calc(var(--msb-p,0) * 100%);}
   /* hamburger (mobile only) */
   .msb-burger{display:none;background:none;border:0;cursor:pointer;padding:0;width:42px;height:42px;
     flex-direction:column;justify-content:center;align-items:center;gap:5px;}
@@ -140,8 +146,9 @@
     .msb-desc{display:none!important;}                    /* long paragraph / meta */
     [style*="font-size: 74px"]{font-size:calc(46px*var(--msb-s,1))!important;}  /* event date */
 
-    /* photo (taped polaroid) — shown, scaled */
-    .msb-grid image-slot{height:calc(140px*var(--msb-s,1))!important;width:100%!important;}
+    /* photo (taped polaroid) — shown; height comes from _measure() which keeps
+       the image aspect between 1:1 and 4:3 and fills the leftover mat space */
+    .msb-grid image-slot{height:var(--msb-photo-h,42vw)!important;width:100%!important;}
     .msb-grid > div:last-child > div:last-child{padding:calc(7px*var(--msb-s,1))
       calc(7px*var(--msb-s,1)) calc(24px*var(--msb-s,1))!important;}
     .msb-grid > div:last-child .cap,.msb-grid > div:last-child [style*="Caveat"]{font-size:calc(15px*var(--msb-s,1))!important;}
@@ -317,9 +324,9 @@
 
       <!-- flip indicator pills -->
       <div class="msb-dots">
-        <span onClick="{{ goHero0 }}" class="msb-pill" style="border-color:{{ pb0 }};color:{{ pc0 }};background:{{ pg0 }};"><b>01</b> WERKSTATT</span>
-        <span onClick="{{ goHero1 }}" class="msb-pill" style="border-color:{{ pb1 }};color:{{ pc1 }};background:{{ pg1 }};"><b>02</b> BLOG</span>
-        <span onClick="{{ goHero2 }}" class="msb-pill" style="border-color:{{ pb2 }};color:{{ pc2 }};background:{{ pg2 }};"><b>03</b> EVENT</span>
+        <span onClick="{{ goHero0 }}" class="msb-pill {{ pa0 }}" style="border-color:{{ pb0 }};color:{{ pc0 }};background:{{ pg0 }};"><b>01</b> WERKSTATT</span>
+        <span onClick="{{ goHero1 }}" class="msb-pill {{ pa1 }}" style="border-color:{{ pb1 }};color:{{ pc1 }};background:{{ pg1 }};"><b>02</b> BLOG</span>
+        <span onClick="{{ goHero2 }}" class="msb-pill {{ pa2 }}" style="border-color:{{ pb2 }};color:{{ pc2 }};background:{{ pg2 }};"><b>03</b> EVENT</span>
       </div>
 
       <!-- MAIN GRID: feed + sidebar -->
@@ -617,6 +624,9 @@ class Component extends DCLogic {
   doFlip(delta){
     if (this._flipping || delta === 0) return;
     this._flipping = true;
+    this._elapsed = 0;                        // restart the countdown for the new face
+    const dots = (typeof document !== 'undefined') && document.querySelector('.msb-dots');
+    if (dots) dots.style.setProperty('--msb-p', '0');
     const self = this;
     const step = this.state.step + delta;
     const target = -step * 120;              // final resting spin (exact multiple)
@@ -633,16 +643,26 @@ class Component extends DCLogic {
   goHero(i){
     const delta = ((i - this.cur()) % 3 + 3) % 3;   // always rotate forward
     if (delta === 0) return;
-    this.doFlip(delta);
-    this._restart();
+    this.doFlip(delta);                              // resets the countdown
   }
+  // rAF timer drives BOTH the auto-flip and the pills' countdown bar, so they
+  // stay perfectly in sync and pause/resume together on hover.
   _start(){
-    if (this._timer || this._paused || typeof window === 'undefined') return;
-    this._timer = setInterval(() => this.nextHero(), 5400);
-  }
-  _restart(){
-    if (this._timer) { clearInterval(this._timer); this._timer = null; }
-    this._start();
+    if (this._raf || typeof window === 'undefined') return;
+    this._DUR = 5400; this._elapsed = this._elapsed || 0; this._lastTs = null;
+    const self = this;
+    this._loop = function(ts){
+      self._raf = requestAnimationFrame(self._loop);
+      if (self._lastTs == null){ self._lastTs = ts; return; }
+      const dt = Math.min(100, ts - self._lastTs); self._lastTs = ts;  // clamp: no jump after a background/hidden pause
+      if (self.state.page === 'start' && !self._paused){
+        self._elapsed += dt;
+        if (self._elapsed >= self._DUR) self.nextHero();   // doFlip resets _elapsed
+      }
+      const dots = document.querySelector('.msb-dots');
+      if (dots) dots.style.setProperty('--msb-p', Math.min(1, self._elapsed / self._DUR).toFixed(4));
+    };
+    this._raf = requestAnimationFrame(this._loop);
   }
   _measure(){
     if (typeof document === 'undefined') return;
@@ -656,6 +676,7 @@ class Component extends DCLogic {
     if ((window.innerWidth || 1000) > 900){
       root.style.removeProperty('--msb-hero-h');
       root.style.removeProperty('--msb-s');
+      root.style.removeProperty('--msb-photo-h');
       return;
     }
     const header = document.querySelector('header');
@@ -666,9 +687,52 @@ class Component extends DCLogic {
                  + (dots ? dots.offsetHeight : 40)
                  + 34; /* scene margins + dots margin + safety */
     const h = Math.max(300, Math.min(720, Math.round((window.innerHeight || 640) - chrome)));
-    const s = Math.max(0.72, Math.min(1.12, h / 468));
+    let s = Math.max(0.72, Math.min(1.12, h / 468));
     root.style.setProperty('--msb-hero-h', h + 'px');
     root.style.setProperty('--msb-s', s.toFixed(3));
+
+    // ---- Keep the photo aspect between 1:1 and 4:3 and let it fill the leftover
+    //      mat space. If the tallest face's text (Event/f2, longest headline)
+    //      leaves too little room for a 4:3 photo, shrink the text scale --msb-s
+    //      until it fits, then size the photo within the band. ----
+    try {
+      const face2 = document.querySelector('.msb-face.f2');
+      const slot  = document.querySelector('.msb-face image-slot');
+      if (slot && slot.clientWidth && face2) {
+        const textOf = function(){
+          // sum element heights only (NOT margins: getComputedStyle resolves the
+          // buttons' margin-top:auto to the free space, which would pollute this);
+          // add a small buffer for the real inter-element margins.
+          let t = 0; const tb = face2.querySelector('.msb-grid').children[0];  // chip/date/h1/…/buttons
+          for (let k = 0; k < tb.children.length; k++){
+            const c = tb.children[k];
+            if (getComputedStyle(c).display === 'none') continue;
+            t += c.offsetHeight;
+          }
+          return t + 22 * s;
+        };
+        const CHROME_PER_S = 69;                    // frame + caption + gaps + mat padding, per unit s
+        // Iterate the text scale down (to a 0.66 floor) until a 4:3 photo fits.
+        // One Newton-ish step per pass, re-measuring each time because text
+        // wrapping makes the height nonlinear in the scale.
+        for (let iter = 0; iter < 6; iter++){
+          const Wi = slot.clientWidth;
+          const textH = textOf();
+          const avail = (h - 30 * s) - textH - (CHROME_PER_S - 30) * s;   // leftover for the photo
+          const deficit = 0.75 * Wi - avail;                             // shortfall vs a 4:3 photo
+          if (deficit <= 0.5 || s <= 0.661) break;
+          const sNew = Math.max(0.66, s - Math.max(0.01, deficit / (textH / s + CHROME_PER_S)));
+          if (sNew === s) break;
+          s = sNew; root.style.setProperty('--msb-s', s.toFixed(3));
+        }
+        const W = slot.clientWidth;                 // final scale settled
+        const avail = (h - 30 * s) - textOf() - (CHROME_PER_S - 30) * s;
+        const arMin = 0.75 * W, arMax = W;          // 4:3 .. 1:1
+        let ph = Math.min(arMax, Math.max(arMin, avail));
+        if (avail < arMin) ph = Math.max(64, avail);   // extreme small screen → avoid clipping
+        root.style.setProperty('--msb-photo-h', Math.round(ph) + 'px');
+      }
+    } catch (e) {}
   }
   _bindHover(){
     if (this._bound || typeof document === 'undefined') return;
@@ -678,14 +742,14 @@ class Component extends DCLogic {
       const sc = document.getElementById('msb-hero-scene');
       if (!sc || sc.__msbBound) return;
       sc.__msbBound = true; self._bound = true;
-      sc.addEventListener('mouseenter', function(){ self._paused = true; if (self._timer){ clearInterval(self._timer); self._timer = null; } });
-      sc.addEventListener('mouseleave', function(){ self._paused = false; self._start(); });
+      sc.addEventListener('mouseenter', function(){ self._paused = true; });   // freezes flip + countdown
+      sc.addEventListener('mouseleave', function(){ self._paused = false; });  // resumes from where it paused
       window.addEventListener('resize', function(){ self._measure(); });
       window.addEventListener('orientationchange', function(){ setTimeout(function(){ self._measure(); }, 120); });
     }, 80);
     setTimeout(function(){ self._measure(); }, 420);   // re-measure once fonts/layout settle
   }
-  componentWillUnmount(){ if (this._timer){ clearInterval(this._timer); this._timer = null; } }
+  componentWillUnmount(){ if (this._raf){ cancelAnimationFrame(this._raf); this._raf = null; } }
 
   renderVals(){
     this._start();      // lazily arm the auto-flip on first render
@@ -727,6 +791,7 @@ class Component extends DCLogic {
       pb0: pillBorder(0), pb1: pillBorder(1), pb2: pillBorder(2),
       pc0: pillColor(0), pc1: pillColor(1), pc2: pillColor(2),
       pg0: pillBg(0), pg1: pillBg(1), pg2: pillBg(2),
+      pa0: on(0)?'active':'', pa1: on(1)?'active':'', pa2: on(2)?'active':'',
     };
   }
 }

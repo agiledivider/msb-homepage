@@ -21,12 +21,12 @@ export function Footer({
         <div>
           <div className="mb-3.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoSrc} alt="MakerSpace Bonn" className="block h-8 w-auto" />
+            <img src={logoSrc} alt="MakerSpace Bonn" className="block h-12 w-auto" />
           </div>
-          <p className="m-0 mb-3.5 max-w-[320px] text-[14px] leading-[1.65] text-[#a49f92]">
+          <p className="m-0 mb-3.5 max-w-[320px] text-[14px] leading-[1.65] text-white">
             Eine offene Werkstatt für Bonn. Für alle. <span className="italic">An open workshop for everyone.</span>
           </p>
-          <p className="m-0 font-mono text-[12.5px] leading-[1.7] text-[#8f8a7d]">
+          <p className="m-0 font-mono text-[12.5px] leading-[1.7] text-white">
             Kennedyallee 18 · 53175 Bonn
             <br />
             Tel: +49 (228) 81 28 69 80
@@ -36,10 +36,10 @@ export function Footer({
         </div>
 
         <div>
-          <div className="mb-3.5 font-mono text-[12px] tracking-[.08em] text-[#7f7a6d]">SEITEN</div>
+          <div className="mb-3.5 font-mono text-[12px] tracking-[.08em] text-white">SEITEN</div>
           <div className="flex flex-col gap-2.5 text-[14px]">
             {links.map((l) => (
-              <Link key={l.href} href={l.href} className="text-[#d7d2c4] no-underline">
+              <Link key={l.href} href={l.href} className="text-white no-underline">
                 {l.label}
               </Link>
             ))}
@@ -47,13 +47,13 @@ export function Footer({
         </div>
 
         <div>
-          <div className="mb-3.5 font-mono text-[12px] tracking-[.08em] text-[#7f7a6d]">MITMACHEN</div>
-          <p className="m-0 mb-3.5 text-[14px] leading-[1.6] text-[#a49f92]">
+          <div className="mb-3.5 font-mono text-[12px] tracking-[.08em] text-white">MITMACHEN</div>
+          <p className="m-0 mb-3.5 text-[14px] leading-[1.6] text-white">
             Werde Mitglied oder unterstütze uns mit einer Spende.
           </p>
           <Link
             href="/mitmachen"
-            className="inline-block rounded-[8px] bg-green-lime px-4 py-2.5 text-[13.5px] font-bold text-ink no-underline"
+            className="inline-block rounded-[8px] bg-green-lime px-4 py-2.5 text-[13.5px] font-bold text-white no-underline"
           >
             Jetzt unterstützen →
           </Link>

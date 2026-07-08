@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { slugField } from '../fields/slug'
+import { PolaroidCard } from '../blocks/PolaroidCard/config'
 
 /** Blog posts. The newest published post drives hero face 1. */
 export const Blog: CollectionConfig = {
@@ -43,6 +45,17 @@ export const Blog: CollectionConfig = {
     { name: 'excerpt', type: 'textarea', label: 'Anrisstext' },
     { name: 'badge', type: 'text', label: 'Hero-Badge', defaultValue: 'NEU IM BLOG' },
     { name: 'cover', type: 'upload', relationTo: 'media', label: 'Titelbild' },
-    { name: 'body', type: 'richText', label: 'Inhalt' },
+    {
+      name: 'body',
+      type: 'richText',
+      label: 'Inhalt',
+      // Extend the default editor with an insertable Polaroid block.
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({ blocks: [PolaroidCard] }),
+        ],
+      }),
+    },
   ],
 }

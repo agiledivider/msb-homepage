@@ -1,15 +1,17 @@
 import { getPayloadClient } from '@/lib/getPayload'
 import { HeroComponent, type Face } from '@/blocks/Hero/Component'
-import { EventFeedComponent } from '@/blocks/EventFeed/Component'
 import { WorkshopsComponent } from '@/blocks/Workshops/Component'
 import { CtaBandComponent } from '@/blocks/CtaBand/Component'
+import { SectionHeading } from '@/components/ui'
+import { ListView } from '@/components/events/ListView'
+import { EventFeedSidebar } from '@/blocks/EventFeed/Sidebar'
+import { toEventVM } from '@/components/events/model'
 import {
   heroToFace,
   blogToFace,
   eventToFace,
   fallbackBlogFace,
   fallbackEventFace,
-  eventsToFeed,
 } from '@/lib/mappers'
 
 export const dynamic = 'force-dynamic' // always reflect the latest content
@@ -63,35 +65,42 @@ export default async function StartPage() {
     nextEvent ? eventToFace(nextEvent) : fallbackEventFace,
   ]
 
-  const feedEvents = eventsToFeed(feedRes.docs)
+  const feedEvents = feedRes.docs.map(toEventVM)
 
   return (
     <main className="mx-auto max-w-shell px-4 pb-[72px] md:px-8">
       <HeroComponent faces={faces} />
 
-      <EventFeedComponent
-        blockType="eventFeed"
-        tagLabel="PINNWAND"
-        heading="Was läuft"
-        allLink={{ label: 'alle Events →', url: '/events' }}
-        events={feedEvents}
-        sidebar={{
-          hoursTitle: 'Öffnungszeiten',
-          hoursBadge: 'DIESE WOCHE',
-          hours: [
-            { day: 'Do 02.', note: 'Offen', time: '18–21' },
-            { day: 'Sa 05.', note: 'Handarbeit', time: '10–14' },
-            { day: 'Mo 06.', note: 'Offene Tür', time: 'ab 10', highlight: true },
-            { day: 'Di 07.', note: 'Offen', time: '18–21' },
-            { day: 'Mi 08.', note: 'Offen', time: '18:30–21' },
-          ],
-          hoursFootnote: '„Offen" = für Mitglieder. Die Offene Tür ist für alle & kostenlos.',
-          infoEyebrow: 'NEU HIER?',
-          infoText:
-            'Komm einfach zur Offenen Tür — unverbindliche Führung durch alle Werkstätten inklusive.',
-          infoLink: { label: 'Mehr über uns →', url: '/verein' },
-        }}
-      />
+      <section className="grid grid-cols-1 items-start gap-10 pt-14 first:pt-0 lg:grid-cols-[1fr_340px]">
+        <div>
+          <SectionHeading
+            tag="PINNWAND"
+            heading="Was läuft"
+            link={{ label: 'alle Events →', url: '/events' }}
+            className="mb-4"
+          />
+          <ListView events={feedEvents} />
+        </div>
+
+        <EventFeedSidebar
+          sidebar={{
+            hoursTitle: 'Öffnungszeiten',
+            hoursBadge: 'DIESE WOCHE',
+            hours: [
+              { day: 'Do 02.', note: 'Offen', time: '18–21' },
+              { day: 'Sa 05.', note: 'Handarbeit', time: '10–14' },
+              { day: 'Mo 06.', note: 'Offene Tür', time: 'ab 10', highlight: true },
+              { day: 'Di 07.', note: 'Offen', time: '18–21' },
+              { day: 'Mi 08.', note: 'Offen', time: '18:30–21' },
+            ],
+            hoursFootnote: '„Offen" = für Mitglieder. Die Offene Tür ist für alle & kostenlos.',
+            infoEyebrow: 'NEU HIER?',
+            infoText:
+              'Komm einfach zur Offenen Tür — unverbindliche Führung durch alle Werkstätten inklusive.',
+            infoLink: { label: 'Mehr über uns →', url: '/verein' },
+          }}
+        />
+      </section>
 
       <WorkshopsComponent
         blockType="workshops"

@@ -11,7 +11,7 @@ export type CtaBandBlock = {
 
 export function CtaBandComponent({ heading, text, primary, secondary }: CtaBandBlock) {
   return (
-    <div className="mt-[52px] flex flex-wrap items-center justify-between gap-9 rounded-[18px] bg-brand p-11 text-white">
+    <div className="mt-[52px] flex flex-wrap items-center justify-between gap-9 rounded-[18px] bg-fond-dark p-11 text-white">
       <div>
         <h2 className="m-0 mb-2 font-display text-[32px] font-extrabold text-white">{heading}</h2>
         {text ? <p className="m-0 max-w-[460px] text-[16px] opacity-90">{text}</p> : null}

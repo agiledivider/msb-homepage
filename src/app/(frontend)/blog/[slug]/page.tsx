@@ -3,6 +3,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { getPayloadClient } from '@/lib/getPayload'
 import { Media } from '@/components/Media'
+import { polaroidConverters } from '@/blocks/PolaroidCard/converter'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       ) : null}
       {post.body ? (
         <div className="text-[17px] leading-[1.7] text-[#332f28] [&_h2]:mt-8 [&_h2]:font-display [&_h2]:text-[24px] [&_h2]:font-bold [&_p]:mb-4">
-          <RichText data={post.body as SerializedEditorState} />
+          <RichText data={post.body as SerializedEditorState} converters={polaroidConverters} />
         </div>
       ) : null}
     </main>

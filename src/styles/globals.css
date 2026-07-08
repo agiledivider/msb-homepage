@@ -21,6 +21,7 @@
   --color-violet: #6d3e91;       /* MINT accent · text on it = white */
   --color-mint: #e6f5fc;         /* MINT light fond (pale tint) */
   --color-yellow: #fcbd30;       /* UGC accent · text on it = black */
+  --color-closed: #c0392b;       /* status strip when the space is closed */
   /* neutrals (aligned to spec) */
   --color-ink: #1a1a1a;          /* headlines / body */
   --color-ink-muted: #595959;    /* captions / secondary */
