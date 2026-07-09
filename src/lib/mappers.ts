@@ -3,6 +3,7 @@ import type { EventsListBlock } from '@/blocks/EventsList/Component'
 import type { Face } from '@/blocks/Hero/Component'
 import type { NavItem } from '@/components/Header'
 import type { MediaResource } from '@/components/Media'
+import { eventTimeText } from '@/lib/eventTime'
 import type { Blog, Event, HeroSetting, Media, SiteSetting } from '@/payload-types'
 
 // ---- date helpers (German) -------------------------------------------------
@@ -14,7 +15,6 @@ const monthLong = (d: Date) => de({ month: 'long' }).format(d).toUpperCase()
 const monthShort = (d: Date) => strip(de({ month: 'short' }).format(d)).toUpperCase()
 const weekdayLong = (d: Date) => de({ weekday: 'long' }).format(d).toUpperCase()
 const weekdayShort = (d: Date) => strip(de({ weekday: 'short' }).format(d)).toUpperCase()
-const timeLabel = (d: Date) => de({ hour: '2-digit', minute: '2-digit' }).format(d)
 const longDate = (d: Date) => de({ day: 'numeric', month: 'short', year: 'numeric' }).format(d).toUpperCase()
 
 /** A populated upload comes back as an object; an id (number) means unpopulated. */
@@ -81,7 +81,7 @@ export function eventToFace(ev: Event): Face {
     variant: 'event',
     eyebrow: '◆ NÄCHSTER TERMIN · EVENT',
     pillLabel: 'EVENT',
-    cornerLabel: timeLabel(d),
+    cornerLabel: eventTimeText(ev.timeLabel),
     eventDay: day2(d),
     eventMonth: monthLong(d),
     eventWeekday: weekdayLong(d),
@@ -147,7 +147,7 @@ export function eventsToList(events: Event[]): EventsListBlock['events'] {
       sub: `${monthShort(d)} · ${weekdayShort(d)}`,
       tag: e.category,
       tagColor: e.tagColor,
-      time: e.timeLabel ?? timeLabel(d),
+      time: eventTimeText(e.timeLabel),
       title: e.title,
       text: e.description,
       link: { url: `/events/${e.slug}` },

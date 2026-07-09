@@ -1,4 +1,5 @@
 import type { MediaResource } from '@/components/Media'
+import { eventTimeText } from '@/lib/eventTime'
 import type { Event, Media } from '@/payload-types'
 
 /** Page size for the list & tiles views (SSR first page + client append). */
@@ -23,7 +24,6 @@ const asMedia = (v: number | Media | null | undefined): MediaResource =>
 
 const de = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('de-DE', opts)
 const strip = (s: string) => s.replace(/\.$/, '')
-const timeFmt = de({ hour: '2-digit', minute: '2-digit' })
 
 export function toEventVM(e: Event): EventVM {
   const date = new Date(e.date)
@@ -32,7 +32,7 @@ export function toEventVM(e: Event): EventVM {
     title: e.title,
     href: `/events/${e.slug ?? e.id}`,
     date,
-    time: e.timeLabel ?? timeFmt.format(date),
+    time: eventTimeText(e.timeLabel),
     location: e.location,
     category: e.category,
     tagColor: e.tagColor,

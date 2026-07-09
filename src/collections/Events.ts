@@ -32,13 +32,14 @@ export const Events: CollectionConfig = {
           name: 'date',
           type: 'date',
           required: true,
-          admin: { width: '50%', date: { pickerAppearance: 'dayAndTime' } },
+          // Date only — the time of day is derived from `timeLabel` (see lib/eventTime.ts).
+          admin: { width: '50%', date: { pickerAppearance: 'dayOnly', displayFormat: 'dd.MM.yyyy' } },
         },
         {
           name: 'endDate',
           type: 'date',
           label: 'Enddatum (optional, mehrtägig)',
-          admin: { width: '50%', date: { pickerAppearance: 'dayAndTime' } },
+          admin: { width: '50%', date: { pickerAppearance: 'dayOnly', displayFormat: 'dd.MM.yyyy' } },
         },
       ],
     },

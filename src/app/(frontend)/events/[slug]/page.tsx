@@ -3,18 +3,18 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Media } from '@/components/Media'
+import { eventTimeText } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
 
 export const dynamic = 'force-dynamic'
 
+// Date only — the time of day comes from the event's timeLabel, not the stored date.
 const fmt = (d: string) =>
   new Intl.DateTimeFormat('de-DE', {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
   }).format(new Date(d))
 
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -39,7 +39,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         {ev.title}
       </h1>
       <div className="mb-8 font-mono text-[13px] text-muted">
-        {fmt(ev.date)}
+        {fmt(ev.date)} · {eventTimeText(ev.timeLabel)}
         {ev.location ? ` · ${ev.location}` : ''}
       </div>
       {ev.image && typeof ev.image === 'object' ? (
