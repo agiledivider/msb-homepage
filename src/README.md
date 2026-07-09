@@ -56,6 +56,23 @@ the `--font-*` CSS vars the config references.
 Move `makerspacebonn_logo.png` and the `uploads/` sketches/photos into `public/`
 (the Header/Footer expect `/makerspacebonn_logo.png`).
 
+## 3a · Icons
+
+Use **Font Awesome** for UI icons — the SVG React components, not the webfont
+(`<i class="fa-…">`) and not emoji / one-off inline `<svg>`:
+
+```tsx
+import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+<FontAwesomeIcon icon={faCalendarPlus} className="h-3.5 w-3.5" aria-hidden />
+```
+
+Import each icon by name so it tree-shakes; size with Tailwind classes. The root
+layout already imports `@fortawesome/fontawesome-svg-core/styles.css` once and
+sets `config.autoAddCss = false` (prevents the oversized-icon flash) — don't
+repeat that per component.
+
 ## 4 · Payload wiring
 
 Register the blocks on a `Pages` collection and a `media` upload collection:

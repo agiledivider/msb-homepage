@@ -17,6 +17,10 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.3.0",
+    "@fortawesome/free-brands-svg-icons": "^7.3.0",
+    "@fortawesome/free-solid-svg-icons": "^7.3.0",
+    "@fortawesome/react-fontawesome": "^3.4.0",
     "@payloadcms/db-sqlite": "3.85.2",
     "@payloadcms/live-preview-react": "3.85.2",
     "@payloadcms/next": "3.85.2",

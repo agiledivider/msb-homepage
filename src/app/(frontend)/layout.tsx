@@ -1,7 +1,14 @@
+import { config } from '@fortawesome/fontawesome-svg-core'
 import type { Metadata } from 'next'
 import { Archivo, Caveat, IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google'
+import '@fortawesome/fontawesome-svg-core/styles.css'
 import { draftMode } from 'next/headers'
 import '@/styles/globals.css'
+
+// We import Font Awesome's CSS above manually, so stop the core from injecting
+// it again at runtime (which flashes oversized icons before hydration).
+config.autoAddCss = false
+
 import { RefreshRouteOnSave } from '@/components/RefreshRouteOnSave'
 import { getPayloadClient } from '@/lib/getPayload'
 
