@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/*.html", "!src/migrations", "!support.js"]
+    "includes": ["**", "!**/*.html", "!src/migrations", "!support.js", "!src/app/(payload)/admin/importMap.js"]
   },
   "formatter": {
     "enabled": true,
