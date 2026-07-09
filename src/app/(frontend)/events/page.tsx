@@ -1,5 +1,6 @@
 import type { Where } from 'payload'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
+import { CalendarSubscribe } from '@/components/events/CalendarSubscribe'
 import { CalendarView } from '@/components/events/CalendarView'
 import { InfiniteEvents } from '@/components/events/InfiniteEvents'
 import { PER_PAGE, toEventVM } from '@/components/events/model'
@@ -72,8 +73,9 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
         headline="Events & Workshops"
         lede="Come by, learn something, meet the community."
       />
-      <div className="mb-8 mt-6">
+      <div className="mb-8 mt-6 flex flex-wrap items-center justify-between gap-3">
         <ViewSwitcher current={view} />
+        <CalendarSubscribe />
       </div>
       {body}
     </main>
