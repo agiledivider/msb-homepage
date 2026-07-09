@@ -1,11 +1,11 @@
-import { Hero } from './Hero/config'
-import { PageIntro } from './PageIntro/config'
-import { EventFeed } from './EventFeed/config'
-import { Workshops } from './Workshops/config'
 import { CtaBand } from './CtaBand/config'
-import { VereinIntro } from './VereinIntro/config'
+import { EventFeed } from './EventFeed/config'
 import { EventsList } from './EventsList/config'
+import { Hero } from './Hero/config'
 import { JoinOptions } from './JoinOptions/config'
+import { PageIntro } from './PageIntro/config'
+import { VereinIntro } from './VereinIntro/config'
+import { Workshops } from './Workshops/config'
 
 /**
  * All MakerSpace Bonn content blocks. Drop into a `blocks` layout field:
@@ -13,15 +13,6 @@ import { JoinOptions } from './JoinOptions/config'
  *   import { msbBlocks } from '@/blocks'
  *   { name: 'layout', type: 'blocks', blocks: msbBlocks }
  */
-export const msbBlocks = [
-  Hero,
-  PageIntro,
-  EventFeed,
-  Workshops,
-  CtaBand,
-  VereinIntro,
-  EventsList,
-  JoinOptions,
-]
+export const msbBlocks = [Hero, PageIntro, EventFeed, Workshops, CtaBand, VereinIntro, EventsList, JoinOptions]
 
-export { Hero, PageIntro, EventFeed, Workshops, CtaBand, VereinIntro, EventsList, JoinOptions }
+export { CtaBand, EventFeed, EventsList, Hero, JoinOptions, PageIntro, VereinIntro, Workshops }

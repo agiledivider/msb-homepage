@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { getPayloadClient } from '@/lib/getPayload'
-import { Media } from '@/components/Media'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
+import { Media } from '@/components/Media'
+import { getPayloadClient } from '@/lib/getPayload'
 
 export const dynamic = 'force-dynamic'
 

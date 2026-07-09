@@ -1,8 +1,7 @@
-import { draftMode } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { headers as getHeaders } from 'next/headers'
-import { getPayload } from 'payload'
 import config from '@payload-config'
+import { draftMode, headers as getHeaders } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 
 /**
  * Enables Next.js Draft Mode, then redirects to `path` so the page renders the
@@ -14,7 +13,7 @@ export async function GET(req: Request): Promise<Response> {
   const path = searchParams.get('path')
 
   // guard against open redirects — only same-site absolute paths
-  if (!path || !path.startsWith('/')) {
+  if (!path?.startsWith('/')) {
     return new Response('Missing or invalid "path"', { status: 400 })
   }
 

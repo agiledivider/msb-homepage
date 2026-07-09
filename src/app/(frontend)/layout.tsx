@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
+import { Archivo, Caveat, IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google'
 import { draftMode } from 'next/headers'
-import { Archivo, IBM_Plex_Sans, IBM_Plex_Mono, Newsreader, Caveat } from 'next/font/google'
 import '@/styles/globals.css'
-import { getPayloadClient } from '@/lib/getPayload'
 import { RefreshRouteOnSave } from '@/components/RefreshRouteOnSave'
+import { getPayloadClient } from '@/lib/getPayload'
 
 // self-hosted, Turbopack-safe fonts; each exposes a --font-* CSS var that the
 // Tailwind theme references. IBM Plex Sans is the MSB brand typeface for body/UI;
@@ -31,10 +31,11 @@ const newsreader = Newsreader({
 const caveat = Caveat({ subsets: ['latin'], variable: '--font-caveat', display: 'swap' })
 
 const fontVars = `${archivo.variable} ${plexSans.variable} ${plexMono.variable} ${newsreader.variable} ${caveat.variable}`
-import { TopStrip } from '@/components/TopStrip'
-import { Header } from '@/components/Header'
+
 import { Footer } from '@/components/Footer'
-import { navFrom, ctaFrom, footerLinksFrom } from '@/lib/mappers'
+import { Header } from '@/components/Header'
+import { TopStrip } from '@/components/TopStrip'
+import { ctaFrom, footerLinksFrom, navFrom } from '@/lib/mappers'
 
 export const metadata: Metadata = {
   title: 'MakerSpace Bonn e.V. — Offene Werkstatt',

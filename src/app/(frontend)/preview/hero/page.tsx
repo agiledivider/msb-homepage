@@ -1,13 +1,7 @@
 import { draftMode } from 'next/headers'
+import { type Face, HeroComponent } from '@/blocks/Hero/Component'
 import { getPayloadClient } from '@/lib/getPayload'
-import { HeroComponent, type Face } from '@/blocks/Hero/Component'
-import {
-  heroToFace,
-  blogToFace,
-  eventToFace,
-  fallbackBlogFace,
-  fallbackEventFace,
-} from '@/lib/mappers'
+import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
 import type { Blog, Event } from '@/payload-types'
 
 export const dynamic = 'force-dynamic'

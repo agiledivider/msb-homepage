@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { eventTagClasses } from '@/components/ui'
-import { fmtMonthYear, type EventVM } from './model'
+import { type EventVM, fmtMonthYear } from './model'
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 const ymParam = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
@@ -28,10 +28,10 @@ export function CalendarView({ month, events, today }: { month: Date; events: Ev
 
   const prev = new Date(year, mo - 1, 1)
   const next = new Date(year, mo + 1, 1)
-  const isToday = (day: number) =>
-    today.getFullYear() === year && today.getMonth() === mo && today.getDate() === day
+  const isToday = (day: number) => today.getFullYear() === year && today.getMonth() === mo && today.getDate() === day
 
-  const navBtn = 'rounded-[8px] border border-line px-3 py-1.5 no-underline transition-colors hover:border-brand hover:text-brand-text'
+  const navBtn =
+    'rounded-[8px] border border-line px-3 py-1.5 no-underline transition-colors hover:border-brand hover:text-brand-text'
 
   return (
     <div>
@@ -39,9 +39,7 @@ export function CalendarView({ month, events, today }: { month: Date; events: Ev
         <Link href={`/events?view=calendar&month=${ymParam(prev)}`} className={navBtn}>
           ← {fmtMonthYear(prev)}
         </Link>
-        <h2 className="m-0 font-display text-[20px] font-extrabold text-ink md:text-[22px]">
-          {fmtMonthYear(month)}
-        </h2>
+        <h2 className="m-0 font-display text-[20px] font-extrabold text-ink md:text-[22px]">{fmtMonthYear(month)}</h2>
         <Link href={`/events?view=calendar&month=${ymParam(next)}`} className={navBtn}>
           {fmtMonthYear(next)} →
         </Link>
@@ -59,12 +57,9 @@ export function CalendarView({ month, events, today }: { month: Date; events: Ev
 
           <div className="grid grid-cols-7 gap-px overflow-hidden rounded-[10px] border border-line bg-line">
             {cells.map((day, i) => {
-              const dayEvents = day ? byDay.get(day) ?? [] : []
+              const dayEvents = day ? (byDay.get(day) ?? []) : []
               return (
-                <div
-                  key={i}
-                  className={`min-h-[104px] bg-card p-1.5 ${day ? '' : 'bg-[#f6f2e8]'}`}
-                >
+                <div key={i} className={`min-h-[104px] bg-card p-1.5 ${day ? '' : 'bg-[#f6f2e8]'}`}>
                   {day ? (
                     <div
                       className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full font-mono text-[12px] ${

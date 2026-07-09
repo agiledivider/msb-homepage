@@ -57,7 +57,9 @@ export function WorkshopsComponent({
                 </div>
               ) : null}
               {it.code ? <div className="mb-1.5 font-mono text-[11px] text-brand-text">{it.code}</div> : null}
-              <div className={`mb-1.5 font-display font-bold ${detailed ? 'text-[21px] font-extrabold' : 'text-[18px]'}`}>
+              <div
+                className={`mb-1.5 font-display font-bold ${detailed ? 'text-[21px] font-extrabold' : 'text-[18px]'}`}
+              >
                 {it.title}
               </div>
               {it.desc ? (
@@ -70,9 +72,7 @@ export function WorkshopsComponent({
         </div>
       </div>
 
-      {footnote ? (
-        <p className="m-0 mt-4 font-mono text-[13.5px] text-faint">{footnote}</p>
-      ) : null}
+      {footnote ? <p className="m-0 mt-4 font-mono text-[13.5px] text-faint">{footnote}</p> : null}
     </div>
   )
 }

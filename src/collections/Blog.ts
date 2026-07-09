@@ -1,9 +1,9 @@
-import type { CollectionConfig } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-import { slugField } from '../fields/slug'
-import { PolaroidCard } from '../blocks/PolaroidCard/config'
-import { generatePreviewPath } from '../lib/preview'
+import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
+import { PolaroidCard } from '../blocks/PolaroidCard/config'
+import { slugField } from '../fields/slug'
+import { generatePreviewPath } from '../lib/preview'
 
 /** Blog posts. The newest published post drives hero face 1. */
 export const Blog: CollectionConfig = {
@@ -61,10 +61,7 @@ export const Blog: CollectionConfig = {
       label: 'Inhalt',
       // Extend the default editor with an insertable Polaroid block.
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          BlocksFeature({ blocks: [PolaroidCard] }),
-        ],
+        features: ({ defaultFeatures }) => [...defaultFeatures, BlocksFeature({ blocks: [PolaroidCard] })],
       }),
     },
   ],

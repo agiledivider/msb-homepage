@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
+import { type MsbBlock, RenderBlocks } from '@/components/RenderBlocks'
 import { getPayloadClient } from '@/lib/getPayload'
-import { RenderBlocks, type MsbBlock } from '@/components/RenderBlocks'
 
 export const dynamic = 'force-dynamic'
 

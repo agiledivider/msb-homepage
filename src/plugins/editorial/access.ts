@@ -16,5 +16,4 @@ export const hasAnyRole = (user: unknown, roles: readonly string[]): boolean => 
 
 export const isAdmin = (user: unknown): boolean => hasAnyRole(user, ['admin'])
 
-export const isReviewer = (user: unknown, reviewerRoles: readonly string[]): boolean =>
-  hasAnyRole(user, reviewerRoles)
+export const isReviewer = (user: unknown, reviewerRoles: readonly string[]): boolean => hasAnyRole(user, reviewerRoles)

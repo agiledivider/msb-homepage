@@ -1,5 +1,5 @@
-import { getPayload } from 'payload'
 import config from '@payload-config'
+import { getPayload } from 'payload'
 
 /**
  * Seeds 200 events spread evenly across roughly one year in the past to one year
@@ -48,7 +48,7 @@ const run = async () => {
 
   const day = 24 * 60 * 60 * 1000
   const start = Date.now() - 365 * day
-  const stepDays = (730 / N) // even spread across ~2 years
+  const stepDays = 730 / N // even spread across ~2 years
 
   for (let i = 0; i < N; i++) {
     const d = new Date(start + Math.round(i * stepDays * day))
@@ -67,8 +67,7 @@ const run = async () => {
         category: cat.category,
         tagColor: cat.tagColor,
         image: (i % 3) + 1, // cycle the seeded media (ids 1–3)
-        description:
-          'Automatisch generierter Beispieltermin für die Events-Übersicht (Liste, Kalender & Kacheln).',
+        description: 'Automatisch generierter Beispieltermin für die Events-Übersicht (Liste, Kalender & Kacheln).',
         _status: 'published',
       },
     })

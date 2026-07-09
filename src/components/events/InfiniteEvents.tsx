@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ListView } from './ListView'
-import { TilesView } from './TilesView'
-import { PER_PAGE, toEventVM, type EventVM } from './model'
 import type { Event } from '@/payload-types'
+import { ListView } from './ListView'
+import { type EventVM, PER_PAGE, toEventVM } from './model'
+import { TilesView } from './TilesView'
 
 type ApiResponse = { docs: Event[]; hasNextPage?: boolean }
 
@@ -98,9 +98,7 @@ export function InfiniteEvents({
           <p className="font-mono text-[12.5px] text-faint">Keine weiteren Termine.</p>
         )}
         {error ? (
-          <p className="font-mono text-[12px] text-[#c0392b]">
-            Konnte nicht laden — bitte erneut versuchen.
-          </p>
+          <p className="font-mono text-[12px] text-[#c0392b]">Konnte nicht laden — bitte erneut versuchen.</p>
         ) : null}
       </div>
     </div>

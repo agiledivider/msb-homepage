@@ -1,9 +1,9 @@
-import { notFound } from 'next/navigation'
-import { draftMode } from 'next/headers'
-import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-import { getPayloadClient } from '@/lib/getPayload'
+import { RichText } from '@payloadcms/richtext-lexical/react'
+import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { Media } from '@/components/Media'
+import { getPayloadClient } from '@/lib/getPayload'
 
 export const dynamic = 'force-dynamic'
 

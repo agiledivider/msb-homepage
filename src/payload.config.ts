@@ -1,22 +1,21 @@
-import { buildConfig } from 'payload'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import type { Field } from 'payload'
+import { buildConfig } from 'payload'
+import { rbac } from 'payload-rbac-plugin'
 import sharp from 'sharp'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-import { Users } from './collections/Users'
-import { Media } from './collections/Media'
+import { adminOnly, hideForNonAdmins } from './access/admin'
 import { Blog } from './collections/Blog'
 import { Events } from './collections/Events'
+import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
+import { Users } from './collections/Users'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { editorialWorkflow } from './plugins/editorial'
-import { rbac } from 'payload-rbac-plugin'
-import { adminOnly, hideForNonAdmins } from './access/admin'
 import { isAdmin } from './plugins/editorial/access'
-import type { Field } from 'payload'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -60,13 +59,14 @@ export default buildConfig({
           ? c
           : {
               ...c,
-              fields: c.fields.map((f): Field =>
-                'name' in f && f.name === 'roles'
-                  ? ({
-                      ...f,
-                      access: { ...('access' in f ? f.access : {}), update: ({ req }) => isAdmin(req.user) },
-                    } as Field)
-                  : f,
+              fields: c.fields.map(
+                (f): Field =>
+                  'name' in f && f.name === 'roles'
+                    ? ({
+                        ...f,
+                        access: { ...('access' in f ? f.access : {}), update: ({ req }) => isAdmin(req.user) },
+                      } as Field)
+                    : f,
               ),
             },
       ),

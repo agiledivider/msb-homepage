@@ -1,9 +1,9 @@
 'use client'
 
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { MediaResource } from '../../components/Media'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { CuttingMat } from '../../components/CuttingMat'
+import type { MediaResource } from '../../components/Media'
 import { Polaroid } from '../../components/Polaroid'
 import type { LinkValue } from '../fields'
 
@@ -272,7 +272,7 @@ export function HeroComponent({
   if (!list.length) return null
 
   // apothem of an equilateral-triangle prism = (width/2)/tan(60°) = width·0.2887
-  const tz = (sw > 0 ? Math.round(sw * 0.2887) : 322) + 'px'
+  const tz = `${sw > 0 ? Math.round(sw * 0.2887) : 322}px`
   const tilt = isMobile ? 'rotateX(4deg) rotateY(0deg)' : 'rotateX(4.5deg) rotateY(8deg)'
   const flipTf = `${tilt} translateZ(calc(var(--tz) * -1)) rotateY(${spin}deg)`
 
@@ -286,11 +286,7 @@ export function HeroComponent({
       >
         <div
           className="relative h-full w-full transform-3d"
-          style={
-            carousel
-              ? ({ '--tz': tz, transform: flipTf, transition: trans } as React.CSSProperties)
-              : undefined
-          }
+          style={carousel ? ({ '--tz': tz, transform: flipTf, transition: trans } as React.CSSProperties) : undefined}
         >
           {list.map((face, i) => (
             <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>

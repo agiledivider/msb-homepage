@@ -1,5 +1,5 @@
-import type { Event, Media } from '@/payload-types'
 import type { MediaResource } from '@/components/Media'
+import type { Event, Media } from '@/payload-types'
 
 /** Page size for the list & tiles views (SSR first page + client append). */
 export const PER_PAGE = 9

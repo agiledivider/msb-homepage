@@ -1,6 +1,6 @@
-import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Payload } from 'payload'
+import { getPayload } from 'payload'
 
 /**
  * Production seed, run on container start (after migrations). Idempotent:

@@ -1,19 +1,13 @@
 import { draftMode } from 'next/headers'
-import { getPayloadClient } from '@/lib/getPayload'
-import { HeroComponent, type Face } from '@/blocks/Hero/Component'
-import { WorkshopsComponent } from '@/blocks/Workshops/Component'
 import { CtaBandComponent } from '@/blocks/CtaBand/Component'
-import { SectionHeading } from '@/components/ui'
-import { ListView } from '@/components/events/ListView'
 import { EventFeedSidebar } from '@/blocks/EventFeed/Sidebar'
+import { type Face, HeroComponent } from '@/blocks/Hero/Component'
+import { WorkshopsComponent } from '@/blocks/Workshops/Component'
+import { ListView } from '@/components/events/ListView'
 import { toEventVM } from '@/components/events/model'
-import {
-  heroToFace,
-  blogToFace,
-  eventToFace,
-  fallbackBlogFace,
-  fallbackEventFace,
-} from '@/lib/mappers'
+import { SectionHeading } from '@/components/ui'
+import { getPayloadClient } from '@/lib/getPayload'
+import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
 
 export const dynamic = 'force-dynamic' // always reflect the latest content
 
@@ -97,8 +91,7 @@ export default async function StartPage() {
             ],
             hoursFootnote: '„Offen" = für Mitglieder. Die Offene Tür ist für alle & kostenlos.',
             infoEyebrow: 'NEU HIER?',
-            infoText:
-              'Komm einfach zur Offenen Tür — unverbindliche Führung durch alle Werkstätten inklusive.',
+            infoText: 'Komm einfach zur Offenen Tür — unverbindliche Führung durch alle Werkstätten inklusive.',
             infoLink: { label: 'Mehr über uns →', url: '/verein' },
           }}
         />

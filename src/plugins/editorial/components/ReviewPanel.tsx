@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { useAuth, useDocumentInfo } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 const REVIEWER_ROLES = ['reviewer', 'admin']
 
@@ -23,7 +23,12 @@ const box: React.CSSProperties = {
   gap: 8,
 }
 
-const hintStyle: React.CSSProperties = { margin: 0, fontSize: 12, color: 'var(--theme-elevation-500)', lineHeight: 1.45 }
+const hintStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: 12,
+  color: 'var(--theme-elevation-500)',
+  lineHeight: 1.45,
+}
 
 /**
  * Sidebar review panel. Submitting for review and approving both go through the
@@ -91,7 +96,14 @@ export function ReviewPanel() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <strong style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '.05em' }}>Redaktion</strong>
         <span
-          style={{ fontSize: 11, fontWeight: 600, color: '#fff', background: meta.color, borderRadius: 4, padding: '2px 8px' }}
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: '#fff',
+            background: meta.color,
+            borderRadius: 4,
+            padding: '2px 8px',
+          }}
         >
           {meta.label}
         </span>
@@ -112,7 +124,12 @@ export function ReviewPanel() {
         status === 'in_review' ? (
           <p style={hintStyle}>Eingereicht — wartet auf Freigabe durch einen Reviewer.</p>
         ) : (
-          <button type="button" className="btn btn--style-primary btn--size-small" disabled={busy} onClick={() => transition('submit')}>
+          <button
+            type="button"
+            className="btn btn--style-primary btn--size-small"
+            disabled={busy}
+            onClick={() => transition('submit')}
+          >
             Zur Freigabe einreichen
           </button>
         )
@@ -121,7 +138,12 @@ export function ReviewPanel() {
       {/* Reviewer: explicit publish (approve) + request-changes */}
       {isReviewer ? (
         <>
-          <button type="button" className="btn btn--style-primary btn--size-small" disabled={busy} onClick={() => transition('approve')}>
+          <button
+            type="button"
+            className="btn btn--style-primary btn--size-small"
+            disabled={busy}
+            onClick={() => transition('approve')}
+          >
             Freigeben &amp; veröffentlichen
           </button>
           {status === 'in_review' ? (
@@ -131,9 +153,20 @@ export function ReviewPanel() {
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Notiz an den Editor (optional)"
                 rows={2}
-                style={{ width: '100%', fontSize: 13, padding: 6, borderRadius: 4, border: '1px solid var(--theme-elevation-150)' }}
+                style={{
+                  width: '100%',
+                  fontSize: 13,
+                  padding: 6,
+                  borderRadius: 4,
+                  border: '1px solid var(--theme-elevation-150)',
+                }}
               />
-              <button type="button" className="btn btn--style-secondary btn--size-small" disabled={busy} onClick={() => transition('request-changes', { note })}>
+              <button
+                type="button"
+                className="btn btn--style-secondary btn--size-small"
+                disabled={busy}
+                onClick={() => transition('request-changes', { note })}
+              >
                 Änderungen erbeten
               </button>
             </>

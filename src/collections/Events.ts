@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
+import { checkPermission } from 'payload-rbac-plugin'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
-import { checkPermission } from 'payload-rbac-plugin'
 
 /** Events. The next upcoming event drives hero face 2; the collection also
  *  feeds the Start "Was läuft" feed and the /events list. */
@@ -45,14 +45,24 @@ export const Events: CollectionConfig = {
     {
       type: 'row',
       fields: [
-        { name: 'timeLabel', type: 'text', label: 'Zeit-Label', admin: { width: '33%', description: 'z. B. "ab 10", "18–21"' } },
+        {
+          name: 'timeLabel',
+          type: 'text',
+          label: 'Zeit-Label',
+          admin: { width: '33%', description: 'z. B. "ab 10", "18–21"' },
+        },
         { name: 'location', type: 'text', admin: { width: '67%' }, defaultValue: 'Kennedyallee 18' },
       ],
     },
     {
       type: 'row',
       fields: [
-        { name: 'category', type: 'text', label: 'Tag/Label', admin: { width: '60%', description: 'z. B. "FÜR ALLE · KOSTENLOS"' } },
+        {
+          name: 'category',
+          type: 'text',
+          label: 'Tag/Label',
+          admin: { width: '60%', description: 'z. B. "FÜR ALLE · KOSTENLOS"' },
+        },
         {
           name: 'tagColor',
           type: 'select',

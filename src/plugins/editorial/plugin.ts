@@ -1,12 +1,11 @@
 import type { Config, Field, Plugin } from 'payload'
-import { rolesField, reviewFields } from './fields'
-import { makePublishGate } from './hooks/publishGate'
-import { makeTransitionEndpoint } from './endpoints/transition'
 import { isReviewer } from './access'
-import { REVIEWER_ROLES_DEFAULT, type EditorialOptions } from './types'
+import { makeTransitionEndpoint } from './endpoints/transition'
+import { reviewFields, rolesField } from './fields'
+import { makePublishGate } from './hooks/publishGate'
+import { type EditorialOptions, REVIEWER_ROLES_DEFAULT } from './types'
 
-const hasField = (fields: Field[], name: string): boolean =>
-  fields.some((f) => 'name' in f && f.name === name)
+const hasField = (fields: Field[], name: string): boolean => fields.some((f) => 'name' in f && f.name === name)
 
 const uniq = (arr: string[]): string[] => Array.from(new Set(arr))
 

@@ -1,10 +1,10 @@
 import type { Where } from 'payload'
-import { getPayloadClient } from '@/lib/getPayload'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
-import { ViewSwitcher } from '@/components/events/ViewSwitcher'
 import { CalendarView } from '@/components/events/CalendarView'
 import { InfiniteEvents } from '@/components/events/InfiniteEvents'
 import { PER_PAGE, toEventVM } from '@/components/events/model'
+import { ViewSwitcher } from '@/components/events/ViewSwitcher'
+import { getPayloadClient } from '@/lib/getPayload'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +27,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
     // Show the requested month (default: current), all events within it.
     const monthParam = pick(sp.month)
     const valid = monthParam && /^\d{4}-\d{2}$/.test(monthParam)
-    const [y, m] = valid ? monthParam!.split('-').map(Number) : [now.getFullYear(), now.getMonth() + 1]
+    const [y, m] = valid ? monthParam.split('-').map(Number) : [now.getFullYear(), now.getMonth() + 1]
     const monthStart = new Date(y, m - 1, 1)
     const monthEnd = new Date(y, m, 1)
 

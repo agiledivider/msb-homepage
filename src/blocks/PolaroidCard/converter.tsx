@@ -1,6 +1,6 @@
 import type { JSXConvertersFunction } from '@payloadcms/richtext-lexical/react'
-import { Polaroid } from '@/components/Polaroid'
 import type { MediaResource } from '@/components/Media'
+import { Polaroid } from '@/components/Polaroid'
 
 type PolaroidFields = {
   image?: MediaResource

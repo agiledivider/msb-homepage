@@ -1,2 +1,2 @@
 export { editorialWorkflow } from './plugin'
-export type { EditorialOptions, RoleName, ReviewStatus } from './types'
+export type { EditorialOptions, ReviewStatus, RoleName } from './types'

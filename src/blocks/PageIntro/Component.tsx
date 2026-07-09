@@ -19,9 +19,7 @@ export function PageIntroComponent({ tag, tagColor, meta, headline, lede }: Page
       <h1 className="m-0 mb-3.5 max-w-[800px] font-display text-[clamp(30px,6vw,48px)] font-black leading-[1.02] tracking-[-.02em]">
         {headline}
       </h1>
-      {lede ? (
-        <p className="m-0 max-w-[640px] font-serif text-[20px] italic text-[#7c766a]">{lede}</p>
-      ) : null}
+      {lede ? <p className="m-0 max-w-[640px] font-serif text-[20px] italic text-[#7c766a]">{lede}</p> : null}
     </div>
   )
 }

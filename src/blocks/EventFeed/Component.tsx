@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { SectionHeading, eventTagClasses } from '../../components/ui'
-import { EventFeedSidebar } from './Sidebar'
+import { eventTagClasses, SectionHeading } from '../../components/ui'
 import type { LinkValue } from '../fields'
+import { EventFeedSidebar } from './Sidebar'
 
 type Event = {
   day?: string | null

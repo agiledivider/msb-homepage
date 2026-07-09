@@ -1,5 +1,5 @@
-import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import { RichText } from '@payloadcms/richtext-lexical/react'
 
 type Milestone = { year?: string | null; text?: string | null }
 type Value = { title: string; text?: string | null }

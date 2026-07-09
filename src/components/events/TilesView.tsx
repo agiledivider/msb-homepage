@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
+import { useEffect, useState } from 'react'
 import { Media } from '@/components/Media'
 import { eventTagClasses } from '@/components/ui'
-import { fmtDay2, fmtMonthShort, fmtWeekdayShort, type EventVM } from './model'
+import { type EventVM, fmtDay2, fmtMonthShort, fmtWeekdayShort } from './model'
 
 // Per-event aspect ratio keyed by id → a tile's height never changes, so it
 // never jumps when more tiles load.
@@ -66,7 +66,9 @@ function Tile({ e }: { e: EventVM }) {
 export function TilesView({ events }: { events: EventVM[] }) {
   const cols = useColumns()
   const columns: EventVM[][] = Array.from({ length: cols }, () => [])
-  events.forEach((e, i) => columns[i % cols].push(e))
+  events.forEach((e, i) => {
+    columns[i % cols].push(e)
+  })
 
   return (
     <div className="flex items-start gap-5">

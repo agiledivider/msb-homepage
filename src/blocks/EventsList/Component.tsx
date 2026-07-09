@@ -69,11 +69,11 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
         {sidebar?.bigEvents?.length ? (
           <div className="rounded-[14px] border border-line bg-[#fffdf8] p-5">
             <div className="mb-3 font-mono text-[11.5px] tracking-[.06em] text-faint">{sidebar.bigTitle}</div>
-            {sidebar.bigEvents.map((b, i) => (
+            {sidebar.bigEvents.map((b, i, arr) => (
               <div
                 key={i}
                 className={`${i > 0 ? 'mt-3' : ''} ${
-                  i < sidebar!.bigEvents!.length - 1 ? 'mb-3 border-b border-[#efeadd] pb-3' : ''
+                  i < arr.length - 1 ? 'mb-3 border-b border-[#efeadd] pb-3' : ''
                 }`}
               >
                 <div className="font-display text-[16px] font-bold">{b.title}</div>

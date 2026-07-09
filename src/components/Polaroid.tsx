@@ -4,10 +4,7 @@ import { Media, type MediaResource } from './Media'
 /** A strip of "tape" holding a corner of the photo. */
 function TapeStrip({ style }: { style: CSSProperties }) {
   return (
-    <div
-      className="absolute z-[3] bg-[rgba(251,247,236,.72)] shadow-[0_2px_6px_-3px_rgba(0,0,0,.3)]"
-      style={style}
-    />
+    <div className="absolute z-[3] bg-[rgba(251,247,236,.72)] shadow-[0_2px_6px_-3px_rgba(0,0,0,.3)]" style={style} />
   )
 }
 

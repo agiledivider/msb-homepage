@@ -61,7 +61,9 @@ function SectionBox({ section }: { section: Section }) {
                 >
                   {g.slug} · {g.docs.length}
                 </div>
-                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <ul
+                  style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}
+                >
                   {g.docs.map((doc) => (
                     <li
                       key={doc.id}
@@ -69,14 +71,20 @@ function SectionBox({ section }: { section: Section }) {
                     >
                       <a
                         href={`/admin/collections/${g.slug}/${doc.id}`}
-                        style={{ color: 'var(--theme-text)', textDecoration: 'none', fontSize: 14, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        style={{
+                          color: 'var(--theme-text)',
+                          textDecoration: 'none',
+                          fontSize: 14,
+                          minWidth: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
                       >
                         › {doc.title ?? `#${doc.id}`}
                       </a>
                       {/* Reviewer queue: diff + approve straight from the card */}
-                      {section.status === 'in_review' ? (
-                        <DashboardActions collectionSlug={g.slug} id={doc.id} />
-                      ) : null}
+                      {section.status === 'in_review' ? <DashboardActions collectionSlug={g.slug} id={doc.id} /> : null}
                     </li>
                   ))}
                 </ul>
@@ -94,12 +102,17 @@ function SectionBox({ section }: { section: Section }) {
  * überarbeiten" (changes_requested); someone with both roles sees both.
  */
 export async function ReviewDashboard({ payload, user }: Props) {
-  const roles = ((user as { editorialRoles?: string[] } | undefined)?.editorialRoles) ?? []
+  const roles = (user as { editorialRoles?: string[] } | undefined)?.editorialRoles ?? []
   if (roles.length === 0) return null
 
   const bases: Omit<Section, 'groups' | 'total'>[] = []
   if (isReviewer(user, REVIEWER_ROLES_DEFAULT)) {
-    bases.push({ key: 'review', label: 'Zur Freigabe', desc: 'Beiträge, die auf deine Freigabe warten.', status: 'in_review' })
+    bases.push({
+      key: 'review',
+      label: 'Zur Freigabe',
+      desc: 'Beiträge, die auf deine Freigabe warten.',
+      status: 'in_review',
+    })
   }
   if (roles.includes('editor')) {
     bases.push({
@@ -115,7 +128,14 @@ export async function ReviewDashboard({ payload, user }: Props) {
   const sections = await Promise.all(bases.map((b) => loadSection(payload, collections, b)))
 
   return (
-    <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', marginBottom: 24 }}>
+    <div
+      style={{
+        display: 'grid',
+        gap: 16,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        marginBottom: 24,
+      }}
+    >
       {sections.map((s) => (
         <SectionBox key={s.key} section={s} />
       ))}

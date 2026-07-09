@@ -2,13 +2,7 @@ import Link from 'next/link'
 import type { LinkValue } from '../blocks/fields'
 
 /** Slightly-rotated "label tape" tag used at the top of most sections. */
-export function TapeTag({
-  children,
-  color = 'green',
-}: {
-  children: React.ReactNode
-  color?: 'green' | 'orange'
-}) {
+export function TapeTag({ children, color = 'green' }: { children: React.ReactNode; color?: 'green' | 'orange' }) {
   // 'orange' = the warm brand accent (UGC yellow #FCBD30, black label)
   const bg = color === 'orange' ? 'bg-yellow text-ink' : 'bg-brand text-white'
   return (

@@ -7,7 +7,8 @@ import { EDITORIAL_SKIP } from '../types'
  * routed into review instead of going live (reviewStatus = 'in_review', stays a
  * draft). Reviewers/admins publish normally and the doc is marked approved.
  */
-export const makePublishGate = (reviewerRoles: string[]): CollectionBeforeChangeHook =>
+export const makePublishGate =
+  (reviewerRoles: string[]): CollectionBeforeChangeHook =>
   ({ data, req, context }) => {
     if (context?.[EDITORIAL_SKIP]) return data
     if (data?._status !== 'published') return data

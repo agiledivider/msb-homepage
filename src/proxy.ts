@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 /**
  * Optional HTTP Basic Auth gate in front of the whole app (site + Payload admin

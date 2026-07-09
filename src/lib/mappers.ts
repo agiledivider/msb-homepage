@@ -1,9 +1,9 @@
-import type { Blog, Event, HeroSetting, Media, SiteSetting } from '@/payload-types'
-import type { Face } from '@/blocks/Hero/Component'
-import type { MediaResource } from '@/components/Media'
 import type { EventFeedBlock } from '@/blocks/EventFeed/Component'
 import type { EventsListBlock } from '@/blocks/EventsList/Component'
+import type { Face } from '@/blocks/Hero/Component'
 import type { NavItem } from '@/components/Header'
+import type { MediaResource } from '@/components/Media'
+import type { Blog, Event, HeroSetting, Media, SiteSetting } from '@/payload-types'
 
 // ---- date helpers (German) -------------------------------------------------
 const de = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('de-DE', opts)
@@ -57,7 +57,7 @@ export function blogToFace(post: Blog): Face {
     variant: 'standard',
     eyebrow: '✎ AUS DER WERKSTATT · BLOG',
     pillLabel: 'BLOG',
-    cornerLabel: '#' + (post.id ?? ''),
+    cornerLabel: `#${post.id ?? ''}`,
     headline: post.title,
     lede: post.subtitle,
     description: post.excerpt,
@@ -159,7 +159,7 @@ export function eventsToList(events: Event[]): EventsListBlock['events'] {
 
 export function navFrom(site?: SiteSetting | null): NavItem[] | undefined {
   const items = site?.nav?.filter((n) => n.label && n.url).map((n) => ({ label: n.label!, href: n.url! }))
-  return items && items.length ? items : undefined
+  return items?.length ? items : undefined
 }
 
 export function ctaFrom(site?: SiteSetting | null): NavItem | undefined {
@@ -169,5 +169,5 @@ export function ctaFrom(site?: SiteSetting | null): NavItem | undefined {
 
 export function footerLinksFrom(site?: SiteSetting | null): NavItem[] | undefined {
   const items = site?.footer?.links?.filter((l) => l.label && l.url).map((l) => ({ label: l.label!, href: l.url! }))
-  return items && items.length ? items : undefined
+  return items?.length ? items : undefined
 }

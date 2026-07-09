@@ -4,7 +4,7 @@
    hero, the pegboard texture, badges, pills, the body background, and the mobile
    fit rules) lives on the components as Tailwind v4 utilities.
    ------------------------------------------------------------------------- */
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Design tokens (Tailwind v4, CSS-first config). Colours → bg-brand / text-ink /
    …; fonts → font-display / font-hand / …; --container-shell → max-w-shell;

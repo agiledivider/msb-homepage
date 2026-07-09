@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Media } from '@/components/Media'
 import { eventTagClasses } from '@/components/ui'
-import { fmtDay2, fmtMonthShort, fmtWeekdayShort, type EventVM } from './model'
+import { type EventVM, fmtDay2, fmtMonthShort, fmtWeekdayShort } from './model'
 
 /** Dense date list with a small thumbnail per event. */
 export function ListView({ events }: { events: EventVM[] }) {

@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation'
-import { draftMode } from 'next/headers'
-import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-import { getPayloadClient } from '@/lib/getPayload'
-import { Media } from '@/components/Media'
+import { RichText } from '@payloadcms/richtext-lexical/react'
+import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { polaroidConverters } from '@/blocks/PolaroidCard/converter'
+import { Media } from '@/components/Media'
+import { getPayloadClient } from '@/lib/getPayload'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,9 +31,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <h1 className="m-0 mb-3 font-display text-[clamp(28px,5vw,44px)] font-black leading-[1.04] tracking-[-.02em]">
         {post.title}
       </h1>
-      {post.subtitle ? (
-        <p className="m-0 mb-4 font-serif text-[20px] italic text-[#7c766a]">{post.subtitle}</p>
-      ) : null}
+      {post.subtitle ? <p className="m-0 mb-4 font-serif text-[20px] italic text-[#7c766a]">{post.subtitle}</p> : null}
       {meta ? <div className="mb-8 font-mono text-[12px] text-faint">{meta}</div> : null}
       {post.cover && typeof post.cover === 'object' ? (
         <Media

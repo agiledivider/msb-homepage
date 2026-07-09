@@ -1,6 +1,6 @@
-import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Payload } from 'payload'
+import { getPayload } from 'payload'
 
 /**
  * Seeds RBAC demo data: CRUD permissions for the content collections, an

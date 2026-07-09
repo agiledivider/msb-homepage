@@ -1,6 +1,6 @@
-import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Payload } from 'payload'
+import { getPayload } from 'payload'
 
 /**
  * Assigns editorial roles: falk = admin, plus editor@test / reviewer@test
@@ -8,13 +8,7 @@ import type { Payload } from 'payload'
  *
  *   pnpm payload run src/seed/roles.ts
  */
-const ensureUser = async (
-  payload: Payload,
-  email: string,
-  password: string,
-  name: string,
-  roles: string[],
-) => {
+const ensureUser = async (payload: Payload, email: string, password: string, name: string, roles: string[]) => {
   const existing = await payload.find({ collection: 'users', where: { email: { equals: email } }, limit: 1 })
   if (existing.totalDocs > 0) {
     await payload.update({ collection: 'users', id: existing.docs[0].id, data: { editorialRoles: roles } as never })

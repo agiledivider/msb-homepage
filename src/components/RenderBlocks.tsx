@@ -1,13 +1,12 @@
 import { Fragment, type ReactNode } from 'react'
-
-import { HeroComponent, type HeroBlock } from '../blocks/Hero/Component'
-import { PageIntroComponent, type PageIntroBlock } from '../blocks/PageIntro/Component'
-import { EventFeedComponent, type EventFeedBlock } from '../blocks/EventFeed/Component'
-import { WorkshopsComponent, type WorkshopsBlock } from '../blocks/Workshops/Component'
-import { CtaBandComponent, type CtaBandBlock } from '../blocks/CtaBand/Component'
-import { VereinIntroComponent, type VereinIntroBlock } from '../blocks/VereinIntro/Component'
-import { EventsListComponent, type EventsListBlock } from '../blocks/EventsList/Component'
-import { JoinOptionsComponent, type JoinOptionsBlock } from '../blocks/JoinOptions/Component'
+import { type CtaBandBlock, CtaBandComponent } from '../blocks/CtaBand/Component'
+import { type EventFeedBlock, EventFeedComponent } from '../blocks/EventFeed/Component'
+import { type EventsListBlock, EventsListComponent } from '../blocks/EventsList/Component'
+import { type HeroBlock, HeroComponent } from '../blocks/Hero/Component'
+import { type JoinOptionsBlock, JoinOptionsComponent } from '../blocks/JoinOptions/Component'
+import { type PageIntroBlock, PageIntroComponent } from '../blocks/PageIntro/Component'
+import { type VereinIntroBlock, VereinIntroComponent } from '../blocks/VereinIntro/Component'
+import { type WorkshopsBlock, WorkshopsComponent } from '../blocks/Workshops/Component'
 
 export type MsbBlock =
   | HeroBlock

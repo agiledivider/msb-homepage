@@ -1,6 +1,6 @@
-import { getPayload } from 'payload'
+import path from 'node:path'
 import config from '@payload-config'
-import path from 'path'
+import { getPayload } from 'payload'
 
 /** Minimal Lexical richText from plain paragraphs. */
 const rt = (paragraphs: string[]) => ({
@@ -157,7 +157,8 @@ const seed = async () => {
       readingTime: '4 MIN',
       publishedAt: at(-9),
       subtitle: 'From cold joints to clean solder.',
-      excerpt: 'Ein kurzer Leitfaden aus unserem Elektronik-Workshop — die häufigsten Anfängerfehler und wie du sie vermeidest.',
+      excerpt:
+        'Ein kurzer Leitfaden aus unserem Elektronik-Workshop — die häufigsten Anfängerfehler und wie du sie vermeidest.',
       cover: werkstattImg,
       body: rt([
         'Löten sieht schwer aus, ist aber schnell gelernt. Hier die Basics aus unserem Workshop.',
@@ -169,12 +170,67 @@ const seed = async () => {
 
   // 5 · events (relative to today so "next upcoming" always resolves)
   const events = [
-    { title: 'Offene Tür — Führung durch die Werkstätten', slug: 'offene-tuer', off: 2, hour: 10, timeLabel: 'ab 10', category: 'FÜR ALLE · KOSTENLOS', tagColor: 'green', description: 'Du willst wissen, was bei uns geht? Komm vorbei, lern uns kennen — kostenlose Führung durch alle sechs Werkstätten. Ab 10:00 Uhr, für alle.' },
-    { title: 'Handarbeitstreff & Makerbrunch', slug: 'handarbeitstreff', off: 5, hour: 10, timeLabel: '10–14', category: 'HANDARBEIT', tagColor: 'orange', description: 'Nähen, sticken, stricken, reparieren — plus gemeinsames Brunch. Jede:r bringt was mit.' },
-    { title: 'Spieleabend', slug: 'spieleabend', off: 15, hour: 19, timeLabel: '19–21', category: 'FÜR ALLE', tagColor: 'green', description: 'Jeden dritten Dienstag im Monat. Ein paar Spiele sind da — eigene gerne mitbringen.' },
-    { title: 'Schmieden leicht gemacht — 101', slug: 'schmieden-101', off: 25, hour: 14, timeLabel: '14:00', category: 'WORKSHOP · TICKET', tagColor: 'orange', description: 'Grundlagen & Schutzmaßnahmen, eigenes Werkstück. 10 € / Ticket.' },
-    { title: 'FrOSCon 2026 — Sankt Augustin', slug: 'froscon-2026', off: 40, hour: 9, timeLabel: 'ganztägig', category: 'EXTERN', tagColor: 'neutral', description: 'Wir sind dabei. Die große Open-Source-Konferenz der Region.' },
-    { title: '132. Scrumtisch Bonn', slug: 'scrumtisch-132', off: -10, hour: 19, timeLabel: 'ab 19', category: 'GAST-EVENT', tagColor: 'neutral', description: 'Offener Treff rund um Agile, Scrum, Kanban & Co. Get-Together ab 19:00.' },
+    {
+      title: 'Offene Tür — Führung durch die Werkstätten',
+      slug: 'offene-tuer',
+      off: 2,
+      hour: 10,
+      timeLabel: 'ab 10',
+      category: 'FÜR ALLE · KOSTENLOS',
+      tagColor: 'green',
+      description:
+        'Du willst wissen, was bei uns geht? Komm vorbei, lern uns kennen — kostenlose Führung durch alle sechs Werkstätten. Ab 10:00 Uhr, für alle.',
+    },
+    {
+      title: 'Handarbeitstreff & Makerbrunch',
+      slug: 'handarbeitstreff',
+      off: 5,
+      hour: 10,
+      timeLabel: '10–14',
+      category: 'HANDARBEIT',
+      tagColor: 'orange',
+      description: 'Nähen, sticken, stricken, reparieren — plus gemeinsames Brunch. Jede:r bringt was mit.',
+    },
+    {
+      title: 'Spieleabend',
+      slug: 'spieleabend',
+      off: 15,
+      hour: 19,
+      timeLabel: '19–21',
+      category: 'FÜR ALLE',
+      tagColor: 'green',
+      description: 'Jeden dritten Dienstag im Monat. Ein paar Spiele sind da — eigene gerne mitbringen.',
+    },
+    {
+      title: 'Schmieden leicht gemacht — 101',
+      slug: 'schmieden-101',
+      off: 25,
+      hour: 14,
+      timeLabel: '14:00',
+      category: 'WORKSHOP · TICKET',
+      tagColor: 'orange',
+      description: 'Grundlagen & Schutzmaßnahmen, eigenes Werkstück. 10 € / Ticket.',
+    },
+    {
+      title: 'FrOSCon 2026 — Sankt Augustin',
+      slug: 'froscon-2026',
+      off: 40,
+      hour: 9,
+      timeLabel: 'ganztägig',
+      category: 'EXTERN',
+      tagColor: 'neutral',
+      description: 'Wir sind dabei. Die große Open-Source-Konferenz der Region.',
+    },
+    {
+      title: '132. Scrumtisch Bonn',
+      slug: 'scrumtisch-132',
+      off: -10,
+      hour: 19,
+      timeLabel: 'ab 19',
+      category: 'GAST-EVENT',
+      tagColor: 'neutral',
+      description: 'Offener Treff rund um Agile, Scrum, Kanban & Co. Get-Together ab 19:00.',
+    },
   ]
   for (const e of events) {
     await payload.create({
@@ -254,12 +310,36 @@ const seed = async () => {
           variant: 'detailed',
           footnote: '⚠ Maschinen dürfen nach einer Einweisung selbstständig genutzt werden. Sicherheit geht vor.',
           items: [
-            { code: 'A1 · ELEKTRONIK', title: 'Elektronik & Löten', desc: '3 Lötstationen, Oszilloskope, Labornetzteile, Reflowofen, Breadboards. Hardware: Raspberry Pi, Arduino, Calliope, BOB3.' },
-            { code: 'A2 · METALL', title: 'Metallwerkstatt', desc: 'Schweißgerät MIG/MAG Puls (AC/DC), Metallbandsäge, Abkantbank, Drehmaschine, Tischfräse.' },
-            { code: 'A3 · HOLZ', title: 'Holzwerkstatt', desc: 'Formatkreissäge, Kreissäge und leistungsfähige Absauganlage für sauberes Arbeiten.' },
-            { code: 'A4 · TEXTIL', title: 'Textil & Handarbeit', desc: 'Nähmaschinen, Stickmaschine, Strickmaschine, Folienplotter & Textilveredelung.' },
-            { code: 'A5 · CNC / 3D', title: '3D-Druck & CNC', desc: '3D-Drucker und Yeti-Smartbench CNC-Fräse für Holz, Acryl u.v.m. Einweisung im CNC-Workshop inklusive.' },
-            { code: 'A6 · DIGITAL', title: 'CAD & Digital', desc: 'Konstruieren mit FreeCAD, Fusion 360 & EstlCAM — regelmäßige Einführungs-Workshops.' },
+            {
+              code: 'A1 · ELEKTRONIK',
+              title: 'Elektronik & Löten',
+              desc: '3 Lötstationen, Oszilloskope, Labornetzteile, Reflowofen, Breadboards. Hardware: Raspberry Pi, Arduino, Calliope, BOB3.',
+            },
+            {
+              code: 'A2 · METALL',
+              title: 'Metallwerkstatt',
+              desc: 'Schweißgerät MIG/MAG Puls (AC/DC), Metallbandsäge, Abkantbank, Drehmaschine, Tischfräse.',
+            },
+            {
+              code: 'A3 · HOLZ',
+              title: 'Holzwerkstatt',
+              desc: 'Formatkreissäge, Kreissäge und leistungsfähige Absauganlage für sauberes Arbeiten.',
+            },
+            {
+              code: 'A4 · TEXTIL',
+              title: 'Textil & Handarbeit',
+              desc: 'Nähmaschinen, Stickmaschine, Strickmaschine, Folienplotter & Textilveredelung.',
+            },
+            {
+              code: 'A5 · CNC / 3D',
+              title: '3D-Druck & CNC',
+              desc: '3D-Drucker und Yeti-Smartbench CNC-Fräse für Holz, Acryl u.v.m. Einweisung im CNC-Workshop inklusive.',
+            },
+            {
+              code: 'A6 · DIGITAL',
+              title: 'CAD & Digital',
+              desc: 'Konstruieren mit FreeCAD, Fusion 360 & EstlCAM — regelmäßige Einführungs-Workshops.',
+            },
           ],
         },
       ],
@@ -284,9 +364,30 @@ const seed = async () => {
         {
           blockType: 'joinOptions',
           options: [
-            { number: '01', eyebrow: 'AKTIV', tint: 'green', title: 'Mitglied werden', text: 'Nutze Werkstatt & Maschinen zu allen Öffnungszeiten, arbeite an eigenen Projekten und bring dich in die Community ein.', link: { label: 'Antrag stellen →', url: '#' } },
-            { number: '02', eyebrow: 'FÖRDERN', tint: 'light', title: 'Fördermitglied', text: 'Du willst uns unterstützen, ohne selbst zu basteln? Als Fördermitglied hältst du den MakerSpace am Laufen.', link: { label: 'Fördern →', url: '#' } },
-            { number: '03', eyebrow: 'SPENDEN', tint: 'light', title: 'Geld- & Sachspende', text: 'Über Geld- und Sachspenden freuen wir uns immer. Ab 100 € gern auch gegen Spendenquittung.', link: { label: 'Spenden →', url: '#' } },
+            {
+              number: '01',
+              eyebrow: 'AKTIV',
+              tint: 'green',
+              title: 'Mitglied werden',
+              text: 'Nutze Werkstatt & Maschinen zu allen Öffnungszeiten, arbeite an eigenen Projekten und bring dich in die Community ein.',
+              link: { label: 'Antrag stellen →', url: '#' },
+            },
+            {
+              number: '02',
+              eyebrow: 'FÖRDERN',
+              tint: 'light',
+              title: 'Fördermitglied',
+              text: 'Du willst uns unterstützen, ohne selbst zu basteln? Als Fördermitglied hältst du den MakerSpace am Laufen.',
+              link: { label: 'Fördern →', url: '#' },
+            },
+            {
+              number: '03',
+              eyebrow: 'SPENDEN',
+              tint: 'light',
+              title: 'Geld- & Sachspende',
+              text: 'Über Geld- und Sachspenden freuen wir uns immer. Ab 100 € gern auch gegen Spendenquittung.',
+              link: { label: 'Spenden →', url: '#' },
+            },
           ],
           location: {
             eyebrow: 'SO FINDEST DU UNS',

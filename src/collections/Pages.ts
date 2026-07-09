@@ -1,8 +1,8 @@
 import type { CollectionConfig } from 'payload'
+import { checkPermission } from 'payload-rbac-plugin'
 import { msbBlocks } from '../blocks'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
-import { checkPermission } from 'payload-rbac-plugin'
 
 /** Editable pages composed from the MSB blocks (Verein / Werkzeug / Mitmachen). */
 export const Pages: CollectionConfig = {
