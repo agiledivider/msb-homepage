@@ -39,7 +39,11 @@ const impressumBody = doc([
   ),
 
   h2('Satzung'),
-  p(t('Unsere Satzung steht als PDF zum Download bereit: '), a('Satzung (PDF)', '/media/satzung.pdf'), t('.')),
+  p(
+    t('Unsere Satzung steht als PDF zum Download bereit: '),
+    a('Satzung (PDF)', '/api/media/file/satzung.pdf'),
+    t('.'),
+  ),
 
   h2('Bankverbindung'),
   h3('Spenden — gern auch gegen Spendenquittung (ab 100 €)'),

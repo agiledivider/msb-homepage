@@ -74,6 +74,7 @@ const seed = async () => {
   const werkstattImg = await media('hero-werkstatt.jpg', 'Maker bei der Arbeit in der Werkstatt')
   const blogImg = await media('hero-blog.jpg', 'CNC-Fräse im Einsatz')
   const eventImg = await media('hero-event.jpg', 'Offene Tür in der Werkstatt')
+  await media('satzung.pdf', 'Satzung des MakerSpace Bonn e. V.') // linked from the Impressum
 
   // 3 · globals
   await payload.updateGlobal({

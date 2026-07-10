@@ -17,7 +17,7 @@ export const Media: CollectionConfig = {
       { name: 'card', width: 768 },
       { name: 'hero', width: 1200 },
     ],
-    mimeTypes: ['image/*'],
+    mimeTypes: ['image/*', 'application/pdf'],
   },
   fields: [{ name: 'alt', type: 'text', required: true }],
 }
