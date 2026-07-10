@@ -1,8 +1,12 @@
-# pnpm 11 approves dependency build scripts here (map of package → bool). Without
-# it a fresh install skips them and can abort (ERR_PNPM_IGNORED_BUILDS). The
-# Docker build additionally passes --config.dangerouslyAllowAllBuilds=true.
+# pnpm 11 no longer reads build-script approvals from package.json's "pnpm"
+# field — they live here as an allowBuilds map (package → bool). Without it a
+# fresh install skips these build scripts and aborts (ERR_PNPM_IGNORED_BUILDS).
+# The Docker build additionally passes --config.dangerouslyAllowAllBuilds=true.
 allowBuilds:
+  '@swc/core': true
+  better-sqlite3: true
   bufferutil: true
   esbuild: true
   sharp: true
+  unrs-resolver: true
   utf-8-validate: true

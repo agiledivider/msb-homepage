@@ -6,6 +6,11 @@
   "scripts": {
     "dev": "next dev",
     "devsafe": "rm -rf .next && next dev",
+    "dev:start": "scripts/dev-server.sh start",
+    "dev:stop": "scripts/dev-server.sh stop",
+    "dev:restart": "scripts/dev-server.sh restart",
+    "dev:status": "scripts/dev-server.sh status",
+    "dev:logs": "scripts/dev-server.sh logs",
     "build": "next build",
     "start": "next start",
     "generate:types": "payload generate:types",
@@ -49,14 +54,5 @@
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
   },
-  "packageManager": "pnpm@11.0.8",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "@swc/core",
-      "unrs-resolver",
-      "better-sqlite3"
-    ]
-  }
+  "packageManager": "pnpm@11.0.8"
 }

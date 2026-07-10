@@ -4,6 +4,9 @@
 # dependencies
 node_modules/
 
+# dev-server helper (pid + logs)
+.dev-server/
+
 # next / build
 .next/
 build/
