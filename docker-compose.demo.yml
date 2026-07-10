@@ -1,0 +1,54 @@
+# Demo deployment behind an existing nginx-proxy + acme-companion (Let's Encrypt).
+# The proxy auto-configures the vhost and TLS certificate from VIRTUAL_HOST /
+# LETSENCRYPT_HOST — no ports are published on the host.
+#
+#   1) let the host pull the (private) ghcr image:
+#        docker login ghcr.io
+#   2) put secrets in a `.env` next to this file (see .env.demo.example), then:
+#        docker compose -f docker-compose.demo.yml up -d
+#
+# Requires a running nginx-proxy stack. Set the `proxy` network below to the
+# name of that stack's network.
+
+services:
+  msb-demo:
+    image: ghcr.io/agiledivider/msb-demo:latest
+    restart: unless-stopped
+    # No `ports:` — nginx-proxy reaches the container over the shared network.
+    expose:
+      - '3000'
+    environment:
+      # --- nginx-proxy + acme-companion ---
+      - VIRTUAL_HOST=msb-demo.idiot.games
+      - VIRTUAL_PORT=3000
+      - LETSENCRYPT_HOST=msb-demo.idiot.games
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-office@makerspacebonn.de}
+      # --- app config ---
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SERVER_URL=https://msb-demo.idiot.games
+      - DATABASE_URI=file:/app/data/msb.db
+      - MEDIA_DIR=/app/public/media
+      # required — generate with: openssl rand -hex 32
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env}
+      # optional Basic-Auth gate over the whole app; leave both unset for a public demo
+      - BASIC_AUTH_USER=${BASIC_AUTH_USER:-}
+      - BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD:-}
+      # optional — seed a ready-to-use admin on a fresh DB (roles + permissions
+      # are always seeded); leave unset to create the first user via /admin
+      - INIT_ADMIN_EMAIL=${INIT_ADMIN_EMAIL:-}
+      - INIT_ADMIN_PASSWORD=${INIT_ADMIN_PASSWORD:-}
+    volumes:
+      - db:/app/data
+      - media:/app/public/media
+    networks:
+      - proxy
+
+volumes:
+  db:
+  media:
+
+networks:
+  # The external network your nginx-proxy + acme-companion stack runs on.
+  # Rename to match it (e.g. nginx-proxy / webproxy) if it isn't `proxy`.
+  proxy:
+    external: true
