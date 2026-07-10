@@ -1,6 +1,7 @@
 import path from 'node:path'
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { legalPages } from './legal'
 
 /** Minimal Lexical richText from plain paragraphs. */
 const rt = (paragraphs: string[]) => ({
@@ -400,6 +401,10 @@ const seed = async () => {
       ],
     },
   })
+
+  for (const page of legalPages) {
+    await payload.create({ collection: 'pages', data: page })
+  }
 
   payload.logger.info('✓ Seed complete.')
 }
