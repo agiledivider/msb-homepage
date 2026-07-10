@@ -28,6 +28,10 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // gate everything except Next's static assets and the favicon
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Gate everything except Next's static assets, the favicon, and the public
+  // media files. `/api/media` must stay ungated: the next/image optimizer fetches
+  // the source image server-side WITHOUT the Basic-Auth header, so gating it makes
+  // the optimizer receive a 401 and return 400 (broken images). Media read is
+  // public by design (Payload access.read), so this exposes nothing new.
+  matcher: ['/((?!_next/static|_next/image|api/media|favicon.ico).*)'],
 }
