@@ -18,6 +18,18 @@ const datenschutzBody = doc([
     a('office@makerspacebonn.de', 'mailto:office@makerspacebonn.de'),
   ),
 
+  h2('Datenschutzbeauftragter'),
+  p(
+    t('Wir haben für unseren Verein einen Datenschutzbeauftragten bestellt. Bei Fragen zum Datenschutz erreichen Sie ihn unter:'),
+    br(),
+    t('Datenschutzbeauftragter des MakerSpace Bonn e. V.'),
+    br(),
+    t('Kennedyallee 18, 53175 Bonn'),
+    br(),
+    t('E-Mail: '),
+    a('datenschutz@makerspacebonn.de', 'mailto:datenschutz@makerspacebonn.de'),
+  ),
+
   h2('Grundsätzliches'),
   p(
     t(
