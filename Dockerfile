@@ -49,3 +49,14 @@ EXPOSE 3000
 # All idempotent. Payload `push` is dev-only, so prod relies on migrations.
 # Binaries run directly to avoid a corepack/pnpm download at runtime.
 CMD ["sh", "-c", "node_modules/.bin/payload migrate && node_modules/.bin/payload run src/seed/prod.ts && node_modules/.bin/next start"]
+
+# ---- demo runtime: baked content DB + media, pre-populated on first start ----
+# Extends the runner with a ready-made demo DB and its uploaded media (generated
+# by scripts/prepare-demo-seed.sh into demo-seed/). On the first `up` with empty
+# named volumes, Docker copies this data into /app/data and /app/public/media.
+# The DB is already complete (built via dev push), so this variant skips
+# `payload migrate` and just serves. Build with: docker build --target demo …
+FROM runner AS demo
+COPY --chown=nextjs:nodejs demo-seed/demo.sqlite /app/data/msb.db
+COPY --chown=nextjs:nodejs demo-seed/media/ /app/public/media/
+CMD ["sh", "-c", "node_modules/.bin/next start"]

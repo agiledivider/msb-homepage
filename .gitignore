@@ -7,6 +7,9 @@ node_modules/
 # dev-server helper (pid + logs)
 .dev-server/
 
+# baked demo data for the `demo` image stage — regenerate with scripts/prepare-demo-seed.sh
+demo-seed/
+
 # next / build
 .next/
 build/
