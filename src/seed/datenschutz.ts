@@ -25,6 +25,24 @@ const datenschutzBody = doc([
     ),
   ),
 
+  h2('Hosting'),
+  p(
+    t(
+      'Diese Website wird bei einem externen Dienstleister gehostet. Die im Rahmen der Nutzung erfassten personenbezogenen Daten werden auf dessen Servern gespeichert. Unser Hoster ist:',
+    ),
+    br(),
+    t('Hetzner Online GmbH'),
+    br(),
+    t('Industriestr. 25, 91710 Gunzenhausen'),
+    br(),
+    t('Deutschland'),
+  ),
+  p(
+    t(
+      'Der Einsatz des Hosters erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicheren, stabilen und effizienten Bereitstellung unseres Online-Angebots). Mit dem Hoster haben wir einen Vertrag über Auftragsverarbeitung (AVV) nach Art. 28 DSGVO geschlossen; die Verarbeitung erfolgt weisungsgebunden. Die Server stehen in Deutschland.',
+    ),
+  ),
+
   h2('Aufruf der Website / Server-Logfiles'),
   p(
     t(
