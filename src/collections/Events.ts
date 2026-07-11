@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
+import { publicRead } from '../access/publicRead'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
 
@@ -16,7 +17,7 @@ export const Events: CollectionConfig = {
     components: { edit: { beforeDocumentControls: ['/components/HeroPreviewButton#HeroPreviewButton'] } },
   },
   access: {
-    read: () => true, // public frontend
+    read: publicRead, // public frontend; drafts hidden from anonymous callers
     create: checkPermission('events:create'),
     update: checkPermission('events:update'),
     delete: checkPermission('events:delete'),

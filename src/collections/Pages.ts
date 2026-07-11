@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
+import { publicRead } from '../access/publicRead'
 import { msbBlocks } from '../blocks'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
@@ -15,7 +16,7 @@ export const Pages: CollectionConfig = {
     preview: (data) => generatePreviewPath({ path: `/${data?.slug}` }),
   },
   access: {
-    read: () => true, // public frontend
+    read: publicRead, // public frontend; drafts hidden from anonymous callers
     create: checkPermission('pages:create'),
     update: checkPermission('pages:update'),
     delete: checkPermission('pages:delete'),

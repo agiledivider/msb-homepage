@@ -1,6 +1,7 @@
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
+import { publicRead } from '../access/publicRead'
 import { PolaroidCard } from '../blocks/PolaroidCard/config'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
@@ -17,7 +18,7 @@ export const Blog: CollectionConfig = {
     components: { edit: { beforeDocumentControls: ['/components/HeroPreviewButton#HeroPreviewButton'] } },
   },
   access: {
-    read: () => true, // public frontend
+    read: publicRead, // public frontend; drafts hidden from anonymous callers
     create: checkPermission('blog:create'),
     update: checkPermission('blog:update'),
     delete: checkPermission('blog:delete'),
