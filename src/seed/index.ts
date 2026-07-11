@@ -1,7 +1,12 @@
 import path from 'node:path'
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { EDITORIAL_SKIP } from '../plugins/editorial/types'
 import { legalPages } from './legal'
+
+// Seed content bypasses the editorial publish gate so `_status: 'published'`
+// stays published instead of being routed into review.
+const PUB = { context: { [EDITORIAL_SKIP]: true } }
 
 /** Minimal Lexical richText from plain paragraphs. */
 const rt = (paragraphs: string[]) => ({
@@ -129,6 +134,7 @@ const seed = async () => {
 
   // 4 · blog (newest drives hero face 1)
   await payload.create({
+    ...PUB,
     collection: 'blog',
     data: {
       title: 'Wie wir die CNC gezähmt haben',
@@ -151,6 +157,7 @@ const seed = async () => {
   })
 
   await payload.create({
+    ...PUB,
     collection: 'blog',
     data: {
       title: 'Löten für Einsteiger:innen',
@@ -236,6 +243,7 @@ const seed = async () => {
   ]
   for (const e of events) {
     await payload.create({
+      ...PUB,
       collection: 'events',
       data: {
         title: e.title,
@@ -254,6 +262,7 @@ const seed = async () => {
 
   // 6 · pages (block layouts)
   await payload.create({
+    ...PUB,
     collection: 'pages',
     data: {
       title: 'Der Verein',
@@ -293,6 +302,7 @@ const seed = async () => {
   })
 
   await payload.create({
+    ...PUB,
     collection: 'pages',
     data: {
       title: 'Werkzeug & Räume',
@@ -349,6 +359,7 @@ const seed = async () => {
   })
 
   await payload.create({
+    ...PUB,
     collection: 'pages',
     data: {
       title: 'Mitmachen',
@@ -404,7 +415,7 @@ const seed = async () => {
   })
 
   for (const page of legalPages) {
-    await payload.create({ collection: 'pages', data: page })
+    await payload.create({ ...PUB, collection: 'pages', data: page })
   }
 
   payload.logger.info('✓ Seed complete.')
