@@ -78,7 +78,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         <p className="mb-6 text-[17px] leading-[1.7] text-[#332f28]">{ev.description}</p>
       ) : null}
       {ev.body ? (
-        <div className="text-[17px] leading-[1.7] text-[#332f28] [&_p]:mb-4">
+        <div className="text-[17px] leading-[1.7] text-[#332f28] [&_a]:text-brand-text [&_a]:underline [&_a]:underline-offset-2 [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[24px] [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-display [&_h3]:text-[18px] [&_h3]:font-bold [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1">
           <RichText data={ev.body as SerializedEditorState} />
         </div>
       ) : null}

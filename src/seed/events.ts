@@ -2,9 +2,10 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 
 /**
- * Seeds 200 events spread evenly across roughly one year in the past to one year
- * in the future. Idempotent: re-running first removes previously auto-seeded
- * events (slug prefix `auto-`), so the hand-made events are left untouched.
+ * Seeds 200 demo events spread evenly across the coming ~year (future-only, so
+ * they populate the upcoming list without cluttering /events/archiv). Idempotent:
+ * re-running first removes previously auto-seeded events (slug prefix `auto-`),
+ * so the hand-made and migrated events are left untouched.
  *
  *   pnpm payload run src/seed/events.ts
  */
@@ -47,8 +48,10 @@ const run = async () => {
   payload.logger.info(`removed ${Array.isArray(del.docs) ? del.docs.length : 0} previous auto-events`)
 
   const day = 24 * 60 * 60 * 1000
-  const start = Date.now() - 365 * day
-  const stepDays = 730 / N // even spread across ~2 years
+  // future-only: real past events come from the article migration (legacyId) and
+  // live in /events/archiv — the demo generator only fills the upcoming list.
+  const start = Date.now() + day
+  const stepDays = 365 / N // even spread across ~1 year ahead
 
   for (let i = 0; i < N; i++) {
     const d = new Date(start + Math.round(i * stepDays * day))

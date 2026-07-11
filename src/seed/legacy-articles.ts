@@ -782,4 +782,47 @@ export const legacyArticles: LegacyArticle[] = [
       },
     ],
   },
+  {
+    kind: 'event',
+    legacyId: 346,
+    slug: 'di-10-12-2024-18-21-uhr-naehen-mit-gurtband-und-fuer-anfaenger-kuchentasche',
+    title: 'Achtung!! Neuer Termin: Fr. 27.12.2024, 18 - 21 Uhr: Nähen mit Gurtband! Und für Anfänger: Kuchentasche',
+    date: d('2024-12-27'),
+    timeLabel: '18–21',
+    category: 'WORKSHOP · NÄHEN',
+    tagColor: 'green',
+    body: [
+      {
+        p: 'Nach vielen Stunden des Probierens und der Recherche, um eine ordentliche Naht auf Gurtband zu schaffen, möchte ich gerne meine Erkenntnisse mit euch teilen. Ihr könnt eure eigenen Kreationen verfolgen, oder nach Anleitung einen Träger zum Umhängen nähen (für eine Trinkflasche oder ein Tetrapack). Es geht auch wieder um Grundlagen. Ralf und ich haben einige Ursachen für Frust statt Lust ausgemacht. Diese wollen wir aus der Welt schaffen. Anfänger können eine Kuchentasche nähen. Bring dazu ein Geschirrhandtuch (etwa 50 x 70 cm) mit. Kurzentschlossene finden Material in unserem Fundus. Bei Fragen, bitte eine mail an britta@makerspacebonn.de',
+      },
+      { p: 'Bei Interesse findet eine Fortsetzung „zwischen den Tagen" statt. Wir freuen uns auf euch!' },
+    ],
+  },
+  {
+    kind: 'blog',
+    legacyId: 348,
+    slug: 'monatlicher-handarbeitstreff-kreativitaet-nachhaltigkeit',
+    title: 'Monatlicher Handarbeitstreff: Kreativität und Nachhaltigkeit vereint',
+    publishedAt: d('2025-02-24'),
+    body: [
+      {
+        p: 'Jeden ersten Sonntag im Monat findet im Makerspace ein offener Handarbeitstreff statt. Diese Veranstaltung bietet nicht nur die Möglichkeit, gemeinsam kreativ zu sein, sondern legt auch einen besonderen Fokus auf Nachhaltigkeit und Ressourcenschonung indem Textilien repariert und upgecyclet werden können.',
+      },
+      { h2: 'Was erwartet Dich?' },
+      {
+        ul: [
+          'Geselliges Beisammensein mit Gleichgesinnten (Makerbrunch: Jeder bringt sein eigenes Brunch-Set mit)',
+          'Austausch von Tipps und Tricks rund ums Handarbeiten',
+          'Fachkundige Unterstützung bei Reparaturen von Textilien',
+          'Kreative Ideen für Upcycling-Projekte',
+        ],
+      },
+      {
+        p: 'Egal ob Du ein Profi mit der Nähnadel bist oder gerade erst die Freude am Handarbeiten entdeckt haben – hier ist jeder willkommen! Erfahrene Handarbeiterinnen und Handarbeiter stehen Dir mit Rat zur Seite, wenn es darum geht, Kleidungsstücke zu reparieren oder alten Textilien neues Leben einzuhauchen.',
+      },
+      {
+        p: 'Darüber hinaus beraten und unterstützen wir auch bei der Reparatur von anderen Alltagsgegenständen. Du kannst unsere Werkstätten (Holz, Metall), 3D Drucker, Elektronikbereich nutzen. Wir leisten Hilfe zur Selbsthilfe.',
+      },
+    ],
+  },
 ]
