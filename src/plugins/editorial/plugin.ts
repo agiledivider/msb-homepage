@@ -53,7 +53,7 @@ export const editorialWorkflow =
       return {
         ...col,
         versions,
-        fields: [...fields, ...reviewFields()],
+        fields: [...fields, ...reviewFields(reviewerRoles)],
         admin: {
           ...col.admin,
           defaultColumns: uniq([...(col.admin?.defaultColumns ?? []), 'reviewStatus']),

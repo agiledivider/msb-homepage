@@ -26,10 +26,14 @@ export function proxy(req: NextRequest) {
 
   const header = req.headers.get('authorization')
   if (header?.startsWith('Basic ')) {
-    const decoded = atob(header.slice(6))
-    const sep = decoded.indexOf(':')
-    if (sep !== -1 && decoded.slice(0, sep) === user && decoded.slice(sep + 1) === pass) {
-      return NextResponse.next()
+    try {
+      const decoded = atob(header.slice(6)) // throws on malformed base64 → fall through to 401
+      const sep = decoded.indexOf(':')
+      if (sep !== -1 && decoded.slice(0, sep) === user && decoded.slice(sep + 1) === pass) {
+        return NextResponse.next()
+      }
+    } catch {
+      // malformed credentials → treat as unauthenticated (challenge below)
     }
   }
 

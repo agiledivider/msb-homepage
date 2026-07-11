@@ -43,3 +43,6 @@ At minimum: **never bake `falk@kuehnel.eu` / `test` with admin rights into a pub
 ## Notes from the same review (already resolved)
 - ✅ #1 Draft/unpublished content publicly readable — fixed in `dcdbbc8` (`src/access/publicRead.ts`).
 - ✅ #3 Day-only events bucketed by the current instant — fixed in `3dec150` (`startOfTodayBerlin` / Berlin-anchored queries).
+- ✅ M1 `submit` transition bypassed RBAC — now gated by the collection's own update access (`transition.ts` `canUpdate`).
+- ✅ MISSED-3 Review fields were UI-`readOnly` only — now locked to reviewers at the data layer via field `access.update` (`fields.ts`).
+- ✅ M2 Basic Auth `atob` threw a 500 on malformed base64 — wrapped in try/catch → 401 challenge (`proxy.ts`).

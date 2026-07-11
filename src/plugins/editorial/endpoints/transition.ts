@@ -5,6 +5,29 @@ import { EDITORIAL_SKIP } from '../types'
 type Body = { collection?: string; id?: string | number; action?: string; note?: string }
 
 /**
+ * Does the requesting user have update access to this doc under the collection's
+ * own access control (RBAC)? Used to gate `submit` — the write itself runs with
+ * `overrideAccess` (to bypass the publish gate + review-field locks), so without
+ * this check *any* authenticated user could push *any* doc into review.
+ */
+async function canUpdate(req: PayloadRequest, slug: CollectionSlug, id: string | number): Promise<boolean> {
+  const accessFn = req.payload.collections[slug]?.config.access?.update
+  if (!accessFn) return false
+  const result = await accessFn({ req, id: id as number, data: {} })
+  if (typeof result === 'boolean') return result
+  // Query-constraint access → confirm this specific doc satisfies it.
+  const found = await req.payload.find({
+    collection: slug,
+    where: { and: [{ id: { equals: id } }, result] },
+    limit: 1,
+    depth: 0,
+    req,
+    overrideAccess: true,
+  })
+  return found.totalDocs > 0
+}
+
+/**
  * POST /api/editorial/transition — drives review-state transitions:
  *   submit          (any editor)  draft/changes_requested → in_review
  *   approve         (reviewer)    → published + approved
@@ -39,6 +62,9 @@ export const makeTransitionEndpoint = (reviewerRoles: string[], collections: Set
       })
 
     if (action === 'submit') {
+      if (!(await canUpdate(req, slug, id))) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 })
+      }
       await update({ reviewStatus: 'in_review', submittedAt: new Date().toISOString() }, true)
       return Response.json({ ok: true, reviewStatus: 'in_review' })
     }
