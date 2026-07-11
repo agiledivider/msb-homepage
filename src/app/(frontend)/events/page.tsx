@@ -5,6 +5,7 @@ import { CalendarView } from '@/components/events/CalendarView'
 import { InfiniteEvents } from '@/components/events/InfiniteEvents'
 import { PER_PAGE, toEventVM } from '@/components/events/model'
 import { ViewSwitcher } from '@/components/events/ViewSwitcher'
+import { berlinMonthRange, startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
 
 export const dynamic = 'force-dynamic'
@@ -29,14 +30,14 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
     const monthParam = pick(sp.month)
     const valid = monthParam && /^\d{4}-\d{2}$/.test(monthParam)
     const [y, m] = valid ? monthParam.split('-').map(Number) : [now.getFullYear(), now.getMonth() + 1]
-    const monthStart = new Date(y, m - 1, 1)
-    const monthEnd = new Date(y, m, 1)
+    const monthStart = new Date(y, m - 1, 1) // civil date for the grid (year/month only)
+    const { start, end } = berlinMonthRange(y, m) // Berlin-anchored query bounds
 
     const where: Where = {
       and: [
         { _status: { equals: 'published' } },
-        { date: { greater_than_equal: monthStart.toISOString() } },
-        { date: { less_than: monthEnd.toISOString() } },
+        { date: { greater_than_equal: start.toISOString() } },
+        { date: { less_than: end.toISOString() } },
       ],
     }
     const res = await payload.find({ collection: 'events', where, sort: 'date', limit: 200, depth: 1 })
@@ -44,7 +45,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
   } else {
     // List & tiles: all upcoming events. SSR the first page, then the client
     // appends further pages (auto on scroll + "Mehr laden" button).
-    const sinceIso = now.toISOString()
+    const sinceIso = startOfTodayBerlin(now).toISOString()
     const where: Where = {
       and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: sinceIso } }],
     }

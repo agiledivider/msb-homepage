@@ -6,6 +6,7 @@ import { WorkshopsComponent } from '@/blocks/Workshops/Component'
 import { ListView } from '@/components/events/ListView'
 import { toEventVM } from '@/components/events/model'
 import { SectionHeading } from '@/components/ui'
+import { startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
 
@@ -14,7 +15,8 @@ export const dynamic = 'force-dynamic' // always reflect the latest content
 export default async function StartPage() {
   const { isEnabled: draft } = await draftMode()
   const payload = await getPayloadClient()
-  const now = new Date().toISOString()
+  // Day-only events stay "upcoming" for their whole Berlin day (see eventTime).
+  const since = startOfTodayBerlin().toISOString()
 
   const [hero, blogRes, upcomingRes, feedRes] = await Promise.all([
     payload.findGlobal({ slug: 'heroSettings', depth: 2, draft }),
@@ -27,14 +29,14 @@ export default async function StartPage() {
     }),
     payload.find({
       collection: 'events',
-      where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: now } }] },
+      where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: since } }] },
       sort: 'date',
       limit: 1,
       depth: 2,
     }),
     payload.find({
       collection: 'events',
-      where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: now } }] },
+      where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: since } }] },
       sort: 'date',
       limit: 5,
       depth: 2,

@@ -1,5 +1,5 @@
 import type { MediaResource } from '@/components/Media'
-import { eventTimeText } from '@/lib/eventTime'
+import { BERLIN_TZ, eventTimeText } from '@/lib/eventTime'
 import type { Event, Media } from '@/payload-types'
 
 /** Page size for the list & tiles views (SSR first page + client append). */
@@ -22,7 +22,8 @@ export type EventVM = {
 const asMedia = (v: number | Media | null | undefined): MediaResource =>
   v && typeof v === 'object' ? (v as MediaResource) : undefined
 
-const de = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('de-DE', opts)
+// Format day-only dates in Berlin so the label never shifts with the server TZ.
+const de = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('de-DE', { timeZone: BERLIN_TZ, ...opts })
 const strip = (s: string) => s.replace(/\.$/, '')
 
 export function toEventVM(e: Event): EventVM {

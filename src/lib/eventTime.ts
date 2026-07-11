@@ -11,7 +11,9 @@
  *   "ganztägig" / none → all-day (VALUE=DATE)
  */
 
-const TZ = 'Europe/Berlin'
+/** The one timezone the whole site reasons about — day-only dates are Berlin days. */
+export const BERLIN_TZ = 'Europe/Berlin'
+const TZ = BERLIN_TZ
 /** Default length for a single start time ("ab 10", "14:00"). */
 export const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000
 
@@ -80,6 +82,34 @@ const fmtDate = ({ y, m, d }: YMD) => `${y}${pad(m)}${pad(d)}`
 function nextDay({ y, m, d }: YMD): YMD {
   const t = new Date(Date.UTC(y, m - 1, d + 1))
   return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate() }
+}
+
+/**
+ * The UTC instant of **Berlin 00:00 today** — the single cutoff that splits
+ * day-only events into "upcoming" vs "past".
+ *
+ * `date` is day-anchored (stored at noon UTC by the dayOnly picker), so it must
+ * be compared against the start of the Berlin day, NOT the current instant.
+ * Comparing against `now` makes an event on its own day flip to "past" the
+ * moment its stored instant (early afternoon Berlin) passes — dropping it from
+ * the events list and homepage, and surfacing it in the archive before it has
+ * happened. Using this cutoff keeps every event visible for its whole Berlin day.
+ */
+export function startOfTodayBerlin(now: Date = new Date()): Date {
+  return berlinWallClockToUTC(berlinYMD(now), { h: 0, m: 0 })
+}
+
+/**
+ * UTC instants bounding a Berlin calendar month `[start, end)` for the 1-based
+ * `year`/`month`. Used by the calendar query so month membership is decided in
+ * Berlin regardless of the server's timezone.
+ */
+export function berlinMonthRange(year: number, month: number): { start: Date; end: Date } {
+  const start = berlinWallClockToUTC({ y: year, m: month, d: 1 }, { h: 0, m: 0 })
+  const nextYear = month === 12 ? year + 1 : year
+  const nextMonth = month === 12 ? 1 : month + 1
+  const end = berlinWallClockToUTC({ y: nextYear, m: nextMonth, d: 1 }, { h: 0, m: 0 })
+  return { start, end }
 }
 
 export type ResolvedTimes =

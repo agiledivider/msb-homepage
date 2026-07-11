@@ -3,11 +3,12 @@ import type { EventsListBlock } from '@/blocks/EventsList/Component'
 import type { Face } from '@/blocks/Hero/Component'
 import type { NavItem } from '@/components/Header'
 import type { MediaResource } from '@/components/Media'
-import { eventTimeText } from '@/lib/eventTime'
+import { BERLIN_TZ, eventTimeText } from '@/lib/eventTime'
 import type { Blog, Event, HeroSetting, Media, SiteSetting } from '@/payload-types'
 
 // ---- date helpers (German) -------------------------------------------------
-const de = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('de-DE', opts)
+// Format in Berlin so day-only event dates never shift with the server timezone.
+const de = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('de-DE', { timeZone: BERLIN_TZ, ...opts })
 const strip = (s: string) => s.replace(/\.$/, '')
 
 const day2 = (d: Date) => de({ day: '2-digit' }).format(d)
