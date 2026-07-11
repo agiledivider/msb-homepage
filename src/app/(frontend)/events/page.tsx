@@ -75,7 +75,12 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
       />
       <div className="mb-8 mt-6 flex flex-wrap items-center justify-between gap-3">
         <ViewSwitcher current={view} />
-        <CalendarSubscribe />
+        <div className="flex items-center gap-4">
+          <a href="/events/archiv" className="font-mono text-[12.5px] text-muted no-underline hover:text-ink">
+            Archiv →
+          </a>
+          <CalendarSubscribe />
+        </div>
       </div>
       {body}
     </main>

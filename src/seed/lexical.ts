@@ -77,3 +77,58 @@ export const ul = (items: string[]): Node => ({
 export const doc = (children: Node[]) => ({
   root: { type: 'root', format: '', indent: 0, version: 1, direction: 'ltr' as const, children },
 })
+
+/** Parse inline markdown links [label](url) in a plain string into text/link nodes. */
+export const inline = (text: string): Node[] => {
+  const nodes: Node[] = []
+  let last = 0
+  for (const m of text.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)) {
+    const idx = m.index ?? 0
+    if (idx > last) nodes.push(t(text.slice(last, idx)))
+    nodes.push(a(m[1], m[2]))
+    last = idx + m[0].length
+  }
+  if (last < text.length) nodes.push(t(text.slice(last)))
+  return nodes.length ? nodes : [t(text)]
+}
+
+/** Compact block shape used by the legacy-article seed data. */
+export type LegacyBlock = { p: string } | { h2: string } | { ul: string[] }
+
+/** Convert compact legacy blocks (with inline markdown links) into a Lexical doc. */
+export const legacyBodyToLexical = (body: LegacyBlock[]) =>
+  doc(
+    body.map((b) => {
+      if ('h2' in b) return h2(b.h2)
+      if ('ul' in b) {
+        return {
+          type: 'list',
+          listType: 'bullet',
+          tag: 'ul',
+          start: 1,
+          format: '',
+          indent: 0,
+          version: 1,
+          direction: 'ltr',
+          children: b.ul.map((it, i) => ({
+            type: 'listitem',
+            value: i + 1,
+            format: '',
+            indent: 0,
+            version: 1,
+            direction: 'ltr',
+            children: inline(it),
+          })),
+        }
+      }
+      return p(...inline(b.p))
+    }),
+  )
+
+/** First paragraph, stripped of markdown links, truncated — for excerpt / meta description. */
+export const firstParagraphText = (body: LegacyBlock[], max = 180): string => {
+  const first = body.find((b) => 'p' in b) as { p: string } | undefined
+  if (!first) return ''
+  const plain = first.p.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1').trim()
+  return plain.length > max ? `${plain.slice(0, max - 1).trimEnd()}…` : plain
+}

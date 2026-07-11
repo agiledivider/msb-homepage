@@ -26,6 +26,15 @@ export const Events: CollectionConfig = {
     { name: 'title', type: 'text', required: true },
     slugField(),
     {
+      name: 'legacyId',
+      type: 'number',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Alte Joomla-Artikel-ID — für den 301-Redirect der alten /?view=article&id=…-URLs.',
+      },
+    },
+    {
       type: 'row',
       fields: [
         {

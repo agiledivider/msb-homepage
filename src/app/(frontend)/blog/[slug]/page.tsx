@@ -1,5 +1,6 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
+import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { polaroidConverters } from '@/blocks/PolaroidCard/converter'
@@ -7,6 +8,29 @@ import { Media } from '@/components/Media'
 import { getPayloadClient } from '@/lib/getPayload'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const payload = await getPayloadClient()
+  const res = await payload.find({ collection: 'blog', where: { slug: { equals: slug } }, limit: 1, depth: 1 })
+  const post = res.docs[0]
+  if (!post) return {}
+  const description = post.excerpt || post.subtitle || undefined
+  const image = post.cover && typeof post.cover === 'object' ? post.cover.url : undefined
+  const url = `/blog/${post.slug}`
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'article',
+      title: post.title,
+      description,
+      url,
+      images: image ? [{ url: image }] : undefined,
+    },
+  }
+}
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params

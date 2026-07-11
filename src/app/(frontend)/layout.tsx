@@ -45,7 +45,11 @@ import { TopStrip } from '@/components/TopStrip'
 import { ctaFrom, footerLinksFrom, navFrom } from '@/lib/mappers'
 
 export const metadata: Metadata = {
-  title: 'MakerSpace Bonn e.V. — Offene Werkstatt',
+  metadataBase: process.env.NEXT_PUBLIC_SERVER_URL ? new URL(process.env.NEXT_PUBLIC_SERVER_URL) : undefined,
+  title: {
+    default: 'MakerSpace Bonn e.V. — Offene Werkstatt',
+    template: '%s · MakerSpace Bonn',
+  },
   description: 'Eine offene Werkstatt für Bonn. Für alle. Sechs Werkstätten, über 40 Maschinen.',
 }
 
