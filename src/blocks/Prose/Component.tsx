@@ -1,5 +1,6 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
+import { richTextConverters } from '../richtext'
 
 export type ProseBlock = {
   blockType: 'prose'
@@ -14,6 +15,7 @@ export function ProseComponent({ body }: ProseBlock) {
     <div className="pt-11 first:pt-0">
       <RichText
         data={body}
+        converters={richTextConverters}
         className={
           'max-w-[760px] ' +
           '[&_h2]:mt-9 [&_h2]:mb-2.5 [&_h2]:font-display [&_h2]:text-[20px] [&_h2]:font-extrabold [&_h2]:text-ink [&_h2:first-child]:mt-0 ' +

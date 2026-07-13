@@ -1,5 +1,6 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
+import { richTextConverters } from '../richtext'
 
 type Milestone = { year?: string | null; text?: string | null }
 type Value = { title: string; text?: string | null }
@@ -21,6 +22,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
           {body ? (
             <RichText
               data={body}
+              converters={richTextConverters}
               className="[&_p]:m-0 [&_p]:mb-4 [&_p]:text-[16.5px] [&_p]:leading-[1.7] [&_p]:text-[#4c4a42] [&_strong]:text-ink"
             />
           ) : null}
