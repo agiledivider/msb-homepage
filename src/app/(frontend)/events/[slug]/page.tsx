@@ -7,6 +7,7 @@ import { richTextConverters } from '@/blocks/richtext'
 import { Media } from '@/components/Media'
 import { eventTimeText } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
+import { socialImageUrl } from '@/lib/mappers'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const ev = res.docs[0]
   if (!ev) return {}
   const description = ev.description || undefined
-  const image = ev.image && typeof ev.image === 'object' ? ev.image.url : undefined
+  const image = socialImageUrl(ev.image)
   const url = `/events/${ev.slug}`
   return {
     title: ev.title,

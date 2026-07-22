@@ -1,6 +1,8 @@
 node_modules
 .next
 .git
+# static snapshot — only Dockerfile.static needs it (see its own .dockerignore)
+dist
 .gitignore
 *.md
 Dockerfile

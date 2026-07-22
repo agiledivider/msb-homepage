@@ -1,0 +1,8 @@
+# Build context for Dockerfile.static: only the published snapshot and its
+# nginx config. (BuildKit prefers `<dockerfile>.dockerignore` over .dockerignore.)
+*
+!dist
+!nginx.conf
+
+# …but never the database, even if one somehow landed in dist/.
+dist/**/*.db

@@ -3,8 +3,8 @@ import { CtaBandComponent } from '@/blocks/CtaBand/Component'
 import { EventFeedSidebar } from '@/blocks/EventFeed/Sidebar'
 import { type Face, HeroComponent } from '@/blocks/Hero/Component'
 import { WorkshopsComponent } from '@/blocks/Workshops/Component'
-import { ListView } from '@/components/events/ListView'
-import { toEventVM } from '@/components/events/model'
+import { toEventDTO } from '@/components/events/model'
+import { UpcomingList } from '@/components/events/UpcomingList'
 import { SectionHeading } from '@/components/ui'
 import { startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
@@ -34,11 +34,13 @@ export default async function StartPage() {
       limit: 1,
       depth: 2,
     }),
+    // Deeper than the 5 displayed: the feed re-filters against the real clock in
+    // the browser, so a published bundle needs spare events to fall back on.
     payload.find({
       collection: 'events',
       where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: since } }] },
       sort: 'date',
-      limit: 5,
+      limit: 25,
       depth: 2,
     }),
   ])
@@ -63,7 +65,7 @@ export default async function StartPage() {
     nextEvent ? eventToFace(nextEvent) : fallbackEventFace,
   ]
 
-  const feedEvents = feedRes.docs.map(toEventVM)
+  const feedEvents = feedRes.docs.map(toEventDTO)
 
   return (
     <main className="mx-auto max-w-shell px-4 pb-[72px] md:px-8">
@@ -77,7 +79,7 @@ export default async function StartPage() {
             link={{ label: 'alle Events →', url: '/events' }}
             className="mb-4"
           />
-          <ListView events={feedEvents} />
+          <UpcomingList events={feedEvents} nowIso={new Date().toISOString()} limit={5} />
         </div>
 
         <EventFeedSidebar

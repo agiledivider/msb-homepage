@@ -66,14 +66,18 @@ src/
 - `pnpm seed` — populate demo content
 - `pnpm generate:types` — regenerate `src/payload-types.ts` after schema changes
 - `pnpm generate:importmap` — regenerate the admin import map after adding custom admin components
+- `pnpm publish:static` — snapshot the public site into `dist/` (see [docs/STATIC.md](docs/STATIC.md))
+- `pnpm release:static` — snapshot + build + push the static nginx image to ghcr
 
 ## Notes
 
 - **Database:** SQLite via `@payloadcms/db-sqlite` with dev `push: true` (auto schema
   sync). For production, switch to migrations (`payload migrate:create`, `push: false`)
   and consider Postgres.
-- **Hosting:** this is a serverful Next app (needs Node) — it can't deploy to the
-  old static-FTP target. Use Vercel / Railway / a Node VPS.
+- **Hosting:** the CMS is a serverful Next app (needs Node) — Vercel / Railway / a
+  Node VPS, or the Docker image in [DEPLOY.md](DEPLOY.md). The *public site* can also
+  be published as plain static files and served from nginx or classic FTP webspace:
+  `pnpm publish:static`, see [docs/STATIC.md](docs/STATIC.md).
 - **Hero 3D:** the prism uses `preserve-3d`; it animates in Blink (Chrome/Edge) and
   degrades to a single static face in WebKit — same as the original design.
 - If Next warns about an inferred workspace root, it's the stray `~/package-lock.json`

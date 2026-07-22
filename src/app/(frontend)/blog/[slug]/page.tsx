@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { richTextConverters } from '@/blocks/richtext'
 import { Media } from '@/components/Media'
 import { getPayloadClient } from '@/lib/getPayload'
+import { socialImageUrl } from '@/lib/mappers'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = res.docs[0]
   if (!post) return {}
   const description = post.excerpt || post.subtitle || undefined
-  const image = post.cover && typeof post.cover === 'object' ? post.cover.url : undefined
+  const image = socialImageUrl(post.cover)
   const url = `/blog/${post.slug}`
   return {
     title: post.title,

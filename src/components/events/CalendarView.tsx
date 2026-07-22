@@ -3,10 +3,25 @@ import { eventTagClasses } from '@/components/ui'
 import { type EventVM, fmtMonthYear } from './model'
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
-const ymParam = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 
-/** Month grid: one calendar month with its events as chips per day. */
-export function CalendarView({ month, events, today }: { month: Date; events: EventVM[]; today: Date }) {
+/**
+ * Month grid: one calendar month with its events as chips per day.
+ *
+ * Month navigation calls back rather than linking to `?month=…` — a static host
+ * can't serve a different document per query string, so `EventsClient` owns the
+ * month as state and mirrors it into the URL.
+ */
+export function CalendarView({
+  month,
+  events,
+  today,
+  onNavigate,
+}: {
+  month: Date
+  events: EventVM[]
+  today: Date
+  onNavigate: (month: Date) => void
+}) {
   const year = month.getFullYear()
   const mo = month.getMonth()
   const firstWeekday = (new Date(year, mo, 1).getDay() + 6) % 7 // Monday = 0
@@ -36,13 +51,13 @@ export function CalendarView({ month, events, today }: { month: Date; events: Ev
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-3 font-mono text-[13px] text-muted">
-        <Link href={`/events?view=calendar&month=${ymParam(prev)}`} className={navBtn}>
+        <button type="button" onClick={() => onNavigate(prev)} className={navBtn}>
           ← {fmtMonthYear(prev)}
-        </Link>
+        </button>
         <h2 className="m-0 font-display text-[20px] font-extrabold text-ink md:text-[22px]">{fmtMonthYear(month)}</h2>
-        <Link href={`/events?view=calendar&month=${ymParam(next)}`} className={navBtn}>
+        <button type="button" onClick={() => onNavigate(next)} className={navBtn}>
           {fmtMonthYear(next)} →
-        </Link>
+        </button>
       </div>
 
       <div className="overflow-x-auto">

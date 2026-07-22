@@ -22,6 +22,20 @@ const longDate = (d: Date) => de({ day: 'numeric', month: 'short', year: 'numeri
 const asMedia = (v: number | Media | null | undefined): MediaResource =>
   v && typeof v === 'object' ? (v as MediaResource) : undefined
 
+/**
+ * URL to use for `og:image` / `twitter:image`.
+ *
+ * Prefers Payload's generated `hero` (1200px) or `card` (768px) size over the
+ * original: social crawlers want roughly 1200px wide, and the original can be a
+ * multi-megabyte camera file. It also keeps those originals out of the static
+ * bundle, since the publish step only copies media something actually links to.
+ * Falls back to the original when Payload skipped the size (it never upscales).
+ */
+export const socialImageUrl = (v: number | Media | null | undefined): string | undefined => {
+  if (!v || typeof v !== 'object') return undefined
+  return v.sizes?.hero?.url ?? v.sizes?.card?.url ?? v.url ?? undefined
+}
+
 // ---- hero faces ------------------------------------------------------------
 
 /** Face 0 — the editable HeroSettings global maps straight onto the Face shape. */
