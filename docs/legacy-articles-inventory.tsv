@@ -1,0 +1,362 @@
+1	2017-08-22	Stand der Dinge
+2	2018-02-10	ES GEHT LOS! ERÖFFNUNG!
+3	2018-03-10	Die MakerSpace Eröffnung war ein voller Erfolg!
+4	2018-03-10	Zu Gast bei Apfeltalk Live
+5	2018-03-10	Was ist ein Makerspace
+6	2020-07-21	Uns Kennenlernen
+7	2020-07-21	Wir sind da für &amp; bei uns machen
+8	2020-07-21	Zu uns &amp; Räumlichkeiten
+9	2020-07-21	Geräte / Maschinen / Werkzeug
+10	2020-07-21	Über uns
+11	2018-03-12	Grippewelle
+12	2018-03-19	Arduino Workshop #2: Motoren
+13	2018-03-22	Workshop: Conrad Connect
+14	2018-03-23	Workshop: RGB LED strips, Power LEDs etc.
+15	2018-04-02	Workshop: Arduino &amp; Sensorik &amp; Kommunikation!
+16	2018-04-02	Workshop „Papier: von 2D zu 3D“
+17	2018-04-09	Dorkbot Bonn lebt wieder!
+18	2018-04-13	Microcontroller Workshop: vom Arduino zu IoT
+19	2018-04-14	Offene Papierwerkstatt
+20	2018-04-16	Betreutes Basteln – ab jetzt immer donnerstags
+21	2018-04-23	Arduino Workshop: bringt eure Projekte!
+22	2018-04-26	Am Brückentag geschlossen!
+23	2018-05-01	Arduino Workshop #7: Eigene Projekte
+24	2018-05-14	Microcontroller Workshop: Smart Home
+25	2018-05-18	Pfingstmontag geschlossen!
+26	2018-05-20	In der Pfingstwoche geschlossen
+27	2018-05-28	Smart Home Microcontroller Workshop #2
+28	2018-05-30	An Fronleichnam geöffnet!
+29	2018-06-05	#MakeUp: OK Lab &amp; TTN Bonn zu Gast
+30	2018-06-18	Im O’Reilly Blog gefeatured
+31	2018-06-27	Origami Workshop
+32	2018-06-28	Vortrag „Amateurfunk am Puls der Zeit“
+33	2018-07-09	Es ist wieder Dorkbot Zeit im MakerSpace
+34	2018-07-22	2x geänderte Öffnungszeit am Montag!
+35	2018-08-22	Tastatur Workshop
+36	2018-08-22	Vortrag „Radio – quo vadis?“
+37	2018-09-02	Geänderte Öffnungszeiten am Montag
+38	2018-09-09	Workshop Sinnlos-Maschinen (20.09)
+39	2018-09-16	Vortrag Robotersumo am 26.09.18
+40	2018-09-24	Weitere Öffnungszeiten Dienstags (ab 02.10.18)
+41	2018-09-26	Night of the … NERDS
+42	2018-09-26	Mini Maker Faire in Bonn
+43	2018-09-27	Der MakerSpace öffnet am Freitag, 28.09
+44	2018-10-01	Längere Öffnungszeiten am 03.10
+45	2018-10-03	Jam Session: Bau von CNC-Fräsen
+46	2018-10-03	Jans langes Maker-Wochenende
+47	2018-10-19	Tiny Spaces Jam Session
+48	2018-10-29	Tastatur Workshop Teil 2 und 3
+49	2018-11-13	Workshop Wettersatelliten-Empfang
+50	2018-11-16	Wir haben heute auf!
+51	2018-11-17	Bastelsamstag am 17.11.2018
+52	2018-11-17	Bastelsonntag am 18.11.2018
+53	2018-11-21	MSB RepairCafe – Dein defektes Lieblingsstück mit Hilfe zur Selbsthilfe reparieren
+54	2018-11-26	Vortrag: Datensicherung
+55	2018-11-27	Wettersatelliten Workshop, Teil 3
+56	2018-11-28	Global AI Bootcamp im MakerSpace Bonn
+57	2018-12-10	Weihnachtsfeier am 11.12.2018 ab 18 Uhr
+58	2018-12-11	Der CCC 35C3 per Livestream im MSB +Live Reporter vor Ort in Leipzig (27.-30.12.2018)
+59	2018-12-16	Geänderte Öffnungszeiten UND Öffnung über die Feiertage
+60	2018-12-18	Wettersatelliten Workshop – Teil 4 – 15.01.2019
+61	2018-12-24	Allen ein föhliches und besinnliches Weihnachtsfestest !!!
+62	2018-12-29	Heute geöffnet und 35C3 Livestream
+63	2018-12-31	Allen ein schöne Sylvesterfeier und einen guten Rutsch !!!
+64	2019-01-14	Workshop zum Thema Holz – 06.02.2019 19:00
+65	2019-01-24	Tiny Homes Workshop – 11.02.19 18:30
+66	2019-02-04	04.02.2019 MONTAG GEÄNDERTE ÖFFNUNGSZEIT (EINMALIG)
+67	2019-02-07	Photo Creator – Das schöne Bild – DER Fotoworkshop 06.03.2019 18:00 (Kostenfrei)
+68	2019-02-07	Bastelsamstag 09.02.2019 12:00 – 18:00
+69	2019-02-12	Mikrocontroller Workshop – Einstieg in die STM32 Welt – 17.02.2019 16:00 (Kostenfrei)
+70	2019-02-21	Microcontroller Workshop für Einsteiger (kostenfrei) 21.03.2019 18:00 – 20:00
+71	2019-02-24	Spontaner Bastelsonntag 24.02.2019 ca. 14:30 – 20:00
+72	2019-03-01	Rosenmontag &amp; Mi. 06.03.2018 – Haben wir auf in der Karnevalswoche! Unser Service für Euch!
+73	2019-03-06	Donnerstag, 7.3. ist geöffnet
+74	2019-03-22	TEIL 2 – Microcontroller Workshop für Einsteiger (kostenfrei) 04.04.2019 18:00 – 20:00
+75	2019-03-26	GESCHLOSSEN am 26.03. !!!!
+76	2019-04-07	07.04.2019 Bonn Marathon und wir haben ab 14:30 auch auf!
+77	2019-04-15	Einführung und Überblick der Imkerei 30.04. 18:00 (Kostenfrei) !Wiederholung vom 16.04.!
+78	2019-04-15	Projekt Donkeycar / Ein autonom fahrendes Modellbau Auto 29.04.2019 18:00 (Kostenfrei)
+79	2019-04-17	Der MakerSpace Bonn hat 2019 von Karfreitag bis Ostermontag geschlossen
+80	2019-04-25	01.MAI – Wir sind da von 15 Uhr bis 22 Uhr
+81	2019-04-28	Microcontroller JAM SESSION mit Peter 02.05. 18:00
+82	2019-05-05	05.05. Sonntag / Wir haben spontan auf ab 17:00 bis mindestens 20 Uhr
+83	2019-05-06	Imkerei – Teil 2 – 07.05.2019 18:00 (Kostenfrei) – Findet beim Imker statt
+84	2019-05-29	Vatertag – Christi Himmelfahrt – 30.05.2019 – GESCHLOSSEN
+85	2019-06-07	Wir haben Samstag auf !!!! Samstag 08.06.2019 ab 13 Uhr
+86	2019-06-10	Jam Session Hausautomatisation mit Schwerpunkt DIY Türklingel 6.0 – 13.06.2019 18:00
+87	2019-06-10	Der Back-Workshop: Lasst uns gemeinsam Backen 13.07.2019 um 15:00 Uhr
+88	2019-06-14	AB JETZT AUCH IMMER SAMSTAGS AUF !!!
+89	2019-06-18	Experimentieren mit Beton – 26.06.2019 18:00
+90	2019-06-23	3D Druck Workshop – Teil 1/2 – Simplify3D &amp; Repetier am 04.07.2019 um 18:00 Uhr
+91	2019-06-26	Blumenkasten mal anders – 06.07.2019 11-15 Uhr
+92	2019-06-26	Der MakerSpace Bonn lädt ein zu einem kleinen Grillfest am 06.07.2019 ab 16:00
+93	2019-07-05	MakerSpace Bonn auf der IT AT School bei der Deutschen Telekom 05.07.2019
+94	2019-07-08	INTERNE VERANSTALTUNG – Eingeschränktes Basteln möglich am 08.07.2019
+95	2019-07-15	Klima findet Stadt 13.09.2019 14:00 – 17:30
+96	2019-07-16	TEAM – MakerSpace Bonn &amp; Code und Design Camp 16-19.07.2019 im Telekom Dome – TAG 1
+97	2019-07-16	17.07.2019 – DIESEN MITTWOCH GESCHLOSSEN
+98	2019-07-24	24.07.2019 HEUTE NUR BIS 20:00 UHR AUF !!!
+99	2019-07-28	Experimentieren mit Beton – 29.07.2019 18:00
+100	2019-08-25	Global AI Nights 05.09.2019 18:00 – Kostenfrei
+101	2019-08-28	Pizza selber machen und einfrieren – Leicht – Schnell- Lecker 30.09. 18:00 (mit Unkostenbeitrag ca. 5 Euro)
+102	2019-09-20	Klima findet Stadt – DIE WORKSHOPS : KlimaWerkStadt
+103	2019-09-20	One robot per child am 13.10.2019 12:30 bis 18:00
+104	2019-09-20	MakerSpace Bonn auf der Conrad Elektronik Hausmesse in Bonn 21.09.2019 11-18 Uhr
+105	2019-09-20	TERMINVERSCHIEBUNG – Eine Werkstatt für Bonn (VHS) 26.09.2019
+106	2019-09-23	LANGER DONNERSTAG 26.09.2019
+107	2019-10-02	Origami &amp; Papier Workshop 19.10.2019 18:00 – Kostenlos
+108	2019-10-04	Global AI Bootcamp 14.12.2019 – Kostenlos
+109	2019-10-08	Resin Drucker – DER ÜBERBLICK – 10.10.2019 19:00 Uhr – Kostenfrei
+110	2019-10-15	FreeCAD Workshop – 17.10.2019 18:00 – Kostenfrei
+111	2019-10-16	Neue Öffnungszeiten – Montags geschlossen
+112	2019-10-26	*** AUSGEBUCHT *** Nähen für ALLE 01.11.2019 13-17 Uhr – ANFÄNGERKURS – Kostenfrei
+113	2019-11-08	Der MakerSpace Bonn auf dem Conrad Maker Day – Das Event für Bastler, Tüftler &amp; Erfinder 09.11.2019 11-18 Uhr
+114	2019-11-16	Workshop „Deutsch lernen online – Spaß und Lernerfolg mit digitalen Medien (30.11.2019, 10h)
+115	2019-11-20	Das große MakerSpace Bonn Keksebacken + Ausstecher selber drucken – 28.11. 18:00 (5 € Selbstbeteiligung)
+116	2019-11-28	TAG 2 – Das große MakerSpace Bonn Keksebacken + Ausstecher selber drucken – 05.12. 18:00 (5 € Selbstbeteiligung)
+117	2019-12-15	GESCHLOSSEN am Dienstag 17.12.2019
+118	2019-12-16	!!!!AUSGEBUCHT!!!! 2. ANFÄNGERKURS – Nähen für ALLE 11.01.2020 12-17 Uhr – Kostenfrei – ANMELDUNG ERFORDERLICH
+119	2019-12-17	Autodesk Fusion 360 Workshop – KOSTENFREI 09.01. &amp; 23.01.2020 18:00
+120	2019-12-22	Öffnungszeiten über die Feiertage 2019 (Weihnachten &amp; Sylvester)
+121	2019-12-23	Fröhliche Weihnachten 2019
+122	2019-12-31	Frohes neues Jahr &amp; Rückblick &amp; Zeit Danke zu sagen
+123	2020-01-14	DIENSTAG 14.01.2020 GESCHLOSSEN
+124	2020-01-13	Autodesk Fusion 360 Workshop – KOSTENFREI – 23.01.2020 18:00-21:00
+125	2020-01-28	ENTFÄLLT – ! NEU ! NEU ! NEU ! Jeden 1. Sonntag im Monat Handarbeit 11-16 -UHR !!!
+126	2020-01-29	Learn to Code: Einführungsveranstaltung am Dienstag, 04.02.2020, 17:15
+127	2020-02-16	ENTFÄLLT – ANFÄNGER NÄHKURS (4 € Materialkostenbeitrag) AUSGEBUCHT
+128	2020-02-16	ENTFÄLLT – FORTGESCHRITTENEN NÄHKURS (KOSTENFREI)
+129	2020-02-27	Wir feiern Geburtstag – der MakerSpace wird 2:-)
+130	2020-03-01	01.03.2020 – Nähcafe fällt heute leider aus WIR BLEIBEN GESCHLOSSEN
+131	2020-03-02	03.03.2020 Programmierworkshop FÄLLT AUS – Wir haben ab 18 Uhr ganz normal auf!
+132	2020-03-04	04.03.2020 GESCHLOSSEN
+133	2020-03-07	ENTFÄLLT – Fusion 360 Workshops – Teil 3 (Kostenfrei)
+134	2020-03-07	ENTFÄLLT – Einführung in die süße Kunst der Chocolatiers (mit Anmeldung &amp; 15 – 25 €)
+135	2020-03-13	VERALTET – Wir machen wieder auf !!! BIS AUF WEITERES GESCHLOSSEN
+136	2020-03-18	Mit 3D-Druck gegen kontaminierte Türklinken
+137	2020-03-18	ONLINE Vortrag* – Preppen eine Disziplin für jedermann 25.03. 18:00 bis ca. 20:30
+138	2020-04-01	Corona im MakerSpace Bonn mit Anleitungen und Infos
+139	2020-04-07	BEENDET! – Gemeinsam Folien kaufen
+140	2020-04-12	FRÖHLICHE OSTER 2020 – home alone
+141	2020-04-20	Dein Engagement gegen Corona – Fahrer gesucht
+142	2020-04-22	Selbst genähten Mund und Nasenmaske zu Verkaufen !!!
+143	2020-05-02	ONLINE Fusion 360 Workshops – Teil 3 14.05.2020 20:00-21:30 (Kostenfrei)
+144	2020-05-02	ONLINE Fusion 360 Workshops – Teil 4 28.05.2020 20:00-21:30 (Kostenfrei)
+145	2020-06-15	WIR HABEN WIEDER AUF!!! MIT VORANMELDUNG!!!
+146	2020-07-20	Abschluß des MSB Coronaprojektes
+147	2020-08-11	Workshop „Deutsch lernen online – Spaß und Lernerfolg mit digitalen Medien“ (19.09.2019, 10:00 – 13:00)
+148	2020-08-14	ES GEHT WEITER: HANDARBEIT MIT LAURA AM 1. SONNTAG IM MONAT!!! MIT VORANMELDUNG!!!
+149	2020-08-15	Skill you up – Finde deine Leidenschaft 11.09.2020 19-21Uhr
+150	2020-08-22	Impressum
+151	2020-08-22	Haftung
+152		Datenschutz
+153	2020-08-23	Dokumente
+154	2020-08-23	Unsere Sponsoren
+155	2021-02-04	Wir in den Medien
+156	2020-08-23	Corona verändert unser Leben
+157	2020-08-23	Produktkatalog &amp; Anleitungen
+158	2020-08-23	 #00 Desinfektionsmittel für Hausgebrauch
+159	2020-08-23	#01 Curve-Flattener
+160	2020-08-23	#02 Mund-Nasenmaske
+161	2020-08-23	#03 Face-Shield
+162	2020-08-23	 MSB Engagement vs. Corona
+163	2020-08-24	Bildnachweise
+164	2020-09-07	Uns unterstützen
+165	2020-09-13	15.09.2020 HEUTE GESCHLOSSEN
+166	2020-12-02	Vorstellung Makerspace
+167	2020-12-06	Heimatpreis 2020 für offene Werkstätten und MakerSpaces
+168	2020-12-06	Hack Your Fashion – Kostenloser Online-Hackathon 5.-8.11.2020
+169	2020-12-06	Veranstaltungshinweis: 26-11-2020 Das Paradigma der sozialen Produktion: Co-Creating mit Herstellern, Herstellerräumen und Konsumenten
+170	2020-12-06	ONLINE! Autodesk Fusion 360 Workshop (in 4 Teilen) Kostenfrei 2. Teil 17.112020
+171	2020-12-06	Corona im November 2020 – We are Closed… but online close to you
+172	2020-12-06	Online-Workshop – Weihnachtsbasteln mit dem 3D Drucker 12.&amp;13.12.2020
+173	2020-12-15	Lockdown ab Mittwoch 16.12.2020
+174	2020-12-26	Einstieg in die Programmierung mit Python 28.12.2020 - Kostenfrei
+175	2021-02-04	Makerspace im General-Anzeiger
+176	2021-02-08	Game-Theaterprojekt &quot;Map to Utopia&quot; - 05. + 06. Februar
+177	2021-03-10	Game-Theaterprojekt &quot;Map to Utopia&quot; -19. + 20 März
+178	2021-03-10	Juuuhuuuuuu Die Maus wird 50!
+179	2021-03-20	Gemeinsam Online Osterbasteln  Samstag 27.3.2021 11:15 - 13:15 MIT ANMELDUNG - kostenfrei
+180	2021-04-02	Fröhliche Ostern 2021
+181	2021-03-31	MSB ist über iProduce auf der Hannovermesse 12. April 2021 15:20 dabei - Du kannst kostenlos dabei sein!
+182	2021-04-14	Online Repair Cafe am 15.April 2021 - SEI DABEI!!!!
+183	2021-04-14	Die Räume vom MSB sind geschlossen UND Online sind weiterhin für alle da!
+184	2021-05-16	Gewinne 1500 mit iProduce! Aber zuerst kommt der Schweiß. Reicht eure Idee bis zum 30. Juni 2021 ein.
+185	2021-05-16	Gewinne 1500 mit iProduce! Aber zuerst kommt der Schweiß. Reicht eure Idee bis zum 30. Juni 2021 ein. (2)
+186	2021-06-17	WIR HABEN WIEDER AUF! 17.06.2021
+187	2021-06-17	Handarbeit im MSB - ES GEHT WIEDER LOS am 04.07.2021 11:00 - 16:00 Uhr
+188	2021-06-24	Wir haben auf  - wir feuen uns auf Euch
+189	2021-07-17	NRW Heimatpreis 2021 für offene Werkstätten und MakerSpaces 
+191	2021-07-31	Makerspaces: MINT-Wissen praktisch angewandt
+193	2021-08-15	Übergabe des Heimatpreises 2021 für Bonner Repaircafés
+195	2021-08-27	Online reparieren: Das digitale Netzwerk-Reparaturcafé geht weiter
+196	2021-09-01	Live auf Youtube: Das Maker Festival
+197	2021-09-09	OBS - Open Bike Sensor Projekt um Radfahren sicherer zu machen
+198	2021-09-17	Makerspace unterstützt die Forschung der Uni Bonn
+199	2021-09-20	Do it yourself - Wir zeigen dir wie du dein Spielzeug reparierst 30.10. 10-14Uhr und 31.10. 10-14Uhr
+200	2021-09-20	One robot per child - Code Week Bonn Rhein Sieg 2021 - 20&amp;21.10.21 10-16 Uhr
+201	2021-09-26	Handarbeitstreff am 03.10.2021 11:00 -16:00
+202	2021-10-06	Offener LEOPARD-Treff der Projekte des Teckids e.V.
+203	2021-10-09	Herbst- und Halloweendeko Bastelworkshop
+204	2021-10-13	Makerspace auf der Code-Week Bonn-Rhein-Sieg
+205	2021-10-28	Makerspace Geheimtipp für Kinder in Bonn
+206	2021-10-28	Bonn sucht neue Ideen für die digitale Stadt von morgen
+207	2021-10-28	FutureCamp21 am 30. Oktober 2021
+208	2021-11-03	Handarbeitstreff am 07.11.2021 11:00 - 16:00 Uhr
+209	2021-11-09	13.11.2021 Hack'n'Fun: Minetest-Server betreiben
+210	2021-11-17	17.11.2021 Anpassung der Corona Regeln 
+211	2021-11-18	Save the Date: Weihnachtsbasteln am 5. und 19. Dezember
+212	2021-11-27	Heute: Die Nähmaschine – artgerechte Haltung und Pflege
+213	2021-12-01	Kreative Teckids im Makerspace
+214	2021-12-01	Handarbeitstreff am 05.12.2021 
+215	2021-12-03	Fällt AUS! Weihnachtsbasteln am 05.12 und 19.12
+216	2021-12-04	05. Dezember 2021 Tag des Ehrenamtes
+217	2021-12-23	Handarbeitstreff am 02.01.2022 fällt aus
+218	2021-12-24	Frohe Festtage 2021
+219	2022-01-01	FROHES NEUES JAHR 2022!
+220	2022-02-03	Virtueller Handarbeitstreff am 06.02.2022
+221	2022-02-08	!!! VORERST BIS ZUM 13.02.2022 GESCHLOSSEN !!!
+222	2022-02-15	Workshop: Skill you up –Finde deine Leidenschaften am 18. März 2022 17-20Uhr 
+223	2022-02-27	Neue Ausgabe: SPLiTTER Nr. 1/2022 – Das Magazin für Reparatur-Fans
+224	2022-02-27	Makerspace im DECOMPOSE.IO Podcast
+225	2022-03-03	HAPPY BIRTHDAY MAKERSPACE BONN !!!! 03.03.2022
+226	2022-03-05	Handarbeitstreff am 06.03.2022 fällt leider aus
+227	2022-03-05	Hack'n'Sun 2022
+228	2022-03-11	Stellenausschreibung - Wir suchen Dich ...
+229	2022-03-12	Demo gegen den Ukrainekrieg
+231	2022-03-19	Makern während Corona - ein kleines IT Projekt - Laptop neu installieren
+232	2022-03-27	Osterbasteln am 02.04.2022 - online
+233	2022-03-27	Handarbeitstreff am 03.04.2022
+235	2022-04-03	04.04.2022 Socialbar Bonn bei Deutsche Telekom Stiftung
+236	2022-04-06	3D Scan Workshop (2 Tägig) WIRD KOMPLETT VERSCHOBEN!!!
+237	2022-04-30	Handarbeitstreff verschoben auf den 08.05
+238	2022-05-18	&quot;Alte&quot; Telefone und die Fritzbox / Zwei hilfesuchende sagen Danke
+239	2022-05-18	Kooperation Bau Open Bike Sensor am 15.05.2022 im MSB
+240	2022-05-18	Logo-Design mit Illustrator – Ferien-Workshop für Jugendliche im Alter von 14 bis 18
+241	2022-05-19	#iPRODUCE - Einreichungsfrist für Wettbewerb beendet
+242	2022-05-30	13.06.2022  61. Socialbar Bonn im Makerspace Bonn
+243	2022-06-01	Handarbeitstreff im Juni am 12.06
+244	2022-06-26	Handarbeitstreff am 03.07.2022
+245	2022-07-04	Maker-Mittwoch ab 06.07.2022
+246	2022-07-04	Neu:  Maker-Mittwoch ab 06.07.2022
+247	2022-07-04	Maker-Mittwoch am 13.07.2022  T-Shirt
+248	2022-07-04	20.07.22 It is MakerMittwoch my dudes! Schon wieder T-Shirts
+249	2022-07-20	Mitglied werden
+250	2022-07-04	Maker-Mittwoch am 27.07.2022 - Jam Session neue Geräte
+251	2022-08-01	Maker-Mittwoch am 03.08.2022 - Holzwerkstatt
+252	2022-08-01	Schlauer Textil Sammelcontainer
+253	2022-08-03	Handarbeitstreff am 07.08.2022
+254	2022-08-04	Ab heute: Es ist Drucker-Donnerstag
+255	2022-08-08	Maker-Mittwoch am 10.08.2022 - Laminat
+256	2022-08-08	Führungen durch den Makerspace
+257	2022-08-20	MSB unterstützt die Veranstaltung Next Generation Telekom 2022 in Bonn
+258	2022-08-25	FabLab Festival Düsseldorf 
+259	2022-08-03	Handarbeitstreff am 04.09.2022
+260	2022-08-30	Vortrag Solar-Balkonkraftwerk am 14.09.2022
+261	2022-09-12	Sommer of Solar Love - Fortsetzung 
+262	2022-09-14	Makerspace goes Bonner Nachhaltigkeitsfestival
+263	2022-09-25	Maker-Mittwoch am 28.09.22: Verschlüsselung (I)
+264	2022-09-25	Makerspace nachhaltig: Tag der offenen Tür MVA Bonn
+265	2022-09-29	Handarbeitstreff am 02.10.2022
+266	2022-09-29	Sonntags-Makern mit Janto
+267	2022-10-03	Makerspace goes Dancing
+268	2022-10-06	Makerspace auf der Code-Week 2022
+269	2022-10-14	Makerspace auf dem Futurecamp 2022
+270	2022-04-06	3D Scan Workshop (2 Tägig)  08.11.2022 und 22.11.2022
+271	2022-11-11	iProduce Ehrung der Gewinner des Ideenwettbewerbs »Products for the future«  9.11.2022
+272	2022-11-29	Öffnungszeiten 28.11 - 02.12
+273	2022-11-29	Maker-Mittwoch am 30.11.2022 - Stickmaschine
+274	2022-12-03	Handarbeitstreff am 04.12.2022
+275	2022-12-10	Großer Maker-Wettbewerb für Elektronikfans
+276	2022-12-10	Großes Maker Advents- &amp; Weihnachtsspezial
+277	2022-12-17	Rust Workshop
+278	2022-12-17	Makerspace fördert GeoMINT@school
+279	2022-12-23	Makern im Advent
+280	2022-12-24	Fröhliche Weihnachten 2022
+281	2023-01-01	Happy New Year 2023
+282	2023-01-09	Ist ja Irre unser MakerSpace - Carry On MakerSpace Make Over
+283	2023-01-12	Atelier am Sonntag: Kunst + Making
+284	2023-01-29	30.01.2023 LANGER MONTAG !!!!! 08:00 - 22:00 !!!!!
+285	2023-01-31	Salsa Kurs - noch Plätze frei
+286	2023-01-31	Sonntag, 05.02.2023 Handarbeits-Brunch!
+287	2023-02-05	Workshops: &quot;Internet of Things&quot; selber makern
+288	2023-01-31	Sonntag, 05.03.2023 Handarbeits-Brunch!
+289	2023-03-04	1. Teil des Lora Workshops
+290	2023-02-05	Workshops: &quot;Internet of Things&quot; selber makern Teil 2
+291	2023-03-26	Sonntag, 02.04.2023 Handarbeitstreff
+292	2023-04-01	2. IoT Workshop erfolgreich beeendet
+293	2023-04-01	Hackaton im Makerspace
+294	2023-04-06	Makerspace hilft bei historischer Rechenmaschine
+295	2023-04-10	Frohe Ostern 2023
+296	2023-04-11	Einführung Stickmaschine (Wiederholung) 19.04.2023 18-21 Uhr
+297	2023-04-11	Kryptografie ohne Mathe (Wiederholung) 26.04.2022 um 18:00-21:00 Uhr
+298	2023-04-13	Atelier am Sonntag (Kunst + Making - Klänge &amp; Geräusche) 16.04.2023 11:15
+299	2023-05-01	Buchbinden / Bookbinding Workshop (Deutsch &amp; English) 03.05.23 um 18:00 - 21:00
+300	2023-05-01	Handarbeitstreff 07.05.2023 11:00 - 15:00 Uhr
+301	2023-05-15	Workshop Siebdruck am 17.05.2023 um 19:00 Uhr
+302	2023-06-10	Lockpicking Workshop (Update)
+303	2023-06-25	Demystifizierung Technik
+304	2023-07-07	Handarbeitstreff 16.07.2023
+305	2023-08-04	Vortragsreihe Smart Home Konzepte
+306	2023-08-19	Eröffnung des neuen Repaircafes in Beuel am 02.09.2023
+307	2023-10-12	 KUNST &amp; MAKING  „WORTE WORDS“
+308	2023-11-02	Handarbeitstreff 05.11.2023
+309	2023-12-24	Fröhliche Weihnachten 2023
+310	2023-12-31	Workshop Demystifizierung Elektronik am 20.-21.01.2024
+311	2023-12-31	Frohes Neues Jahr 2024
+312	2024-01-27	Maker-Mittwoch am 28.02.2024 Workshop Stickmaschine
+313	2024-03-07	Handarbeitstreff 10.03.2024
+315	2024-03-22	Osternähworkshop
+316	2024-03-22	Fernerkundung, Was ist das? Erdbeobachtung via Satellit
+317	2024-03-22	MakeCityBonn Hackathon
+319	2024-04-14	Fernerkundung – was ist das?
+320	2024-04-17	Stick- &amp; Nähworkshop am 21.04.2024 Update !
+321	2024-04-23	Workshop Schrumpfplastik am 27.04.2024
+322	2024-04-30	Aktuelle Workshops am 01.05.2024
+323	2024-05-01	Stick/Nähworkshop am 05.05.2024 
+325	2024-05-08	Acrylworkshop am Samstag, den 11.05.2024
+326	2024-05-08	Stick/Nähworkshop am 11.05.2024
+327	2024-05-10	Workshop am Sonntag: Shrinkplastik
+328	2024-05-10	Workshop am Sonntag: 
+329	2024-05-11	Demystifizierung Technik - Elektronik
+330	2024-05-12	3D-Scan Workshop Teil 4 / Motion Capture - Kinect
+331	2024-06-01	Stick- &amp; Nähworkshop am 02.06.2024
+332	2024-06-09	Grundlegende Einführung KI
+333	2024-06-20	Makerspace beim DIGITAL@School Campus
+334	2024-06-20	Workshop Tassen designen am 23.06.2024
+335	2024-06-20	Workshop Schmuck und Patches am 23.06.2024
+340	2024-07-08	Workshops zur Demystifizierung IT 
+341	2024-10-04	Handarbeitstreff am 06.10 10:00 - 14:00
+342	2024-10-15	Kunst Workshop und Ferienprogramm
+343	2024-10-16	Kurzfristiger Haloween Kunstworkshop
+344	2024-10-26	Makerwochenende 23. und 24. November 2024
+345	2024-11-27	GEM-einsam – Das Gesellschaftsspiele-Event im Makerspace Bonn
+346	2024-12-08	 Achtung!! Neuer Termin: Fr. 27.12.2024, 18 - 21 Uhr: Nähen mit Gurtband! Und für Anfänger: Kuchentasche
+347	2025-01-27	Workshops zur Demystifizierung IT
+348	2025-02-24	Monatlicher Handarbeitstreff: Kreativität und Nachhaltigkeit vereint
+349	2025-03-03	Workshop Seifenherstellung
+350	2025-03-13	TDD (Test Driven Development) Workshop
+351	2025-03-27	Makerspace fördert GeoMINT@school 
+352	2025-04-07	Kreative Osterzeit am 12.04.2025
+353	2025-04-27	Handarbeitstreff am 04.05.2025 - Vorstellung neue Maschinen
+354	2025-05-01	Workshop Home-Assistent
+355	2025-05-09	Teckids Campdays
+356	2025-05-09	T-Shirts und Co.  -- Veranstaltung nur für Mitglieder --
+357	2025-05-13	Collective Neurogenisis - Community-Textilkunstwerk
+358	2025-05-21	Umfangreiche Buchspende stärkt Know-How und Technikkompetenz
+359	2025-05-29	Home Assistant Jam Session
+360	2025-07-11	Workshop Seifenherstellung neuer Termin: 09.08.2025
+361	2025-06-05	Gast-Veranstaltung KI &amp; Schatten
+362	2025-07-03	Handarbeitstreff am 05.07.2025
+363	2025-07-09	Die Telekom feiert ihren 30. Geburtstag - und wir feiern mit!
+364	2025-08-23	Workshop-Reihe Nähen
+365	2025-09-01	Gast-Veranstaltung 124. Scrumtisch Bonn
+366	2025-11-11	Workshop Demystifizierung Lebkuchenhaus bauen
+367	2025-07-11	Workshop Seifenherstellung neuer Termin: 10.01.2026
+368	2026-01-06	Workshop Amugurumi-Häkeln für Anfänger (deutsch/englisch) 
+369	2026-01-09	Workshop Grundlagen CNC-Fräse / Einweisung Yeti
+370	2026-01-09	Workshop Grundlagen CNC-Fräse / Einweisung Yeti 
+371	2026-04-02	FreeCAD Workshop (Webinar) für Makerspaces und Erfinder am 28.04.2026
+372	2026-04-11	Teckids Campdays im Makerspace (25.04 - 26.04.2026)
+373	2026-04-17	Schmieden leicht gemacht - 101 am 29.04.2026
+374	2025-09-01	Gast-Veranstaltung 132. Scrumtisch Bonn

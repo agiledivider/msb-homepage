@@ -10,6 +10,45 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ---
 
+## Legacy migration is incomplete — ~328 old Joomla articles were never imported
+
+**Status:** postponed (2026-07-22). Scope decision needed before any work starts.
+**Impact:** old inbound links 404. Not a go-live blocker, but it is SEO/link rot.
+
+### What's actually there
+The old Joomla site (`makerspacebonn.de`) is **still online**, and the redirect map only
+covers what was migrated: `legacyId` **341–374** (34 articles, in
+`src/seed/legacy-articles.ts`). Everything older 404s — e.g. the reported
+`/index.php?view=article&id=335:workshop-schmuck-und-patches-am-23-06&catid=10`.
+
+Probing `/index.php?view=article&id=N` for N in 1–400 (missing ids return a clean 404)
+found **362 live articles**, spanning 2017–2026:
+
+| year | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| articles | 1 | 57 | 59 | 55 | 42 | 60 | 31 | 28 | 22 | 6 |
+
+Full id → date → title list: [`legacy-articles-inventory.tsv`](legacy-articles-inventory.tsv)
+(regenerate by re-probing; don't re-scan casually, it's ~360 requests against their live site).
+
+Note the category listing (`?option=com_content&view=category&id=10`) shows only 33 of
+these, so it is **not** a reliable inventory — it omits most older items.
+
+### Scope options
+1. **Close the recent gap (~320–340)** — ~15 articles, 2024, contiguous with what exists.
+   Small enough to hand-check; covers the links people still follow.
+2. **Migrate everything (~328 missing)** — full archive back to 2017. Best link
+   preservation, but a large automated scrape (bodies, images, dates) with real risk of
+   mangled formatting, and it would roughly 10x the events collection with long-past events.
+3. **Redirect-only** — map unmigrated ids to `/events/archiv` so links land somewhere
+   instead of 404-ing. No content recovered.
+4. **Recent gap + redirect the rest.**
+
+Whichever is chosen, `scripts/publish-static.ts` builds the nginx/Apache redirect rules
+from the DB automatically, so no redirect code needs touching — only the seed data.
+
+---
+
 ## 🚨 GO-LIVE BLOCKER — Public demo image ships real admin accounts with known passwords
 
 **Status:** exposure removed 2026-07-22 — `msb-demo.idiot.games` now serves the **static** site (no Node, no DB, no `/admin`), so there is nothing there to log into. Closes once the host is redeployed from the new `ghcr.io/agiledivider/msb-demo` image.
