@@ -17,7 +17,7 @@
  *
  * Run: `pnpm publish:static`
  */
-import { execSync, spawn } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -55,9 +55,53 @@ const buildEnv = () => ({ ...process.env, STATIC_EXPORT: 'true', PORT })
  */
 const NEXT_BIN = path.join(ROOT, 'node_modules', '.bin', 'next')
 const PKG_RUN = {
-  build: `${NEXT_BIN} build`,
+  build: [NEXT_BIN, 'build'],
   start: (port: string) => [NEXT_BIN, 'start', '-p', port],
 }
+
+/**
+ * Run a command to completion **without blocking the event loop**.
+ *
+ * Deliberately not `execSync`: the publisher service hosts an HTTP API in the
+ * same process, and a synchronous `next build` freezes it for the whole build —
+ * so `/status` times out exactly when someone is watching a publish, the
+ * debounce and nightly timers fire late, and the healthcheck can flap.
+ */
+function run(argv: string[], env: NodeJS.ProcessEnv, onLine?: (line: string) => void): Promise<void> {
+  const [cmd, ...args] = argv
+  return new Promise((resolve, reject) => {
+    // Pipe rather than inherit when a caller wants to watch the output, and
+    // echo it on so `docker compose logs` still shows the build verbatim.
+    const child = spawn(cmd, args, { stdio: onLine ? ['ignore', 'pipe', 'pipe'] : 'inherit', env, cwd: ROOT })
+    if (onLine) {
+      const scan = (buf: Buffer) => {
+        const text = buf.toString()
+        process.stdout.write(text)
+        for (const line of text.split('\n')) if (line.trim()) onLine(line)
+      }
+      child.stdout?.on('data', scan)
+      child.stderr?.on('data', scan)
+    }
+    child.on('error', reject)
+    child.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited with code ${code}`))))
+  })
+}
+
+/**
+ * Milestones Next prints during a production build, with how far through the
+ * build each one means we are. Without these the build is a single opaque step
+ * that occupies ~40% of the wall clock — a progress bar frozen there looks
+ * broken, and "what is it doing?" has no answer.
+ */
+const BUILD_MARKERS: Array<{ re: RegExp; at: number; label: string }> = [
+  { re: /Creating an optimized production build/i, at: 0.05, label: 'kompilieren' },
+  { re: /Compiled successfully/i, at: 0.45, label: 'TypeScript prüfen' },
+  { re: /Running TypeScript/i, at: 0.5, label: 'TypeScript prüfen' },
+  { re: /Finished TypeScript/i, at: 0.7, label: 'Seitendaten sammeln' },
+  { re: /Collecting page data/i, at: 0.75, label: 'Seitendaten sammeln' },
+  { re: /Generating static pages/i, at: 0.85, label: 'Seiten erzeugen' },
+  { re: /Finalizing page optimization|Collecting build traces/i, at: 0.95, label: 'abschließen' },
+]
 
 /**
  * Media source directories and the URL prefixes they're served under. Payload
@@ -73,6 +117,17 @@ const MEDIA_SOURCES = [
 const PUBLIC_SKIP = new Set(['media', 'diday'])
 
 const RASTER_RE = /\.(jpe?g|png|webp)$/i
+
+/**
+ * Coarse progress reporting, so a caller hosting a UI can say what is happening
+ * rather than just "running". Stage keys are stable identifiers; the caller owns
+ * the labels and the overall step ordering (see `scripts/publisher-server.ts`).
+ */
+export type PublishProgress = { stage: string; current?: number; total?: number; detail?: string }
+export type ProgressFn = (p: PublishProgress) => void
+
+/** Set for the duration of a run; no-op for the CLI path. */
+let emit: ProgressFn = () => {}
 
 function log(msg: string) {
   console.log(`\n\x1b[36m[publish]\x1b[0m ${msg}`)
@@ -310,6 +365,8 @@ async function copyMedia() {
   }
 
   let generated = 0
+  let done = 0
+  emit({ stage: 'images', current: 0, total: jobs.length })
   await pool(jobs, CONCURRENCY, async (job) => {
     const [primary, ...rest] = job.prefixes
     for (const width of ALL_WIDTHS) {
@@ -324,6 +381,8 @@ async function copyMedia() {
         await cp(dest, alias)
       }
     }
+    done++
+    emit({ stage: 'images', current: done, total: jobs.length })
   })
 
   console.log(`  ✓ ${generated} WebP variants from ${jobs.length} images, ${copied} originals copied`)
@@ -523,7 +582,8 @@ async function writeHostConfigs(redirects: Redirect[]) {
  *
  * Resolves with the route count; throws on failure.
  */
-export async function publishStatic(): Promise<{ ok: number; total: number }> {
+export async function publishStatic(onProgress?: ProgressFn): Promise<{ ok: number; total: number }> {
+  emit = onProgress ?? (() => {})
   await assertPortFree()
   await warnIfDevServerRunning()
 
@@ -537,8 +597,13 @@ export async function publishStatic(): Promise<{ ok: number; total: number }> {
   await wipe(path.join(ROOT, '.next', 'cache'))
   // `next`/`pnpm` directly rather than via pnpm when it isn't present — the
   // publisher image installs dependencies but not a package manager.
-  execSync(PKG_RUN.build, { stdio: 'inherit', env: buildEnv(), cwd: ROOT })
+  emit({ stage: 'build', current: 0, total: 100 })
+  await run(PKG_RUN.build, buildEnv(), (line) => {
+    const hit = BUILD_MARKERS.find((m) => m.re.test(line))
+    if (hit) emit({ stage: 'build', current: Math.round(hit.at * 100), total: 100, detail: hit.label })
+  })
 
+  emit({ stage: 'server' })
   log(`Starting production server on ${ORIGIN}…`)
   const [startCmd, ...startArgs] = PKG_RUN.start(PORT)
   const server = spawn(startCmd, startArgs, { env: buildEnv(), cwd: ROOT, stdio: 'inherit' })
@@ -554,6 +619,7 @@ export async function publishStatic(): Promise<{ ok: number; total: number }> {
   try {
     await waitForServer()
 
+    emit({ stage: 'crawl' })
     log('Crawling published routes → dist/')
     const { routes, redirects } = await collectRoutes()
     let ok = 0
@@ -561,6 +627,7 @@ export async function publishStatic(): Promise<{ ok: number; total: number }> {
     for (const route of routes) {
       if (await saveRoute(route)) ok++
       else failed.push(route)
+      emit({ stage: 'crawl', current: ok + failed.length, total: routes.length })
     }
 
     // A crawl that mostly failed still produces a well-formed dist/ — it is just
@@ -579,9 +646,12 @@ export async function publishStatic(): Promise<{ ok: number; total: number }> {
     await writeFile(path.join(DIST, '404.html'), await notFound.text())
     console.log('  ✓ /404.html')
 
+    emit({ stage: 'assets' })
     await copyBuildAssets()
     await copyMedia() // must run after the crawl — it reads the emitted HTML
+    emit({ stage: 'seo' })
     await writeSeoFiles(routes)
+    emit({ stage: 'configs' })
     await writeHostConfigs(redirects)
 
     log(`Done. Snapshotted ${ok}/${routes.length} routes into dist/`)

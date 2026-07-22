@@ -11,10 +11,24 @@ type Result = {
   error?: string
   durationMs: number
 }
+type Progress = {
+  stage: string
+  label: string
+  step: number
+  steps: number
+  current?: number
+  total?: number
+  /** Sub-step within the stage, e.g. which phase of the Next build. */
+  detail?: string
+  /** Weighted completion 0–1, computed by the publisher. */
+  fraction?: number
+}
 type Status = {
   phase?: 'idle' | 'queued' | 'running'
   startedAt?: string
   reason?: string
+  /** What the running publish is doing right now. */
+  progress?: Progress
   /** A debounced auto-publish waiting to fire. */
   pending?: { reason: string; dueAt: string }
   last?: Result
@@ -24,6 +38,47 @@ type Status = {
 
 const fmtWhen = (iso?: string) => (iso ? new Date(iso).toLocaleString('de-DE') : '—')
 const fmtDur = (ms?: number) => (ms == null ? '' : `${Math.round(ms / 1000)}s`)
+const fmtElapsed = (from?: string) => (from ? `${Math.max(0, Math.round((Date.now() - +new Date(from)) / 1000))}s` : '')
+
+/**
+ * Overall completion, 0–1. The publisher weights stages by real duration; the
+ * step-based value is only a fallback for an older publisher.
+ */
+function fraction(p: Progress): number {
+  if (typeof p.fraction === 'number') return p.fraction
+  const within = p.total ? Math.min(1, (p.current ?? 0) / p.total) : 0
+  return Math.min(1, (p.step - 1 + within) / p.steps)
+}
+
+/** Rough remaining time, from how long the last successful publish took. */
+function eta(startedAt?: string, lastMs?: number): string {
+  if (!startedAt || !lastMs) return ''
+  const left = Math.round((lastMs - (Date.now() - +new Date(startedAt))) / 1000)
+  return left > 5 ? ` · noch ca. ${left}s` : ''
+}
+
+/** Indeterminate spinner — CSS only, no dependency. */
+function Spinner() {
+  return (
+    <>
+      <style>{'@keyframes msb-spin{to{transform:rotate(360deg)}}'}</style>
+      <span
+        aria-hidden
+        style={{
+          display: 'inline-block',
+          width: 13,
+          height: 13,
+          marginRight: 8,
+          verticalAlign: '-2px',
+          border: '2px solid var(--theme-elevation-300)',
+          borderTopColor: 'var(--theme-success-500, #4caf50)',
+          borderRadius: '50%',
+          animation: 'msb-spin .8s linear infinite',
+        }}
+      />
+    </>
+  )
+}
 
 /**
  * Dashboard widget: publish the public website.
@@ -58,11 +113,23 @@ export function PublishSite() {
   }, [load])
 
   // Poll while a build is in flight so the panel tracks it without a refresh.
+  // 2s rather than 5s: the stages are short enough that a slower poll makes the
+  // bar look stuck. Also poll while a debounced run is pending, so the panel
+  // notices when it starts.
   useEffect(() => {
-    if (status?.phase !== 'running' && status?.phase !== 'queued') return
-    const t = setInterval(load, 5000)
+    const active = status?.phase === 'running' || status?.phase === 'queued' || Boolean(status?.pending)
+    if (!active) return
+    const t = setInterval(load, 2000)
     return () => clearInterval(t)
-  }, [status?.phase, load])
+  }, [status?.phase, status?.pending, load])
+
+  // Re-render once a second so the elapsed counter advances between polls.
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    if (status?.phase !== 'running') return
+    const t = setInterval(() => setTick((n) => n + 1), 1000)
+    return () => clearInterval(t)
+  }, [status?.phase])
 
   const publish = async () => {
     setBusy(true)
@@ -106,7 +173,27 @@ export function PublishSite() {
         <>
           <p style={{ fontSize: 13, margin: '0 0 .75rem' }}>
             {running ? (
-              <strong>Veröffentlichung läuft… ({status?.reason})</strong>
+              <>
+                <Spinner />
+                <strong>
+                  {status?.progress
+                    ? `${status.progress.label}${status.progress.detail ? ` — ${status.progress.detail}` : ''} (Schritt ${status.progress.step}/${status.progress.steps})`
+                    : 'Veröffentlichung wird vorbereitet…'}
+                </strong>
+                {status?.progress?.total && !status.progress.detail ? (
+                  <span style={{ color: 'var(--theme-elevation-600)' }}>
+                    {' '}
+                    — {status.progress.current ?? 0}/{status.progress.total}
+                  </span>
+                ) : null}
+                <span style={{ color: 'var(--theme-elevation-600)' }}>
+                  {' '}
+                  · {fmtElapsed(status?.startedAt)}
+                  {eta(status?.startedAt, status?.last?.ok ? status.last.durationMs : undefined)}
+                </span>
+                <br />
+                <span style={{ color: 'var(--theme-elevation-600)', fontSize: 12 }}>{status?.reason}</span>
+              </>
             ) : last ? (
               <>
                 Zuletzt: {fmtWhen(last.at)} — {last.ok ? `${last.routes} Seiten` : 'fehlgeschlagen'}{' '}
@@ -117,6 +204,30 @@ export function PublishSite() {
               'Noch keine Veröffentlichung.'
             )}
           </p>
+          {running ? (
+            <div
+              style={{
+                height: 6,
+                borderRadius: 3,
+                background: 'var(--theme-elevation-150)',
+                overflow: 'hidden',
+                margin: '0 0 .85rem',
+              }}
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={status?.progress ? Math.round(fraction(status.progress) * 100) : undefined}
+            >
+              <div
+                style={{
+                  height: '100%',
+                  width: `${status?.progress ? Math.max(2, fraction(status.progress) * 100) : 2}%`,
+                  background: 'var(--theme-success-500, #4caf50)',
+                  transition: 'width .4s ease',
+                }}
+              />
+            </div>
+          ) : null}
           {status?.pending ? (
             <p style={{ fontSize: 13, margin: '0 0 .75rem', color: 'var(--theme-elevation-600)' }}>
               Automatische Veröffentlichung geplant für {fmtWhen(status.pending.dueAt)} ({status.pending.reason}) — oder

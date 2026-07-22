@@ -48,6 +48,45 @@ const DEBOUNCE_MS = Number(process.env.PUBLISH_DEBOUNCE_MS || 5 * 60_000)
 const NIGHTLY_HOUR = Number(process.env.PUBLISH_NIGHTLY_HOUR ?? 3)
 const STATE_FILE = process.env.PUBLISH_STATE_FILE || '/tmp/publish-state.json'
 
+/**
+ * The full pipeline, in order. The publisher owns this list (not
+ * publish-static.ts) because it brackets the snapshot with its own steps —
+ * the database copy before, the sync and registry push after. Labels are German
+ * to match the admin UI.
+ */
+/**
+ * `weight` is roughly the share of wall-clock each stage takes (measured on a
+ * real run). Equal weighting made the progress bar sit at 10% for the ~45s Next
+ * build and then leap forward — which reads as a hang. The build and the image
+ * ladder genuinely dominate, so the bar should reflect that.
+ */
+const STAGES: Array<{ key: string; label: string; weight: number }> = [
+  { key: 'db', label: 'Datenbank-Schnappschuss', weight: 1 },
+  { key: 'build', label: 'Next.js-Build', weight: 30 },
+  { key: 'server', label: 'Server starten', weight: 2 },
+  { key: 'crawl', label: 'Seiten erfassen', weight: 25 },
+  { key: 'assets', label: 'Assets kopieren', weight: 3 },
+  { key: 'images', label: 'Bilder konvertieren', weight: 30 },
+  { key: 'seo', label: 'Sitemap & robots.txt', weight: 1 },
+  { key: 'configs', label: 'Host-Konfiguration', weight: 1 },
+  { key: 'sync', label: 'Website aktualisieren', weight: 4 },
+  { key: 'push', label: 'Image hochladen', weight: 3 },
+]
+const TOTAL_WEIGHT = STAGES.reduce((n, s) => n + s.weight, 0)
+
+type Progress = {
+  stage: string
+  label: string
+  step: number
+  steps: number
+  current?: number
+  total?: number
+  /** Sub-step within the stage, e.g. which phase of the Next build. */
+  detail?: string
+  /** Weighted completion 0–1, computed here so the UI needn't know the weights. */
+  fraction: number
+}
+
 type Phase = 'idle' | 'queued' | 'running'
 type Result = {
   at: string
@@ -65,6 +104,8 @@ const state: {
   reason?: string
   /** A debounced auto-publish waiting to fire. */
   pending?: { reason: string; dueAt: string }
+  /** What the running publish is doing right now. */
+  progress?: Progress
   last?: Result
 } = { phase: 'idle' }
 
@@ -139,8 +180,26 @@ async function runPublish(reason: string): Promise<Result> {
   state.phase = 'running'
   state.startedAt = new Date().toISOString()
   state.reason = reason
+  state.progress = undefined
   await saveState()
   log(`publish started (${reason})`)
+
+  /** Record the current stage so /status (and the admin widget) can show it. */
+  const setStage = (stage: string, current?: number, total?: number, detail?: string) => {
+    const i = STAGES.findIndex((s) => s.key === stage)
+    const before = STAGES.slice(0, Math.max(0, i)).reduce((n, s) => n + s.weight, 0)
+    const within = total ? Math.min(1, (current ?? 0) / total) : 0
+    state.progress = {
+      stage,
+      label: STAGES[i]?.label ?? stage,
+      step: i + 1,
+      steps: STAGES.length,
+      current,
+      total,
+      detail,
+      fraction: Math.min(1, (before + (STAGES[i]?.weight ?? 0) * within) / TOTAL_WEIGHT),
+    }
+  }
 
   try {
     // Snapshot the DB first: the live container keeps serving and editors keep
@@ -149,6 +208,7 @@ async function runPublish(reason: string): Promise<Result> {
     // The -wal/-shm sidecars must come along: in WAL mode the newest commits
     // live in the write-ahead log, so copying only the .db silently publishes
     // stale content. Opening the copy replays the WAL.
+    setStage('db')
     await copyFile(SOURCE_DB, BUILD_DB)
     for (const suffix of ['-wal', '-shm']) {
       await copyFile(`${SOURCE_DB}${suffix}`, `${BUILD_DB}${suffix}`).catch(() => {
@@ -157,11 +217,13 @@ async function runPublish(reason: string): Promise<Result> {
     }
     process.env.DATABASE_URI = `file:${BUILD_DB}`
 
-    const { ok, total } = await publishStatic()
+    const { ok, total } = await publishStatic((p) => setStage(p.stage, p.current, p.total, p.detail))
 
+    setStage('sync')
     const served = await syncToLocalNginx()
     if (served) log(`synced snapshot → ${served}`)
 
+    setStage('push')
     const sha = (process.env.GIT_SHA || 'nogit').slice(0, 12)
     const image = PUSH_IMAGE
       ? await pushImage(`${sha}-${new Date().toISOString().slice(0, 10)}`)
@@ -197,6 +259,7 @@ function trigger(reason: string): { accepted: boolean; note: string } {
     state.phase = 'idle'
     state.startedAt = undefined
     state.reason = undefined
+    state.progress = undefined
     await saveState()
     inFlight = null
     if (pendingReason) {
@@ -261,6 +324,7 @@ const server = createServer(async (req, res) => {
       phase: state.phase,
       startedAt: state.startedAt,
       reason: state.reason,
+      progress: state.progress,
       pending: state.pending,
       last: state.last,
     })
