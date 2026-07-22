@@ -1,8 +1,11 @@
 # Deployment (Docker + SQLite)
 
 Self-contained image running Payload + Next.js with a SQLite DB and uploaded
-media on **persistent volumes**. A simple HTTP Basic Auth password gates the whole
-site until you're ready to go public.
+media on **persistent volumes**.
+
+> This deployment is **not password-gated**. Anything reachable at its URL is
+> public, including `/admin` (which still requires a Payload login). To publish
+> only the public site as static files instead, see [docs/STATIC.md](docs/STATIC.md).
 
 ## Build & push
 
@@ -23,8 +26,6 @@ buildx, e.g. `docker buildx build --platform linux/amd64 -t ... --push .`
    IMAGE=<registry>/msb-homepage:TAG
    PAYLOAD_SECRET=<openssl rand -hex 32>
    NEXT_PUBLIC_SERVER_URL=https://your-domain
-   BASIC_AUTH_USER=msb
-   BASIC_AUTH_PASSWORD=<your password>
    ```
 
 2. Start it:
@@ -47,12 +48,6 @@ admin, you can drop the `INIT_ADMIN_*` vars.
 
 - **`db` volume** → `/app/data/msb.db` (SQLite). Keep it to keep your content.
 - **`media` volume** → `/app/public/media` (uploaded images).
-
-## The password gate
-
-`BASIC_AUTH_USER` + `BASIC_AUTH_PASSWORD` enable a Basic Auth prompt in front of
-everything (site, `/admin`, `/api`). Remove both env vars (and restart) to open
-the site to the public. This is separate from Payload's own admin login.
 
 ## Schema changes
 

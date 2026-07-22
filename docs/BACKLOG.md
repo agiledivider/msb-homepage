@@ -1,6 +1,12 @@
 # Backlog
 
-Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resolved before the site is publicly reachable without the Basic Auth gate.
+Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resolved before the site is publicly reachable.
+
+> **The Basic Auth gate no longer exists** (removed 2026-07-22). `src/proxy.ts` now only
+> does the legacy 301s, and `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD` are gone from the
+> compose files and env examples. Any deployment of the Payload image is therefore public
+> the moment it has a URL — there is no longer a fallback gate to hide behind, which makes
+> the blocker below unconditional rather than "only when the gate is off".
 
 ---
 
@@ -11,10 +17,10 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 **Source:** code review #2 (2026-07-11), confirmed live against the baked DB
 
 ### The problem
-The public demo (`msb-demo.idiot.games`) is reachable **without Basic Auth by default** and ships **four privileged accounts baked into the image with trivial dev passwords** — anyone can open `/admin` and log in as an editorial admin.
+The public demo (`msb-demo.idiot.games`) ships **four privileged accounts baked into the image with trivial dev passwords** — anyone can open `/admin` and log in as an editorial admin.
 
 - `Dockerfile:60` bakes the git-tracked `demo-seed/demo.sqlite` into the image.
-- `docker-compose.demo.yml:34-35` leaves `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD` empty; `src/proxy.ts:25` (`if (!user || !pass) return NextResponse.next()`) then disables the gate → whole app + `/admin` public. (The compose comment even says "leave both unset for a public demo.")
+- There is no gate in front of it: since the Basic Auth removal (2026-07-22) the whole app + `/admin` is public by construction.
 
 Baked accounts (verified from `demo-seed/demo.sqlite`):
 
@@ -30,13 +36,14 @@ Baked accounts (verified from `demo-seed/demo.sqlite`):
 ### Fix options (pick one, or combine)
 1. **Dedicated demo seed** — build the demo DB from a seed that creates a single demo account with a random (or disabled/read-only) password, instead of `sqlite3 .backup` of the dev DB (`scripts/prepare-demo-seed.sh`). *Preferred.*
 2. **Strip/rotate users before baking** — in `scripts/prepare-demo-seed.sh`, after the backup, delete/rotate all `users` rows and their `users_rels`/`users_editorial_roles` so no real credentials ship.
-3. **Force Basic Auth on for the demo** — set non-empty `BASIC_AUTH_*` in `docker-compose.demo.yml` so the gate is never bypassed.
+3. **Don't expose the demo at all** — keep it on a private network / VPN, or serve the
+   statically published site (`docs/STATIC.md`) instead, which contains no `/admin` at all.
 
 At minimum: **never bake `falk@kuehnel.eu` / `test` with admin rights into a publicly reachable image.**
 
 ### Related follow-ups (not blockers, note while here)
 - **Rotate** `test` / `changeme123` anywhere they are reused; treat the current baked `demo-seed/demo.sqlite` as compromised.
-- `/api/media` is ungated by design (`src/proxy.ts:48` matcher excludes it) — uploaded assets, including covers on unpublished drafts, are fetchable by sequential id even with Basic Auth on. Separate, low severity.
+- `/api/media` is public by design — uploaded assets, including covers on unpublished drafts, are fetchable by sequential id. Separate, low severity. (The static bundle only ships media the published pages reference, so it isn't affected.)
 
 ---
 

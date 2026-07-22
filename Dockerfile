@@ -27,7 +27,7 @@ RUN pnpm run build
 
 # ---- runtime ----
 # Regular `next start` (not standalone) — most reliable for Payload's admin/api
-# routes and the Node-runtime proxy (Basic Auth).
+# routes and the Node-runtime proxy (legacy redirects).
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0

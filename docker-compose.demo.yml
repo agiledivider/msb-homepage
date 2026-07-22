@@ -30,9 +30,6 @@ services:
       - MEDIA_DIR=/app/public/media
       # required — generate with: openssl rand -hex 32
       - PAYLOAD_SECRET=${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env}
-      # optional Basic-Auth gate over the whole app; leave both unset for a public demo
-      - BASIC_AUTH_USER=${BASIC_AUTH_USER:-}
-      - BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD:-}
       # optional — seed a ready-to-use admin on a fresh DB (roles + permissions
       # are always seeded); leave unset to create the first user via /admin
       - INIT_ADMIN_EMAIL=${INIT_ADMIN_EMAIL:-}

@@ -23,9 +23,6 @@ services:
       PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env}
       # required — public URL of this deployment (used by live preview)
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:?set NEXT_PUBLIC_SERVER_URL in .env}
-      # simple Basic-Auth gate in front of everything (unset both to make it public)
-      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-msb}
-      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:?set BASIC_AUTH_PASSWORD in .env}
       # optional: on a fresh DB, seed a ready-to-use admin (roles + permissions are
       # always seeded). Leave unset to create the first user via /admin instead.
       INIT_ADMIN_EMAIL: ${INIT_ADMIN_EMAIL:-}
