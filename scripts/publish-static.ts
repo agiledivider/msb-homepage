@@ -21,6 +21,7 @@ import { execSync, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import sharp from 'sharp'
 import { ALL_WIDTHS } from '../src/lib/imageWidths.mjs'
 
@@ -37,6 +38,17 @@ const WEBP_QUALITY = 78
 const CONCURRENCY = 4
 
 const buildEnv = { ...process.env, STATIC_EXPORT: 'true', PORT }
+
+/**
+ * Invoke Next through its local binary rather than `pnpm build` / `pnpm exec`.
+ * The publisher image installs dependencies but deliberately ships no package
+ * manager, and this works identically on a dev machine.
+ */
+const NEXT_BIN = path.join(ROOT, 'node_modules', '.bin', 'next')
+const PKG_RUN = {
+  build: `${NEXT_BIN} build`,
+  start: (port: string) => [NEXT_BIN, 'start', '-p', port],
+}
 
 /**
  * Media source directories and the URL prefixes they're served under. Payload
@@ -496,7 +508,13 @@ async function writeHostConfigs(redirects: Redirect[]) {
 
 // ---------------------------------------------------------------------------
 
-async function main() {
+/**
+ * Run the whole snapshot pipeline. Exported so the publisher service can call
+ * it in-process (see `scripts/publisher-server.ts`) instead of shelling out.
+ *
+ * Resolves with the route count; throws on failure.
+ */
+export async function publishStatic(): Promise<{ ok: number; total: number }> {
   await assertPortFree()
   await warnIfDevServerRunning()
 
@@ -508,10 +526,13 @@ async function main() {
   await mkdir(DIST, { recursive: true })
   // Drop Next's persisted data cache so nothing is served from a prior build.
   await wipe(path.join(ROOT, '.next', 'cache'))
-  execSync('pnpm build', { stdio: 'inherit', env: buildEnv, cwd: ROOT })
+  // `next`/`pnpm` directly rather than via pnpm when it isn't present — the
+  // publisher image installs dependencies but not a package manager.
+  execSync(PKG_RUN.build, { stdio: 'inherit', env: buildEnv, cwd: ROOT })
 
   log(`Starting production server on ${ORIGIN}…`)
-  const server = spawn('pnpm', ['exec', 'next', 'start', '-p', PORT], { env: buildEnv, cwd: ROOT, stdio: 'inherit' })
+  const [startCmd, ...startArgs] = PKG_RUN.start(PORT)
+  const server = spawn(startCmd, startArgs, { env: buildEnv, cwd: ROOT, stdio: 'inherit' })
   const killServer = () => {
     if (!server.killed) server.kill('SIGTERM')
   }
@@ -542,12 +563,17 @@ async function main() {
     await writeHostConfigs(redirects)
 
     log(`Done. Snapshotted ${ok}/${routes.length} routes into dist/`)
+    return { ok, total: routes.length }
   } finally {
     killServer()
   }
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+// CLI entry: only when run directly (`pnpm publish:static`), so importing this
+// module from the publisher service doesn't kick off a build.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  publishStatic().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}

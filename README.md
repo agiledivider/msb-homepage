@@ -68,6 +68,7 @@ src/
 - `pnpm generate:importmap` — regenerate the admin import map after adding custom admin components
 - `pnpm publish:static` — snapshot the public site into `dist/` (see [docs/STATIC.md](docs/STATIC.md))
 - `pnpm release:static` — snapshot + build + push the static nginx image to ghcr
+- `pnpm publisher` — run the publish worker locally (normally a container, see [docs/PUBLISHING.md](docs/PUBLISHING.md))
 
 ## Notes
 

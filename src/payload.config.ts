@@ -15,6 +15,7 @@ import { Users } from './collections/Users'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { editorialWorkflow } from './plugins/editorial'
+import { sitePublishing } from './plugins/publish'
 import { isAdmin } from './plugins/editorial/access'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -41,6 +42,9 @@ export default buildConfig({
       // fields only reviewers may edit (editors see them locked)
       lockedFields: { blog: ['publishedAt'] },
     }),
+    // Publish the static site from the admin (button + auto-publish on change).
+    // The build runs in the separate publisher container; see docs/PUBLISHING.md.
+    sitePublishing({ collections: ['blog', 'events', 'pages'] }),
     // UI-configurable roles & permissions (Roles + Permissions collections).
     // Locked to admins so the permission system can't be edited by others.
     rbac({
