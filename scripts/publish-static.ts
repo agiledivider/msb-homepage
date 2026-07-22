@@ -427,7 +427,9 @@ function htaccess(redirects: Redirect[]): string {
       (r) =>
         `RewriteCond %{QUERY_STRING} (^|&)view=article(&|$) [NC]\n` +
         `RewriteCond %{QUERY_STRING} (^|&)id=${r.legacyId}(:|&|$)\n` +
-        `RewriteRule ^$ ${r.target}? [R=301,L]`,
+        // Joomla served these from /index.php as well as /, so both must match —
+        // `^$` alone would silently miss every real inbound link.
+        `RewriteRule ^(index\\.php)?$ ${r.target}? [R=301,L]`,
     )
     .join('\n\n')
 
@@ -436,6 +438,13 @@ function htaccess(redirects: Redirect[]): string {
 # Never let the content negotiator guess extensions; we do clean URLs ourselves.
 Options -MultiViews
 DirectoryIndex index.html
+
+# mod_dir would 301 /blog → /blog/ before the rewrite below ever runs, so Apache
+# would answer the canonical URLs in sitemap.xml with a redirect while nginx
+# serves them directly. -Indexes because disabling DirectorySlash can otherwise
+# expose a directory listing.
+DirectorySlash Off
+Options -Indexes
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
