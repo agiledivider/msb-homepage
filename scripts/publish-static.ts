@@ -37,7 +37,16 @@ const WEBP_QUALITY = 78
 /** How many images to transcode at once. */
 const CONCURRENCY = 4
 
-const buildEnv = { ...process.env, STATIC_EXPORT: 'true', PORT }
+/**
+ * Environment for the spawned build/serve steps.
+ *
+ * Must be read at spawn time, not module load: the publisher service imports
+ * this module at startup and only then points `DATABASE_URI` at its private
+ * copy of the SQLite file. Snapshotting it as a constant made the build fall
+ * back to the default path and quietly render every page against an empty
+ * database.
+ */
+const buildEnv = () => ({ ...process.env, STATIC_EXPORT: 'true', PORT })
 
 /**
  * Invoke Next through its local binary rather than `pnpm build` / `pnpm exec`.
@@ -528,11 +537,11 @@ export async function publishStatic(): Promise<{ ok: number; total: number }> {
   await wipe(path.join(ROOT, '.next', 'cache'))
   // `next`/`pnpm` directly rather than via pnpm when it isn't present — the
   // publisher image installs dependencies but not a package manager.
-  execSync(PKG_RUN.build, { stdio: 'inherit', env: buildEnv, cwd: ROOT })
+  execSync(PKG_RUN.build, { stdio: 'inherit', env: buildEnv(), cwd: ROOT })
 
   log(`Starting production server on ${ORIGIN}…`)
   const [startCmd, ...startArgs] = PKG_RUN.start(PORT)
-  const server = spawn(startCmd, startArgs, { env: buildEnv, cwd: ROOT, stdio: 'inherit' })
+  const server = spawn(startCmd, startArgs, { env: buildEnv(), cwd: ROOT, stdio: 'inherit' })
   const killServer = () => {
     if (!server.killed) server.kill('SIGTERM')
   }
@@ -548,8 +557,21 @@ export async function publishStatic(): Promise<{ ok: number; total: number }> {
     log('Crawling published routes → dist/')
     const { routes, redirects } = await collectRoutes()
     let ok = 0
+    const failed: string[] = []
     for (const route of routes) {
       if (await saveRoute(route)) ok++
+      else failed.push(route)
+    }
+
+    // A crawl that mostly failed still produces a well-formed dist/ — it is just
+    // empty. Publishing that would replace a working site with nothing, so a
+    // partial snapshot is a hard failure unless explicitly allowed.
+    if (failed.length && process.env.PUBLISH_ALLOW_PARTIAL !== 'true') {
+      throw new Error(
+        `${failed.length}/${routes.length} routes failed to render — refusing to publish a partial snapshot. ` +
+          `First failures: ${failed.slice(0, 5).join(', ')}. ` +
+          `(Set PUBLISH_ALLOW_PARTIAL=true to override.)`,
+      )
     }
 
     // Request a definitely-missing path to capture the not-found HTML.

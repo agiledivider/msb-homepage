@@ -15,6 +15,8 @@ type Status = {
   phase?: 'idle' | 'queued' | 'running'
   startedAt?: string
   reason?: string
+  /** A debounced auto-publish waiting to fire. */
+  pending?: { reason: string; dueAt: string }
   last?: Result
   unavailable?: boolean
   error?: string
@@ -115,6 +117,12 @@ export function PublishSite() {
               'Noch keine Veröffentlichung.'
             )}
           </p>
+          {status?.pending ? (
+            <p style={{ fontSize: 13, margin: '0 0 .75rem', color: 'var(--theme-elevation-600)' }}>
+              Automatische Veröffentlichung geplant für {fmtWhen(status.pending.dueAt)} ({status.pending.reason}) — oder
+              jetzt starten.
+            </p>
+          ) : null}
           <button type="button" className="btn btn--style-primary" onClick={publish} disabled={busy || running}>
             {running ? 'Läuft…' : 'Jetzt veröffentlichen'}
           </button>

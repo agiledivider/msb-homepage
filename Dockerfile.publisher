@@ -27,11 +27,18 @@ WORKDIR /app
 ENV NODE_ENV=production TZ=Europe/Berlin
 
 # crane: daemonless image assembly + push (static Go binary, ~20 MB).
+# The asset name must follow the image's own architecture — an x86_64 binary in
+# an arm64 image (what an Apple-Silicon host builds by default) simply won't run.
 ARG CRANE_VERSION=0.20.2
-ARG TARGETARCH=amd64
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl tar \
-  && curl -sSL "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" \
+  && case "$(uname -m)" in \
+       x86_64)  CRANE_ARCH=x86_64 ;; \
+       aarch64) CRANE_ARCH=arm64 ;; \
+       *) echo "unsupported arch $(uname -m)" >&2; exit 1 ;; \
+     esac \
+  && curl -sSL "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_${CRANE_ARCH}.tar.gz" \
      | tar -xz -C /usr/local/bin crane \
+  && crane version \
   && apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # The publisher needs the whole app: it runs a real `next build` + crawl.

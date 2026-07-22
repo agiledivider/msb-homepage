@@ -37,6 +37,11 @@ const IMAGE = process.env.STATIC_IMAGE || 'ghcr.io/agiledivider/msb-demo'
 const TAG = process.env.TAG || 'latest'
 const PLATFORM = process.env.PLATFORM || 'linux/amd64'
 const BASE_IMAGE = process.env.BASE_IMAGE || 'nginx:1.27-alpine'
+/** Push to the registry. Off for local end-to-end runs so a test can't ship. */
+const PUSH_IMAGE = process.env.PUSH_IMAGE !== 'false'
+/** Optional: serve the result from a local nginx via these shared volumes. */
+const SITE_HTML_DIR = process.env.SITE_HTML_DIR || ''
+const SITE_CONF_DIR = process.env.SITE_CONF_DIR || ''
 /** Quiet period before an auto-triggered publish runs, so a burst of edits = one build. */
 const DEBOUNCE_MS = Number(process.env.PUBLISH_DEBOUNCE_MS || 5 * 60_000)
 /** Nightly run, Berlin local time (the container's TZ). */
@@ -54,7 +59,14 @@ type Result = {
   durationMs: number
 }
 
-const state: { phase: Phase; startedAt?: string; reason?: string; last?: Result } = { phase: 'idle' }
+const state: {
+  phase: Phase
+  startedAt?: string
+  reason?: string
+  /** A debounced auto-publish waiting to fire. */
+  pending?: { reason: string; dueAt: string }
+  last?: Result
+} = { phase: 'idle' }
 
 /** Coalesces concurrent requests: while a run is in flight, another is queued at most once. */
 let inFlight: Promise<void> | null = null
@@ -103,6 +115,25 @@ async function pushImage(sha: string): Promise<string> {
   return tags.join(', ')
 }
 
+/**
+ * Copy the snapshot into the volumes a co-located nginx serves.
+ *
+ * Deliberately a copy rather than mounting the volume at `dist/`: the pipeline
+ * wipes `dist/` on every run, and unlinking a mount point fails with EBUSY.
+ * Stale files are cleared first so deleted pages actually disappear.
+ */
+async function syncToLocalNginx(): Promise<string | null> {
+  if (!SITE_HTML_DIR) return null
+  const sh = (cmd: string) => execFileAsync('sh', ['-c', cmd])
+  await sh(`rm -rf ${SITE_HTML_DIR}/* ${SITE_HTML_DIR}/.[!.]* 2>/dev/null; true`)
+  await sh(`cp -a ${path.join(ROOT, 'dist')}/. ${SITE_HTML_DIR}/`)
+  if (SITE_CONF_DIR) {
+    await mkdir(SITE_CONF_DIR, { recursive: true })
+    await copyFile(path.join(ROOT, 'nginx.conf'), path.join(SITE_CONF_DIR, 'default.conf'))
+  }
+  return SITE_HTML_DIR
+}
+
 async function runPublish(reason: string): Promise<Result> {
   const started = Date.now()
   state.phase = 'running'
@@ -127,8 +158,14 @@ async function runPublish(reason: string): Promise<Result> {
     process.env.DATABASE_URI = `file:${BUILD_DB}`
 
     const { ok, total } = await publishStatic()
+
+    const served = await syncToLocalNginx()
+    if (served) log(`synced snapshot → ${served}`)
+
     const sha = (process.env.GIT_SHA || 'nogit').slice(0, 12)
-    const image = await pushImage(`${sha}-${new Date().toISOString().slice(0, 10)}`)
+    const image = PUSH_IMAGE
+      ? await pushImage(`${sha}-${new Date().toISOString().slice(0, 10)}`)
+      : 'not pushed (PUSH_IMAGE=false)'
 
     const result: Result = {
       at: new Date().toISOString(),
@@ -171,13 +208,24 @@ function trigger(reason: string): { accepted: boolean; note: string } {
   return { accepted: true, note: 'publish started' }
 }
 
-/** Auto-publish: wait for the edits to stop before spending a build. */
+/**
+ * Auto-publish: wait for the edits to stop before spending a build.
+ *
+ * The pending run is recorded in `state` (not just a timer) so `/status` can
+ * tell the admin a publish is coming — otherwise someone publishes a document,
+ * sees "idle", and assumes nothing happened.
+ */
 function triggerDebounced(reason: string): string {
   if (debounceTimer) clearTimeout(debounceTimer)
+  const dueAt = new Date(Date.now() + DEBOUNCE_MS).toISOString()
+  state.pending = { reason, dueAt }
+  log(`auto-publish queued (${reason}) — runs at ${dueAt} unless more changes arrive`)
   debounceTimer = setTimeout(() => {
     debounceTimer = null
+    state.pending = undefined
     trigger(reason)
   }, DEBOUNCE_MS)
+  void saveState()
   return `queued; runs in ${Math.round(DEBOUNCE_MS / 1000)}s unless more changes arrive`
 }
 
@@ -209,7 +257,13 @@ const server = createServer(async (req, res) => {
   if (TOKEN && req.headers['x-publish-token'] !== TOKEN) return send(401, { error: 'Unauthorized' })
 
   if (req.method === 'GET' && req.url === '/status') {
-    return send(200, { phase: state.phase, startedAt: state.startedAt, reason: state.reason, last: state.last })
+    return send(200, {
+      phase: state.phase,
+      startedAt: state.startedAt,
+      reason: state.reason,
+      pending: state.pending,
+      last: state.last,
+    })
   }
 
   if (req.method === 'POST' && req.url?.startsWith('/publish')) {
