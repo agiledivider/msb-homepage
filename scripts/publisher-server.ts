@@ -140,6 +140,31 @@ async function loadState() {
 }
 
 /**
+ * Point crane at credentials it can actually use.
+ *
+ * Mounting the host's ~/.docker is not enough on a Docker Desktop machine: it
+ * stores tokens in the OS keychain via `credsStore`, leaving the config's
+ * registry entry empty, so an in-container crane sees no credentials at all.
+ * A token supplied through the environment is written to a private config the
+ * container owns. The value is never logged.
+ */
+async function ensureRegistryAuth(): Promise<void> {
+  // Always point at a config this container owns, even with no token: any
+  // config.json inherited from the host declares `credsStore: "desktop"`, and
+  // crane then tries to exec a credential helper that does not exist here —
+  // failing even the anonymous pull of the nginx base image.
+  const dir = '/tmp/registry-auth'
+  await mkdir(dir, { recursive: true })
+  process.env.DOCKER_CONFIG = dir
+
+  const user = process.env.GHCR_USER
+  const token = process.env.GHCR_TOKEN
+  const registry = IMAGE.split('/')[0]
+  const auths = user && token ? { [registry]: { auth: Buffer.from(`${user}:${token}`).toString('base64') } } : {}
+  await writeFile(path.join(dir, 'config.json'), JSON.stringify({ auths }), { mode: 0o600 })
+}
+
+/**
  * Assemble and push the image without a Docker daemon.
  *
  * The static image is just `nginx:alpine` + files, so there is nothing a real
@@ -147,6 +172,7 @@ async function loadState() {
  * the host's docker.sock into a web-triggerable container would hand it root.
  */
 async function pushImage(sha: string): Promise<string> {
+  await ensureRegistryAuth()
   const layer = '/tmp/site-layer.tar'
   const stage = '/tmp/stage'
 

@@ -71,6 +71,11 @@ services:
       PUBLISH_NIGHTLY_HOUR: ${PUBLISH_NIGHTLY_HOUR:-3}
       PUBLISH_DEBOUNCE_MS: ${PUBLISH_DEBOUNCE_MS:-300000}
       GIT_SHA: ${GIT_SHA:-nogit}
+      # Registry credentials. A mounted ~/.docker is not usable on Docker
+      # Desktop (credsStore keeps the token in the OS keychain), so pass a
+      # token explicitly. Only needed when PUSH_IMAGE=true.
+      GHCR_USER: ${GHCR_USER:-}
+      GHCR_TOKEN: ${GHCR_TOKEN:-}
     volumes:
       # The CMS state, read-only — the DB is copied before each build anyway.
       - db:/data:ro
@@ -80,7 +85,6 @@ services:
       # Keeps "last published" + the ETA baseline across container updates.
       - publisher_state:/state
       # Registry credentials, only needed when PUSH_IMAGE=true.
-      - ${DOCKER_CONFIG_DIR:-${HOME}/.docker}:/root/.docker:ro
     depends_on:
       - payload
 
