@@ -78,7 +78,9 @@ src/
 - **Hosting:** the CMS is a serverful Next app (needs Node) — Vercel / Railway / a
   Node VPS, or the Docker image in [DEPLOY.md](DEPLOY.md). The *public site* can also
   be published as plain static files and served from nginx or classic FTP webspace:
-  `pnpm publish:static`, see [docs/STATIC.md](docs/STATIC.md).
+  `pnpm publish:static`, see [docs/STATIC.md](docs/STATIC.md). The authoring stack
+  (CMS + publish worker, with a publish button in the admin) is
+  [docs/PUBLISHING.md](docs/PUBLISHING.md).
 - **Hero 3D:** the prism uses `preserve-3d`; it animates in Blink (Chrome/Edge) and
   degrades to a single static face in WebKit — same as the original design.
 - If Next warns about an inferred workspace root, it's the stray `~/package-lock.json`

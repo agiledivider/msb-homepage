@@ -43,6 +43,9 @@ nginx.conf                      # nginx adapter, for Dockerfile.static
 
 Quick local check: `npx serve dist`.
 
+Editors don't run this by hand — the authoring stack has a publish button, a
+nightly run and auto-publish on content change. See [PUBLISHING.md](PUBLISHING.md).
+
 ## Serving it
 
 **Release to the registry — the one command:**
