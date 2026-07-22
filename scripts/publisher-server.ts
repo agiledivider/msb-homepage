@@ -46,7 +46,12 @@ const SITE_CONF_DIR = process.env.SITE_CONF_DIR || ''
 const DEBOUNCE_MS = Number(process.env.PUBLISH_DEBOUNCE_MS || 5 * 60_000)
 /** Nightly run, Berlin local time (the container's TZ). */
 const NIGHTLY_HOUR = Number(process.env.PUBLISH_NIGHTLY_HOUR ?? 3)
-const STATE_FILE = process.env.PUBLISH_STATE_FILE || '/tmp/publish-state.json'
+/**
+ * Persisted, not /tmp: the last result survives a container update, so the
+ * "last published" line and the ETA baseline don't reset every time the image
+ * is rebuilt.
+ */
+const STATE_FILE = process.env.PUBLISH_STATE_FILE || '/state/publish-state.json'
 
 /**
  * The full pipeline, in order. The publisher owns this list (not
@@ -72,7 +77,12 @@ const STAGES: Array<{ key: string; label: string; weight: number }> = [
   { key: 'sync', label: 'Website aktualisieren', weight: 4 },
   { key: 'push', label: 'Image hochladen', weight: 3 },
 ]
-const TOTAL_WEIGHT = STAGES.reduce((n, s) => n + s.weight, 0)
+/**
+ * Stages that will actually run. Skipping the registry push when it is disabled
+ * matters for more than the label: leaving its weight in the denominator caps
+ * the progress bar at 97%, so a finished publish never looks finished.
+ */
+const activeStages = () => STAGES.filter((s) => s.key !== 'push' || PUSH_IMAGE)
 
 type Progress = {
   stage: string
@@ -117,6 +127,7 @@ let debounceTimer: NodeJS.Timeout | null = null
 const log = (msg: string) => console.log(`[publisher] ${new Date().toISOString()} ${msg}`)
 
 async function saveState() {
+  await mkdir(path.dirname(STATE_FILE), { recursive: true }).catch(() => {})
   await writeFile(STATE_FILE, JSON.stringify(state)).catch(() => {})
 }
 async function loadState() {
@@ -186,18 +197,21 @@ async function runPublish(reason: string): Promise<Result> {
 
   /** Record the current stage so /status (and the admin widget) can show it. */
   const setStage = (stage: string, current?: number, total?: number, detail?: string) => {
-    const i = STAGES.findIndex((s) => s.key === stage)
-    const before = STAGES.slice(0, Math.max(0, i)).reduce((n, s) => n + s.weight, 0)
+    const stages = activeStages()
+    const i = stages.findIndex((s) => s.key === stage)
+    if (i === -1) return // unknown stage — leave the last known progress alone
+    const totalWeight = stages.reduce((n, s) => n + s.weight, 0)
+    const before = stages.slice(0, i).reduce((n, s) => n + s.weight, 0)
     const within = total ? Math.min(1, (current ?? 0) / total) : 0
     state.progress = {
       stage,
-      label: STAGES[i]?.label ?? stage,
+      label: stages[i].label,
       step: i + 1,
-      steps: STAGES.length,
+      steps: stages.length,
       current,
       total,
       detail,
-      fraction: Math.min(1, (before + (STAGES[i]?.weight ?? 0) * within) / TOTAL_WEIGHT),
+      fraction: Math.min(1, (before + stages[i].weight * within) / totalWeight),
     }
   }
 
@@ -223,7 +237,7 @@ async function runPublish(reason: string): Promise<Result> {
     const served = await syncToLocalNginx()
     if (served) log(`synced snapshot → ${served}`)
 
-    setStage('push')
+    if (PUSH_IMAGE) setStage('push')
     const sha = (process.env.GIT_SHA || 'nogit').slice(0, 12)
     const image = PUSH_IMAGE
       ? await pushImage(`${sha}-${new Date().toISOString().slice(0, 10)}`)

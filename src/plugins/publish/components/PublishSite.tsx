@@ -112,14 +112,16 @@ export function PublishSite() {
     load()
   }, [load])
 
-  // Poll while a build is in flight so the panel tracks it without a refresh.
-  // 2s rather than 5s: the stages are short enough that a slower poll makes the
-  // bar look stuck. Also poll while a debounced run is pending, so the panel
-  // notices when it starts.
+  // Always poll, fast while something is happening and slowly otherwise.
+  //
+  // Polling only while active looked right but wasn't: publishes also start
+  // from the auto-publish hook, the nightly run, or another editor, and an idle
+  // panel never noticed them — you'd sit on a stale "Zuletzt: …" until you
+  // reloaded. 2s while active because the stages are short enough that a slower
+  // poll makes the bar look stuck.
   useEffect(() => {
     const active = status?.phase === 'running' || status?.phase === 'queued' || Boolean(status?.pending)
-    if (!active) return
-    const t = setInterval(load, 2000)
+    const t = setInterval(load, active ? 2000 : 15000)
     return () => clearInterval(t)
   }, [status?.phase, status?.pending, load])
 
@@ -177,7 +179,7 @@ export function PublishSite() {
                 <Spinner />
                 <strong>
                   {status?.progress
-                    ? `${status.progress.label}${status.progress.detail ? ` — ${status.progress.detail}` : ''} (Schritt ${status.progress.step}/${status.progress.steps})`
+                    ? `${status.progress.label}${status.progress.detail ? ` — ${status.progress.detail}` : ''}`
                     : 'Veröffentlichung wird vorbereitet…'}
                 </strong>
                 {status?.progress?.total && !status.progress.detail ? (
@@ -187,8 +189,8 @@ export function PublishSite() {
                   </span>
                 ) : null}
                 <span style={{ color: 'var(--theme-elevation-600)' }}>
-                  {' '}
-                  · {fmtElapsed(status?.startedAt)}
+                  {status?.progress ? ` · ${Math.round(fraction(status.progress) * 100)}%` : ''} ·{' '}
+                  {fmtElapsed(status?.startedAt)}
                   {eta(status?.startedAt, status?.last?.ok ? status.last.durationMs : undefined)}
                 </span>
                 <br />

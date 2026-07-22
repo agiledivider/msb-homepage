@@ -77,6 +77,8 @@ services:
       - media:/app/public/media:ro
       - site_html:/site/html
       - site_conf:/site/conf
+      # Keeps "last published" + the ETA baseline across container updates.
+      - publisher_state:/state
       # Registry credentials, only needed when PUSH_IMAGE=true.
       - ${DOCKER_CONFIG_DIR:-${HOME}/.docker}:/root/.docker:ro
     depends_on:
@@ -108,3 +110,4 @@ volumes:
   media:
   site_html:
   site_conf:
+  publisher_state:
