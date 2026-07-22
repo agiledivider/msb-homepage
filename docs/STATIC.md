@@ -48,17 +48,22 @@ Quick local check: `npx serve dist`.
 **Release to the registry — the one command:**
 
 ```bash
-NEXT_PUBLIC_SERVER_URL=https://makerspacebonn.de pnpm release:static
+NEXT_PUBLIC_SERVER_URL=https://msb-demo.idiot.games pnpm release:static
 ```
 
 Snapshots the site, builds the nginx image **for `linux/amd64`**, and pushes it to
-`ghcr.io/agiledivider/msb-static` as both `:latest` and an immutable `:<git-sha>`
+`ghcr.io/agiledivider/msb-demo` as both `:latest` and an immutable `:<git-sha>`
 tag for rollback. Then on the server:
 
 ```bash
-docker compose -f docker-compose.static.yml pull
-docker compose -f docker-compose.static.yml up -d
+docker compose -f docker-compose.demo.yml pull
+docker compose -f docker-compose.demo.yml up -d
 ```
+
+> `msb-demo` **used to be the Payload CMS demo** (with `/admin`). It now serves the
+> static bundle instead; `docker-compose.demo.yml` was rewritten accordingly (port
+> 80, no volumes, no `PAYLOAD_SECRET`). The old CMS images are still in the registry
+> by digest if you need one back.
 
 Two things the script refuses to let you get wrong:
 

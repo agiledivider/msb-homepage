@@ -5,10 +5,10 @@
 #   snapshot the site  →  build the nginx image  →  push it to the registry
 #
 # Usage:
-#   NEXT_PUBLIC_SERVER_URL=https://makerspacebonn.de pnpm release:static
+#   NEXT_PUBLIC_SERVER_URL=https://msb-demo.idiot.games pnpm release:static
 #
 # Overridable:
-#   STATIC_IMAGE   target repository   (default ghcr.io/agiledivider/msb-static)
+#   STATIC_IMAGE   target repository   (default ghcr.io/agiledivider/msb-demo)
 #   TAG            moving tag          (default latest)
 #   PLATFORM       target architecture (default linux/amd64)
 #   SKIP_PUBLISH=1 reuse the existing dist/ instead of re-crawling
@@ -17,7 +17,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-IMAGE="${STATIC_IMAGE:-ghcr.io/agiledivider/msb-static}"
+IMAGE="${STATIC_IMAGE:-ghcr.io/agiledivider/msb-demo}"
 TAG="${TAG:-latest}"
 PLATFORM="${PLATFORM:-linux/amd64}"
 
@@ -31,7 +31,7 @@ step() { printf '\n\033[36m[release]\033[0m %s\n' "$1"; }
 : "${NEXT_PUBLIC_SERVER_URL:=}"
 [ -n "$NEXT_PUBLIC_SERVER_URL" ] || die \
   "NEXT_PUBLIC_SERVER_URL is not set. It is baked into the bundle (sitemap, og:image, iCal).
-       Run e.g.  NEXT_PUBLIC_SERVER_URL=https://makerspacebonn.de pnpm release:static"
+       Run e.g.  NEXT_PUBLIC_SERVER_URL=https://msb-demo.idiot.games pnpm release:static"
 case "$NEXT_PUBLIC_SERVER_URL" in
   *localhost*|*127.0.0.1*) die "NEXT_PUBLIC_SERVER_URL is '$NEXT_PUBLIC_SERVER_URL' — that would publish localhost URLs." ;;
 esac
@@ -68,7 +68,11 @@ docker buildx build \
   --tag "$IMAGE:$TAG" \
   --tag "$IMAGE:$SHA" \
   --push \
-  . || die "buildx failed. Not logged in? → docker login ghcr.io"
+  . || die "buildx failed. Common causes:
+         denied / unauthorized      → docker login ghcr.io
+         proxyconnect … i/o timeout → Docker Desktop's internal proxy stalled; just re-run
+                                      (add SKIP_PUBLISH=1 to reuse dist/ and retry the push only),
+                                      or restart Docker Desktop if it persists"
 
 step "Done — $IMAGE:$TAG and $IMAGE:$SHA are live"
-echo "  deploy:  docker compose -f docker-compose.static.yml pull && docker compose -f docker-compose.static.yml up -d"
+echo "  deploy:  docker compose -f docker-compose.demo.yml pull && docker compose -f docker-compose.demo.yml up -d"

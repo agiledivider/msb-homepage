@@ -12,15 +12,22 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ## 🚨 GO-LIVE BLOCKER — Public demo image ships real admin accounts with known passwords
 
-**Status:** deferred to shortly before go-live (decided 2026-07-11)
-**Severity:** Critical — full CMS takeover on the public demo
+**Status:** exposure removed 2026-07-22 — `msb-demo.idiot.games` now serves the **static** site (no Node, no DB, no `/admin`), so there is nothing there to log into. Closes once the host is redeployed from the new `ghcr.io/agiledivider/msb-demo` image.
+**Severity:** was Critical (full CMS takeover on the public demo)
 **Source:** code review #2 (2026-07-11), confirmed live against the baked DB
 
 ### The problem
-The public demo (`msb-demo.idiot.games`) ships **four privileged accounts baked into the image with trivial dev passwords** — anyone can open `/admin` and log in as an editorial admin.
+The public demo used to ship **four privileged accounts baked into the image with trivial dev passwords** — anyone could open `/admin` and log in as an editorial admin.
 
-- `Dockerfile:60` bakes the git-tracked `demo-seed/demo.sqlite` into the image.
-- There is no gate in front of it: since the Basic Auth removal (2026-07-22) the whole app + `/admin` is public by construction.
+- `Dockerfile:60` (the `demo` target) bakes `demo-seed/demo.sqlite` into the image.
+- Nothing gates it: since the Basic Auth removal (2026-07-22) any Payload deployment is public by construction.
+
+### Still outstanding
+The *deployment* is fixed, not the artifact. Before any Payload image is exposed again:
+
+- The `demo` target in `Dockerfile` and `scripts/prepare-demo-seed.sh` still produce an image with those accounts — nothing deploys it today, but it's a loaded gun on the shelf.
+- Previously pushed CMS images remain pullable **by digest** even though `msb-demo:latest` now points at the static site.
+- Rotate `test` / `changeme123` wherever they are reused; treat the existing `demo-seed/demo.sqlite` as compromised.
 
 Baked accounts (verified from `demo-seed/demo.sqlite`):
 
