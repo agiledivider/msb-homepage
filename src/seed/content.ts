@@ -1,0 +1,383 @@
+import path from 'node:path'
+import type { Payload } from 'payload'
+import { EDITORIAL_SKIP } from '../plugins/editorial/types'
+
+/**
+ * The site's hand-authored core content: hero + site globals (menu, footer),
+ * the three structural pages (Verein, Werkzeug, Mitmachen), and a couple of
+ * editorial sample blog posts + events.
+ *
+ * Idempotent — media is matched by filename, pages/blog/events are upserted by
+ * slug, and globals are naturally single-value. Safe to call against a populated
+ * DB (it updates in place), but callers that must not clobber editor changes
+ * should guard on an empty DB first (see prod.ts). Legal pages and the migrated
+ * "Aktuelles" articles are seeded separately via upsertLegalPages() and
+ * upsertLegacyArticles().
+ *
+ * Reads its images from uploads/ (bundled into the runtime image), so the media
+ * files land on the `media` volume on the first production boot.
+ */
+
+// Seed content bypasses the editorial publish gate so `_status: 'published'`
+// stays published instead of being routed into review.
+const PUB = { context: { [EDITORIAL_SKIP]: true } } as const
+
+const UP = path.resolve(process.cwd(), 'uploads')
+const day = 24 * 60 * 60 * 1000
+const at = (offsetDays: number, hour = 10) => {
+  const d = new Date(Date.now() + offsetDays * day)
+  d.setHours(hour, 0, 0, 0)
+  return d.toISOString()
+}
+
+/** Minimal Lexical richText from plain paragraphs. */
+const rt = (paragraphs: string[]) => ({
+  root: {
+    type: 'root',
+    format: '',
+    indent: 0,
+    version: 1,
+    direction: 'ltr' as const,
+    children: paragraphs.map((text) => ({
+      type: 'paragraph',
+      format: '',
+      indent: 0,
+      version: 1,
+      direction: 'ltr' as const,
+      textFormat: 0,
+      children: [{ type: 'text', text, format: 0, style: '', mode: 'normal', detail: 0, version: 1 }],
+    })),
+  },
+})
+
+/** Ensure an image from uploads/ exists in the media library (idempotent by filename). */
+const mediaId = async (payload: Payload, file: string, alt: string) => {
+  const ex = await payload.find({ collection: 'media', where: { filename: { equals: file } }, limit: 1 })
+  if (ex.totalDocs) return ex.docs[0].id
+  return (await payload.create({ collection: 'media', data: { alt }, filePath: path.resolve(UP, file) })).id
+}
+
+/** Create a doc if its slug is missing, otherwise update it in place. */
+const upsertBySlug = async (payload: Payload, collection: 'pages' | 'blog' | 'events', slug: string, data: object) => {
+  const ex = await payload.find({ collection, where: { slug: { equals: slug } }, limit: 1 })
+  if (ex.totalDocs) return payload.update({ collection, id: ex.docs[0].id, data: data as never, ...PUB })
+  return payload.create({ collection, data: data as never, ...PUB })
+}
+
+export async function seedSiteContent(payload: Payload) {
+  // 1 · media
+  const werkstattImg = await mediaId(payload, 'hero-werkstatt.jpg', 'Maker bei der Arbeit in der Werkstatt')
+  const blogImg = await mediaId(payload, 'hero-blog.jpg', 'CNC-Fräse im Einsatz')
+  const eventImg = await mediaId(payload, 'hero-event.jpg', 'Offene Tür in der Werkstatt')
+
+  // 2 · globals (hero drives the front-page hero; site settings drive nav + footer)
+  await payload.updateGlobal({
+    slug: 'heroSettings',
+    data: {
+      badge: 'SEIT 2018',
+      note: 'Hilfe zur Selbsthilfe ✦',
+      eyebrow: '◆ OFFENE WERKSTATT · BONN',
+      pillLabel: 'WERKSTATT',
+      accent: 'green',
+      cornerLabel: '45°',
+      headline: 'Bau, was du dir\nvorstellst.',
+      lede: 'A place to make things — for everyone in Bonn.',
+      description:
+        'Löten, schweißen, fräsen, nähen, 3D-drucken. Sechs Werkstätten, über 40 Maschinen und eine Community, die mit anpackt.',
+      primaryStyle: 'white',
+      primary: { label: 'Offene Tür besuchen →', url: '/events' },
+      secondary: { label: 'Werkstätten ansehen', url: '/werkzeug' },
+      image: werkstattImg,
+      imagePlaceholder: 'Foto: Maker bei der Arbeit',
+      caption: 'Werkstatt · Kennedyallee 18',
+    },
+  })
+
+  await payload.updateGlobal({
+    slug: 'siteSettings',
+    data: {
+      topStrip: {
+        status: '● GEÖFFNET · HEUTE 18:00–21:00 UHR',
+        address: 'Kennedyallee 18 · 53175 Bonn · Tel 0228 81286980',
+      },
+      nav: [
+        { label: 'Start', url: '/' },
+        { label: 'Verein', url: '/verein' },
+        { label: 'Werkzeug & Räume', url: '/werkzeug' },
+        { label: 'Events', url: '/events' },
+        { label: 'Mitmachen', url: '/mitmachen' },
+      ],
+      headerCta: { label: 'Mitglied werden', url: '/mitmachen' },
+      footer: {
+        tagline: 'Eine offene Werkstatt für Bonn. Für alle.',
+        contact: 'Kennedyallee 18 · 53175 Bonn\nTel: +49 (228) 81 28 69 80',
+        links: [
+          { label: 'Der Verein', url: '/verein' },
+          { label: 'Werkzeug & Räume', url: '/werkzeug' },
+          { label: 'Events & Workshops', url: '/events' },
+          { label: 'Mitmachen', url: '/mitmachen' },
+        ],
+      },
+    },
+  })
+
+  // 3 · blog (newest drives hero face 1)
+  await upsertBySlug(payload, 'blog', 'cnc-gezaehmt', {
+    title: 'Wie wir die CNC gezähmt haben',
+    slug: 'cnc-gezaehmt',
+    author: 'Jonas K.',
+    readingTime: '6 MIN',
+    publishedAt: at(-2),
+    subtitle: 'Three weekends, one big cut — a build log.',
+    excerpt:
+      'Von der ersten Fehlkalibrierung bis zum sauberen Finish: unser Team dokumentiert, wie die Yeti-Smartbench endlich lief — inklusive der Fehler.',
+    badge: 'NEU IM BLOG',
+    cover: blogImg,
+    body: rt([
+      'Drei Wochenenden, eine große Fräsung — und jede Menge Lehrgeld. Hier das komplette Logbuch.',
+      'Am Anfang stand die Kalibrierung. Oder besser: die Fehlkalibrierung. Der erste Schnitt saß daneben, der zweite auch.',
+      'Am Ende lief die Yeti-Smartbench sauber durch. Was wir gelernt haben, steht hier — Fehler inklusive.',
+    ]),
+    _status: 'published',
+  })
+
+  await upsertBySlug(payload, 'blog', 'loeten-einsteiger', {
+    title: 'Löten für Einsteiger:innen',
+    slug: 'loeten-einsteiger',
+    author: 'Mira T.',
+    readingTime: '4 MIN',
+    publishedAt: at(-9),
+    subtitle: 'From cold joints to clean solder.',
+    excerpt:
+      'Ein kurzer Leitfaden aus unserem Elektronik-Workshop — die häufigsten Anfängerfehler und wie du sie vermeidest.',
+    cover: werkstattImg,
+    body: rt([
+      'Löten sieht schwer aus, ist aber schnell gelernt. Hier die Basics aus unserem Workshop.',
+      'Saubere Spitze, richtige Temperatur, genug Flussmittel — der Rest ist Übung.',
+    ]),
+    _status: 'published',
+  })
+
+  // 4 · events (relative to today so "next upcoming" always resolves)
+  const events = [
+    {
+      title: 'Offene Tür — Führung durch die Werkstätten',
+      slug: 'offene-tuer',
+      off: 2,
+      hour: 10,
+      timeLabel: 'ab 10',
+      category: 'FÜR ALLE · KOSTENLOS',
+      tagColor: 'green' as const,
+      description:
+        'Du willst wissen, was bei uns geht? Komm vorbei, lern uns kennen — kostenlose Führung durch alle sechs Werkstätten. Ab 10:00 Uhr, für alle.',
+    },
+    {
+      title: 'Handarbeitstreff & Makerbrunch',
+      slug: 'handarbeitstreff',
+      off: 5,
+      hour: 10,
+      timeLabel: '10–14',
+      category: 'HANDARBEIT',
+      tagColor: 'orange' as const,
+      description: 'Nähen, sticken, stricken, reparieren — plus gemeinsames Brunch. Jede:r bringt was mit.',
+    },
+    {
+      title: 'Spieleabend',
+      slug: 'spieleabend',
+      off: 15,
+      hour: 19,
+      timeLabel: '19–21',
+      category: 'FÜR ALLE',
+      tagColor: 'green' as const,
+      description: 'Jeden dritten Dienstag im Monat. Ein paar Spiele sind da — eigene gerne mitbringen.',
+    },
+    {
+      title: 'Schmieden leicht gemacht — 101',
+      slug: 'schmieden-101',
+      off: 25,
+      hour: 14,
+      timeLabel: '14:00',
+      category: 'WORKSHOP · TICKET',
+      tagColor: 'orange' as const,
+      description: 'Grundlagen & Schutzmaßnahmen, eigenes Werkstück. 10 € / Ticket.',
+    },
+    {
+      title: 'FrOSCon 2026 — Sankt Augustin',
+      slug: 'froscon-2026',
+      off: 40,
+      hour: 9,
+      timeLabel: 'ganztägig',
+      category: 'EXTERN',
+      tagColor: 'neutral' as const,
+      description: 'Wir sind dabei. Die große Open-Source-Konferenz der Region.',
+    },
+    {
+      title: '132. Scrumtisch Bonn',
+      slug: 'scrumtisch-132',
+      off: -10,
+      hour: 19,
+      timeLabel: 'ab 19',
+      category: 'GAST-EVENT',
+      tagColor: 'neutral' as const,
+      description: 'Offener Treff rund um Agile, Scrum, Kanban & Co. Get-Together ab 19:00.',
+    },
+  ]
+  for (const e of events) {
+    await upsertBySlug(payload, 'events', e.slug, {
+      title: e.title,
+      slug: e.slug,
+      date: at(e.off, e.hour),
+      timeLabel: e.timeLabel,
+      location: 'Kennedyallee 18',
+      category: e.category,
+      tagColor: e.tagColor,
+      image: eventImg,
+      description: e.description,
+      _status: 'published',
+    })
+  }
+
+  // 5 · pages (block layouts)
+  await upsertBySlug(payload, 'pages', 'verein', {
+    title: 'Der Verein',
+    slug: 'verein',
+    _status: 'published',
+    layout: [
+      {
+        blockType: 'pageIntro',
+        tag: 'DER VEREIN',
+        tagColor: 'green',
+        meta: 'seit 03.03.2018 · gemeinnützig',
+        headline: 'Eine offene Werkstatt für Bonn. Für alle.',
+        lede: 'An open workshop where a curious community creates, gets inspired and learns from one another.',
+      },
+      {
+        blockType: 'vereinIntro',
+        body: rt([
+          'Bei uns findet eine Community von engagierten, neugierigen Menschen zusammen, die kreativ Neues erschaffen. Wenn wir geöffnet haben, kann jede:r kommen und am eigenen Projekt arbeiten.',
+          'Brauchst du Hilfe, unterstützen wir gern mit Rat und Denkanstößen — nach dem Motto Hilfe zur Selbsthilfe. Am meisten freuen wir uns, wenn du dein Wissen weitergibst.',
+        ]),
+        quote:
+          '„Bonn hat mit uns eine offene Werkstatt, in der Menschen kreativ und neugierig Neues erschaffen — und voneinander lernen."',
+        timelineTitle: 'DIE KURZE GESCHICHTE',
+        timeline: [
+          { year: '2018', text: 'Vereinsgründung, Gemeinnützigkeit & Eröffnung am 3. März — mit vielen Gästen.' },
+          { year: '2019', text: 'Öffnungszeiten ausgeweitet, Kernteam wächst, erste Workshop-Reihen.' },
+          { year: 'heute', text: '6 Werkstätten, über 40 Maschinen, regelmäßige offene Türen & Kurse.' },
+        ],
+        values: [
+          { title: 'Für alle', text: 'Anfänger:innen bis Profis, jung bis alt — jede:r ist willkommen.' },
+          { title: 'Hilfe zur Selbsthilfe', text: 'Wir helfen ein Stück weiter — bauen tust du selbst.' },
+          { title: 'Wissen teilen', text: 'Workshops, Themenabende & gegenseitiges Lernen.' },
+        ],
+      },
+    ],
+  })
+
+  await upsertBySlug(payload, 'pages', 'werkzeug', {
+    title: 'Werkzeug & Räume',
+    slug: 'werkzeug',
+    _status: 'published',
+    layout: [
+      {
+        blockType: 'pageIntro',
+        tag: 'AUSSTATTUNG',
+        tagColor: 'orange',
+        meta: '6 Werkstätten · 40+ Maschinen',
+        headline: 'Werkzeug & Räume',
+        lede: "Everything you need to build — you may use all tools once you've been briefed.",
+      },
+      {
+        blockType: 'workshops',
+        variant: 'detailed',
+        footnote: '⚠ Maschinen dürfen nach einer Einweisung selbstständig genutzt werden. Sicherheit geht vor.',
+        items: [
+          {
+            code: 'A1 · ELEKTRONIK',
+            title: 'Elektronik & Löten',
+            desc: '3 Lötstationen, Oszilloskope, Labornetzteile, Reflowofen, Breadboards. Hardware: Raspberry Pi, Arduino, Calliope, BOB3.',
+          },
+          {
+            code: 'A2 · METALL',
+            title: 'Metallwerkstatt',
+            desc: 'Schweißgerät MIG/MAG Puls (AC/DC), Metallbandsäge, Abkantbank, Drehmaschine, Tischfräse.',
+          },
+          {
+            code: 'A3 · HOLZ',
+            title: 'Holzwerkstatt',
+            desc: 'Formatkreissäge, Kreissäge und leistungsfähige Absauganlage für sauberes Arbeiten.',
+          },
+          {
+            code: 'A4 · TEXTIL',
+            title: 'Textil & Handarbeit',
+            desc: 'Nähmaschinen, Stickmaschine, Strickmaschine, Folienplotter & Textilveredelung.',
+          },
+          {
+            code: 'A5 · CNC / 3D',
+            title: '3D-Druck & CNC',
+            desc: '3D-Drucker und Yeti-Smartbench CNC-Fräse für Holz, Acryl u.v.m. Einweisung im CNC-Workshop inklusive.',
+          },
+          {
+            code: 'A6 · DIGITAL',
+            title: 'CAD & Digital',
+            desc: 'Konstruieren mit FreeCAD, Fusion 360 & EstlCAM — regelmäßige Einführungs-Workshops.',
+          },
+        ],
+      },
+    ],
+  })
+
+  await upsertBySlug(payload, 'pages', 'mitmachen', {
+    title: 'Mitmachen',
+    slug: 'mitmachen',
+    _status: 'published',
+    layout: [
+      {
+        blockType: 'pageIntro',
+        tag: 'MITMACHEN',
+        tagColor: 'orange',
+        meta: 'Mitglied · Fördern · Spenden',
+        headline: 'Mach mit. Bau mit.',
+        lede: 'Join us, support us as a sustaining member, or donate — every bit helps.',
+      },
+      {
+        blockType: 'joinOptions',
+        options: [
+          {
+            number: '01',
+            eyebrow: 'AKTIV',
+            tint: 'green',
+            title: 'Mitglied werden',
+            text: 'Nutze Werkstatt & Maschinen zu allen Öffnungszeiten, arbeite an eigenen Projekten und bring dich in die Community ein.',
+            link: { label: 'Antrag stellen →', url: '#' },
+          },
+          {
+            number: '02',
+            eyebrow: 'FÖRDERN',
+            tint: 'light',
+            title: 'Fördermitglied',
+            text: 'Du willst uns unterstützen, ohne selbst zu basteln? Als Fördermitglied hältst du den MakerSpace am Laufen.',
+            link: { label: 'Fördern →', url: '#' },
+          },
+          {
+            number: '03',
+            eyebrow: 'SPENDEN',
+            tint: 'light',
+            title: 'Geld- & Sachspende',
+            text: 'Über Geld- und Sachspenden freuen wir uns immer. Ab 100 € gern auch gegen Spendenquittung.',
+            link: { label: 'Spenden →', url: '#' },
+          },
+        ],
+        location: {
+          eyebrow: 'SO FINDEST DU UNS',
+          title: 'Kennedyallee 18',
+          line: '53175 Bonn · Tel +49 (228) 81 28 69 80',
+          transit: 'Linie 16 / 63 → Hochkreuz / Deutsches Museum\nLinie 610 / 611 → Kennedyallee',
+          mapPlaceholder: 'Karte / Foto vom Eingang',
+        },
+      },
+    ],
+  })
+
+  payload.logger.info('✓ site content seeded (globals, pages, blog, events, media)')
+}

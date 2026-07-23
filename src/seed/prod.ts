@@ -1,6 +1,9 @@
 import config from '@payload-config'
 import type { Payload } from 'payload'
 import { getPayload } from 'payload'
+import { seedSiteContent } from './content'
+import { upsertLegacyArticles } from './legacy'
+import { upsertLegalPages } from './legal'
 
 /**
  * Production seed, run on container start (after migrations). Idempotent:
@@ -9,7 +12,20 @@ import { getPayload } from 'payload'
  *  - if INIT_ADMIN_EMAIL + INIT_ADMIN_PASSWORD are set and that user doesn't
  *    exist yet, creates a ready-to-use admin (editorialRoles=admin +
  *    Administrator role) so a fresh deploy isn't locked out.
+ *  - on a *fresh* DB only (no pages/blog/events yet), seeds the real launch
+ *    content: hand-authored globals + pages, legal pages, and the migrated
+ *    "Aktuelles" blog posts + events. Skipped once any content exists, so it
+ *    never clobbers edits made through /admin.
  */
+
+/** True only on a genuinely empty DB — nothing to clobber. */
+const isFreshDb = async (payload: Payload) => {
+  for (const collection of ['pages', 'blog', 'events'] as const) {
+    const { totalDocs } = await payload.find({ collection, limit: 0 })
+    if (totalDocs > 0) return false
+  }
+  return true
+}
 const COLLECTIONS = ['blog', 'events', 'pages']
 const ACTIONS = ['create', 'read', 'update', 'delete']
 
@@ -61,6 +77,17 @@ const run = async () => {
       })
       payload.logger.info(`created init admin: ${email}`)
     }
+  }
+
+  // Launch content — only on a fresh DB, so editor changes are never overwritten.
+  if (await isFreshDb(payload)) {
+    payload.logger.info('fresh DB → seeding launch content')
+    await seedSiteContent(payload) // globals (menu/footer/hero), pages, sample blog + events
+    await upsertLegalPages() // Impressum / Datenschutz / Haftung (+ Satzung PDF)
+    await upsertLegacyArticles() // migrated "Aktuelles" → real blog posts + events (301 redirects)
+    payload.logger.info('✓ launch content seeded')
+  } else {
+    payload.logger.info('content already present → skipping content seed')
   }
 
   payload.logger.info('✓ prod seed done')

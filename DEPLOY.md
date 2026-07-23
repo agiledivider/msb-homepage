@@ -10,12 +10,33 @@ media on **persistent volumes**.
 ## Build & push
 
 ```bash
-docker build -t <registry>/msb-homepage:TAG .
-docker push <registry>/msb-homepage:TAG
+pnpm release:app
 ```
 
-The image builds for its own platform. To target a different server arch, use
-buildx, e.g. `docker buildx build --platform linux/amd64 -t ... --push .`
+Builds the app image and pushes it, tagged both `:latest` and `:<git-sha>` (so a
+bad release can be rolled back to a known image). Defaults:
+
+| var        | default                              | note                          |
+| ---------- | ------------------------------------ | ----------------------------- |
+| `APP_IMAGE`| `ghcr.io/agiledivider/msb-homepage`  | target repository             |
+| `TAG`      | `latest`                             | moving tag                    |
+| `PLATFORM` | `linux/amd64`                        | server arch (cross-built)     |
+| `TARGET`   | `runner`                             | `demo` bakes in `demo-seed/`  |
+
+```bash
+APP_IMAGE=ghcr.io/you/msb-homepage TAG=v1.2.0 pnpm release:app
+```
+
+Push first requires `docker login ghcr.io`. The build is cross-platform via
+buildx, so it runs on Apple Silicon and produces an `amd64` image. Unlike the
+static build, `NEXT_PUBLIC_SERVER_URL` is **not** baked in — the app reads it
+from the runtime env, so one image serves any origin.
+
+Manual equivalent, if you prefer:
+
+```bash
+docker buildx build --platform linux/amd64 -t <registry>/msb-homepage:TAG --push .
+```
 
 ## Run on a server
 
@@ -34,8 +55,23 @@ buildx, e.g. `docker buildx build --platform linux/amd64 -t ... --push .`
    docker compose -f docker-compose.prod.yml up -d
    ```
 
-On boot the container **runs DB migrations** (schema), then a **seed** (RBAC
-permissions + `Administrator`/`Redakteur` roles — idempotent), then starts.
+On boot the container **runs DB migrations** (schema), then a **seed**, then
+starts. The seed is idempotent and does three things:
+
+1. RBAC permissions + `Administrator`/`Redakteur` roles (every start).
+2. An init admin, if `INIT_ADMIN_*` is set and that user is missing (see below).
+3. **On a fresh DB only** (no pages/blog/events yet), the **launch content**:
+   the menu/footer + hero globals, the structural pages (Verein, Werkzeug,
+   Mitmachen), the legal pages (Impressum, Datenschutz, Haftung + Satzung PDF),
+   and the real blog posts + events (the migrated "Aktuelles" articles, with
+   301-redirect ids, plus a few hand-authored samples). Once any content exists
+   this step is skipped, so it never overwrites edits made through `/admin`.
+
+So a first deploy comes up **fully populated and browsable** — no empty-DB 500s,
+nothing to import by hand. The content lives in `src/seed/` (and its images in
+`uploads/`, bundled into the image); edit there and rebuild to change the
+launch set. The 200 synthetic demo events (`src/seed/events.ts`) are **not**
+part of the production seed.
 
 **Set `INIT_ADMIN_EMAIL` + `INIT_ADMIN_PASSWORD` for the first deploy.** On a fresh
 DB that creates a ready admin (admin role + full permissions) so you can log

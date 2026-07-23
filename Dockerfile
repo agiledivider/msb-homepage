@@ -37,6 +37,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/src ./src
+# uploads/ holds the seed's source images (hero photos, legacy article images,
+# Satzung PDF). The first-boot prod seed reads them from here and writes the
+# resulting media onto the `media` volume. Not served directly.
+COPY --from=builder --chown=nextjs:nodejs /app/uploads ./uploads
 COPY --from=builder --chown=nextjs:nodejs \
   /app/package.json /app/next.config.mjs /app/tsconfig.json ./
 

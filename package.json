@@ -15,6 +15,7 @@
     "start": "next start",
     "publish:static": "tsx scripts/publish-static.ts",
     "release:static": "scripts/release-static.sh",
+    "release:app": "scripts/release-app.sh",
     "publisher": "tsx scripts/publisher-server.ts",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
