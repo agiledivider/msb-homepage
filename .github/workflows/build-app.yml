@@ -1,0 +1,65 @@
+# Build and push the Payload + Next.js app image on a native amd64 runner.
+#
+# This is the CI equivalent of `pnpm release:app`. GitHub's ubuntu-latest is
+# native linux/amd64, so the Next build runs at full speed — no QEMU emulation
+# like a cross-build from an Apple Silicon laptop.
+#
+# Auth: the built-in GITHUB_TOKEN pushes to ghcr.io for packages owned by this
+# repo's owner (no PAT needed) — hence `permissions: packages: write` below.
+name: build-app
+
+on:
+  # Limited to this branch on purpose.
+  push:
+    branches: [feat/payload-cms]
+  # Allow a manual run from the Actions tab as well.
+  workflow_dispatch:
+
+# A newer push supersedes an in-flight build for the same ref.
+concurrency:
+  group: build-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Moving `latest` tag + an immutable short-sha tag, matching release-app.sh.
+      - name: Compute image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/msb-homepage
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          # `runner` (not the default final `demo` stage, which needs demo-seed/).
+          target: runner
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Reuse layers across runs to keep rebuilds fast.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
