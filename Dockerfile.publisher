@@ -45,6 +45,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# src/payload-types.ts is git-ignored (and excluded from the build context), so
+# generate it into the image — the runtime `next build` type-checks against it.
+# Placeholders are inline (not ENV) so no build value persists in the image.
+RUN PAYLOAD_SECRET=build-placeholder DATABASE_URI=file:/tmp/build.db pnpm run generate:types
+
 # Builds are CPU/RAM hungry; keep them off the Payload container's back.
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s CMD node -e "fetch('http://localhost:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

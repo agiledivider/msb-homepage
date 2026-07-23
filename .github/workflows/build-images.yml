@@ -1,12 +1,16 @@
-# Build and push the Payload + Next.js app image on a native amd64 runner.
+# Build and push the deployment images on a native amd64 runner.
 #
-# This is the CI equivalent of `pnpm release:app`. GitHub's ubuntu-latest is
-# native linux/amd64, so the Next build runs at full speed — no QEMU emulation
-# like a cross-build from an Apple Silicon laptop.
+# CI equivalent of `pnpm release:app`. GitHub's ubuntu-latest is native
+# linux/amd64, so the Next build runs at full speed — no QEMU emulation like a
+# cross-build from an Apple Silicon laptop.
+#
+# Builds two images in parallel:
+#   - msb-homepage : the Payload + Next.js app (Dockerfile, `runner` stage)
+#   - msb-publisher: the static-snapshot publisher worker (Dockerfile.publisher)
 #
 # Auth: the built-in GITHUB_TOKEN pushes to ghcr.io for packages owned by this
 # repo's owner (no PAT needed) — hence `permissions: packages: write` below.
-name: build-app
+name: build-images
 
 on:
   # Limited to this branch on purpose.
@@ -17,7 +21,7 @@ on:
 
 # A newer push supersedes an in-flight build for the same ref.
 concurrency:
-  group: build-app-${{ github.ref }}
+  group: build-images-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -26,6 +30,19 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: app
+            image: msb-homepage
+            dockerfile: Dockerfile
+            target: runner
+          - name: publisher
+            image: msb-publisher
+            dockerfile: Dockerfile.publisher
+            target: runner
+    name: build (${{ matrix.name }})
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -45,7 +62,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/${{ github.repository_owner }}/msb-homepage
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
           tags: |
             type=raw,value=latest
             type=sha,format=short
@@ -54,12 +71,12 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          # `runner` (not the default final `demo` stage, which needs demo-seed/).
-          target: runner
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Reuse layers across runs to keep rebuilds fast.
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Per-image cache scope so the two builds don't clobber each other.
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
