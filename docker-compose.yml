@@ -1,10 +1,20 @@
-# The whole system, locally: CMS + publisher + the published website.
+# The whole system: CMS + publisher + the published website.
 #
-#   cp .env.local.example .env    # fill in PAYLOAD_SECRET + PUBLISH_TOKEN
-#   docker compose up -d --build
+# Two ways to run it — same file, both modes, because each service carries both a
+# `build:` section and a ghcr `image:` tag:
 #
-#   admin    → http://localhost:3000/admin
-#   website  → http://localhost:8080     (after the first publish)
+#   Local (build from source):
+#     cp .env.local.example .env      # fill in PAYLOAD_SECRET + PUBLISH_TOKEN
+#     docker compose up -d --build
+#
+#   Server / new instance (pull the images CI pushed to ghcr — no source needed):
+#     docker compose pull            # fetches ghcr.io/agiledivider/msb-homepage + msb-publisher
+#     docker compose up -d
+#     # `docker login ghcr.io` first if the packages are private (or set
+#     #  GHCR_USER/GHCR_TOKEN and `echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin`)
+#
+#   admin    → http://localhost:3000/admin   (or your NEXT_PUBLIC_SERVER_URL)
+#   website  → http://localhost:8080         (after the first publish)
 #
 # `payload` and `publisher` are the authoring stack; `web` stands in for the
 # public host. In production the website is a separate deployment that pulls the
@@ -12,7 +22,7 @@
 # a shared volume so the full loop can be exercised without a registry.
 #
 # PUSH_IMAGE defaults to false below: a local test must not be able to overwrite
-# the production tag. Set it true (and mount registry credentials) to also push.
+# the production tag. Set it true (with GHCR_USER/GHCR_TOKEN) to also push.
 
 services:
   payload:
@@ -20,7 +30,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
-    image: msb-payload:local
+    image: ghcr.io/agiledivider/msb-homepage:latest
     restart: unless-stopped
     ports:
       - '${PORT:-3000}:3000'
@@ -44,7 +54,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.publisher
-    image: msb-publisher:local
+    image: ghcr.io/agiledivider/msb-publisher:latest
     restart: unless-stopped
     # No `ports:` — only payload may reach it, and only after checking the
     # caller's role.
