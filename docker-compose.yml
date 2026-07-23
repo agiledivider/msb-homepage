@@ -32,6 +32,9 @@ services:
       target: runner
     image: ghcr.io/agiledivider/msb-homepage:latest
     restart: unless-stopped
+    # Ceiling so a runaway can't take the whole box. `next start` + Payload sits
+    # around 0.4–0.7 GB; 1 GB leaves headroom. Override per host if needed.
+    mem_limit: ${PAYLOAD_MEM_LIMIT:-1g}
     ports:
       - '${PORT:-3000}:3000'
     environment:
@@ -56,6 +59,12 @@ services:
       dockerfile: Dockerfile.publisher
     image: ghcr.io/agiledivider/msb-publisher:latest
     restart: unless-stopped
+    # The on-demand `next build` is the memory-hungry step (~1.5–2.5 GB peak).
+    # This cap must sit ABOVE that peak, or the build worker gets OOM-killed
+    # ("exited with code: 1"). If host swap exists, the container may spill into
+    # it up to the same amount again (memswap defaults to 2× mem_limit). On a
+    # tight box, raise this or cap the build workers instead.
+    mem_limit: ${PUBLISHER_MEM_LIMIT:-2560m}
     # No `ports:` — only payload may reach it, and only after checking the
     # caller's role.
     environment:
@@ -101,6 +110,8 @@ services:
   web:
     image: nginx:1.27-alpine
     restart: unless-stopped
+    # nginx serving static files barely uses anything; a small cap is plenty.
+    mem_limit: ${WEB_MEM_LIMIT:-128m}
     ports:
       - '${WEB_PORT:-8080}:80'
     volumes:
