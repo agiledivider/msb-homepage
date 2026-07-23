@@ -115,17 +115,6 @@ export const kanidmOAuth = OAuth2Plugin({
     }
     const claims = (await res.json()) as Record<string, unknown>
 
-    // TEMP role-mapping debug — remove once the claim map is confirmed working.
-    req.payload.logger.info(
-      {
-        roles_claim_name: rolesClaim,
-        roles_claim_value: claims[rolesClaim],
-        all_claim_keys: Object.keys(claims),
-        mapped_role_names: mapClaimToRoleNames(claims[rolesClaim]),
-      },
-      'Kanidm OIDC — roles debug',
-    )
-
     const email = typeof claims.email === 'string' ? claims.email : undefined
     if (!email) {
       // useEmailAsIdentity needs an email; surface a clear cause instead of a
