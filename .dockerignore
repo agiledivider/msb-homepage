@@ -9,6 +9,9 @@ Dockerfile
 .dockerignore
 docker-compose*.yml
 
+# generated in-image (RUN generate:types) — don't ship a stale local copy
+src/payload-types.ts
+
 # local sqlite DBs (prod uses a volume)
 *.db
 *.db-journal

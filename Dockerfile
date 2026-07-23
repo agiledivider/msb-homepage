@@ -23,7 +23,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # placeholders so config init during `next build` doesn't complain; no DB is touched
 ENV PAYLOAD_SECRET=build-placeholder DATABASE_URI=file:/tmp/build.db
-RUN pnpm run build
+# Generate Payload's types first: src/payload-types.ts is git-ignored, so it is
+# absent on a clean checkout (e.g. CI) and the type-checked build would fail on
+# `@/payload-types`. It is derived from the config, so regenerating is correct.
+RUN pnpm run generate:types && pnpm run build
 
 # ---- runtime ----
 # Regular `next start` (not standalone) — most reliable for Payload's admin/api
