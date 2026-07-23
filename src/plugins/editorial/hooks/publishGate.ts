@@ -8,12 +8,12 @@ import { EDITORIAL_SKIP } from '../types'
  * draft). Reviewers/admins publish normally and the doc is marked approved.
  */
 export const makePublishGate =
-  (reviewerRoles: string[]): CollectionBeforeChangeHook =>
+  (): CollectionBeforeChangeHook =>
   ({ data, req, context }) => {
     if (context?.[EDITORIAL_SKIP]) return data
     if (data?._status !== 'published') return data
 
-    if (isReviewer(req.user, reviewerRoles)) {
+    if (isReviewer(req.user)) {
       data.reviewStatus = 'approved'
       if (req.user?.id) data.reviewedBy = req.user.id
       return data

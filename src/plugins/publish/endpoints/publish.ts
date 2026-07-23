@@ -1,6 +1,6 @@
 import type { Endpoint, PayloadRequest } from 'payload'
-import { hasAnyRole } from '../../editorial/access'
-import { type PublishOptions, publisherToken, publisherUrl } from '../types'
+import { isReviewer } from '../../editorial/access'
+import { publisherToken, publisherUrl } from '../types'
 
 /**
  * Talk to the publisher service. It lives on the internal compose network and
@@ -23,15 +23,16 @@ async function callPublisher(path: string, init?: RequestInit) {
   return res.json()
 }
 
-const allowed = (req: PayloadRequest, roles: string[]) => Boolean(req.user) && hasAnyRole(req.user, roles)
+// Publishing the live site is a reviewer/admin action → editorial:review.
+const allowed = (req: PayloadRequest) => Boolean(req.user) && isReviewer(req.user)
 
 /** POST /api/publish/trigger — queue a site rebuild + push. */
-export const makeTriggerEndpoint = (roles: string[]): Endpoint => ({
+export const makeTriggerEndpoint = (): Endpoint => ({
   path: '/publish/trigger',
   method: 'post',
   handler: async (req: PayloadRequest) => {
     if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-    if (!allowed(req, roles)) return Response.json({ error: 'Forbidden' }, { status: 403 })
+    if (!allowed(req)) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
     try {
       const who = req.user.email ?? `user ${req.user.id}`
@@ -49,12 +50,12 @@ export const makeTriggerEndpoint = (roles: string[]): Endpoint => ({
 })
 
 /** GET /api/publish/status — current phase + last result, for the admin widget. */
-export const makeStatusEndpoint = (roles: string[]): Endpoint => ({
+export const makeStatusEndpoint = (): Endpoint => ({
   path: '/publish/status',
   method: 'get',
   handler: async (req: PayloadRequest) => {
     if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-    if (!allowed(req, roles)) return Response.json({ error: 'Forbidden' }, { status: 403 })
+    if (!allowed(req)) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
     try {
       return Response.json(await callPublisher('/status'))
@@ -65,7 +66,4 @@ export const makeStatusEndpoint = (roles: string[]): Endpoint => ({
   },
 })
 
-export const makePublishEndpoints = (options: Required<Pick<PublishOptions, 'publisherRoles'>>): Endpoint[] => [
-  makeTriggerEndpoint(options.publisherRoles),
-  makeStatusEndpoint(options.publisherRoles),
-]
+export const makePublishEndpoints = (): Endpoint[] => [makeTriggerEndpoint(), makeStatusEndpoint()]

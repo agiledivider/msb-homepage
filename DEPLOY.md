@@ -80,6 +80,73 @@ screen starts as a plain editor with no permissions — and since there's no
 existing admin to grant them a role yet, you'd be locked out. Once you have one
 admin, you can drop the `INIT_ADMIN_*` vars.
 
+## Single sign-on (Kanidm / OIDC)
+
+Optional. When configured, `/admin/login` gains a **"Sign in with Kanidm"**
+button next to the normal email/password form — password login stays available,
+so keep one local admin as a break-glass account for when the IdP is
+unreachable. Leave the vars unset for password-only login.
+
+### Configure Kanidm
+
+Access and role are separate: a dedicated **access group** (`msb-payload-user`)
+carries the scope map that lets someone log in, while **role groups** carry a
+**claim map** that emits a clean value into a `cms_roles` claim. A user must be in
+the access group *and* a role group. This keeps Kanidm sending only what the app
+needs — no full group list, no UUIDs.
+
+```bash
+# 1. the client + access group scope map (who may log in)
+kanidm system oauth2 create msb-payload "MakerSpace CMS" https://cms.example.com
+kanidm system oauth2 add-redirect-url msb-payload \
+  https://cms.example.com/api/users/oauth/kanidm/callback
+kanidm system oauth2 update-scope-map msb-payload msb-payload-user openid email profile
+
+# 2. one group per role (skip any that already exist), add your people
+kanidm group create msb-payload-admin
+kanidm group create msb-payload-reviewer
+kanidm group create msb-payload-editor
+# a role-holder must also be in the access group:
+kanidm group add-members msb-payload-user  your-account
+kanidm group add-members msb-payload-admin your-account
+
+# 3. claim map — role-group membership → clean value in the `cms_roles` claim
+kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-admin    admin
+kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-reviewer reviewer
+kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-editor   editor
+kanidm system oauth2 update-claim-map-join msb-payload cms_roles array
+
+# 4. the client secret → KANIDM_CLIENT_SECRET
+kanidm system oauth2 show-basic-secret msb-payload
+```
+
+`msb-payload-user` decides *who can log in*; the role groups decide *what they can
+do*. A user's token carries just `cms_roles: ["editor"]` (or `admin` / `reviewer`)
+— nothing else. Someone in the access group but no role group logs in with no
+editorial access (deny by default). Group/claim names are examples; the app reads
+the claim named `cms_roles` unless you set `KANIDM_ROLES_CLAIM`.
+
+The redirect URL must be exactly `<NEXT_PUBLIC_SERVER_URL>/api/users/oauth/kanidm/callback`.
+Kanidm's PKCE (S256) and HTTP-Basic token auth are both handled by the app.
+
+### Configure the app
+
+Add to `.env` (the secret belongs here, never on a command line):
+
+```env
+KANIDM_ISSUER=https://idm.example.com        # base URL, no trailing slash
+KANIDM_CLIENT_ID=msb-payload
+KANIDM_CLIENT_SECRET=<show-basic-secret output>
+# optional — only if you named the claim something other than cms_roles:
+# KANIDM_ROLES_CLAIM=cms_roles
+```
+
+Users are provisioned on first login and matched to any existing account by
+email. **Roles are re-synced from the `cms_roles` claim on every SSO login** —
+so Kanidm group membership is the source of truth, and changes take effect on the
+user's next login. Roles are hierarchical: admin ⊇ reviewer ⊇ editor. Manage
+roles in Kanidm, not in `/admin`, for SSO users. Implementation: `src/plugins/oidc/`.
+
 ## What persists
 
 - **`db` volume** → `/app/data/msb.db` (SQLite). Keep it to keep your content.

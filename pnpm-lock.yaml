@@ -44,6 +44,9 @@ importers:
       payload:
         specifier: 3.85.2
         version: 3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6)
+      payload-oauth2:
+        specifier: 1.0.21
+        version: 1.0.21(payload@3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6))
       payload-rbac-plugin:
         specifier: 1.1.0
         version: 1.1.0(payload@3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6))
@@ -2378,6 +2381,12 @@ packages:
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
+
+  payload-oauth2@1.0.21:
+    resolution: {integrity: sha512-YSdgiob3o/HN4od0n0FqMoZyENBC2z0YTPLT7DNtpbwUxCnP81Y5lHzIt1tYmGMzPYiA47pJLnsqT7z9UCyNbg==}
+    hasBin: true
+    peerDependencies:
+      payload: ^3
 
   payload-rbac-plugin@1.1.0:
     resolution: {integrity: sha512-2c+o5lHOZkOG8JxPqkcRSPKv3T3iIpp1SYH2Q4xw/yMsYd+P+c9Keds+hKzKGYxIvIJRoQvgekhrCUjxkcUQ8Q==}
@@ -5017,6 +5026,10 @@ snapshots:
   path-to-regexp@6.3.0: {}
 
   path-type@4.0.0: {}
+
+  payload-oauth2@1.0.21(payload@3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6)):
+    dependencies:
+      payload: 3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6)
 
   payload-rbac-plugin@1.1.0(payload@3.85.2(bufferutil@4.1.0)(graphql@16.14.2)(typescript@5.9.3)(utf-8-validate@6.0.6)):
     dependencies:

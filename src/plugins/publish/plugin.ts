@@ -1,7 +1,7 @@
 import type { Config, Plugin } from 'payload'
 import { makePublishEndpoints } from './endpoints/publish'
 import { makeAutoPublishHook } from './hooks/autoPublish'
-import { PUBLISHER_ROLES_DEFAULT, type PublishOptions } from './types'
+import type { PublishOptions } from './types'
 
 /**
  * Site publishing: lets publishers trigger the static build + push from the
@@ -17,7 +17,6 @@ export const sitePublishing =
   (config: Config): Config => {
     if (options.disabled) return config
 
-    const publisherRoles = options.publisherRoles ?? PUBLISHER_ROLES_DEFAULT
     const autoPublish = options.autoPublish ?? true
     const targets = new Set(options.collections)
 
@@ -45,6 +44,6 @@ export const sitePublishing =
         },
       },
       collections,
-      endpoints: [...(config.endpoints ?? []), ...makePublishEndpoints({ publisherRoles })],
+      endpoints: [...(config.endpoints ?? []), ...makePublishEndpoints()],
     }
   }

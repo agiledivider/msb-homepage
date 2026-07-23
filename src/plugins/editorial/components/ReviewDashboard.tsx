@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
+import { hasPermission } from 'payload-rbac-plugin'
 import { isReviewer } from '../access'
-import { REVIEWER_ROLES_DEFAULT } from '../types'
 import { DashboardActions } from './DashboardActions'
 
 type Props = { payload: Payload; user?: unknown }
@@ -102,11 +102,14 @@ function SectionBox({ section }: { section: Section }) {
  * überarbeiten" (changes_requested); someone with both roles sees both.
  */
 export async function ReviewDashboard({ payload, user }: Props) {
-  const roles = (user as { editorialRoles?: string[] } | undefined)?.editorialRoles ?? []
-  if (roles.length === 0) return null
+  const collections = workflowCollections(payload)
+  // review box → editorial:review; edit box → content-edit permission on any workflow collection
+  const canReview = isReviewer(user)
+  const canEdit = collections.some((slug) => hasPermission(user as never, `${slug}:update`))
+  if (!canReview && !canEdit) return null
 
   const bases: Omit<Section, 'groups' | 'total'>[] = []
-  if (isReviewer(user, REVIEWER_ROLES_DEFAULT)) {
+  if (canReview) {
     bases.push({
       key: 'review',
       label: 'Zur Freigabe',
@@ -114,7 +117,7 @@ export async function ReviewDashboard({ payload, user }: Props) {
       status: 'in_review',
     })
   }
-  if (roles.includes('editor')) {
+  if (canEdit) {
     bases.push({
       key: 'edit',
       label: 'Zu überarbeiten',
@@ -124,7 +127,6 @@ export async function ReviewDashboard({ payload, user }: Props) {
   }
   if (bases.length === 0) return null
 
-  const collections = workflowCollections(payload)
   const sections = await Promise.all(bases.map((b) => loadSection(payload, collections, b)))
 
   return (

@@ -34,7 +34,7 @@ async function canUpdate(req: PayloadRequest, slug: CollectionSlug, id: string |
  *   request-changes (reviewer)    → changes_requested (+ note), stays draft
  * Updates run with EDITORIAL_SKIP so the publish gate doesn't re-route them.
  */
-export const makeTransitionEndpoint = (reviewerRoles: string[], collections: Set<string>): Endpoint => ({
+export const makeTransitionEndpoint = (collections: Set<string>): Endpoint => ({
   path: '/editorial/transition',
   method: 'post',
   handler: async (req: PayloadRequest) => {
@@ -69,7 +69,7 @@ export const makeTransitionEndpoint = (reviewerRoles: string[], collections: Set
       return Response.json({ ok: true, reviewStatus: 'in_review' })
     }
 
-    if (!isReviewer(user, reviewerRoles)) {
+    if (!isReviewer(user)) {
       return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 

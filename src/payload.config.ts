@@ -15,8 +15,9 @@ import { Users } from './collections/Users'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { editorialWorkflow } from './plugins/editorial'
-import { sitePublishing } from './plugins/publish'
 import { isAdmin } from './plugins/editorial/access'
+import { kanidmOAuth } from './plugins/oidc'
+import { sitePublishing } from './plugins/publish'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -25,6 +26,11 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: '· MakerSpace Bonn' },
+    // "Sign in with Kanidm" button under the password form (renders nothing
+    // when Kanidm SSO isn't configured — see src/plugins/oidc).
+    components: {
+      afterLogin: ['/components/auth/KanidmLoginButton#KanidmLoginButton'],
+    },
   },
   editor: lexicalEditor(),
   collections: [Users, Media, Blog, Events, Pages],
@@ -56,6 +62,10 @@ export default buildConfig({
     }),
     // The RBAC `roles` field ships without field access — lock its editing to
     // admins so a self-service update can't grant roles (privilege escalation).
+    // Also drop it from the JWT: `saveToJWT: true` (the plugin default) serialises
+    // the *populated* roles + permissions, which blows the OAuth login token past
+    // the ~4KB cookie limit (silently dropped → auth lost). `req.user` is still
+    // populated from the DB for access control, so permissions are unaffected.
     (config) => ({
       ...config,
       collections: config.collections?.map((c) =>
@@ -68,6 +78,7 @@ export default buildConfig({
                   'name' in f && f.name === 'roles'
                     ? ({
                         ...f,
+                        saveToJWT: false,
                         access: { ...('access' in f ? f.access : {}), update: ({ req }) => isAdmin(req.user) },
                       } as Field)
                     : f,
@@ -75,6 +86,10 @@ export default buildConfig({
             },
       ),
     }),
+    // Kanidm (OIDC) sign-in alongside email/password. Last so it modifies the
+    // fully-assembled `users` collection (RBAC `roles` + `canReview` already added).
+    // No-op unless KANIDM_* env vars are set. See src/plugins/oidc.
+    kanidmOAuth,
   ],
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,

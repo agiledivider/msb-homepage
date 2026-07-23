@@ -7,11 +7,11 @@ import { upsertLegalPages } from './legal'
 
 /**
  * Production seed, run on container start (after migrations). Idempotent:
- *  - creates the RBAC CRUD permissions for the content collections,
- *  - creates an "Administrator" role (everything) and a "Redakteur" role,
+ *  - creates the RBAC content permissions + the editorial:review/editorial:admin
+ *    capabilities, and the Administrator / Reviewer / Redakteur roles,
  *  - if INIT_ADMIN_EMAIL + INIT_ADMIN_PASSWORD are set and that user doesn't
- *    exist yet, creates a ready-to-use admin (editorialRoles=admin +
- *    Administrator role) so a fresh deploy isn't locked out.
+ *    exist yet, creates a ready-to-use admin (Administrator role) so a fresh
+ *    deploy isn't locked out.
  *  - on a *fresh* DB only (no pages/blog/events yet), seeds the real launch
  *    content: hand-authored globals + pages, legal pages, and the migrated
  *    "Aktuelles" blog posts + events. Skipped once any content exists, so it
@@ -57,14 +57,24 @@ const run = async () => {
 
   const perms: Record<string, unknown> = {}
   for (const c of COLLECTIONS) for (const a of ACTIONS) perms[`${c}:${a}`] = await permId(payload, `${c}:${a}`)
+  // editorial capabilities: review = approve/publish, admin = manage users/roles/permissions
+  for (const name of ['editorial:review', 'editorial:admin']) perms[name] = await permId(payload, name)
 
   const adminRole = await roleId(payload, 'Administrator', Object.values(perms))
+  await roleId(
+    payload,
+    'Reviewer',
+    ['blog', 'events', 'pages']
+      .flatMap((c) => [`${c}:create`, `${c}:read`, `${c}:update`])
+      .concat('editorial:review')
+      .map((k) => perms[k]),
+  )
   await roleId(
     payload,
     'Redakteur',
     ['blog:create', 'blog:read', 'blog:update', 'events:create', 'events:read', 'events:update'].map((k) => perms[k]),
   )
-  payload.logger.info(`rbac: ${Object.keys(perms).length} permissions, roles Administrator/Redakteur`)
+  payload.logger.info(`rbac: ${Object.keys(perms).length} permissions, roles Administrator/Reviewer/Redakteur`)
 
   const email = process.env.INIT_ADMIN_EMAIL
   const password = process.env.INIT_ADMIN_PASSWORD
@@ -73,7 +83,7 @@ const run = async () => {
     if (ex.totalDocs === 0) {
       await payload.create({
         collection: 'users',
-        data: { email, password, name: 'Admin', editorialRoles: ['admin'], roles: [adminRole] } as never,
+        data: { email, password, name: 'Admin', roles: [adminRole] } as never,
       })
       payload.logger.info(`created init admin: ${email}`)
     }

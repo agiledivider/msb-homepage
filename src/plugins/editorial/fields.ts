@@ -1,26 +1,47 @@
-import type { Field } from 'payload'
-import { isAdmin, isReviewer } from './access'
+import type { Field, FieldHook } from 'payload'
+import { hasPermission } from 'payload-rbac-plugin'
+import { EDITORIAL_REVIEW, isReviewer } from './access'
 
-/** `editorialRoles` select injected into the auth collection (editor/reviewer/admin).
- *  Named `editorialRoles` (not `roles`) to avoid colliding with general-purpose
- *  RBAC plugins that add their own `roles` field. */
-export const rolesField = (): Field => ({
-  name: 'editorialRoles',
-  type: 'select',
-  hasMany: true,
-  label: 'Redaktions-Rollen',
-  saveToJWT: true, // available on req.user without a DB lookup
-  defaultValue: ['editor'],
-  options: [
-    { label: 'Editor', value: 'editor' },
-    { label: 'Reviewer', value: 'reviewer' },
-    { label: 'Admin', value: 'admin' },
-  ],
-  access: {
-    // only admins may change roles (prevents self-escalation)
-    update: ({ req }) => isAdmin(req.user),
-  },
-  admin: { position: 'sidebar' },
+/**
+ * Computes `canReview` from the RBAC permission system so the (client-side)
+ * review panel knows whether to show reviewer actions — the client can't call
+ * `hasPermission` reliably (permissions aren't guaranteed on the JWT). Fast path
+ * uses the populated user; falls back to a role lookup when the read depth didn't
+ * populate each role's permissions.
+ */
+const computeCanReview: FieldHook = async ({ data, req }) => {
+  // In an afterRead field hook, `data` is the full document being read (the user).
+  const user = data as { roles?: unknown } | undefined
+  if (hasPermission(user as never, EDITORIAL_REVIEW)) return true
+
+  const roles = Array.isArray(user?.roles) ? user.roles : []
+  const ids = roles
+    .map((r: unknown) => (r && typeof r === 'object' ? (r as { id?: unknown }).id : r))
+    .filter((v: unknown) => v !== null && v !== undefined)
+  if (ids.length === 0 || !req?.payload) return false
+
+  const found = await req.payload.find({
+    collection: 'roles' as never,
+    where: { id: { in: ids } } as never,
+    depth: 1,
+    limit: 100,
+    req,
+    overrideAccess: true,
+  })
+  return found.docs.some((role: { permissions?: unknown }) => {
+    const perms = Array.isArray(role.permissions) ? role.permissions : []
+    return perms.some((p) => p && typeof p === 'object' && (p as { name?: unknown }).name === EDITORIAL_REVIEW)
+  })
+}
+
+/** Virtual `canReview` flag injected into the auth collection for the review UI. */
+export const canReviewField = (): Field => ({
+  name: 'canReview',
+  type: 'checkbox',
+  virtual: true,
+  admin: { hidden: true, readOnly: true },
+  access: { create: () => false, update: () => false },
+  hooks: { afterRead: [computeCanReview] },
 })
 
 /**
@@ -33,8 +54,8 @@ export const rolesField = (): Field => ({
  * review. So the managed fields are also locked to reviewers at the data layer;
  * the transition endpoint writes them with `overrideAccess`, so it's unaffected.
  */
-export const reviewFields = (reviewerRoles: string[]): Field[] => {
-  const reviewerOnly = { update: ({ req }: { req: { user?: unknown } }) => isReviewer(req.user, reviewerRoles) }
+export const reviewFields = (): Field[] => {
+  const reviewerOnly = { update: ({ req }: { req: { user?: unknown } }) => isReviewer(req.user) }
   return [
     {
       name: 'reviewStatus',

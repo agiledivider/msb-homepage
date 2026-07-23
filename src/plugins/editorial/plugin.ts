@@ -1,9 +1,9 @@
 import type { Config, Field, Plugin } from 'payload'
 import { isReviewer } from './access'
 import { makeTransitionEndpoint } from './endpoints/transition'
-import { reviewFields, rolesField } from './fields'
+import { canReviewField, reviewFields } from './fields'
 import { makePublishGate } from './hooks/publishGate'
-import { type EditorialOptions, REVIEWER_ROLES_DEFAULT } from './types'
+import type { EditorialOptions } from './types'
 
 const hasField = (fields: Field[], name: string): boolean => fields.some((f) => 'name' in f && f.name === name)
 
@@ -20,14 +20,13 @@ export const editorialWorkflow =
   (config: Config): Config => {
     if (options.disabled) return config
 
-    const reviewerRoles = options.reviewerRoles ?? REVIEWER_ROLES_DEFAULT
     const targets = new Set(options.collections)
     const authSlug = config.admin?.user ?? 'users'
 
     const collections = (config.collections ?? []).map((col) => {
-      // 1. inject `editorialRoles` into the auth collection
+      // 1. inject the `canReview` flag into the auth collection (for the review UI)
       if (col.slug === authSlug) {
-        return hasField(col.fields, 'editorialRoles') ? col : { ...col, fields: [...col.fields, rolesField()] }
+        return hasField(col.fields, 'canReview') ? col : { ...col, fields: [...col.fields, canReviewField()] }
       }
 
       if (!targets.has(col.slug)) return col
@@ -43,7 +42,7 @@ export const editorialWorkflow =
           const prev = 'access' in f ? f.access : undefined
           return {
             ...f,
-            access: { ...prev, update: ({ req }) => isReviewer(req.user, reviewerRoles) },
+            access: { ...prev, update: ({ req }) => isReviewer(req.user) },
           } as Field
         }
         return f
@@ -53,14 +52,14 @@ export const editorialWorkflow =
       return {
         ...col,
         versions,
-        fields: [...fields, ...reviewFields(reviewerRoles)],
+        fields: [...fields, ...reviewFields()],
         admin: {
           ...col.admin,
           defaultColumns: uniq([...(col.admin?.defaultColumns ?? []), 'reviewStatus']),
         },
         hooks: {
           ...col.hooks,
-          beforeChange: [...(col.hooks?.beforeChange ?? []), makePublishGate(reviewerRoles)],
+          beforeChange: [...(col.hooks?.beforeChange ?? []), makePublishGate()],
         },
       }
     })
@@ -78,6 +77,6 @@ export const editorialWorkflow =
         },
       },
       collections,
-      endpoints: [...(config.endpoints ?? []), makeTransitionEndpoint(reviewerRoles, targets)],
+      endpoints: [...(config.endpoints ?? []), makeTransitionEndpoint(targets)],
     }
   }

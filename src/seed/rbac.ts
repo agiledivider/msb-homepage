@@ -3,9 +3,10 @@ import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 
 /**
- * Seeds RBAC demo data: CRUD permissions for the content collections, an
- * "Administrator" role (everything) for falk, and a limited "Redakteur" role
- * (blog + events, no pages/delete) for editor@test.de. Idempotent.
+ * Seeds RBAC dev data: content CRUD permissions + the editorial:review /
+ * editorial:admin capabilities, the Administrator / Reviewer / Redakteur roles,
+ * and three test users (password "test") — falk=Administrator,
+ * reviewer@test.de=Reviewer, editor@test.de=Redakteur. Idempotent.
  *
  *   pnpm payload run src/seed/rbac.ts
  */
@@ -36,11 +37,16 @@ const roleId = async (payload: Payload, name: string, permissions: unknown[]) =>
   return (await create(payload, 'roles', { name, permissions })).id
 }
 
-const assign = async (payload: Payload, email: string, roles: unknown[]) => {
+/** Assign roles to an existing user, or create the test user if missing. */
+const ensureUser = async (payload: Payload, email: string, password: string, name: string, roles: unknown[]) => {
   const u = await payload.find({ collection: 'users', where: { email: { equals: email } }, limit: 1 })
-  if (u.totalDocs === 0) return
-  await payload.update({ collection: 'users', id: u.docs[0].id, data: { roles } as never })
-  payload.logger.info(`assigned ${email} → ${roles.length} role(s)`)
+  if (u.totalDocs > 0) {
+    await payload.update({ collection: 'users', id: u.docs[0].id, data: { roles } as never })
+    payload.logger.info(`assigned ${email} → ${roles.length} role(s)`)
+  } else {
+    await payload.create({ collection: 'users', data: { email, password, name, roles } as never })
+    payload.logger.info(`created ${email} → ${roles.length} role(s)`)
+  }
 }
 
 const run = async () => {
@@ -48,18 +54,27 @@ const run = async () => {
 
   const perms: Record<string, unknown> = {}
   for (const c of COLLECTIONS) for (const a of ACTIONS) perms[`${c}:${a}`] = await permId(payload, `${c}:${a}`)
+  for (const name of ['editorial:review', 'editorial:admin']) perms[name] = await permId(payload, name)
   payload.logger.info(`permissions: ${Object.keys(perms).length}`)
 
   const adminRole = await roleId(payload, 'Administrator', Object.values(perms))
+  const reviewerRole = await roleId(
+    payload,
+    'Reviewer',
+    ['blog', 'events', 'pages']
+      .flatMap((c) => [`${c}:create`, `${c}:read`, `${c}:update`])
+      .concat('editorial:review')
+      .map((k) => perms[k]),
+  )
   const redakteurRole = await roleId(
     payload,
     'Redakteur',
     ['blog:create', 'blog:read', 'blog:update', 'events:create', 'events:read', 'events:update'].map((k) => perms[k]),
   )
 
-  await assign(payload, 'falk@kuehnel.eu', [adminRole])
-  await assign(payload, 'reviewer@test.de', [adminRole])
-  await assign(payload, 'editor@test.de', [redakteurRole])
+  await ensureUser(payload, 'falk@kuehnel.eu', 'test', 'Falk Kühnel', [adminRole])
+  await ensureUser(payload, 'reviewer@test.de', 'test', 'Test Reviewer', [reviewerRole])
+  await ensureUser(payload, 'editor@test.de', 'test', 'Test Editor', [redakteurRole])
 
   payload.logger.info('✓ rbac seeded')
 }

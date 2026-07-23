@@ -2,7 +2,7 @@ import type { Access } from 'payload'
 import { isAdmin } from '@/plugins/editorial/access'
 
 /**
- * "admin" = the editorial `admin` role (editorialRoles includes 'admin').
+ * "admin" = holds the `editorial:admin` RBAC permission (see plugins/editorial).
  * Used to lock down the meta collections (users, roles, permissions) so the
  * permission system itself can't be edited by non-admins.
  */

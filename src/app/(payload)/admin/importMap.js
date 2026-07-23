@@ -24,6 +24,7 @@ import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ReviewPanel as ReviewPanel_812323546135d17338b9452fd3f00174 } from '../../../plugins/editorial/components/ReviewPanel'
 import { HeroPreviewButton as HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95 } from '../../../components/HeroPreviewButton'
+import { KanidmLoginButton as KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27 } from '../../../components/auth/KanidmLoginButton'
 import { ReviewDashboard as ReviewDashboard_eaaae8e46032f1445a954959095ac5e4 } from '../../../plugins/editorial/components/ReviewDashboard'
 import { PublishSite as PublishSite_a4c7146036cdb0d0c6483019f622d27e } from '../../../plugins/publish/components/PublishSite'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -56,6 +57,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/plugins/editorial/components/ReviewPanel#ReviewPanel": ReviewPanel_812323546135d17338b9452fd3f00174,
   "/components/HeroPreviewButton#HeroPreviewButton": HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95,
+  "/components/auth/KanidmLoginButton#KanidmLoginButton": KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27,
   "/plugins/editorial/components/ReviewDashboard#ReviewDashboard": ReviewDashboard_eaaae8e46032f1445a954959095ac5e4,
   "/plugins/publish/components/PublishSite#PublishSite": PublishSite_a4c7146036cdb0d0c6483019f622d27e,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

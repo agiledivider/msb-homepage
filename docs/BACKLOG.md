@@ -77,7 +77,11 @@ Baked accounts (verified from `demo-seed/demo.sqlite`):
 | 3 | editor@test.de | editor | Redakteur | `test` | `src/seed/roles.ts` |
 | 4 | reviewer@test.de | reviewer | Administrator | `test` | `src/seed/roles.ts` |
 
-`isAdmin` keys off `editorialRoles: ['admin']` (`src/plugins/editorial/access.ts:17`), which unlocks Users/Roles/Permissions → account #2 is a full admin.
+> **Note (updated 2026-07-24):** the `editorialRoles` field was removed — roles are
+> now unified on RBAC. `isAdmin` keys off the `editorial:admin` RBAC permission
+> (`src/plugins/editorial/access.ts`), and test users are seeded by `src/seed/rbac.ts`
+> (the old `src/seed/roles.ts` is gone). The "editorialRoles" / roles.ts columns above
+> are historical. Account #2 (falk = Administrator) is still a full admin.
 
 ### Fix options (pick one, or combine)
 1. **Dedicated demo seed** — build the demo DB from a seed that creates a single demo account with a random (or disabled/read-only) password, instead of `sqlite3 .backup` of the dev DB (`scripts/prepare-demo-seed.sh`). *Preferred.*

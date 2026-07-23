@@ -4,8 +4,6 @@ import { useAuth, useDocumentInfo } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-const REVIEWER_ROLES = ['reviewer', 'admin']
-
 const STATUS: Record<string, { label: string; color: string }> = {
   draft: { label: 'Entwurf', color: 'var(--theme-elevation-400)' },
   in_review: { label: 'In Review', color: '#e6a817' },
@@ -49,8 +47,7 @@ export function ReviewPanel() {
 
   const status = (savedDocumentData?.reviewStatus as string) ?? 'draft'
   const reviewNote = savedDocumentData?.reviewNote as string | undefined
-  const roles = (user?.editorialRoles as string[] | undefined) ?? []
-  const isReviewer = roles.some((r) => REVIEWER_ROLES.includes(r))
+  const isReviewer = Boolean((user as { canReview?: boolean } | undefined)?.canReview)
   const meta = STATUS[status] ?? STATUS.draft
 
   const openDiff = async () => {

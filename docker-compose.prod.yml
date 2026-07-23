@@ -27,6 +27,12 @@ services:
       # always seeded). Leave unset to create the first user via /admin instead.
       INIT_ADMIN_EMAIL: ${INIT_ADMIN_EMAIL:-}
       INIT_ADMIN_PASSWORD: ${INIT_ADMIN_PASSWORD:-}
+      # Kanidm SSO (OIDC) — optional; all three enable the "Sign in with Kanidm"
+      # button. Password login stays available. See src/plugins/oidc.
+      KANIDM_ISSUER: ${KANIDM_ISSUER:-}
+      KANIDM_CLIENT_ID: ${KANIDM_CLIENT_ID:-}
+      KANIDM_CLIENT_SECRET: ${KANIDM_CLIENT_SECRET:-}
+      KANIDM_ROLES_CLAIM: ${KANIDM_ROLES_CLAIM:-}
     volumes:
       - db:/app/data
       - media:/app/public/media
