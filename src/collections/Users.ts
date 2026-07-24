@@ -16,5 +16,18 @@ export const Users: CollectionConfig = {
     delete: adminOnly,
   },
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'email'], hidden: hideForNonAdmins },
-  fields: [{ name: 'name', type: 'text' }],
+  fields: [
+    { name: 'name', type: 'text' },
+    // OIDC subject identifier (Kanidm). Defined here rather than left to the
+    // payload-oauth2 plugin so the column exists whether or not SSO is enabled —
+    // otherwise a seed run with KANIDM_* unset (OIDC off) drops it via `push` and
+    // login breaks with "no such column: sub". The plugin reuses this field.
+    {
+      name: 'sub',
+      type: 'text',
+      index: true,
+      admin: { readOnly: true, hidden: true },
+      access: { read: () => true, create: () => true, update: () => false },
+    },
+  ],
 }
