@@ -18,7 +18,8 @@
  * Auth: `X-Publish-Token` must match PUBLISH_TOKEN.
  */
 import { execFile } from 'node:child_process'
-import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
+import { constants as fsConstants } from 'node:fs'
+import { access, chmod, copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
 import { promisify } from 'node:util'
@@ -33,6 +34,54 @@ const TOKEN = process.env.PUBLISH_TOKEN || ''
 const SOURCE_DB = process.env.SOURCE_DATABASE_FILE || '/data/msb.db'
 /** Where the build reads from — a private copy, so edits mid-build can't tear it. */
 const BUILD_DB = process.env.BUILD_DATABASE_FILE || '/tmp/publish.db'
+
+/**
+ * Snapshot the live DB into a private, writable copy for the build. The source
+ * lives on a volume shared with (and owned by) the Payload container; this runs
+ * in a separate container, so the copy is where cross-container permissions bite.
+ *
+ *  - Remove any stale target first: `copyFile` opens the dest with O_TRUNC, so a
+ *    leftover `/tmp/publish.db` owned by a different uid (e.g. from a run under a
+ *    different user) makes the overwrite fail EACCES. `/tmp` survives restarts.
+ *  - Attribute failures to source-read vs target-write, instead of the opaque
+ *    "copyfile a -> b" — the two need different fixes (DB file perms vs. /tmp).
+ *  - chmod the copy writable: libsql opens it read-write to replay the WAL.
+ *
+ * The -wal/-shm sidecars must come along: in WAL mode the newest commits live in
+ * the write-ahead log, so copying only the .db silently publishes stale content.
+ */
+const snapshotDb = async (): Promise<void> => {
+  for (const suffix of ['', '-wal', '-shm']) {
+    const src = `${SOURCE_DB}${suffix}`
+    const dest = `${BUILD_DB}${suffix}`
+    await rm(dest, { force: true }).catch((err) => {
+      throw new Error(`could not remove stale snapshot ${dest}: ${(err as Error).message}`)
+    })
+    try {
+      await copyFile(src, dest)
+    } catch (err) {
+      // The sidecars are absent unless the DB is in WAL mode with pending commits.
+      if (suffix !== '' && (err as NodeJS.ErrnoException).code === 'ENOENT') continue
+      const code = (err as NodeJS.ErrnoException).code
+      // Read-test the source directly (not just stat): a 0600 DB owned by another
+      // uid is statable but not readable, and that's exactly the case to name.
+      const readable = await access(src, fsConstants.R_OK).then(
+        () => true,
+        () => false,
+      )
+      const side = readable ? `writing target ${dest}` : `reading source ${src}`
+      throw new Error(
+        `DB snapshot failed ${side} (${code}). ` +
+          `The publisher must be able to read the Payload-owned DB and write ${BUILD_DB}. ` +
+          `Original: ${(err as Error).message}`,
+      )
+    }
+    // libsql opens the copy read-write (WAL replay/checkpoint); ensure it can.
+    await chmod(dest, 0o644).catch(() => {
+      // best-effort: if we couldn't chmod it we usually still own it
+    })
+  }
+}
 const IMAGE = process.env.STATIC_IMAGE || 'ghcr.io/agiledivider/msb-demo'
 const TAG = process.env.TAG || 'latest'
 const PLATFORM = process.env.PLATFORM || 'linux/amd64'
@@ -242,19 +291,11 @@ async function runPublish(reason: string): Promise<Result> {
   }
 
   try {
-    // Snapshot the DB first: the live container keeps serving and editors keep
-    // saving while we build, and SQLite can't be safely read mid-write.
-    //
-    // The -wal/-shm sidecars must come along: in WAL mode the newest commits
-    // live in the write-ahead log, so copying only the .db silently publishes
-    // stale content. Opening the copy replays the WAL.
+    // Snapshot the DB first (see snapshotDb): the live container keeps serving
+    // and editors keep saving while we build, and SQLite can't be safely read
+    // mid-write, so the build works from a private copy.
     setStage('db')
-    await copyFile(SOURCE_DB, BUILD_DB)
-    for (const suffix of ['-wal', '-shm']) {
-      await copyFile(`${SOURCE_DB}${suffix}`, `${BUILD_DB}${suffix}`).catch(() => {
-        // absent when the DB isn't in WAL mode, or nothing is pending — fine
-      })
-    }
+    await snapshotDb()
     process.env.DATABASE_URI = `file:${BUILD_DB}`
 
     const { ok, total } = await publishStatic((p) => setStage(p.stage, p.current, p.total, p.detail))
