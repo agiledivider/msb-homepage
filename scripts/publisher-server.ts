@@ -88,6 +88,26 @@ const PLATFORM = process.env.PLATFORM || 'linux/amd64'
 const BASE_IMAGE = process.env.BASE_IMAGE || 'nginx:1.27-alpine'
 /** Push to the registry. Off for local end-to-end runs so a test can't ship. */
 const PUSH_IMAGE = process.env.PUSH_IMAGE !== 'false'
+
+/**
+ * Optional post-push deploy: SSH to the web host and trigger a redeploy of the
+ * freshly pushed static image. The far side runs a fixed script pinned as an SSH
+ * forced command (see DEPLOY.md), so this key can do exactly one thing — no
+ * shell, no arguments. We connect and run nothing; the forced command does the
+ * `docker compose pull && up -d`.
+ *
+ *   DEPLOY_SSH_HOST         user@web-host (unset → deploy step skipped)
+ *   DEPLOY_SSH_KEY          path to the private key mounted into this container
+ *   DEPLOY_SSH_PORT         optional, default 22
+ *   DEPLOY_SSH_KNOWN_HOSTS  optional known_hosts to pin the host key; without it
+ *                           we trust-on-first-use (accept-new)
+ */
+const DEPLOY_HOST = process.env.DEPLOY_SSH_HOST || ''
+const DEPLOY_KEY = process.env.DEPLOY_SSH_KEY || '/deploy/id_ed25519'
+const DEPLOY_PORT = process.env.DEPLOY_SSH_PORT || '22'
+const DEPLOY_KNOWN_HOSTS = process.env.DEPLOY_SSH_KNOWN_HOSTS || ''
+/** Only deploy an image we actually pushed, and only when a target is configured. */
+const DEPLOY_ENABLED = PUSH_IMAGE && DEPLOY_HOST !== ''
 /** Optional: serve the result from a local nginx via these shared volumes. */
 const SITE_HTML_DIR = process.env.SITE_HTML_DIR || ''
 const SITE_CONF_DIR = process.env.SITE_CONF_DIR || ''
@@ -125,13 +145,16 @@ const STAGES: Array<{ key: string; label: string; weight: number }> = [
   { key: 'configs', label: 'Host-Konfiguration', weight: 1 },
   { key: 'sync', label: 'Website aktualisieren', weight: 4 },
   { key: 'push', label: 'Image hochladen', weight: 3 },
+  { key: 'deploy', label: 'Website ausrollen', weight: 3 },
 ]
 /**
- * Stages that will actually run. Skipping the registry push when it is disabled
- * matters for more than the label: leaving its weight in the denominator caps
- * the progress bar at 97%, so a finished publish never looks finished.
+ * Stages that will actually run. Skipping the registry push (and the SSH deploy)
+ * when disabled matters for more than the label: leaving their weight in the
+ * denominator caps the progress bar below 100%, so a finished publish never
+ * looks finished.
  */
-const activeStages = () => STAGES.filter((s) => s.key !== 'push' || PUSH_IMAGE)
+const activeStages = () =>
+  STAGES.filter((s) => (s.key === 'push' ? PUSH_IMAGE : s.key === 'deploy' ? DEPLOY_ENABLED : true))
 
 type Progress = {
   stage: string
@@ -243,6 +266,36 @@ async function pushImage(sha: string): Promise<string> {
 }
 
 /**
+ * Trigger the web host to pull + restart the freshly pushed static image, over
+ * SSH. Security model (details in DEPLOY.md):
+ *   - the key is restricted to a single forced command on the server, so we send
+ *     NO remote command — the far side runs its own `docker compose pull && up -d`;
+ *   - `BatchMode` refuses any interactive/password fallback (fail, don't hang);
+ *   - host-key checking is on: pinned via DEPLOY_SSH_KNOWN_HOSTS, else accept-new.
+ */
+async function deployStatic(): Promise<string> {
+  const args = [
+    '-i',
+    DEPLOY_KEY,
+    '-p',
+    DEPLOY_PORT,
+    '-o',
+    'BatchMode=yes',
+    '-o',
+    'ConnectTimeout=15',
+    '-o',
+    `StrictHostKeyChecking=${DEPLOY_KNOWN_HOSTS ? 'yes' : 'accept-new'}`,
+    ...(DEPLOY_KNOWN_HOSTS ? ['-o', `UserKnownHostsFile=${DEPLOY_KNOWN_HOSTS}`] : []),
+    DEPLOY_HOST,
+  ]
+  // 5 min: the far side pulls an image and recreates the container.
+  const { stdout, stderr } = await execFileAsync('ssh', args, { timeout: 5 * 60_000, maxBuffer: 4 * 1024 * 1024 })
+  const out = `${stdout}${stderr}`.trim()
+  if (out) log(`deploy: ${out.split('\n').slice(-3).join(' | ')}`)
+  return `deployed → ${DEPLOY_HOST}`
+}
+
+/**
  * Copy the snapshot into the volumes a co-located nginx serves.
  *
  * Deliberately a copy rather than mounting the volume at `dist/`: the pipeline
@@ -309,6 +362,12 @@ async function runPublish(reason: string): Promise<Result> {
     const image = PUSH_IMAGE
       ? await pushImage(`${sha}-${new Date().toISOString().slice(0, 10)}`)
       : 'not pushed (PUSH_IMAGE=false)'
+
+    // Roll the new image out to the web host (skipped unless DEPLOY_SSH_HOST is set).
+    if (DEPLOY_ENABLED) {
+      setStage('deploy')
+      log(await deployStatic())
+    }
 
     const result: Result = {
       at: new Date().toISOString(),

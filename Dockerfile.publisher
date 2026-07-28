@@ -29,8 +29,10 @@ ENV NODE_ENV=production TZ=Europe/Berlin
 # crane: daemonless image assembly + push (static Go binary, ~20 MB).
 # The asset name must follow the image's own architecture — an x86_64 binary in
 # an arm64 image (what an Apple-Silicon host builds by default) simply won't run.
+# openssh-client: the post-push deploy step SSHes to the web host to roll out
+# the new static image (see scripts/publisher-server.ts / DEPLOY.md).
 ARG CRANE_VERSION=0.20.2
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl tar \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl tar openssh-client \
   && case "$(uname -m)" in \
        x86_64)  CRANE_ARCH=x86_64 ;; \
        aarch64) CRANE_ARCH=arm64 ;; \

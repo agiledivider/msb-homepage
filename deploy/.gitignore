@@ -1,0 +1,4 @@
+# The post-push deploy key + known_hosts live here (mounted into the publisher
+# read-only). NEVER commit them.
+*
+!.gitignore

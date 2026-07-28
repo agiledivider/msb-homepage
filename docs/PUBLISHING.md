@@ -151,6 +151,68 @@ that silently break it.
   If you have been editing locally, get that content into the `db` volume first
   or the release will regress the site.
 
+## Auto-deploy (roll the pushed image out to the web host)
+
+By default the publisher **pushes** the new static image to ghcr but the public
+host still has to `pull` it. Set `DEPLOY_SSH_HOST` and the publisher does that
+last step itself, over SSH, right after the push — the final "pull" arrow in the
+diagram above.
+
+**The key can do exactly one thing.** On the web host, the deploy key is pinned
+to a fixed *forced command* — it cannot open a shell, forward ports, or run
+anything but the redeploy script. So even if the publisher (or the key) is
+compromised, the blast radius is "someone can trigger a redeploy", nothing more.
+
+### Web host, one-time setup
+
+1. **A `deploy` user in the `docker` group** (needed to talk to the daemon).
+   Note the group is root-equivalent on the host — the forced command below is
+   what actually contains this account.
+
+2. **The redeploy script**, owned by root so the deploy user can run but not
+   edit it (`sudo install -o root -g root -m 0755 /dev/stdin /usr/local/bin/msb-static-deploy`):
+
+   ```sh
+   #!/bin/sh
+   set -eu
+   cd /srv/msb-demo                                   # holds docker-compose.demo.yml + .env
+   docker compose -f docker-compose.demo.yml pull
+   docker compose -f docker-compose.demo.yml up -d
+   docker image prune -f
+   ```
+
+3. **Pin the key to that script** in `~deploy/.ssh/authorized_keys` — `restrict`
+   disables pty/forwarding/etc., `command=` overrides whatever the client sends:
+
+   ```
+   restrict,command="/usr/local/bin/msb-static-deploy" ssh-ed25519 AAAA…deploykey… publisher
+   ```
+
+4. **Registry read** for the pull: either make the `msb-demo` package public, or
+   `docker login ghcr.io` once as the deploy user with a PAT scoped to
+   **`read:packages` only**.
+
+### Publisher side
+
+```sh
+ssh-keygen -t ed25519 -f ./deploy/id_ed25519 -N ''   # keypair; .pub → step 3 above
+chmod 600 ./deploy/id_ed25519                         # ssh rejects world-readable keys
+```
+
+Then in the publisher's `.env`:
+
+```env
+DEPLOY_SSH_HOST=deploy@web-host.example
+# recommended — pin the host key (else first connect is trust-on-first-use):
+ssh-keyscan -p 22 web-host.example > ./deploy/known_hosts
+DEPLOY_SSH_KNOWN_HOSTS=/deploy/known_hosts
+```
+
+`./deploy/` is mounted read-only into the publisher (`/deploy`) and is
+gitignored. Leave `DEPLOY_SSH_HOST` blank to skip the deploy step — the image is
+still pushed, you just pull it by hand as before. The step also self-skips when
+`PUSH_IMAGE=false` (nothing was pushed to deploy).
+
 ## Troubleshooting
 
 - **"Publisher-Dienst nicht erreichbar"** — `PUBLISHER_URL` unset on the Payload
@@ -168,3 +230,9 @@ that silently break it.
   overrides, but check *why* first.
 - **Published site missing new content** — the doc is probably still in
   editorial review. Only `_status: published` is crawled.
+- **Deploy step fails `Permission denied (publickey)`** — the public key isn't in
+  the web host's `~deploy/.ssh/authorized_keys`, or `DEPLOY_SSH_KEY` points at the
+  wrong file. **`Host key verification failed`** — `DEPLOY_SSH_KNOWN_HOSTS` is
+  stale/missing; regenerate with `ssh-keyscan`. **`UNPROTECTED PRIVATE KEY`** —
+  `chmod 600 ./deploy/id_ed25519`. The push already succeeded, so re-publishing
+  after fixing only re-runs the deploy.

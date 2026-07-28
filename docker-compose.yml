@@ -101,6 +101,13 @@ services:
       # token explicitly. Only needed when PUSH_IMAGE=true.
       GHCR_USER: ${GHCR_USER:-}
       GHCR_TOKEN: ${GHCR_TOKEN:-}
+      # Post-push deploy: after pushing the static image, SSH to the web host and
+      # roll it out. Unset DEPLOY_SSH_HOST to skip. The key is restricted to a
+      # single forced command on the server (see DEPLOY.md § "Auto-deploy").
+      DEPLOY_SSH_HOST: ${DEPLOY_SSH_HOST:-}
+      DEPLOY_SSH_KEY: ${DEPLOY_SSH_KEY:-/deploy/id_ed25519}
+      DEPLOY_SSH_PORT: ${DEPLOY_SSH_PORT:-22}
+      DEPLOY_SSH_KNOWN_HOSTS: ${DEPLOY_SSH_KNOWN_HOSTS:-}
     volumes:
       # The CMS state, read-only — the DB is copied before each build anyway.
       - db:/data:ro
@@ -109,7 +116,10 @@ services:
       - site_conf:/site/conf
       # Keeps "last published" + the ETA baseline across container updates.
       - publisher_state:/state
-      # Registry credentials, only needed when PUSH_IMAGE=true.
+      # Deploy key for the post-push rollout, read-only. Create ./deploy/id_ed25519
+      # (see DEPLOY.md); the whole mount is optional — omit it if DEPLOY_SSH_HOST
+      # is unset. Also mount a known_hosts here to pin the host key.
+      - ./deploy:/deploy:ro
     depends_on:
       - payload
 
