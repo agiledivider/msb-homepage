@@ -1,0 +1,23 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(jq:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm build)",
+      "Bash(pnpm dev:status)",
+      "Bash(pnpm dev:logs)",
+      "Bash(pnpm generate:types)",
+      "Read(~/.claude/skills/media-gen/**)"
+    ]
+  }
+}

@@ -10,6 +10,47 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ---
 
+## Playbook retrofit gaps
+
+**Status:** proposed 2026-11-12 (gaps against the playbook's TypeScript starter checklist). Not go-live blockers.
+
+### Lint is green and stays green
+**Problem:** `pnpm lint` reports 20 errors and 7 warnings (mostly `noArrayIndexKey`, `noNonNullAssertion`, `noImgElement`), so the fast check can't tell new problems from old ones.
+**Desired:** zero errors and warnings; anything deliberately allowed is an explicit, commented Biome override.
+**AC:** `pnpm lint` exits 0 on a clean checkout.
+
+### Every push runs the gate in CI
+**Problem:** CI only builds and pushes images; lint, typecheck, tests and a vulnerability scan never run, and actions are pinned by tag.
+**Desired:** a CI job runs lint, typecheck, tests and a container/dependency scan (Trivy) on every push to `main`, images are only pushed when it is green, actions are pinned by SHA, and dependency updates arrive as PRs (Renovate) plus a scheduled audit.
+**AC:** a red test blocks the image push; the Actions tab shows the scan result.
+
+### Stricter TypeScript catches missing data
+**Problem:** `tsconfig.json` lacks `noUncheckedIndexedAccess`, `noImplicitOverride` and `verbatimModuleSyntax` (explicitly `false`).
+**Desired:** the playbook strict flags are on, with existing errors fixed.
+**AC:** `pnpm typecheck` passes with the flags enabled.
+
+### Commits and edits are checked locally
+**Problem:** no git hooks: no Conventional-Commit / no-AI-trailer check, no pre-commit lint, no Biome-on-edit hook for Claude.
+**Desired:** `pnpm setup:hooks` installs the playbook's `commit-msg` and `pre-commit` hooks; `.claude/settings.json` runs Biome on edited files.
+**AC:** a commit with a bad subject or an AI trailer is rejected locally.
+
+### One command proves "done"
+**Problem:** the gate is four commands with no evidence file; there are no `qa`, `deps:check`, `deps:update` or `security:scan` scripts, and no supply-chain delay for new package versions (pnpm `minimumReleaseAge`).
+**Desired:** `pnpm qa` runs the full gate and writes a summary file; deps and security scripts exist; new releases wait a day before install.
+**AC:** `pnpm qa` exits non-zero on any failing stage and leaves `summary.json`.
+
+### Key user journeys are covered end to end
+**Problem:** no e2e tests; hero, navigation, events views and the static bundle are only checked by hand.
+**Desired:** Playwright-in-Docker e2e for the public site (start page hero, blog/event detail, events views, legacy 301s) and for the static `dist/` bundle.
+**AC:** `pnpm test:e2e` runs in Docker and is part of the gate.
+
+### Images are reproducible
+**Problem:** Dockerfiles use floating tags (`node:22-slim`, `nginx:1.27-alpine`).
+**Desired:** base images pinned by digest and updated by Renovate.
+**AC:** rebuilding the same commit yields the same base layers.
+
+---
+
 ## Legacy migration is incomplete — ~328 old Joomla articles were never imported
 
 **Status:** postponed (2026-07-22). Scope decision needed before any work starts.

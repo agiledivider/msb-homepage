@@ -1,8 +1,13 @@
 # MakerSpace Bonn Homepage — Development Learnings
 
-Hard-won notes from building the animated hero, generated assets, and the mobile-friendly
-pass on `MakerSpace Bonn Redesign.dc.html`. Read this before touching the hero, the inline-style
-layout, or the asset pipeline — several things here are non-obvious and cost real time to discover.
+> **Status 2026-11-12.** This file documents the original single-file design prototype
+> (`MakerSpace Bonn Redesign.dc.html`, July 2026). The production site is the Next.js + Payload
+> app in `src/` (see `CLAUDE.md`), whose hero is a React/Tailwind port of this prototype.
+> Reusable traps from this file now live in [`docs/runtime-traps.md`](docs/runtime-traps.md);
+> superseded sections are marked below rather than deleted.
+
+Notes from building the animated hero, generated assets, and the mobile-friendly pass on the
+prototype. Read this before touching the `.dc.html` file or the asset pipeline.
 
 ---
 
@@ -79,6 +84,8 @@ hover. Design decisions the user explicitly asked for (don't undo without asking
   two-stage `setState` in `doFlip()`.
 
 ### 3D rendering gotchas (each one cost time)
+Items 1–4 also apply to the production hero and are tracked in
+[`docs/runtime-traps.md`](docs/runtime-traps.md#hero-prism--css).
 1. **One `preserve-3d` level only.** The tilt and the carousel spin must live on the *same*
    element (`.msb-flip`). Nesting two `preserve-3d` elements (a separate `.msb-tilt` wrapper around
    `.msb-flip`) breaks `backface-visibility` culling → the rear faces show through **mirrored**.
@@ -96,7 +103,12 @@ hover. Design decisions the user explicitly asked for (don't undo without asking
    `--tz`; faces are `rotateY(k·120deg) translateZ(var(--tz))`, and the prism is pulled back by
    `translateZ(calc(var(--tz) × -1))`.
 
-### ⚠️ WebKit flattens this prism at small sizes
+### ~~⚠️ WebKit flattens this prism at small sizes~~ (superseded 2026-07)
+> **Superseded.** The flattening on iPhone was caused by a mobile-only `html,body{overflow-x:hidden}`,
+> not by WebKit itself. Desktop and iOS Safari render the prism, and the production hero uses the
+> **true prism on all widths** ([`docs/DECISIONS.md`](docs/DECISIONS.md) D-004). WKWebView-based
+> preview panes still show it flattened; verify in Blink and on a real iPhone. Kept for history:
+
 Verified in cmux's WKWebView: the prism renders correctly in **Chrome/Blink**, but flattens (all
 three faces overlap, mirrored) in WebKit — which means **iOS Safari would break it too**. This is
 why the mobile hero uses a completely different mechanism (below). A simple 2-face card culls fine
@@ -104,7 +116,11 @@ in the same WebKit; it's specifically the 3-face + `translateZ` prism that WebKi
 
 ---
 
-## 4. The hero on mobile (≤900px) — a WebKit-safe flip
+## 4. ~~The hero on mobile (≤900px) — a WebKit-safe flip~~ (prototype only, superseded)
+> **Superseded in production:** the app uses the true prism on mobile, switches at `md` (768px),
+> shows the photo on top, and sizes the hero from measured header/pill heights. The single-face
+> fallback below is what the prototype did.
+
 
 Because the prism flattens in WebKit, mobile does **not** use it. Instead:
 
@@ -180,17 +196,18 @@ crescent) on a 38px grid. Applied to both the start-page preview and the Tools p
 
 ## 8. Verifying in the browser (workflow)
 
-- **Always use the cmux browser** for preview/verification in this project (not Playwright or
-  claude-in-chrome) — the user's explicit choice. `cmux browser open/navigate/screenshot/eval …`.
-- cmux runs **WKWebView**, which flattens the complex nested 3D prism. So a broken-looking prism in
-  cmux does **not** necessarily mean it's broken in the user's Chrome. Cross-check reasoning against
-  the engine, and note WebKit caveats.
-- **The pane can be hard to resize** to arbitrary widths. To preview at a specific viewport width
-  (mobile or desktop), load the page inside a fixed-size **iframe** and screenshot that — media
-  queries and `vh`/`svh` evaluate against the *iframe's* box, so a `375×667` iframe faithfully
-  simulates a phone (and a `1200×900` iframe simulates desktop) regardless of the cmux pane size.
-  Remember to delete the temporary preview file afterward.
-- For close-ups, screenshot then crop/zoom with `sips` or ImageMagick (no browser zoom tool needed).
+Updated 2026-11-12. The cmux browser used during the prototype work is no longer part of the
+setup. Current approach (global playbook rules + [`docs/runtime-traps.md`](docs/runtime-traps.md)):
+
+- **Manual checks:** the Orca embedded browser.
+- **The 3D prism:** WKWebView-based panes (like the old cmux pane) flatten the prism and
+  skew `getBoundingClientRect`, so a broken-looking prism there is not a bug. Verify the visual in
+  **Blink** via headless Chrome over CDP (`Emulation.setDeviceMetricsOverride` to the exact phone
+  size, `Page.captureScreenshot`), and iOS on a real iPhone.
+- **Several widths quickly:** load the page in a same-origin fixed-size **iframe**
+  (`375×667`, `1200×900`); media queries and `svh` evaluate against the iframe box. Delete the
+  temporary preview file afterward.
+- For close-ups, screenshot then crop/zoom with `sips` or ImageMagick.
 
 ---
 
