@@ -1,15 +1,13 @@
 import Link from 'next/link'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { Media } from '@/components/Media'
-import { getPayloadClient } from '@/lib/getPayload'
+import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
 
 export default async function BlogIndexPage() {
-  const payload = await getPayloadClient()
-  const res = await payload.find({
+  const res = await findPublic({
     collection: 'blog',
-    where: { _status: { equals: 'published' } },
     sort: '-publishedAt',
     limit: 20,
     depth: 2,

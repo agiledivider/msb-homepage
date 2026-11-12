@@ -1,8 +1,7 @@
-import type { Where } from 'payload'
 import { resolveEventTimes } from '@/lib/eventTime'
-import { getPayloadClient } from '@/lib/getPayload'
 import { buildICalendar, type ICalEvent } from '@/lib/ical'
 import { serverURL } from '@/lib/preview'
+import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,14 +13,16 @@ const HISTORY_MS = 90 * 24 * 60 * 60 * 1000
  * Subscribe once and the client re-polls periodically for new/changed events.
  */
 export async function GET() {
-  const payload = await getPayloadClient()
   const host = new URL(serverURL).host
 
   const since = new Date(Date.now() - HISTORY_MS)
-  const where: Where = {
-    and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: since.toISOString() } }],
-  }
-  const res = await payload.find({ collection: 'events', where, sort: 'date', limit: 1000, depth: 0 })
+  const res = await findPublic({
+    collection: 'events',
+    where: { date: { greater_than_equal: since.toISOString() } },
+    sort: 'date',
+    limit: 1000,
+    depth: 0,
+  })
 
   const events: ICalEvent[] = res.docs.map((e) => {
     const path = `/events/${e.slug ?? e.id}`

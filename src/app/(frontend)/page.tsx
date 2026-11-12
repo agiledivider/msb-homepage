@@ -9,6 +9,7 @@ import { SectionHeading } from '@/components/ui'
 import { startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
+import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic' // always reflect the latest content
 
@@ -20,25 +21,24 @@ export default async function StartPage() {
 
   const [hero, blogRes, upcomingRes, feedRes] = await Promise.all([
     payload.findGlobal({ slug: 'heroSettings', depth: 2, draft }),
-    payload.find({
+    findPublic({
       collection: 'blog',
-      where: { _status: { equals: 'published' } },
       sort: '-publishedAt',
       limit: 1,
       depth: 2,
     }),
-    payload.find({
+    findPublic({
       collection: 'events',
-      where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: since } }] },
+      where: { date: { greater_than_equal: since } },
       sort: 'date',
       limit: 1,
       depth: 2,
     }),
     // Deeper than the 5 displayed: the feed re-filters against the real clock in
     // the browser, so a published bundle needs spare events to fall back on.
-    payload.find({
+    findPublic({
       collection: 'events',
-      where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: since } }] },
+      where: { date: { greater_than_equal: since } },
       sort: 'date',
       limit: 25,
       depth: 2,
@@ -48,9 +48,8 @@ export default async function StartPage() {
   // fallback: if nothing upcoming, use the most recent past event
   let nextEvent = upcomingRes.docs[0]
   if (!nextEvent) {
-    const past = await payload.find({
+    const past = await findPublic({
       collection: 'events',
-      where: { _status: { equals: 'published' } },
       sort: '-date',
       limit: 1,
       depth: 2,

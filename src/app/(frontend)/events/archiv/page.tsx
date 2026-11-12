@@ -1,11 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import type { Where } from 'payload'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { ListView } from '@/components/events/ListView'
 import { toEventVM } from '@/components/events/model'
 import { startOfTodayBerlin } from '@/lib/eventTime'
-import { getPayloadClient } from '@/lib/getPayload'
+import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,17 +14,13 @@ export const metadata: Metadata = {
 }
 
 export default async function EventsArchivePage() {
-  const payload = await getPayloadClient()
   // Same Berlin start-of-day cutoff as "upcoming" — an event is in exactly one
   // bucket, and today's events stay out of the archive until Berlin midnight.
   const cutoff = startOfTodayBerlin().toISOString()
 
-  const where: Where = {
-    and: [{ _status: { equals: 'published' } }, { date: { less_than: cutoff } }],
-  }
-  const res = await payload.find({
+  const res = await findPublic({
     collection: 'events',
-    where,
+    where: { date: { less_than: cutoff } },
     sort: '-date', // most recent past event first
     limit: 500,
     depth: 1,

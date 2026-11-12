@@ -2,6 +2,7 @@ import { draftMode } from 'next/headers'
 import { type Face, HeroComponent } from '@/blocks/Hero/Component'
 import { getPayloadClient } from '@/lib/getPayload'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
+import { findForRequest, findPublic } from '@/lib/publicData'
 import type { Blog, Event } from '@/payload-types'
 
 export const dynamic = 'force-dynamic'
@@ -30,16 +31,7 @@ export default async function HeroPreviewPage({
   const hero = await payload.findGlobal({ slug: 'heroSettings', depth: 2, draft })
 
   const edited = slug
-    ? (
-        await payload.find({
-          collection,
-          where: { slug: { equals: slug } },
-          limit: 1,
-          depth: 2,
-          draft,
-          overrideAccess: draft,
-        })
-      ).docs[0]
+    ? (await findForRequest({ collection, where: { slug: { equals: slug } }, limit: 1, depth: 2 })).docs[0]
     : undefined
 
   let blogFace: Face
@@ -48,9 +40,9 @@ export default async function HeroPreviewPage({
 
   if (collection === 'blog') {
     blogFace = edited ? blogToFace(edited as unknown as Blog) : fallbackBlogFace
-    const ev = await payload.find({
+    const ev = await findPublic({
       collection: 'events',
-      where: { and: [{ _status: { equals: 'published' } }, { date: { greater_than_equal: now } }] },
+      where: { date: { greater_than_equal: now } },
       sort: 'date',
       limit: 1,
       depth: 2,
@@ -59,9 +51,8 @@ export default async function HeroPreviewPage({
     initialFace = 1
   } else {
     eventFace = edited ? eventToFace(edited as unknown as Event) : fallbackEventFace
-    const bl = await payload.find({
+    const bl = await findPublic({
       collection: 'blog',
-      where: { _status: { equals: 'published' } },
       sort: '-publishedAt',
       limit: 1,
       depth: 2,

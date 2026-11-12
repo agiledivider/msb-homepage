@@ -1,19 +1,16 @@
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { EventsClient } from '@/components/events/EventsClient'
 import { toEventDTO } from '@/components/events/model'
-import { getPayloadClient } from '@/lib/getPayload'
+import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
 
 export default async function EventsPage() {
-  const payload = await getPayloadClient()
-
   // Every published event, past included — the calendar view can page back into
   // previous months, and the upcoming/past split happens client-side so a
   // static snapshot stays correct as time moves past its publish date.
-  const res = await payload.find({
+  const res = await findPublic({
     collection: 'events',
-    where: { _status: { equals: 'published' } },
     sort: 'date',
     limit: 2000,
     depth: 1,

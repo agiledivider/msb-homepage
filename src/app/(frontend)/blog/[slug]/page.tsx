@@ -1,20 +1,17 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Metadata } from 'next'
-import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { richTextConverters } from '@/blocks/richtext'
 import { Media } from '@/components/Media'
-import { getPayloadClient } from '@/lib/getPayload'
 import { socialImageUrl } from '@/lib/mappers'
+import { findBySlug } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const payload = await getPayloadClient()
-  const res = await payload.find({ collection: 'blog', where: { slug: { equals: slug } }, limit: 1, depth: 1 })
-  const post = res.docs[0]
+  const post = await findBySlug('blog', slug, 1)
   if (!post) return {}
   const description = post.excerpt || post.subtitle || undefined
   const image = socialImageUrl(post.cover)
@@ -35,17 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const { isEnabled: draft } = await draftMode()
-  const payload = await getPayloadClient()
-  const res = await payload.find({
-    collection: 'blog',
-    where: { slug: { equals: slug } },
-    limit: 1,
-    depth: 2,
-    draft,
-    overrideAccess: draft,
-  })
-  const post = res.docs[0]
+  const post = await findBySlug('blog', slug, 2)
   if (!post) notFound()
 
   const meta = [post.author, post.readingTime].filter(Boolean).join(' · ')

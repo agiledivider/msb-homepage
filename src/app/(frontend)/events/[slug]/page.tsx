@@ -1,21 +1,18 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Metadata } from 'next'
-import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { richTextConverters } from '@/blocks/richtext'
 import { Media } from '@/components/Media'
 import { eventTimeText } from '@/lib/eventTime'
-import { getPayloadClient } from '@/lib/getPayload'
 import { socialImageUrl } from '@/lib/mappers'
+import { findBySlug } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const payload = await getPayloadClient()
-  const res = await payload.find({ collection: 'events', where: { slug: { equals: slug } }, limit: 1, depth: 1 })
-  const ev = res.docs[0]
+  const ev = await findBySlug('events', slug, 1)
   if (!ev) return {}
   const description = ev.description || undefined
   const image = socialImageUrl(ev.image)
@@ -45,17 +42,7 @@ const fmt = (d: string) =>
 
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const { isEnabled: draft } = await draftMode()
-  const payload = await getPayloadClient()
-  const res = await payload.find({
-    collection: 'events',
-    where: { slug: { equals: slug } },
-    limit: 1,
-    depth: 2,
-    draft,
-    overrideAccess: draft,
-  })
-  const ev = res.docs[0]
+  const ev = await findBySlug('events', slug, 2)
   if (!ev) notFound()
 
   return (

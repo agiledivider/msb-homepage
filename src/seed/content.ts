@@ -57,11 +57,16 @@ const mediaId = async (payload: Payload, file: string, alt: string) => {
   return (await payload.create({ collection: 'media', data: { alt }, filePath: path.resolve(UP, file) })).id
 }
 
-/** Create a doc if its slug is missing, otherwise update it in place. */
+/**
+ * Create a doc if its slug is missing, otherwise update it in place. Seeded
+ * published content counts as reviewed: the public frontend only shows docs that
+ * are published *and* approved (src/lib/publicData.ts).
+ */
 const upsertBySlug = async (payload: Payload, collection: 'pages' | 'blog' | 'events', slug: string, data: object) => {
+  const approved = '_status' in data && data._status === 'published' ? { ...data, reviewStatus: 'approved' } : data
   const ex = await payload.find({ collection, where: { slug: { equals: slug } }, limit: 1 })
-  if (ex.totalDocs) return payload.update({ collection, id: ex.docs[0].id, data: data as never, ...PUB })
-  return payload.create({ collection, data: data as never, ...PUB })
+  if (ex.totalDocs) return payload.update({ collection, id: ex.docs[0].id, data: approved as never, ...PUB })
+  return payload.create({ collection, data: approved as never, ...PUB })
 }
 
 export async function seedSiteContent(payload: Payload) {
