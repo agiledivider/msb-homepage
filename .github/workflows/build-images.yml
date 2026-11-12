@@ -15,7 +15,7 @@ name: build-images
 on:
   # Limited to this branch on purpose.
   push:
-    branches: [feat/payload-cms]
+    branches: [main]
   # Allow a manual run from the Actions tab as well.
   workflow_dispatch:
 
