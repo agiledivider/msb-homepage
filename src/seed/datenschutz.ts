@@ -20,7 +20,9 @@ const datenschutzBody = doc([
 
   h2('Datenschutzbeauftragter'),
   p(
-    t('Wir haben für unseren Verein einen Datenschutzbeauftragten bestellt. Bei Fragen zum Datenschutz erreichen Sie ihn unter:'),
+    t(
+      'Wir haben für unseren Verein einen Datenschutzbeauftragten bestellt. Bei Fragen zum Datenschutz erreichen Sie ihn unter:',
+    ),
     br(),
     t('Datenschutzbeauftragter des MakerSpace Bonn e. V.'),
     br(),
