@@ -8,7 +8,7 @@ Last reviewed: 2026-11-12 (versions from `package.json`)
 | package manager | pnpm 11 | bun, npm, yarn | Next + Payload tooling expects it (playbook exception); build-script approvals in `pnpm-workspace.yaml` | 2026-07 |
 | runtime | Node 22 LTS (`node:22-slim` images) | Node 26 | Next 16 targets 20/22 LTS | 2026-07 |
 | app framework | Next.js 16 (App Router), React 19.2 | TanStack Start (house default) | Payload 3 runs inside Next | 2026-07 |
-| CMS | Payload 3.85 (`@payloadcms/next`, `ui`, `richtext-lexical`, `live-preview-react`) | — | code-first config, runs in the Next app | 2026-07 |
+| CMS | Payload 3.93 (`@payloadcms/next`, `ui`, `richtext-lexical`, `live-preview-react`) | — | code-first config, runs in the Next app; 3.85 → 3.93 on 2026-11-20 for security advisories | 2026-11 |
 | database | SQLite via `@payloadcms/db-sqlite` (dev `push`, prod migrations) | Postgres | one file on a volume; enough for a Verein site | 2026-07 |
 | roles / permissions | `payload-rbac-plugin` 1.1 + own `src/plugins/editorial` (review workflow) | hand-rolled role fields | RBAC CRUD gating; editorial roles were unified onto RBAC 2026-07-24 | 2026-07 |
 | login (SSO) | `payload-oauth2` 1.0 against Kanidm (`src/plugins/oidc`) | — | Kanidm is the Verein IdP (setup in `DEPLOY.md`) | 2026-07 |

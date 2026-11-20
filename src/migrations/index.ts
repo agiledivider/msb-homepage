@@ -1,6 +1,7 @@
 import * as migration_20260708_190832_initial from './20260708_190832_initial';
 import * as migration_20260723_100658_prose_block from './20260723_100658_prose_block';
 import * as migration_20260724_005233_rbac_oidc_sub from './20260724_005233_rbac_oidc_sub';
+import * as migration_20261120_090203_payload_3_93 from './20261120_090203_payload_3_93';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20260724_005233_rbac_oidc_sub.up,
     down: migration_20260724_005233_rbac_oidc_sub.down,
-    name: '20260724_005233_rbac_oidc_sub'
+    name: '20260724_005233_rbac_oidc_sub',
+  },
+  {
+    up: migration_20261120_090203_payload_3_93.up,
+    down: migration_20261120_090203_payload_3_93.down,
+    name: '20261120_090203_payload_3_93'
   },
 ];
