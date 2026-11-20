@@ -10,6 +10,37 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ---
 
+## Security audit 2026-11-20
+
+**Status:** proposed 2026-11-20. The critical dependency advisories were fixed the same day (Payload 3.93, Next 16.4.6, `9822cc3`); these items are what's left.
+
+### 🚨 GO-LIVE BLOCKER — Removing someone in Kanidm removes their CMS access
+**Problem:** a person taken out of every CMS role group in Kanidm keeps the CMS roles they had before, as long as they can still log in. A Kanidm login also attaches to an existing CMS account with the same email address, even when Kanidm hasn't verified that address. A blocker only if Kanidm sign-in is part of the launch, which is the plan.
+**Desired:** CMS rights always follow Kanidm group membership at login, and a Kanidm identity only takes over an existing account through a verified email address.
+**AC:** a user removed from all role groups has no CMS rights after their next login; a login with an unverified email never lands in an existing account; a user whose roles change in Kanidm sees the change at their next login.
+
+### The publish service only accepts authenticated requests and runs unprivileged
+**Problem:** the publish service accepts every request when its shared token is not configured, and its container runs as root while holding the registry token and the deploy key.
+**Desired:** the service refuses to start without a token, checks it in constant time, and runs as an unprivileged user.
+**AC:** starting the publisher without a token fails with a clear message; a request with a wrong or missing token gets 401; the publisher container's process is not root.
+
+### Admin and public site send security headers
+**Problem:** neither the CMS nor the static site sends security headers, so other sites can frame the admin (clickjacking) and browsers get no HSTS, `nosniff` or CSP.
+**Desired:** both deployments send a sensible baseline of security headers that doesn't break the admin, live preview or the hero.
+**AC:** a header scan of `/admin` and of the static site shows frame protection, HSTS, `nosniff` and a CSP; admin, live preview and the start page still work.
+
+### Small hardening follow-ups
+**Problem:** several small gaps:
+- the draft-preview link can be made to redirect to another site;
+- a hanging Kanidm server hangs the login request;
+- a failed Kanidm login writes the token server's response into the log;
+- a real production env file isn't covered by `.gitignore`.
+
+**Desired:** preview only redirects within the site; Kanidm calls give up after a few seconds; login-failure logs contain only status and error code; no real env file can be committed by accident.
+**AC:** `/next/preview?path=//example.com` is rejected; a login against an unreachable Kanidm fails within seconds; `git status` ignores a new `.env.production`.
+
+---
+
 ## Playbook retrofit gaps
 
 **Status:** proposed 2026-11-12 (gaps against the playbook's TypeScript starter checklist). Not go-live blockers.
@@ -23,6 +54,7 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 **Problem:** CI only builds and pushes images; lint, typecheck, tests and a vulnerability scan never run, and actions are pinned by tag.
 **Desired:** a CI job runs lint, typecheck, tests and a container/dependency scan (Trivy) on every push to `main`, images are only pushed when it is green, actions are pinned by SHA, and dependency updates arrive as PRs (Renovate) plus a scheduled audit.
 **AC:** a red test blocks the image push; the Actions tab shows the scan result.
+**Note (2026-11-20):** `pnpm audit --prod` still reports 2 high advisories in `happy-dom`. Only the HTML-to-Lexical converter uses it, and the app never calls that converter. The fix needs happy-dom 21, which Lexical doesn't allow yet. The scheduled audit should show them clearing.
 
 ### Stricter TypeScript catches missing data
 **Problem:** `tsconfig.json` lacks `noUncheckedIndexedAccess`, `noImplicitOverride` and `verbatimModuleSyntax` (explicitly `false`).
