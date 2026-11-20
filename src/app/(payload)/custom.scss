@@ -1,7 +1,7 @@
 // MakerSpace Bonn look for the Payload admin, following MSB Styleguide
-// 2026-11.7, section 7 "Hell & Dunkel" (msb-styleguide repo): colour roles for
-// both modes plus the "Anwendungen" pattern (Grün 900 sidebar, layers, one main
-// button, focus ring). Imported after Payload's CSS, so these rules win.
+// 2026-11.8, section 7 "Hell & Dunkel" (msb-styleguide repo): colour roles for
+// both modes (dark = Tanne) plus the "Anwendungen" pattern (Tannenschwarz
+// sidebar with --leiste-* roles, layers, one main button, focus ring). Imported after Payload's CSS, so these rules win.
 
 // ── Styleguide tokens ──────────────────────────────────────────────────────
 // Copied from the styleguide's "Farben (CSS)" block; update by pasting a newer
@@ -12,7 +12,6 @@
   --marke: #5eb130; /* Markengrün */
   --tinte: #1e1c19; /* Tinte */
   --kreide: #ede8de; /* Kreide */
-  --gruen-300: #9cd27d; /* Grün 300 */
   --gruen-800: #325725; /* Grün 800 */
   --gruen-900: #1b3714; /* Grün 900 */
   --violett: #6d3e91; /* MINT-Violett */
@@ -43,16 +42,25 @@
   --fond-mint: #e6f5fc; /* MINT-Fond */
   --text-violett: #6d3e91; /* MINT-Violett */
   --text-blau: #0070a8; /* Textblau */
+  --leiste: #13201a; /* Tannenschwarz */
+  --leiste-text: #d6e0da; /* Nebel */
+  --leiste-leise: #9ba6a0; /* Salbei */
+  --leiste-feld: #1f2b26; /* Tanne Feld */
+  --leiste-hover: #213129; /* Tanne hell */
+  --leiste-linie: #2a3c33; /* Tanne Linie */
+  --leiste-aktiv: #5eb130; /* Markengrün */
+  --leiste-aktiv-text: #1e1c19; /* Tinte */
+  --leiste-fokus: #5eb130; /* Markengrün */
 }
 
 @mixin dunkel {
   color-scheme: dark;
-  --hintergrund: #141210; /* Kohle */
-  --flaeche: #1e1c19; /* Tinte */
-  --fond: #2b2721; /* Werkbank */
-  --linie: #3e3932; /* Linie dunkel */
+  --hintergrund: #0c1511; /* Tannennacht */
+  --flaeche: #13201a; /* Tannenschwarz */
+  --fond: #213129; /* Tanne hell */
+  --linie: #2a3c33; /* Tanne Linie */
   --text: #ede8de; /* Kreide */
-  --text-leise: #aaa297; /* Stein hell */
+  --text-leise: #9ba6a0; /* Salbei */
   --text-gruen: #9cd27d; /* Grün 300 */
   --fokus: #9cd27d; /* Grün 300 */
   --button: #5eb130; /* Grün 500 */
@@ -66,6 +74,15 @@
   --fond-mint: #152d37; /* MINT-Fond dunkel */
   --text-violett: #bc94db; /* Violett hell */
   --text-blau: #009fe3; /* MINT-Blau */
+  --leiste: #13201a; /* Tannenschwarz */
+  --leiste-text: #d6e0da; /* Nebel */
+  --leiste-leise: #9ba6a0; /* Salbei */
+  --leiste-feld: #1f2b26; /* Tanne Feld */
+  --leiste-hover: #213129; /* Tanne hell */
+  --leiste-linie: #2a3c33; /* Tanne Linie */
+  --leiste-aktiv: #5eb130; /* Markengrün */
+  --leiste-aktiv-text: #1e1c19; /* Tinte */
+  --leiste-fokus: #5eb130; /* Markengrün */
 }
 
 /* Dunkel: folgt dem System, außer data-theme="light" erzwingt Hell */
@@ -143,19 +160,20 @@ html[data-theme] {
 }
 
 // ── Sidebar ("Anwendungen" pattern) ────────────────────────────────────────
-// Grün 900 in both modes, Kreide text, Grün 300 group titles; hover and the
-// active entry in Grün 800, the active one with a Markengrün bar and bold text.
-// On Kohle (dark mode) the brand surface gets a Linie edge.
+// The --leiste-* roles: Tannenschwarz with a Tanne Linie edge to the content,
+// Nebel text, Salbei group titles, Tanne hell on hover. The active entry is a
+// full Markengrün fill with bold Tinte text, no bar.
 .nav {
-  background: var(--gruen-900);
+  background: var(--leiste);
   border-inline: 0;
-  color: var(--kreide);
-  --theme-text: var(--kreide);
-  --theme-elevation-400: var(--gruen-300);
-  --theme-elevation-100: var(--gruen-800);
-  --theme-elevation-800: var(--kreide);
-  --theme-elevation-1000: var(--kreide);
-  --accessibility-outline: 3px solid var(--gruen-300);
+  border-inline-end: 1px solid var(--leiste-linie);
+  color: var(--leiste-text);
+  --theme-text: var(--leiste-text);
+  --theme-elevation-400: var(--leiste-leise);
+  --theme-elevation-100: var(--leiste-hover);
+  --theme-elevation-800: var(--leiste-text);
+  --theme-elevation-1000: var(--leiste-text);
+  --accessibility-outline: 3px solid var(--leiste-fokus);
 
   .nav__scroll {
     // the brand block replaces the empty space under the app header
@@ -173,7 +191,7 @@ html[data-theme] {
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--gruen-300);
+    color: var(--leiste-leise);
   }
 
   .nav__link {
@@ -183,7 +201,7 @@ html[data-theme] {
     border-radius: 8px;
     font-size: 15px;
     line-height: 22px;
-    color: var(--kreide);
+    color: var(--leiste-text);
     text-decoration: none;
     transition: background-color 120ms ease;
 
@@ -198,15 +216,15 @@ html[data-theme] {
 
     &:hover,
     &:focus-visible {
-      background: var(--gruen-800);
+      background: var(--leiste-hover);
       text-decoration: none;
     }
   }
 
   // current page: Payload renders the indicator only on the active entry
   .nav__link:has(.nav__link-indicator) {
-    background: var(--gruen-800);
-    box-shadow: inset 4px 0 0 var(--marke);
+    background: var(--leiste-aktiv);
+    color: var(--leiste-aktiv-text);
     font-weight: 700;
   }
 
@@ -217,26 +235,12 @@ html[data-theme] {
   .nav__controls {
     align-self: stretch;
     padding: 12px;
-    border-top: 1px solid var(--gruen-800);
+    border-top: 1px solid var(--leiste-linie);
   }
 
   .nav__log-out {
-    color: var(--kreide);
+    color: var(--leiste-text);
   }
-}
-
-@mixin nav-dunkel {
-  .nav {
-    border-inline-end: 1px solid var(--linie);
-  }
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    @include nav-dunkel;
-  }
-}
-:root[data-theme='dark'] {
-  @include nav-dunkel;
 }
 
 .msb-nav-brand {
@@ -251,7 +255,7 @@ html[data-theme] {
   align-items: center;
   gap: 12px;
   padding: 4px 12px;
-  color: var(--kreide);
+  color: var(--leiste-text);
   text-decoration: none;
 
   span {
@@ -267,7 +271,7 @@ html[data-theme] {
 
   small {
     font-size: 13px;
-    color: var(--gruen-300);
+    color: var(--leiste-leise);
   }
 }
 
@@ -278,7 +282,7 @@ html[data-theme] {
   // 58px = its 18px offset + 24px width + 16px gap to the sidebar's edge.
   .template-default__nav-toggler.nav-toggler--is-open {
     transform: translateX(calc(var(--nav-width) - 58px));
-    color: var(--gruen-300);
+    color: var(--leiste-leise);
     transition: none;
   }
 }
@@ -287,7 +291,7 @@ html[data-theme] {
   .nav .nav__mobile-close {
     position: absolute;
     inset-inline-end: 16px;
-    color: var(--kreide);
+    color: var(--leiste-text);
   }
 }
 
