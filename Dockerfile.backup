@@ -1,0 +1,16 @@
+# Backup sidecar: nightly restic backup of the CMS database + media volumes.
+# Script and usage: scripts/backup/msb-backup.sh; operations: DEPLOY.md "Backups".
+FROM restic/restic:0.18.1
+
+RUN apk add --no-cache sqlite tzdata curl \
+  # same uid/gid as the app's `nextjs` user, so it can read and restore the volumes
+  && addgroup -g 1001 nodejs && adduser -u 1001 -G nodejs -D backup \
+  && mkdir -p /volumes/db /volumes/media /work /repo \
+  && chown backup:nodejs /volumes/db /volumes/media /work /repo
+
+COPY --chmod=755 scripts/backup/msb-backup.sh /usr/local/bin/msb-backup
+
+ENV TZ=Europe/Berlin RESTIC_CACHE_DIR=/work/cache
+USER backup
+ENTRYPOINT ["/usr/local/bin/msb-backup"]
+CMD ["schedule"]

@@ -4,9 +4,10 @@
 # linux/amd64, so the Next build runs at full speed — no QEMU emulation like a
 # cross-build from an Apple Silicon laptop.
 #
-# Builds two images in parallel:
+# Builds three images in parallel:
 #   - msb-homepage : the Payload + Next.js app (Dockerfile, `runner` stage)
 #   - msb-publisher: the static-snapshot publisher worker (Dockerfile.publisher)
+#   - msb-backup   : the nightly restic backup sidecar (Dockerfile.backup)
 #
 # Auth: the built-in GITHUB_TOKEN pushes to ghcr.io for packages owned by this
 # repo's owner (no PAT needed) — hence `permissions: packages: write` below.
@@ -42,6 +43,10 @@ jobs:
             image: msb-publisher
             dockerfile: Dockerfile.publisher
             target: runner
+          - name: backup
+            image: msb-backup
+            dockerfile: Dockerfile.backup
+            target: ''
     name: build (${{ matrix.name }})
     steps:
       - name: Checkout

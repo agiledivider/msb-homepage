@@ -160,6 +160,63 @@ roles in Kanidm, not in `/admin`, for SSO users. Implementation: `src/plugins/oi
 - **`db` volume** → `/app/data/msb.db` (SQLite). Keep it to keep your content.
 - **`media` volume** → `/app/public/media` (uploaded images).
 
+Both are backed up nightly; see [Backups](#backups).
+
+## Backups
+
+The `backup` service in `docker-compose.prod.yml` backs up the `db` and `media`
+volumes every night at `BACKUP_AT` (default 03:30 Europe/Berlin) with
+[restic](https://restic.net): encrypted, deduplicated, kept as 7 daily, 4 weekly
+and 12 monthly snapshots, followed by a `restic check`. The database is copied
+with SQLite's online backup, so the app keeps running. Image: `msb-backup`
+(`Dockerfile.backup`, built by CI); script: `scripts/backup/msb-backup.sh`.
+
+**Setup:** set `RESTIC_REPOSITORY` (a place *off this server*: S3-compatible
+storage, Backblaze B2, a Storage Box via `sftp:` or `rest:`) and
+`RESTIC_PASSWORD` in `.env`, plus the backend's credentials (see
+`.env.production.example`). The compose stack refuses to start without them;
+the repository is created on first start. **Keep `RESTIC_PASSWORD` in the
+password manager as well:** without it the backups cannot be read.
+
+**Check it works:**
+
+```bash
+docker compose -f docker-compose.prod.yml logs backup          # "repository ok", nightly "backup finished"
+docker compose -f docker-compose.prod.yml run --rm backup backup     # one backup now
+docker compose -f docker-compose.prod.yml run --rm backup snapshots  # list backups
+```
+
+**Check from your own machine** (proves the backups really are off the server
+and readable with the stored password; needs only Docker):
+
+```bash
+export RESTIC_REPOSITORY=… RESTIC_PASSWORD=…   # + backend keys, same as on the server
+pnpm backup:check                    # snapshots, newest < 36 h old, verify 10 % of the data
+pnpm backup:check --restore ./restore-check   # also restore the latest backup and look inside
+```
+
+**Alerts:** not set up yet. Set `BACKUP_PING_URL` to a healthchecks.io-style URL
+and that service alerts when a backup fails *or doesn't run*. Until then, look at
+`snapshots` now and then.
+
+**Restore** (onto a fresh server or after data loss). The web service must be
+stopped, so nothing writes to the database meanwhile:
+
+```bash
+docker compose -f docker-compose.prod.yml stop web
+docker compose -f docker-compose.prod.yml run --rm backup restore            # dry run: shows the plan
+docker compose -f docker-compose.prod.yml run --rm backup restore --apply    # latest snapshot
+#   restore <snapshot-id> --apply     a specific one (ids from `snapshots`)
+#   add --overwrite if the volumes aren't empty; the old DB stays as msb.db.before-restore-<time>
+docker compose -f docker-compose.prod.yml start web
+```
+
+On a fresh server, run the restore **before** the first `up -d`,
+or the first-boot seed fills the empty
+database and you need `--overwrite`. Media files that aren't in the backup are
+left in place by `--overwrite`. `pnpm backup:test` proves the round trip locally
+(Docker, throwaway volumes and repository).
+
 ## Schema changes
 
 The app uses SQLite `push` in **dev only**. In prod it applies **migrations**.

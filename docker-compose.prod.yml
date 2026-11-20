@@ -37,6 +37,27 @@ services:
       - db:/app/data
       - media:/app/public/media
 
+  # Nightly off-server backup of the db + media volumes (restic). Operations
+  # (restore, choosing a target): DEPLOY.md "Backups".
+  backup:
+    image: ${BACKUP_IMAGE:-ghcr.io/agiledivider/msb-backup:latest}
+    restart: unless-stopped
+    environment:
+      # required — where backups go (any restic backend) and its encryption
+      # password. Lose the password and the backups are unreadable.
+      RESTIC_REPOSITORY: ${RESTIC_REPOSITORY:?set RESTIC_REPOSITORY in .env}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD:?set RESTIC_PASSWORD in .env}
+      # backend credentials, as the chosen backend needs them
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      B2_ACCOUNT_ID: ${B2_ACCOUNT_ID:-}
+      B2_ACCOUNT_KEY: ${B2_ACCOUNT_KEY:-}
+      BACKUP_AT: ${BACKUP_AT:-03:30}
+      BACKUP_PING_URL: ${BACKUP_PING_URL:-}
+    volumes:
+      - db:/volumes/db
+      - media:/volumes/media
+
 volumes:
   db:
   media:

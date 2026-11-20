@@ -20,6 +20,7 @@ Last reviewed: 2026-11-12 (versions from `package.json`)
 | tests | vitest 5 (integration on a temp SQLite per file, fitness tests) | jest | Payload boots in-process | 2026-11 |
 | script runner | `tsx` | ts-node | runs `scripts/*.ts` | 2026-07 |
 | static hosting | nginx 1.27 image or FTP webspace (`.htaccess`) | Node on the public host | public site needs no server; see `docs/STATIC.md` | 2026-07 |
+| backups | restic 0.18 sidecar (`Dockerfile.backup`): SQLite online `.backup` + media, nightly | host-level volume snapshots, cron in the app image | encrypted, deduplicated, any off-site backend; retention + `check` built in | 2026-11 |
 | CI / registry | GitHub Actions → GHCR | Docker Hub | playbook D3 | 2026-07 |
 
 ## Deliberately not used

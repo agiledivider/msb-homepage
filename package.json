@@ -25,7 +25,9 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "backup:test": "scripts/backup/test-roundtrip.sh",
+    "backup:check": "scripts/backup/check.sh"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.0",
