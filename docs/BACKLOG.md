@@ -10,6 +10,23 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ---
 
+## From IDEAS.md (2026-11-20)
+
+**Status:** proposed 2026-11-20.
+
+### Editors can set every label on the homepage carousel and lists
+**Status:** the implementation needs a design discussion with Falk before work starts.
+**Problem:** the blog and event slides in the start-page carousel, and the lists next to it, show labels and tags that editors can't change. Some are fixed texts in the code, some are derived automatically. Every event slide says "kostenlos", for example, even for paid events, and the small eyebrow, note and button texts are the same for every post and event.
+**Desired:** every label and tag a visitor sees on a blog or event slide, and on its entry in the homepage lists, can be set per post or event. When left empty, it falls back to today's sensible default.
+**AC:** an editor changes each visible label on one event and one blog post and sees the change in the hero preview and on the start page; a paid event no longer shows "kostenlos"; posts and events nobody edits look exactly as they do today.
+
+### 🚨 GO-LIVE BLOCKER — Site content survives a lost server
+**Problem:** all content (the CMS database and uploaded media) lives only on the server's Docker volumes. There is no backup, so a broken disk, a bad migration or an accidental delete loses everything editors have written.
+**Desired:** content and media are backed up automatically on a regular schedule to a place off the server, old backups are kept for a while, and a documented restore brings a fresh server back to the state of the last backup.
+**AC:** a backup runs without anyone triggering it; a restore onto an empty stack from the latest backup shows the same pages, posts, events and images; someone is notified when a backup fails.
+
+---
+
 ## Security audit 2026-11-20
 
 **Status:** proposed 2026-11-20. The critical dependency advisories were fixed the same day (Payload 3.93, Next 16.4.6, `9822cc3`); these items are what's left.
