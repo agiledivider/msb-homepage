@@ -1,6 +1,6 @@
 import type { Field, FieldHook } from 'payload'
 import { hasPermission } from 'payload-rbac-plugin'
-import { EDITORIAL_REVIEW, isAdmin, isReviewer } from './access'
+import { EDITORIAL_REVIEW, isReviewer } from './access'
 
 /**
  * Computes `canReview` from the RBAC permission system so the (client-side)
@@ -110,12 +110,7 @@ export const reviewFields = (): Field[] => {
       relationTo: 'users',
       label: 'Geprüft von',
       access: reviewerOnly,
-      admin: {
-        position: 'sidebar',
-        readOnly: true,
-        // Only admins can read other users; everyone else would see "Untitled".
-        condition: (data, _sibling, { user }) => whenSet('reviewedBy')(data) && isAdmin(user),
-      },
+      admin: { position: 'sidebar', readOnly: true, condition: whenSet('reviewedBy') },
     },
   ]
 }

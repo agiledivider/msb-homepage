@@ -1,4 +1,4 @@
-import type { Access } from 'payload'
+import type { Access, FieldAccess } from 'payload'
 import { isAdmin } from '@/plugins/editorial/access'
 
 /**
@@ -17,3 +17,8 @@ export const hideForNonAdmins = ({ user }: { user: unknown }): boolean => !isAdm
 
 /** Any logged-in user. Role names aren't secret, and editors need them to see their own roles. */
 export const loggedIn: Access = ({ req: { user } }) => Boolean(user)
+
+/** Field-level read: admins, and the user reading their own account. Keeps
+ *  email and IdP subject private now that logged-in users can read names. */
+export const adminOrSelfField: FieldAccess = ({ req: { user }, doc }) =>
+  isAdmin(user) || (Boolean(user) && doc?.id === user?.id)
