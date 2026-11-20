@@ -27,6 +27,32 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ---
 
+## Before launch (2026-11-20)
+
+**Status:** proposed 2026-11-20 from the pre-launch review. Not blockers on their own, but should land before the site goes public. Two existing items also belong on this list: **Lint is green and stays green** and **Every push runs the gate in CI** (under "Playbook retrofit gaps"), and the redirect story below draws on the legacy migration section.
+
+### Search engines find and present every page well
+**Problem:** the site has no `robots.txt` and no sitemap, and normal content pages show no page-specific title or description in search results or link previews (blog posts and events do).
+**Desired:** search engines get a robots file and a sitemap of every public page, post and event; every public page has its own title and description, and sharing a link shows a sensible preview.
+**AC:** `/robots.txt` and `/sitemap.xml` load on the live site and in the static bundle; the sitemap lists a newly published page and leaves out drafts; a page like `/verein` shows its own title in the browser tab and in a link preview.
+
+### The Verein has checked the legal pages
+**Problem:** Impressum and Datenschutzerklärung were written as a baseline by the developers. Nobody responsible for the Verein has confirmed they're correct, and the privacy statement must describe what the live site actually does.
+**Desired:** the Vorstand (or whoever they name) has reviewed both pages against the live setup and signed them off.
+**AC:** the reviewer confirms in writing that Impressum and Datenschutzerklärung are correct for the launch setup; any corrections are live.
+
+### The most-visited old links still work
+**Problem:** about 328 old Joomla articles were never imported (see "Legacy migration is incomplete" below), so links from other sites and search engines lead to a 404 at launch.
+**Desired:** at least the old addresses that still get real visits lead to the matching new page, or to a fitting overview.
+**AC:** a list of the most-visited old addresses exists, and each of them opens a useful page on the new site instead of a 404.
+
+### The site goes live on its real domain and is watched
+**Problem:** launch still needs things outside the code: the real domain and certificates, a production Kanidm login, a strong emergency admin login, a first database setup on the production server, and someone noticing when the site is down.
+**Desired:** the site runs on its real domain over HTTPS; editors log in through the production Kanidm; a local emergency admin with a strong password exists and is stored safely; the production database was created by the migrations; an uptime check alerts someone when the site or the CMS stops responding.
+**AC:** the real domain serves the site with a valid certificate; an editor logs in through Kanidm in production; the emergency admin can log in; stopping the site triggers an alert within minutes.
+
+---
+
 ## Security audit 2026-11-20
 
 **Status:** proposed 2026-11-20. The critical dependency advisories were fixed the same day (Payload 3.93, Next 16.4.6, `9822cc3`); these items are what's left.
