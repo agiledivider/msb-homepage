@@ -22,6 +22,40 @@ import { EDITORIAL_SKIP } from '../plugins/editorial/types'
 // stays published instead of being routed into review.
 const PUB = { context: { [EDITORIAL_SKIP]: true } } as const
 
+/** "Die kurze Geschichte" on /verein (text from Falk, 2026-11-20). */
+export const VEREIN_TIMELINE = [
+  { year: '2017', text: 'Der MakerSpace Bonn e.V. wird als gemeinnütziger Verein gegründet.' },
+  {
+    year: '2018',
+    text: 'Eröffnung am 3. März auf 240 qm im ehemaligen Wählersaal der Telekom, mit großem Andrang. Der General-Anzeiger berichtet.',
+  },
+  {
+    year: '2019',
+    text: 'Ein Jahr nach der Eröffnung kommt der General-Anzeiger wieder und beschreibt den MakerSpace als „Ideenschmiede für Tüftler“.',
+  },
+  {
+    year: '2022',
+    text: 'Die Teckids stoßen dazu. Mit MakeCityBonn startet ein vom BMBF gefördertes MINT-Cluster, zusammen mit Telekom Stiftung, Stadt Bonn und Fraunhofer IAIS.',
+  },
+  {
+    year: '2022',
+    text: 'Der MakerSpace richtet den Projekt-Kickoff aus und betreut das Robotik-Angebot beim futurecamp.digital.',
+  },
+  {
+    year: '2023',
+    text: 'Die Stadt Bonn lädt zu IoT-Workshops in den MakerSpace ein. Bei der Digitalfabrik laufen die 3D-Drucker von MakeCity.',
+  },
+  { year: '2024', text: 'Erster Hackathon für 12- bis 16-Jährige, dazu Plotten beim futurecamp.digital.' },
+  {
+    year: '2025',
+    text: '„Sachen Machen Hackathon“ mit 24 Jugendlichen. Bilanz von MakeCityBonn Phase 1: 237 Workshops, 1.279 Kinder und Jugendliche (41 % Mädchen) und 105 geschulte Fachkräfte.',
+  },
+  {
+    year: 'Heute',
+    text: 'Offene Werkstatt mit Workshops, Handarbeitstreff, Gast-Events und Community-Kunst wie „Collective Neurogenesis“.',
+  },
+]
+
 const UP = path.resolve(process.cwd(), 'uploads')
 const day = 24 * 60 * 60 * 1000
 const at = (offsetDays: number, hour = 10) => {
@@ -265,11 +299,7 @@ export async function seedSiteContent(payload: Payload) {
         quote:
           '„Bonn hat mit uns eine offene Werkstatt, in der Menschen kreativ und neugierig Neues erschaffen — und voneinander lernen."',
         timelineTitle: 'DIE KURZE GESCHICHTE',
-        timeline: [
-          { year: '2018', text: 'Vereinsgründung, Gemeinnützigkeit & Eröffnung am 3. März — mit vielen Gästen.' },
-          { year: '2019', text: 'Öffnungszeiten ausgeweitet, Kernteam wächst, erste Workshop-Reihen.' },
-          { year: 'heute', text: '6 Werkstätten, über 40 Maschinen, regelmäßige offene Türen & Kurse.' },
-        ],
+        timeline: VEREIN_TIMELINE,
         values: [
           { title: 'Für alle', text: 'Anfänger:innen bis Profis, jung bis alt — jede:r ist willkommen.' },
           { title: 'Hilfe zur Selbsthilfe', text: 'Wir helfen ein Stück weiter — bauen tust du selbst.' },
