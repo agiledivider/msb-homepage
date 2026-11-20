@@ -31,7 +31,9 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 **Status:** proposed 2026-11-20. The critical dependency advisories were fixed the same day (Payload 3.93, Next 16.4.6, `9822cc3`); these items are what's left.
 
-### 🚨 GO-LIVE BLOCKER — Removing someone in Kanidm removes their CMS access
+### ✅ DONE 2026-11-20 — Removing someone in Kanidm removes their CMS access
+**Implementation notes:** roles are overwritten at every Kanidm login; a missing `cms_roles` claim (Kanidm omits it when the user is in no role group) means no roles. Logins without `email_verified: true` are refused (`src/plugins/oidc/claims.ts`). Covered by `tests/integration/kanidm-login.test.ts`, which drives the real payload-oauth2 callback with Kanidm faked at `fetch`. Verified by Falk with a real Kanidm login. Caveats in `DEPLOY.md`: a wrong claim name strips Kanidm users' roles (keep the local password admin), and removal takes effect at the next login, not immediately.
+
 **Problem:** a person taken out of every CMS role group in Kanidm keeps the CMS roles they had before, as long as they can still log in. A Kanidm login also attaches to an existing CMS account with the same email address, even when Kanidm hasn't verified that address. A blocker only if Kanidm sign-in is part of the launch, which is the plan.
 **Desired:** CMS rights always follow Kanidm group membership at login, and a Kanidm identity only takes over an existing account through a verified email address.
 **AC:** a user removed from all role groups has no CMS rights after their next login; a login with an unverified email never lands in an existing account; a user whose roles change in Kanidm sees the change at their next login.

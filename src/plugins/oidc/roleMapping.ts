@@ -32,13 +32,11 @@ const toValues = (claim: unknown): string[] => {
 /**
  * Resolve the RBAC role names for the roles claim.
  *
- * Returns `undefined` when the claim is absent — a signal to leave the user's
- * existing roles untouched rather than wiping them (guards against a
- * mis-configured claim map stripping an admin on next login). When present but
- * carrying no recognised role, returns `[]` (deny by default).
+ * An absent claim yields `[]`: Kanidm omits a claim-map claim when the user is in
+ * none of its groups, so "absent" means "removed from every role group" and must
+ * revoke CMS rights (deny by default). Unknown values are ignored.
  */
-export const mapClaimToRoleNames = (claim: unknown): string[] | undefined => {
-  if (claim === undefined || claim === null) return undefined
+export const mapClaimToRoleNames = (claim: unknown): string[] => {
   const names = new Set<string>()
   for (const value of toValues(claim)) {
     const name = ROLE_BY_CLAIM[value.trim().toLowerCase()]

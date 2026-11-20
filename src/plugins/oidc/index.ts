@@ -1,6 +1,6 @@
 import { type PayloadRequest, parseCookies } from 'payload'
 import { OAuth2Plugin } from 'payload-oauth2'
-import { mapClaimToRoleNames } from './roleMapping'
+import { parseKanidmUserInfo } from './claims'
 
 /**
  * Kanidm (OIDC) sign-in for the Payload admin, layered on top of the built-in
@@ -113,50 +113,32 @@ export const kanidmOAuth = OAuth2Plugin({
     if (!res.ok) {
       throw new Error(`Kanidm userinfo request failed (${res.status})`)
     }
-    const claims = (await res.json()) as Record<string, unknown>
+    // Verified email + roles that always follow Kanidm group membership (claims.ts).
+    const { email, sub, name, roleNames } = parseKanidmUserInfo(await res.json(), rolesClaim)
 
-    const email = typeof claims.email === 'string' ? claims.email : undefined
-    if (!email) {
-      // useEmailAsIdentity needs an email; surface a clear cause instead of a
-      // generic "email not found" from deep inside the plugin.
-      throw new Error('Kanidm account has no email — add a mail attribute or grant the `email` scope.')
-    }
-    const name =
-      (typeof claims.name === 'string' && claims.name) ||
-      (typeof claims.preferred_username === 'string' && claims.preferred_username) ||
-      undefined
-
-    // Map the roles claim → RBAC role names → Role doc IDs (the `roles`
-    // relationship, the source of truth for authorization). Only touch roles when
-    // the token actually carried the claim, so a missing claim map can't silently
-    // strip everyone's access on next login.
-    const roleNames = mapClaimToRoleNames(claims[rolesClaim])
-    let roleIds: (string | number)[] | undefined
-    if (roleNames !== undefined) {
-      if (roleNames.length === 0) {
-        roleIds = []
-      } else {
-        const found = await req.payload.find({
-          collection: 'roles',
-          where: { name: { in: roleNames } },
-          depth: 0,
-          limit: 100,
-          req,
-          overrideAccess: true,
-        })
-        roleIds = found.docs.map((r) => r.id)
-        if (roleIds.length < roleNames.length) {
-          req.payload.logger.warn(
-            { requested: roleNames, resolved: found.docs.map((r) => r.name) },
-            'Kanidm OIDC — some role names have no matching RBAC role (check seeded role names)',
-          )
-        }
+    // RBAC role names → Role doc IDs (the `roles` relationship, the source of
+    // truth for authorization). Always written, so a user removed from every
+    // Kanidm role group loses their CMS rights at this login.
+    let roleIds: (string | number)[] = []
+    if (roleNames.length > 0) {
+      const found = await req.payload.find({
+        collection: 'roles',
+        where: { name: { in: roleNames } },
+        depth: 0,
+        limit: 100,
+        req,
+        overrideAccess: true,
+      })
+      roleIds = found.docs.map((r) => r.id)
+      if (roleIds.length < roleNames.length) {
+        req.payload.logger.warn(
+          { requested: roleNames, resolved: found.docs.map((r) => r.name) },
+          'Kanidm OIDC — some role names have no matching RBAC role (check seeded role names)',
+        )
       }
     }
 
-    const data: Record<string, unknown> = { email, sub: claims.sub, name }
-    if (roleIds !== undefined) data.roles = roleIds
-    return data
+    return { email, sub, name, roles: roleIds }
   },
   successRedirect: () => '/admin',
   failureRedirect: (req: PayloadRequest, err?: unknown) => {

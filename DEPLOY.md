@@ -126,6 +126,14 @@ do*. A user's token carries just `cms_roles: ["editor"]` (or `admin` / `reviewer
 editorial access (deny by default). Group/claim names are examples; the app reads
 the claim named `cms_roles` unless you set `KANIDM_ROLES_CLAIM`.
 
+Roles are **overwritten at every Kanidm login**: removing someone from all role
+groups takes away their CMS rights the next time they log in. A wrong claim name
+therefore strips everyone who logs in via Kanidm, so keep the local password admin
+as break-glass. To cut someone off *immediately*, also remove them from
+`msb-payload-user` and delete their sessions in the CMS. Kanidm accounts are matched
+to CMS accounts by email, and only a verified email (`email_verified: true`) is
+accepted; anything else is refused at login.
+
 The redirect URL must be exactly `<NEXT_PUBLIC_SERVER_URL>/api/users/oauth/kanidm/callback`.
 Kanidm's PKCE (S256) and HTTP-Basic token auth are both handled by the app.
 
