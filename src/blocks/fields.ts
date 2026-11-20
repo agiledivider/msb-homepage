@@ -10,12 +10,19 @@ export const linkField = (name: string, label: string, opts?: { required?: boole
   label,
   type: 'group',
   fields: [
-    { name: 'label', type: 'text', required: opts?.required },
     {
-      name: 'url',
-      type: 'text',
-      required: opts?.required,
-      admin: { description: 'Internal path (e.g. /verein) or full URL.' },
+      // label and target side by side, so each link takes one line, not two
+      type: 'row',
+      fields: [
+        { name: 'label', type: 'text', label: 'Text', required: opts?.required, admin: { width: '50%' } },
+        {
+          name: 'url',
+          type: 'text',
+          label: 'Ziel',
+          required: opts?.required,
+          admin: { width: '50%', description: 'Interner Pfad (z. B. /verein) oder volle URL.' },
+        },
+      ],
     },
   ],
 })

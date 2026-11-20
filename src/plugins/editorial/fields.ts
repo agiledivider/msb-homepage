@@ -1,6 +1,6 @@
 import type { Field, FieldHook } from 'payload'
 import { hasPermission } from 'payload-rbac-plugin'
-import { EDITORIAL_REVIEW, isReviewer } from './access'
+import { EDITORIAL_REVIEW, isAdmin, isReviewer } from './access'
 
 /**
  * Computes `canReview` from the RBAC permission system so the (client-side)
@@ -56,7 +56,22 @@ export const canReviewField = (): Field => ({
  */
 export const reviewFields = (): Field[] => {
   const reviewerOnly = { update: ({ req }: { req: { user?: unknown } }) => isReviewer(req.user) }
+  /** Read-only metadata only earns sidebar space once it has a value. */
+  const whenSet = (name: string) => (data: Record<string, unknown> | undefined) =>
+    data?.[name] !== undefined && data?.[name] !== null && data?.[name] !== ''
   return [
+    // The panel comes first: its badge already shows the status, so the raw
+    // `reviewStatus` select below stays hidden (it is still stored and locked).
+    {
+      name: 'reviewPanel',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '/plugins/editorial/components/ReviewPanel#ReviewPanel',
+        },
+      },
+    },
     {
       name: 'reviewStatus',
       type: 'select',
@@ -68,36 +83,38 @@ export const reviewFields = (): Field[] => {
         { label: 'Freigegeben', value: 'approved' },
       ],
       access: reviewerOnly,
-      admin: { position: 'sidebar', readOnly: true },
+      admin: { position: 'sidebar', readOnly: true, hidden: true },
     },
     {
       name: 'reviewNote',
       type: 'textarea',
       label: 'Reviewer-Notiz',
       access: reviewerOnly,
-      admin: { position: 'sidebar', readOnly: true },
+      admin: { position: 'sidebar', readOnly: true, condition: whenSet('reviewNote') },
+    },
+    {
+      name: 'submittedAt',
+      type: 'date',
+      label: 'Eingereicht am',
+      access: reviewerOnly,
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        condition: whenSet('submittedAt'),
+        date: { pickerAppearance: 'dayAndTime', displayFormat: 'dd.MM.yyyy HH:mm' },
+      },
     },
     {
       name: 'reviewedBy',
       type: 'relationship',
       relationTo: 'users',
+      label: 'Geprüft von',
       access: reviewerOnly,
-      admin: { position: 'sidebar', readOnly: true },
-    },
-    {
-      name: 'submittedAt',
-      type: 'date',
-      access: reviewerOnly,
-      admin: { position: 'sidebar', readOnly: true, date: { pickerAppearance: 'dayAndTime' } },
-    },
-    {
-      name: 'reviewPanel',
-      type: 'ui',
       admin: {
         position: 'sidebar',
-        components: {
-          Field: '/plugins/editorial/components/ReviewPanel#ReviewPanel',
-        },
+        readOnly: true,
+        // Only admins can read other users; everyone else would see "Untitled".
+        condition: (data, _sibling, { user }) => whenSet('reviewedBy')(data) && isAdmin(user),
       },
     },
   ]

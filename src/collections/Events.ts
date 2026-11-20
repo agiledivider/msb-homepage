@@ -23,24 +23,16 @@ export const Events: CollectionConfig = {
     delete: checkPermission('events:delete'),
   },
   versions: { drafts: true },
+  // Layout only: rows and labels, no named groups, so the stored shape is unchanged.
   fields: [
-    { name: 'title', type: 'text', required: true },
-    slugField(),
-    {
-      name: 'legacyId',
-      type: 'number',
-      index: true,
-      admin: {
-        position: 'sidebar',
-        description: 'Alte Joomla-Artikel-ID — für den 301-Redirect der alten /?view=article&id=…-URLs.',
-      },
-    },
+    { name: 'title', type: 'text', label: 'Titel', required: true },
     {
       type: 'row',
       fields: [
         {
           name: 'date',
           type: 'date',
+          label: 'Datum',
           required: true,
           // Date only — the time of day is derived from `timeLabel` (see lib/eventTime.ts).
           admin: { width: '50%', date: { pickerAppearance: 'dayOnly', displayFormat: 'dd.MM.yyyy' } },
@@ -48,8 +40,12 @@ export const Events: CollectionConfig = {
         {
           name: 'endDate',
           type: 'date',
-          label: 'Enddatum (optional, mehrtägig)',
-          admin: { width: '50%', date: { pickerAppearance: 'dayOnly', displayFormat: 'dd.MM.yyyy' } },
+          label: 'Enddatum',
+          admin: {
+            width: '50%',
+            description: 'Nur bei mehrtägigen Events.',
+            date: { pickerAppearance: 'dayOnly', displayFormat: 'dd.MM.yyyy' },
+          },
         },
       ],
     },
@@ -59,10 +55,10 @@ export const Events: CollectionConfig = {
         {
           name: 'timeLabel',
           type: 'text',
-          label: 'Zeit-Label',
-          admin: { width: '33%', description: 'z. B. "ab 10", "18–21"' },
+          label: 'Uhrzeit',
+          admin: { width: '50%', description: 'Freitext, z. B. „ab 10" oder „18–21".' },
         },
-        { name: 'location', type: 'text', admin: { width: '67%' }, defaultValue: 'Kennedyallee 18' },
+        { name: 'location', type: 'text', label: 'Ort', admin: { width: '50%' }, defaultValue: 'Kennedyallee 18' },
       ],
     },
     {
@@ -71,24 +67,49 @@ export const Events: CollectionConfig = {
         {
           name: 'category',
           type: 'text',
-          label: 'Tag/Label',
-          admin: { width: '60%', description: 'z. B. "FÜR ALLE · KOSTENLOS"' },
+          label: 'Etikett',
+          admin: { width: '50%', description: 'Farbiges Etikett in Liste und Kacheln, z. B. „FÜR ALLE · KOSTENLOS".' },
         },
         {
           name: 'tagColor',
           type: 'select',
+          label: 'Farbe des Etiketts',
           defaultValue: 'green',
           options: [
             { label: 'Grün', value: 'green' },
             { label: 'Orange', value: 'orange' },
             { label: 'Neutral', value: 'neutral' },
           ],
-          admin: { width: '40%' },
+          admin: { width: '50%' },
         },
       ],
     },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Bild' },
-    { name: 'description', type: 'textarea', label: 'Kurzbeschreibung' },
-    { name: 'body', type: 'richText', label: 'Details' },
+    {
+      name: 'description',
+      type: 'textarea',
+      label: 'Kurzbeschreibung',
+      admin: { description: 'Erscheint in Liste und Kacheln und, beim nächsten Event, im Startseiten-Karussell.' },
+    },
+    {
+      name: 'body',
+      type: 'richText',
+      label: 'Details',
+      admin: { description: 'Der ausführliche Text auf der Seite des Events.' },
+    },
+    slugField(),
+    {
+      name: 'legacyId',
+      type: 'number',
+      label: 'Alte Joomla-ID',
+      index: true,
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Leitet die alte Joomla-Adresse auf dieses Event um.',
+        // Only imported events carry one; nobody sets it by hand.
+        condition: (data) => typeof data?.legacyId === 'number',
+      },
+    },
   ],
 }

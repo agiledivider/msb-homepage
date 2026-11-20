@@ -14,9 +14,10 @@ const slugify = (val: string): string =>
 export const slugField = (from = 'title'): Field => ({
   name: 'slug',
   type: 'text',
+  label: 'URL-Pfad',
   index: true,
   unique: true,
-  admin: { position: 'sidebar', description: 'Leerlassen = automatisch aus dem Titel.' },
+  admin: { position: 'sidebar', description: 'Leer lassen: wird aus dem Titel erzeugt.' },
   hooks: {
     beforeValidate: [
       ({ value, data }) => {
