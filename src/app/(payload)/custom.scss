@@ -1,0 +1,327 @@
+// MakerSpace Bonn look for the Payload admin, following MSB Styleguide
+// 2026-11.7, section 7 "Hell & Dunkel" (msb-styleguide repo): colour roles for
+// both modes plus the "Anwendungen" pattern (Grün 900 sidebar, layers, one main
+// button, focus ring). Imported after Payload's CSS, so these rules win.
+
+// ── Styleguide tokens ──────────────────────────────────────────────────────
+// Copied from the styleguide's "Farben (CSS)" block; update by pasting a newer
+// one. Payload sets data-theme on <html>, which the guide's selectors honour.
+
+/* In beiden Modi gleich */
+:root {
+  --marke: #5eb130; /* Markengrün */
+  --tinte: #1e1c19; /* Tinte */
+  --kreide: #ede8de; /* Kreide */
+  --gruen-300: #9cd27d; /* Grün 300 */
+  --gruen-800: #325725; /* Grün 800 */
+  --gruen-900: #1b3714; /* Grün 900 */
+  --violett: #6d3e91; /* MINT-Violett */
+  --gelb: #fcbd30; /* Mitglieder-Gelb */
+  --orange: #f2711c; /* Maker-Orange */
+  --rot: #c62828; /* Sicherheitsrot */
+}
+
+/* Hell (Standard) */
+:root {
+  color-scheme: light;
+  --hintergrund: #fbf8f2; /* Papier */
+  --flaeche: #ffffff; /* Weiß */
+  --fond: #faf2e4; /* Creme */
+  --linie: #e4dccb; /* Linie */
+  --text: #1e1c19; /* Tinte */
+  --text-leise: #5f5850; /* Stein */
+  --text-gruen: #33791a; /* Grün 600 */
+  --fokus: #33791a; /* Grün 600 */
+  --button: #33791a; /* Grün 600 */
+  --button-hover: #325725; /* Grün 800 */
+  --button-text: #ffffff; /* Weiß */
+  --fond-gruen: #f0f7ea; /* Grün 50 */
+  --fond-gelb: #fdf3d7; /* Gelb-Fond */
+  --text-gelb: #8a5a00; /* Ocker */
+  --fond-rot: #fcebe9; /* Rot-Fond */
+  --text-rot: #c62828; /* Sicherheitsrot */
+  --fond-mint: #e6f5fc; /* MINT-Fond */
+  --text-violett: #6d3e91; /* MINT-Violett */
+  --text-blau: #0070a8; /* Textblau */
+}
+
+@mixin dunkel {
+  color-scheme: dark;
+  --hintergrund: #141210; /* Kohle */
+  --flaeche: #1e1c19; /* Tinte */
+  --fond: #2b2721; /* Werkbank */
+  --linie: #3e3932; /* Linie dunkel */
+  --text: #ede8de; /* Kreide */
+  --text-leise: #aaa297; /* Stein hell */
+  --text-gruen: #9cd27d; /* Grün 300 */
+  --fokus: #9cd27d; /* Grün 300 */
+  --button: #5eb130; /* Grün 500 */
+  --button-hover: #9cd27d; /* Grün 300 */
+  --button-text: #1e1c19; /* Tinte */
+  --fond-gruen: #1b3714; /* Grün 900 */
+  --fond-gelb: #33280f; /* Gelb-Fond dunkel */
+  --text-gelb: #fcbd30; /* Mitglieder-Gelb */
+  --fond-rot: #3b1a17; /* Rot-Fond dunkel */
+  --text-rot: #ff7b7b; /* Rot hell */
+  --fond-mint: #152d37; /* MINT-Fond dunkel */
+  --text-violett: #bc94db; /* Violett hell */
+  --text-blau: #009fe3; /* MINT-Blau */
+}
+
+/* Dunkel: folgt dem System, außer data-theme="light" erzwingt Hell */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dunkel;
+  }
+}
+:root[data-theme='dark'] {
+  @include dunkel;
+}
+
+// ── Payload theme → styleguide roles ───────────────────────────────────────
+// Payload paints everything from --theme-elevation-0…1000 (bg → text). Map the
+// guide's three layers onto the bright end and its two text tones onto the
+// rest; the roles above already flip per mode, so one mapping serves both.
+// `html[data-theme]` matches the specificity of Payload's own theme blocks.
+:root,
+html[data-theme] {
+  --theme-bg: var(--hintergrund);
+  --theme-text: var(--text);
+  --theme-input-bg: var(--flaeche);
+  --theme-border-color: var(--linie);
+  --theme-elevation-0: var(--hintergrund); // Ebene 0
+  --theme-elevation-50: var(--flaeche); // Ebene 1: cards, tables
+  --theme-elevation-100: var(--fond); // Ebene 2: hover, table head
+  --theme-elevation-150: var(--linie);
+  --theme-elevation-200: color-mix(in oklab, var(--linie), var(--text-leise) 25%);
+  --theme-elevation-250: color-mix(in oklab, var(--linie), var(--text-leise) 50%);
+  --theme-elevation-300: color-mix(in oklab, var(--linie), var(--text-leise) 75%);
+  --theme-elevation-350: var(--text-leise);
+  --theme-elevation-400: var(--text-leise); // Payload's muted text
+  --theme-elevation-450: var(--text-leise);
+  --theme-elevation-500: var(--text-leise);
+  --theme-elevation-550: var(--text-leise);
+  --theme-elevation-600: color-mix(in oklab, var(--text-leise), var(--text) 25%);
+  --theme-elevation-650: color-mix(in oklab, var(--text-leise), var(--text) 50%);
+  --theme-elevation-700: color-mix(in oklab, var(--text-leise), var(--text) 75%);
+  --theme-elevation-750: var(--text);
+  --theme-elevation-800: var(--text);
+  --theme-elevation-850: var(--text);
+  --theme-elevation-900: var(--text);
+  --theme-elevation-950: var(--text);
+  --theme-elevation-1000: var(--text);
+  // Fokus: 3 px ring, 2 px gap
+  --accessibility-outline: 3px solid var(--fokus);
+  --accessibility-outline-offset: 2px;
+}
+
+// Inputs: the guide wants a "Text leise" border (≥ 3:1) so a field reads as a
+// field; Payload uses the card-border colour. `:not(.msb)` only lifts the
+// specificity to Payload's own `.field-type.text:not(.has-many) input`.
+.field-type:not(.has-many):not(.msb) :is(input, textarea),
+.date-time-picker .react-datepicker__input-container input:not(.msb),
+.search-filter__input:not(.msb) {
+  border-color: var(--text-leise);
+}
+
+// One main button per view: Grün 600 / Grün 500 by mode.
+.btn--style-primary {
+  --bg-color: var(--button);
+  --color: var(--button-text);
+  --hover-bg: var(--button-hover);
+  --hover-color: var(--button-text);
+}
+
+// Further buttons: on Fond with Linie.
+.btn--style-secondary,
+.btn--style-pill {
+  --bg-color: var(--fond);
+  --color: var(--text);
+  --hover-bg: var(--fond);
+  --hover-color: var(--text);
+  border: 1px solid var(--linie);
+}
+
+// ── Sidebar ("Anwendungen" pattern) ────────────────────────────────────────
+// Grün 900 in both modes, Kreide text, Grün 300 group titles; hover and the
+// active entry in Grün 800, the active one with a Markengrün bar and bold text.
+// On Kohle (dark mode) the brand surface gets a Linie edge.
+.nav {
+  background: var(--gruen-900);
+  border-inline: 0;
+  color: var(--kreide);
+  --theme-text: var(--kreide);
+  --theme-elevation-400: var(--gruen-300);
+  --theme-elevation-100: var(--gruen-800);
+  --theme-elevation-800: var(--kreide);
+  --theme-elevation-1000: var(--kreide);
+  --accessibility-outline: 3px solid var(--gruen-300);
+
+  .nav__scroll {
+    // the brand block replaces the empty space under the app header
+    padding-top: calc(var(--base) * 1);
+    padding-inline: calc(var(--base) * 0.5);
+  }
+
+  .nav-group {
+    margin-top: calc(var(--base) * 1);
+  }
+
+  .nav-group__toggle {
+    padding-inline: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gruen-300);
+  }
+
+  .nav__link {
+    gap: 12px;
+    margin-block: 2px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 22px;
+    color: var(--kreide);
+    text-decoration: none;
+    transition: background-color 120ms ease;
+
+    // icon from the per-item `--msb-icon` below
+    &::before {
+      content: '';
+      flex: 0 0 18px;
+      height: 18px;
+      background: currentColor;
+      mask: var(--msb-icon) center / contain no-repeat;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: var(--gruen-800);
+      text-decoration: none;
+    }
+  }
+
+  // current page: Payload renders the indicator only on the active entry
+  .nav__link:has(.nav__link-indicator) {
+    background: var(--gruen-800);
+    box-shadow: inset 4px 0 0 var(--marke);
+    font-weight: 700;
+  }
+
+  .nav__link-indicator {
+    display: none;
+  }
+
+  .nav__controls {
+    align-self: stretch;
+    padding: 12px;
+    border-top: 1px solid var(--gruen-800);
+  }
+
+  .nav__log-out {
+    color: var(--kreide);
+  }
+}
+
+@mixin nav-dunkel {
+  .nav {
+    border-inline-end: 1px solid var(--linie);
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include nav-dunkel;
+  }
+}
+:root[data-theme='dark'] {
+  @include nav-dunkel;
+}
+
+.msb-nav-brand {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.75);
+}
+
+.msb-nav-brand__home {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 12px;
+  color: var(--kreide);
+  text-decoration: none;
+
+  span {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  strong {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  small {
+    font-size: 13px;
+    color: var(--gruen-300);
+  }
+}
+
+// Payload parks the "close menu" button at the sidebar's top-left, on top of
+// the logo; move it to the top-right. Desktop and phone use different buttons.
+@media (min-width: 769px) {
+  // Rendered outside the template root, so key off the button's own state.
+  // 58px = its 18px offset + 24px width + 16px gap to the sidebar's edge.
+  .template-default__nav-toggler.nav-toggler--is-open {
+    transform: translateX(calc(var(--nav-width) - 58px));
+    color: var(--gruen-300);
+    transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav .nav__mobile-close {
+    position: absolute;
+    inset-inline-end: 16px;
+    color: var(--kreide);
+  }
+}
+
+// ── Branding outside the sidebar ───────────────────────────────────────────
+.msb-admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  span {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  strong {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  small {
+    font-size: 15px;
+    color: var(--text-leise);
+  }
+}
+
+// ── Nav icons (Font Awesome 7 free-solid; generated, one per entry id) ─────
+#nav-start { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20448%20512%22%3E%3Cpath%20d%3D%22M0%2096C0%2060.7%2028.7%2032%2064%2032l320%200c35.3%200%2064%2028.7%2064%2064l0%20320c0%2035.3-28.7%2064-64%2064L64%20480c-35.3%200-64-28.7-64-64L0%2096zm64%2064l0%20256%20128%200%200-256-128%200zm320%200l-128%200%200%20256%20128%200%200-256z%22%2F%3E%3C%2Fsvg%3E"); } // faTableColumns
+#nav-blog { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M368.5%2018.3l-50.1%2050.1%20125.3%20125.3%2050.1-50.1c21.9-21.9%2021.9-57.3%200-79.2L447.7%2018.3c-21.9-21.9-57.3-21.9-79.2%200zM279.3%2097.2l-.5%20.1-144.1%2043.2c-19.9%206-35.7%2021.2-42.3%2041L3.8%20445.8c-2.9%208.7-1.9%2018.2%202.5%2026L161.7%20316.4c-1.1-4-1.6-8.1-1.6-12.4%200-26.5%2021.5-48%2048-48s48%2021.5%2048%2048-21.5%2048-48%2048c-4.3%200-8.5-.6-12.4-1.6L40.3%20505.7c7.8%204.4%2017.2%205.4%2026%202.5l264.3-88.6c19.7-6.6%2035-22.4%2041-42.3l43.2-144.1%20.1-.5-135.5-135.5z%22%2F%3E%3C%2Fsvg%3E"); } // faPenNib
+#nav-events { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20448%20512%22%3E%3Cpath%20d%3D%22M128%200c17.7%200%2032%2014.3%2032%2032l0%2032%20128%200%200-32c0-17.7%2014.3-32%2032-32s32%2014.3%2032%2032l0%2032%2032%200c35.3%200%2064%2028.7%2064%2064l0%20288c0%2035.3-28.7%2064-64%2064L64%20480c-35.3%200-64-28.7-64-64L0%20128C0%2092.7%2028.7%2064%2064%2064l32%200%200-32c0-17.7%2014.3-32%2032-32zM64%20240l0%2032c0%208.8%207.2%2016%2016%2016l32%200c8.8%200%2016-7.2%2016-16l0-32c0-8.8-7.2-16-16-16l-32%200c-8.8%200-16%207.2-16%2016zm128%200l0%2032c0%208.8%207.2%2016%2016%2016l32%200c8.8%200%2016-7.2%2016-16l0-32c0-8.8-7.2-16-16-16l-32%200c-8.8%200-16%207.2-16%2016zm144-16c-8.8%200-16%207.2-16%2016l0%2032c0%208.8%207.2%2016%2016%2016l32%200c8.8%200%2016-7.2%2016-16l0-32c0-8.8-7.2-16-16-16l-32%200zM64%20368l0%2032c0%208.8%207.2%2016%2016%2016l32%200c8.8%200%2016-7.2%2016-16l0-32c0-8.8-7.2-16-16-16l-32%200c-8.8%200-16%207.2-16%2016zm144-16c-8.8%200-16%207.2-16%2016l0%2032c0%208.8%207.2%2016%2016%2016l32%200c8.8%200%2016-7.2%2016-16l0-32c0-8.8-7.2-16-16-16l-32%200zm112%2016l0%2032c0%208.8%207.2%2016%2016%2016l32%200c8.8%200%2016-7.2%2016-16l0-32c0-8.8-7.2-16-16-16l-32%200c-8.8%200-16%207.2-16%2016z%22%2F%3E%3C%2Fsvg%3E"); } // faCalendarDays
+#nav-pages { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M0%2064C0%2028.7%2028.7%200%2064%200L213.5%200c17%200%2033.3%206.7%2045.3%2018.7L365.3%20125.3c12%2012%2018.7%2028.3%2018.7%2045.3L384%20448c0%2035.3-28.7%2064-64%2064L64%20512c-35.3%200-64-28.7-64-64L0%2064zm208-5.5l0%2093.5c0%2013.3%2010.7%2024%2024%2024L325.5%20176%20208%2058.5zM120%20256c-13.3%200-24%2010.7-24%2024s10.7%2024%2024%2024l144%200c13.3%200%2024-10.7%2024-24s-10.7-24-24-24l-144%200zm0%2096c-13.3%200-24%2010.7-24%2024s10.7%2024%2024%2024l144%200c13.3%200%2024-10.7%2024-24s-10.7-24-24-24l-144%200z%22%2F%3E%3C%2Fsvg%3E"); } // faFileLines
+#nav-media { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20448%20512%22%3E%3Cpath%20d%3D%22M64%2032C28.7%2032%200%2060.7%200%2096L0%20416c0%2035.3%2028.7%2064%2064%2064l320%200c35.3%200%2064-28.7%2064-64l0-320c0-35.3-28.7-64-64-64L64%2032zm64%2080a48%2048%200%201%201%200%2096%2048%2048%200%201%201%200-96zM272%20224c8.4%200%2016.1%204.4%2020.5%2011.5l88%20144c4.5%207.4%204.7%2016.7%20.5%2024.3S368.7%20416%20360%20416L88%20416c-8.9%200-17.2-5-21.3-12.9s-3.5-17.5%201.6-24.8l56-80c4.5-6.4%2011.8-10.2%2019.7-10.2s15.2%203.8%2019.7%2010.2l26.4%2037.8%2061.4-100.5c4.4-7.1%2012.1-11.5%2020.5-11.5z%22%2F%3E%3C%2Fsvg%3E"); } // faImage
+#nav-global-heroSettings { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M277.8%208.6c-12.3-11.4-31.3-11.4-43.5%200l-224%20208c-9.6%209-12.8%2022.9-8%2035.1S18.8%20272%2032%20272l16%200%200%20176c0%2035.3%2028.7%2064%2064%2064l288%200c35.3%200%2064-28.7%2064-64l0-176%2016%200c13.2%200%2025-8.1%2029.8-20.3s1.6-26.2-8-35.1l-224-208zM240%20320l32%200c26.5%200%2048%2021.5%2048%2048l0%2096-128%200%200-96c0-26.5%2021.5-48%2048-48z%22%2F%3E%3C%2Fsvg%3E"); } // faHouse
+#nav-global-siteSettings { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M32%2064C14.3%2064%200%2078.3%200%2096s14.3%2032%2032%2032l86.7%200c12.3%2028.3%2040.5%2048%2073.3%2048s61-19.7%2073.3-48L480%20128c17.7%200%2032-14.3%2032-32s-14.3-32-32-32L265.3%2064C253%2035.7%20224.8%2016%20192%2016s-61%2019.7-73.3%2048L32%2064zm0%20160c-17.7%200-32%2014.3-32%2032s14.3%2032%2032%2032l246.7%200c12.3%2028.3%2040.5%2048%2073.3%2048s61-19.7%2073.3-48l54.7%200c17.7%200%2032-14.3%2032-32s-14.3-32-32-32l-54.7%200c-12.3-28.3-40.5-48-73.3-48s-61%2019.7-73.3%2048L32%20224zm0%20160c-17.7%200-32%2014.3-32%2032s14.3%2032%2032%2032l54.7%200c12.3%2028.3%2040.5%2048%2073.3%2048s61-19.7%2073.3-48L480%20448c17.7%200%2032-14.3%2032-32s-14.3-32-32-32l-246.7%200c-12.3-28.3-40.5-48-73.3-48s-61%2019.7-73.3%2048L32%20384z%22%2F%3E%3C%2Fsvg%3E"); } // faSliders
+#nav-users { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20640%20512%22%3E%3Cpath%20d%3D%22M320%2016a104%20104%200%201%201%200%20208%20104%20104%200%201%201%200-208zM96%2088a72%2072%200%201%201%200%20144%2072%2072%200%201%201%200-144zM0%20416c0-70.7%2057.3-128%20128-128%2012.8%200%2025.2%201.9%2036.9%205.4-32.9%2036.8-52.9%2085.4-52.9%20138.6l0%2016c0%2011.4%202.4%2022.2%206.7%2032L32%20480c-17.7%200-32-14.3-32-32l0-32zm521.3%2064c4.3-9.8%206.7-20.6%206.7-32l0-16c0-53.2-20-101.8-52.9-138.6%2011.7-3.5%2024.1-5.4%2036.9-5.4%2070.7%200%20128%2057.3%20128%20128l0%2032c0%2017.7-14.3%2032-32%2032l-86.7%200zM472%20160a72%2072%200%201%201%20144%200%2072%2072%200%201%201%20-144%200zM160%20432c0-88.4%2071.6-160%20160-160s160%2071.6%20160%20160l0%2016c0%2017.7-14.3%2032-32%2032l-256%200c-17.7%200-32-14.3-32-32l0-16z%22%2F%3E%3C%2Fsvg%3E"); } // faUsers
+#nav-roles { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20576%20512%22%3E%3Cpath%20d%3D%22M224%20248a120%20120%200%201%200%200-240%20120%20120%200%201%200%200%20240zm-29.7%2056C95.8%20304%2016%20383.8%2016%20482.3%2016%20498.7%2029.3%20512%2045.7%20512l251.5%200C261%20469.4%20240%20414.5%20240%20356.4l0-31.1c0-7.3%201-14.5%202.9-21.3l-48.6%200zm251%20184.5l-13.3%206.3%200-188.1%2096%2032%200%2019.6c0%2055.8-32.2%20106.5-82.7%20130.3zM421.9%20259.5l-112%2037.3c-13.1%204.4-21.9%2016.6-21.9%2030.4l0%2031.1c0%2074.4%2043%20142.1%20110.2%20173.7l18.5%208.7c4.8%202.2%2010%203.4%2015.2%203.4s10.5-1.2%2015.2-3.4l18.5-8.7C533%20500.3%20576%20432.6%20576%20358.2l0-31.1c0-13.8-8.8-26-21.9-30.4l-112-37.3c-6.6-2.2-13.7-2.2-20.2%200z%22%2F%3E%3C%2Fsvg%3E"); } // faUserShield
+#nav-permissions { --msb-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M336%20352c97.2%200%20176-78.8%20176-176S433.2%200%20336%200%20160%2078.8%20160%20176c0%2018.7%202.9%2036.8%208.3%2053.7L7%20391c-4.5%204.5-7%2010.6-7%2017l0%2080c0%2013.3%2010.7%2024%2024%2024l80%200c13.3%200%2024-10.7%2024-24l0-40%2040%200c13.3%200%2024-10.7%2024-24l0-40%2040%200c6.4%200%2012.5-2.5%2017-7l33.3-33.3c16.9%205.4%2035%208.3%2053.7%208.3zM376%2096a40%2040%200%201%201%200%2080%2040%2040%200%201%201%200-80z%22%2F%3E%3C%2Fsvg%3E"); } // faKey

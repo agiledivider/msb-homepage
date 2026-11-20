@@ -17,7 +17,8 @@ export const Users: CollectionConfig = {
     update: adminOrSelf, // self may edit own name/email/password (role fields stay admin-locked)
     delete: adminOnly,
   },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'email'], hidden: hideForNonAdmins },
+  labels: { singular: 'Benutzer', plural: 'Benutzer' },
+  admin: { group: 'Verwaltung', useAsTitle: 'name', defaultColumns: ['name', 'email'], hidden: hideForNonAdmins },
   fields: [
     { name: 'name', type: 'text' },
     // Merged over Payload's built-in auth `email` field; only adds read access.

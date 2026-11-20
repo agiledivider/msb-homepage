@@ -30,10 +30,17 @@ export default buildConfig({
     // when Kanidm SSO isn't configured — see src/plugins/oidc).
     components: {
       afterLogin: ['/components/auth/KanidmLoginButton#KanidmLoginButton'],
+      // MSB branding + "Start" link at the top of the sidebar; look in custom.scss.
+      beforeNavLinks: ['/components/admin/NavBrand#NavBrand'],
+      graphics: {
+        Icon: '/components/admin/Graphics#AdminIcon',
+        Logo: '/components/admin/Graphics#AdminLogo',
+      },
     },
   },
   editor: lexicalEditor(),
-  collections: [Users, Media, Blog, Events, Pages],
+  // Order drives the sidebar: editors' "Inhalte" group first, "Verwaltung" last.
+  collections: [Blog, Events, Pages, Media, Users],
   globals: [HeroSettings, SiteSettings],
   db: sqliteAdapter({
     client: { url: process.env.DATABASE_URI || 'file:./msb.db' },
@@ -70,21 +77,30 @@ export default buildConfig({
     (config) => ({
       ...config,
       collections: config.collections?.map((c) =>
-        c.slug !== 'users'
-          ? c
-          : {
+        c.slug === 'roles' || c.slug === 'permissions'
+          ? {
               ...c,
-              fields: c.fields.map(
-                (f): Field =>
-                  'name' in f && f.name === 'roles'
-                    ? ({
-                        ...f,
-                        saveToJWT: false,
-                        access: { ...('access' in f ? f.access : {}), update: ({ req }) => isAdmin(req.user) },
-                      } as Field)
-                    : f,
-              ),
-            },
+              labels:
+                c.slug === 'roles'
+                  ? { singular: 'Rolle', plural: 'Rollen' }
+                  : { singular: 'Berechtigung', plural: 'Berechtigungen' },
+              admin: { ...c.admin, group: 'Verwaltung' },
+            }
+          : c.slug !== 'users'
+            ? c
+            : {
+                ...c,
+                fields: c.fields.map(
+                  (f): Field =>
+                    'name' in f && f.name === 'roles'
+                      ? ({
+                          ...f,
+                          saveToJWT: false,
+                          access: { ...('access' in f ? f.access : {}), update: ({ req }) => isAdmin(req.user) },
+                        } as Field)
+                      : f,
+                ),
+              },
       ),
     }),
     // Kanidm (OIDC) sign-in alongside email/password. Last so it modifies the

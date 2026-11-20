@@ -9,6 +9,7 @@ export const SiteSettings: GlobalConfig = {
   label: 'Website-Einstellungen',
   access: { read: () => true },
   admin: {
+    group: 'Inhalte',
     livePreview: { url: () => generatePreviewPath({ path: '/' }) },
     preview: () => generatePreviewPath({ path: '/' }),
   },

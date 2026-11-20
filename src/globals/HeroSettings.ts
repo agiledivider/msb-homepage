@@ -11,6 +11,7 @@ export const HeroSettings: GlobalConfig = {
   label: 'Hero (Startseite)',
   access: { read: () => true },
   admin: {
+    group: 'Inhalte',
     description:
       'Die erste Seite des Karussells oben auf der Startseite. Blog- und Event-Seiten füllen sich automatisch.',
     livePreview: { url: () => generatePreviewPath({ path: '/' }) },

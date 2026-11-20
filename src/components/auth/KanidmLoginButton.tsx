@@ -32,7 +32,8 @@ export const KanidmLoginButton: React.FC = () => {
       </div>
       <a
         href="/api/users/oauth/kanidm"
-        className="btn btn--style-primary btn--size-medium"
+        // secondary: the styleguide allows one main button per view (the Login submit)
+        className="btn btn--style-secondary btn--size-medium"
         style={{ display: 'block', width: '100%', textAlign: 'center', textDecoration: 'none' }}
       >
         {label}

@@ -10,6 +10,7 @@ export const Events: CollectionConfig = {
   slug: 'events',
   labels: { singular: 'Event', plural: 'Events' },
   admin: {
+    group: 'Inhalte',
     useAsTitle: 'title',
     defaultColumns: ['title', 'date', 'category', '_status'],
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/events/${data?.slug}` }) },

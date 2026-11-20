@@ -10,6 +10,7 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   labels: { singular: 'Seite', plural: 'Seiten' },
   admin: {
+    group: 'Inhalte',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', '_status'],
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/${data?.slug}` }) },

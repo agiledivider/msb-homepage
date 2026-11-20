@@ -11,6 +11,7 @@ export const Blog: CollectionConfig = {
   slug: 'blog',
   labels: { singular: 'Blogbeitrag', plural: 'Blog' },
   admin: {
+    group: 'Inhalte',
     useAsTitle: 'title',
     defaultColumns: ['title', 'author', '_status', 'publishedAt'],
     livePreview: { url: ({ data }) => generatePreviewPath({ path: `/blog/${data?.slug}` }) },
