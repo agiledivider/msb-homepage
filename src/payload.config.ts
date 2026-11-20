@@ -6,7 +6,7 @@ import type { Field } from 'payload'
 import { buildConfig } from 'payload'
 import { rbac } from 'payload-rbac-plugin'
 import sharp from 'sharp'
-import { adminOnly, hideForNonAdmins } from './access/admin'
+import { adminOnly, hideForNonAdmins, loggedIn } from './access/admin'
 import { Blog } from './collections/Blog'
 import { Events } from './collections/Events'
 import { Media } from './collections/Media'
@@ -52,10 +52,11 @@ export default buildConfig({
     // The build runs in the separate publisher container; see docs/PUBLISHING.md.
     sitePublishing({ collections: ['blog', 'events', 'pages'] }),
     // UI-configurable roles & permissions (Roles + Permissions collections).
-    // Locked to admins so the permission system can't be edited by others.
+    // Locked to admins so the permission system can't be edited by others. Any
+    // logged-in user may read role names, or their own account shows "Untitled".
     rbac({
       enabled: true,
-      rolesAccess: { read: adminOnly, create: adminOnly, update: adminOnly, delete: adminOnly },
+      rolesAccess: { read: loggedIn, create: adminOnly, update: adminOnly, delete: adminOnly },
       permissionsAccess: { read: adminOnly, create: adminOnly, update: adminOnly, delete: adminOnly },
       hideRoles: hideForNonAdmins,
       hidePermissions: hideForNonAdmins,

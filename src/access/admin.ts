@@ -14,3 +14,6 @@ export const adminOrSelf: Access = ({ req: { user } }) =>
 
 /** For admin.hidden / hideRoles / hidePermissions — hide from the nav for non-admins. */
 export const hideForNonAdmins = ({ user }: { user: unknown }): boolean => !isAdmin(user)
+
+/** Any logged-in user. Role names aren't secret, and editors need them to see their own roles. */
+export const loggedIn: Access = ({ req: { user } }) => Boolean(user)
