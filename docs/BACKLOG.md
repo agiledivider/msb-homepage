@@ -10,6 +10,33 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ---
 
+## From IDEAS.md (2026-11-21)
+
+**Status:** proposed 2026-11-21.
+
+### Editors choose which events appear in the start-page carousel
+**Problem:** the carousel's event slide always shows the next upcoming event, whatever it is. Editors can't keep a routine or minor event out of the banner, or let a more important one take its place.
+**Desired:** each event has a "show in the carousel" option, switched on by default. The carousel shows the next upcoming event that has it switched on; switched-off events still appear in the event lists and on the events page.
+**AC:** an editor switches the option off for the next event, and the carousel shows the next event that has it on, while the switched-off event is still in the upcoming list; new events and existing events nobody edits behave exactly as today.
+
+### Visitors buy tickets or register on the event page
+**Problem:** events that need registration or a ticket only say so in the text, so visitors have to go somewhere else (mail, another site) to sign up.
+**Desired:** an editor can link an event to its pretix shop or event, and the event page then shows the pretix order form, so visitors register or buy right there. Events without a pretix link look as they do today. This also works on the statically published site.
+**AC:** an editor adds a pretix event to an event, and on the published page a visitor can complete an order without leaving the site; an event without pretix shows no form; the Datenschutzerklärung covers pretix before it goes live.
+
+### People apply for membership on the website
+**Status:** needs a design discussion with Falk first: whether the homepage sends applications to the Vereinssoftware or the Vereinssoftware fetches them, and how that works when the public site is published statically.
+**Problem:** there's no way to apply for membership online. Applications arrive on paper or by mail and have to be typed into the Vereinssoftware by hand.
+**Desired:** a membership application form on the site. Each submitted application reaches the Vereinssoftware as an application to review, with nothing typed in twice. Applicants get a confirmation. Personal data is handled as the Datenschutzerklärung describes and isn't kept on the website longer than needed.
+**AC:** a visitor fills in the form and gets a confirmation; the application shows up in the Vereinssoftware with all fields filled in correctly; an incomplete form is rejected with a clear message; the Datenschutzerklärung covers the form.
+
+### Editors create content by asking Claude
+**Problem:** writing a blog post or entering an event means working through the CMS forms by hand, even when the content already exists elsewhere (a mail, a flyer, notes).
+**Desired:** an editor can ask Claude to create or update blog posts, events and pages in the CMS. Claude works with the editor's own rights and only creates drafts, which go through the normal review and approval before anything is published.
+**AC:** an editor asks Claude to create an event from a flyer text, and the event appears in the CMS as a draft under the editor's name; Claude cannot publish or approve anything, and cannot do anything the editor's own account couldn't; without a valid login it can do nothing.
+
+---
+
 ## From IDEAS.md (2026-11-20)
 
 **Status:** proposed 2026-11-20.
