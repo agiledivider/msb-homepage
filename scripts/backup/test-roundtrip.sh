@@ -5,17 +5,23 @@
 #
 # Builds Dockerfile.backup, fills throwaway volumes with a small SQLite DB and
 # media files, backs up to a throwaway local restic repo, restores into empty
-# volumes, and compares. Also checks the fail-fast config check and the restore
-# safety rails. Everything it creates is removed at the end.
+# volumes, and compares. Also checks the fail-fast config check, the restore
+# safety rails, and an sftp: repository (a throwaway SSH server on port 23,
+# reached through the same .ssh mount as on the server, like a Hetzner Storage
+# Box). Everything it creates is removed at the end.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 IMG=msb-backup:test
 P="msb-bk-test-$$"
-VOLS=("$P-db" "$P-media" "$P-repo" "$P-db2" "$P-media2")
+VOLS=("$P-db" "$P-media" "$P-repo" "$P-db2" "$P-media2" "$P-ssh")
 fail() { printf '\033[31mFAIL\033[0m %s\n' "$*" >&2; exit 1; }
 pass() { printf '\033[32mok\033[0m   %s\n' "$*"; }
-cleanup() { docker volume rm -f "${VOLS[@]}" >/dev/null 2>&1 || true; }
+cleanup() {
+  docker rm -f "$P-sftp" >/dev/null 2>&1 || true
+  docker network rm "$P-net" >/dev/null 2>&1 || true
+  docker volume rm -f "${VOLS[@]}" >/dev/null 2>&1 || true
+}
 trap cleanup EXIT
 
 docker build -q -f Dockerfile.backup -t "$IMG" . >/dev/null
@@ -71,5 +77,33 @@ pass "restore over existing data needs --overwrite and keeps the previous DB"
 added=$(run "$P-db" "$P-media" backup | grep -o 'Added to the repository: [0-9.]* [A-Za-z]*' | tail -1)
 [[ $added =~ :\ 0(\.[0-9]+)?\ B$ || $added =~ :\ [0-9.]+\ (B|KiB)$ ]] || fail "unchanged second backup stored new data: $added"
 pass "second backup of unchanged data stores (almost) nothing new ($added)"
+
+# 7. sftp: repository through the mounted .ssh dir (key, known_hosts, config),
+#    like a Hetzner Storage Box: SSH on port 23, read-only mount, uid 1001.
+docker network create "$P-net" >/dev/null
+docker build -q -t msb-sftp:test - >/dev/null <<'DOCKERFILE'
+FROM alpine:3.22
+RUN apk add --no-cache openssh-server openssh-sftp-server && ssh-keygen -A \
+  && adduser -D box && echo 'box:*' | chpasswd -e
+DOCKERFILE
+docker run --rm -u 0 -v "$P-ssh:/ssh" --entrypoint sh "$IMG" -c '
+  ssh-keygen -q -t ed25519 -N "" -f /ssh/id_ed25519
+  printf "Host storagebox\n  HostName %s\n  User box\n  Port 23\n  IdentityFile ~/.ssh/id_ed25519\n" "$1" > /ssh/config' \
+  sh "$P-sftp" >/dev/null
+docker run --rm -u 0 -v "$P-ssh:/ssh" --entrypoint sh "$IMG" -c 'chown -R 1001:1001 /ssh && chmod 700 /ssh' >/dev/null
+pub=$(docker run --rm -v "$P-ssh:/ssh:ro" --entrypoint cat "$IMG" /ssh/id_ed25519.pub)
+docker run -d --name "$P-sftp" --network "$P-net" -e PUB="$pub" msb-sftp:test sh -c '
+  mkdir -p /home/box/.ssh && echo "$PUB" > /home/box/.ssh/authorized_keys
+  chown -R box /home/box/.ssh && chmod 700 /home/box/.ssh && exec /usr/sbin/sshd -D -e -p 23' >/dev/null
+docker run --rm -u 0 --network "$P-net" -v "$P-ssh:/ssh" --entrypoint sh "$IMG" -c '
+  for i in $(seq 50); do ssh-keyscan -p 23 "$1" > /ssh/known_hosts 2>/dev/null && [ -s /ssh/known_hosts ] && break; sleep 0.2; done
+  chown 1001:1001 /ssh/known_hosts' sh "$P-sftp" >/dev/null
+SFTP=(--network "$P-net" -e RESTIC_REPOSITORY=sftp:storagebox:msb-homepage -e RESTIC_PASSWORD=roundtrip-test-only
+  -v "$P-ssh:/home/backup/.ssh:ro" -v "$P-db:/volumes/db" -v "$P-media:/volumes/media")
+docker run --rm "${SFTP[@]}" "$IMG" backup >/dev/null || fail "backup to the sftp repository failed"
+snaps=$(docker run --rm "${SFTP[@]}" "$IMG" snapshots | grep -c msb-homepage || true)
+[[ $snaps == 1 ]] || fail "expected 1 snapshot in the sftp repository, got $snaps"
+docker exec "$P-sftp" test -f /home/box/msb-homepage/config || fail "sftp repository not in the box user's home"
+pass "backup to an sftp: repository (port 23, key from the read-only .ssh mount)"
 
 echo "backup round trip: all checks passed"

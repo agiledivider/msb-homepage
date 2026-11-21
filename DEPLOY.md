@@ -178,6 +178,45 @@ storage, Backblaze B2, a Storage Box via `sftp:` or `rest:`) and
 the repository is created on first start. **Keep `RESTIC_PASSWORD` in the
 password manager as well:** without it the backups cannot be read.
 
+### Hetzner Storage Box (sftp)
+
+restic reaches the box over SFTP on **port 23**. The `backup` service mounts
+`./backup-ssh` (or `BACKUP_SSH_DIR`) read-only as its `~/.ssh`; the directory
+is gitignored and unused by other backends.
+
+1. In the Hetzner Console, order a Storage Box (BX11 is plenty), enable
+   **SSH support** and **External reachability**. A sub-account with its own
+   directory keeps the homepage apart from anything else on the box.
+2. Next to `docker-compose.prod.yml` on the server, create the key, install it
+   on the box (asks for the box password once) and pin the host key:
+   ```bash
+   mkdir backup-ssh && ssh-keygen -t ed25519 -N '' -C msb-backup -f backup-ssh/id_ed25519
+   cat backup-ssh/id_ed25519.pub | ssh -p 23 uXXXXX@uXXXXX.your-storagebox.de install-ssh-key
+   ssh-keyscan -p 23 uXXXXX.your-storagebox.de > backup-ssh/known_hosts
+   ```
+3. Write `backup-ssh/config`:
+   ```
+   Host storagebox
+     HostName uXXXXX.your-storagebox.de
+     User uXXXXX
+     Port 23
+     IdentityFile ~/.ssh/id_ed25519
+   ```
+4. Hand the directory to the container's user (uid 1001); ssh ignores a key
+   others can read:
+   ```bash
+   sudo chown -R 1001:1001 backup-ssh && chmod 700 backup-ssh && chmod 600 backup-ssh/*
+   ```
+5. In `.env`: `RESTIC_REPOSITORY=sftp:storagebox:msb-homepage` (a folder in the
+   box's home) plus `RESTIC_PASSWORD`. Then `docker compose -f
+   docker-compose.prod.yml run --rm backup backup` and look for "backup finished".
+
+`pnpm backup:check` on your laptop uses `~/.ssh` (or `BACKUP_SSH_DIR`) and the
+same `Host storagebox` entry: add your own key to the box with `install-ssh-key`
+and the config block to your `~/.ssh/config`, rather than copying the server's key.
+`known_hosts` must hold the box's key; a missing entry fails the backup
+instead of trusting an unknown host.
+
 **Check it works:**
 
 ```bash

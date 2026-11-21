@@ -57,6 +57,9 @@ services:
     volumes:
       - db:/volumes/db
       - media:/volumes/media
+      # SSH key, known_hosts and config for an sftp: repository (Hetzner
+      # Storage Box). Unused by other backends. Setup: DEPLOY.md "Backups".
+      - ${BACKUP_SSH_DIR:-./backup-ssh}:/home/backup/.ssh:ro
 
 volumes:
   db:

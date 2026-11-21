@@ -32,3 +32,6 @@ src/payload-types.ts
 # env
 .env
 .env*.local
+
+# backup SSH key for an sftp: restic repository (DEPLOY.md "Backups")
+backup-ssh/

@@ -11,6 +11,7 @@
 #   AWS_*, B2_*, …                       whatever the backend needs
 #   BACKUP_CHECK_SUBSET                  share of data to read (default 10%)
 #   BACKUP_MAX_AGE_HOURS                 newest snapshot must be younger (default 36)
+#   BACKUP_SSH_DIR                       sftp: only, SSH key/config dir (default ~/.ssh)
 set -euo pipefail
 
 RESTIC_IMAGE=restic/restic:0.18.1
@@ -42,7 +43,17 @@ if [[ $RESTIC_REPOSITORY == /* ]]; then
   [ -d "$RESTIC_REPOSITORY" ] || die "local repository $RESTIC_REPOSITORY does not exist"
   args+=(-v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY") # rw: check writes a lock
 fi
-restic() { docker run "${args[@]}" "$@" "$RESTIC_IMAGE" "${RESTIC_ARGS[@]}"; }
+# An sftp: repository (Hetzner Storage Box) uses your SSH key and config. ssh
+# rejects a bind-mounted ~/.ssh owned by another uid, so it is copied first.
+if [[ $RESTIC_REPOSITORY == sftp:* ]]; then
+  ssh_dir="${BACKUP_SSH_DIR:-$HOME/.ssh}"
+  [ -d "$ssh_dir" ] || die "sftp repository needs an SSH dir: $ssh_dir does not exist (set BACKUP_SSH_DIR)"
+  args+=(-v "$(cd "$ssh_dir" && pwd):/ssh-src:ro" --entrypoint sh)
+  restic() { docker run "${args[@]}" "$@" "$RESTIC_IMAGE" -c \
+    'cp -R /ssh-src /root/.ssh && chmod -R go-rwx /root/.ssh && exec restic "$@"' sh "${RESTIC_ARGS[@]}"; }
+else
+  restic() { docker run "${args[@]}" "$@" "$RESTIC_IMAGE" "${RESTIC_ARGS[@]}"; }
+fi
 
 step "snapshots"
 RESTIC_ARGS=(snapshots --tag msb); restic
