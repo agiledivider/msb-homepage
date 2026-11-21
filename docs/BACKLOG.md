@@ -25,10 +25,10 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 **AC:** an editor adds a pretix event to an event, and on the published page a visitor can complete an order without leaving the site; an event without pretix shows no form; the Datenschutzerklärung covers pretix before it goes live.
 
 ### People apply for membership on the website
-**Status:** needs a design discussion with Falk first: whether the homepage sends applications to the Vereinssoftware or the Vereinssoftware fetches them, and how that works when the public site is published statically.
+**Status:** decided 2026-11-21: the application itself lives in the Vereinssoftware (its S1.34). The homepage only leads there. **Needs:** Vereinssoftware S1.34 live at a public address.
 **Problem:** there's no way to apply for membership online. Applications arrive on paper or by mail and have to be typed into the Vereinssoftware by hand.
-**Desired:** a membership application form on the site. Each submitted application reaches the Vereinssoftware as an application to review, with nothing typed in twice. Applicants get a confirmation. Personal data is handled as the Datenschutzerklärung describes and isn't kept on the website longer than needed.
-**AC:** a visitor fills in the form and gets a confirmation; the application shows up in the Vereinssoftware with all fields filled in correctly; an incomplete form is rejected with a clear message; the Datenschutzerklärung covers the form.
+**Desired:** visitors who want to join find a clear way from the homepage (at least on "Mitmachen") to the online application in the Vereinssoftware. While online applications are switched off, the homepage doesn't offer them and says how to join instead.
+**AC:** from "Mitmachen", a visitor reaches the online application in one click and can apply there; editors can change the link and its text in the CMS; with no link set, the page shows the offline way to join instead of a broken link.
 
 ### Editors create content by asking Claude
 **Problem:** writing a blog post or entering an event means working through the CMS forms by hand, even when the content already exists elsewhere (a mail, a flyer, notes).
