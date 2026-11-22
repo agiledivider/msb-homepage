@@ -13,7 +13,12 @@ const FALLBACK_MAP: MediaResource = {
   width: 1400,
   height: 939,
 }
-const MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=MakerSpace Bonn,+53175+Bonn'
+/** The MakerSpace's own OpenStreetMap entry ("Makerspace Bonn", Kennedyallee 18;
+ *  checked via Nominatim 2026-11-22). The main map link: open data, no tracking. */
+const OSM_URL = 'https://www.openstreetmap.org/node/5454350635'
+const GOOGLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=MakerSpace Bonn,+53175+Bonn'
+const MAP_BADGE =
+  'rounded-full bg-card px-3 py-1 font-mono text-[14px] font-semibold text-ink no-underline shadow-sm ring-1 ring-line hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-text'
 /** Where the MakerSpace sits on the stylised base map (percent of the image).
  *  Kennedyallee 18 (50.69817, 7.14513) is on the SW side of Kennedyallee, just
  *  west of the Burgfriedhof green — i.e. upper-right, on the road left of the
@@ -88,17 +93,15 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
               </div>
             ) : null}
           </div>
-          <a
-            href={MAPS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Standort in Google Maps öffnen — Kennedyallee 18, 53175 Bonn"
-            className="group relative block aspect-[3/2] w-full overflow-hidden rounded-[14px] ring-1 ring-line ring-inset transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-          >
+          {/* Map card. The image, marker and link row share one grid cell. The
+              OpenStreetMap label is the card's main link: its ::after stretches over
+              the whole card (nearest positioned ancestor), so a click anywhere on the
+              map opens OSM. Google Maps sits above that overlay as a second link. */}
+          <div className="relative grid aspect-[3/2] w-full overflow-hidden rounded-[14px] ring-1 ring-line ring-inset transition-shadow hover:shadow-md">
             <Media
               resource={location.map ?? FALLBACK_MAP}
               placeholder={location.mapPlaceholder ?? 'Karte'}
-              className="h-full w-full"
+              className="h-full w-full [grid-area:1/1]"
               sizes="(max-width:640px) 100vw, 560px"
             />
             {/* Signet marker — only when using our stylised base map (an editor
@@ -118,10 +121,28 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
                 </span>
               </span>
             ) : null}
-            <span className="pointer-events-none absolute bottom-2.5 right-2.5 rounded-full bg-white/90 px-3 py-1 font-mono text-[14px] font-semibold text-ink shadow-sm backdrop-blur-sm transition-transform group-hover:-translate-y-0.5">
-              In Maps öffnen ↗
-            </span>
-          </a>
+            {/* Not positioned itself, so the OSM link's ::after reaches the card. */}
+            <div className="z-20 m-2.5 flex flex-wrap justify-end gap-2 self-end justify-self-end [grid-area:1/1]">
+              <a
+                href={OSM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Standort in OpenStreetMap öffnen — Kennedyallee 18, 53175 Bonn"
+                className={`${MAP_BADGE} after:absolute after:inset-0 after:content-['']`}
+              >
+                OpenStreetMap ↗
+              </a>
+              <a
+                href={GOOGLE_MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Standort in Google Maps öffnen — Kennedyallee 18, 53175 Bonn"
+                className={`${MAP_BADGE} relative z-10`}
+              >
+                Google Maps ↗
+              </a>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>
