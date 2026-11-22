@@ -23,6 +23,8 @@
 #   BACKUP_KEEP      restic forget policy              (default 7 daily, 4 weekly, 12 monthly)
 #   BACKUP_PING_URL  optional healthchecks-style URL: pinged at start (/start),
 #                    on success, and on failure (/fail)
+#   BACKUP_API_TOKEN required by `schedule`: it also starts the internal API the
+#                    CMS uses to list backups (backup-api.mjs, port $BACKUP_API_PORT)
 set -eu
 
 DB_DIR=/volumes/db
@@ -32,6 +34,8 @@ WORK=/work
 BACKUP_AT="${BACKUP_AT:-03:30}"
 BACKUP_KEEP="${BACKUP_KEEP:---keep-daily 7 --keep-weekly 4 --keep-monthly 12}"
 BACKUP_PING_URL="${BACKUP_PING_URL:-}"
+BACKUP_STATUS_FILE="${BACKUP_STATUS_FILE:-$WORK/last-run.json}"
+export BACKUP_STATUS_FILE
 
 log() { printf '%s [backup] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
@@ -45,6 +49,14 @@ require_config() {
     missing="$missing BACKUP_AT(HH:MM, got '$BACKUP_AT')"
   fi
   [ -z "$missing" ] || die "missing or invalid settings:$missing"
+}
+
+# Record the last run for the CMS backups view (read by backup-api.mjs).
+# Written atomically; it lives in the container, so it's gone after a restart
+# and the CMS then shows the last run as unknown.
+record_run() { # record_run ok|failed
+  printf '{"status":"%s","at":"%s"}\n' "$1" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$BACKUP_STATUS_FILE.tmp" &&
+    mv "$BACKUP_STATUS_FILE.tmp" "$BACKUP_STATUS_FILE" || log "could not record the run status (ignored)"
 }
 
 ping() { # ping <suffix>; never fails the backup, never hangs
@@ -82,16 +94,21 @@ run_backup() {
   # A separate process: `set -e` does not apply inside an `if` condition.
   if "$0" backup-once; then
     log "backup finished"
+    record_run ok
     ping ''
   else
     log "BACKUP FAILED"
+    record_run failed
     ping /fail
     return 1
   fi
 }
 
 schedule() {
-  trap 'log "stopping"; exit 0' TERM INT
+  [ -n "${BACKUP_API_TOKEN:-}" ] || die "missing setting: BACKUP_API_TOKEN (the CMS backups view needs it)"
+  node /usr/local/lib/msb/backup-api.mjs &
+  api=$!
+  trap 'log "stopping"; kill $api 2>/dev/null; exit 0' TERM INT
   log "daily backup at $BACKUP_AT ($TZ); repository ok"
   last=''
   while :; do

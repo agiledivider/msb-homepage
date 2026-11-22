@@ -32,3 +32,11 @@ Entries D-001 to D-004 were recorded retroactively on 2026-11-12 from the sessio
 **Decision:** Falk chose the true prism on mobile too; the iPhone bug was `overflow-x:hidden` on `html,body`, not WebKit itself.
 **Consequences:** no clipping `overflow` on any prism ancestor; the scene is inset instead (`docs/runtime-traps.md`).
 **Revisit when:** a supported browser can't render it.
+
+## D-005 The CMS reaches backups only through the backup container's API — Status: decided 2026-11-22
+**Context:** admins should see, download and restore backups in the CMS (E8). Until now only the `backup` container held the restic password and repository credentials.
+**Options:** A) the backup container serves a small internal API with a shared token, and the CMS calls it after checking that the user is an admin (the publish-service pattern); B) the app container gets restic and the backup credentials and reads the repository itself.
+**Decision:** A (Falk). `scripts/backup/backup-api.mjs`, internal network only, `X-Backup-Token` compared in constant time, refuses to start without `BACKUP_API_TOKEN`.
+**Why:** a break-in into the public CMS must not be able to delete or overwrite the backups. The API only offers what E8 needs; it has no delete or prune.
+**Consequences:** every backup feature in the CMS is an API endpoint in the backup container first; downloads and restores (S8.2–S8.4) stream through it. `web` and `backup` both need `BACKUP_API_TOKEN`.
+**Revisit when:** the backup storage supports append-only access for the app, or the backups move to a managed service with its own access control.

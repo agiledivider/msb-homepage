@@ -328,10 +328,12 @@ Admins see, download and restore the site's backups themselves, without a shell 
 
 **Status:** proposed 2026-11-22. Builds on the nightly off-server backup (B1). Decided 2026-11-22: a restore always covers the whole site (database and media), no single pages or images.
 
-### ⏳ S8.1 — Admins see which backups exist (M)
+### ✅ S8.1 — Admins see which backups exist (M) — 2026-11-22
 Today only someone with a shell on the server or the backup password can tell whether backups run and which ones exist. Admins should see that in the CMS.
 
 **AC:** an admin opens a backups view in the admin area and sees every backup with its date and size, and whether the last nightly run worked; when the newest backup is older than a day and a half, the view says so clearly; editors and reviewers can't see the view or reach its data.
+
+**Implementation notes:** per D-005 the backup container serves an internal API (`scripts/backup/backup-api.mjs`, port 8081, `X-Backup-Token`, list only, no delete), started by `msb-backup schedule`; the scheduler records each run in `/work/last-run.json` (unknown after a container restart). The CMS view `/admin/backups` and its sidebar link come from `src/plugins/backups/`; `load.ts` checks admin rights before calling the API, parses the answer with zod and flags "stale" after 36 h. New setting `BACKUP_API_TOKEN` (required by `web` and `backup` in prod compose) plus `BACKUP_API_URL`; dev runs the real service with `pnpm backup:dev`. Covered by `tests/unit/backup-api.test.ts`, `tests/unit/backups-load.test.ts` and section 8 of `pnpm backup:test`; checked in the browser as admin, as editor and with the service down.
 
 ### ⏳ S8.2 — Admins download a backup (M)
 **Needs:** S8.1.
@@ -350,6 +352,12 @@ When content is lost or broken (an accidental delete, a bad import), getting it 
 A backup downloaded earlier, or taken from another server, can't be brought back into the site.
 
 **AC:** an admin uploads a file downloaded with S8.2 and restores it the same way as in S8.3 (preview, deliberate confirmation, safety backup first); a file that isn't such a backup, or is damaged, is refused before anything changes.
+
+### ⏳ S8.5 — Admins take a backup now (S)
+**Needs:** S8.1. **Source:** Falk 2026-11-22.
+Backups only run once a night. Before a risky change (a big import, a restructure, an update) an admin wants a fresh backup first, and today that needs a shell on the server.
+
+**AC:** an admin starts a backup from the backups view and sees that it is running; when it finishes, it appears in the list with the current time, and a failure is shown clearly; a second click while one is running starts no second backup; the nightly backup still runs as usual; the backup is recorded with who started it; non-admins can't start one.
 
 ---
 

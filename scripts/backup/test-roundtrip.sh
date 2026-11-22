@@ -18,7 +18,7 @@ VOLS=("$P-db" "$P-media" "$P-repo" "$P-db2" "$P-media2" "$P-ssh")
 fail() { printf '\033[31mFAIL\033[0m %s\n' "$*" >&2; exit 1; }
 pass() { printf '\033[32mok\033[0m   %s\n' "$*"; }
 cleanup() {
-  docker rm -f "$P-sftp" >/dev/null 2>&1 || true
+  docker rm -f "$P-sftp" "$P-sched" >/dev/null 2>&1 || true
   docker network rm "$P-net" >/dev/null 2>&1 || true
   docker volume rm -f "${VOLS[@]}" >/dev/null 2>&1 || true
 }
@@ -105,5 +105,24 @@ snaps=$(docker run --rm "${SFTP[@]}" "$IMG" snapshots | grep -c msb-homepage || 
 [[ $snaps == 1 ]] || fail "expected 1 snapshot in the sftp repository, got $snaps"
 docker exec "$P-sftp" test -f /home/box/msb-homepage/config || fail "sftp repository not in the box user's home"
 pass "backup to an sftp: repository (port 23, key from the read-only .ssh mount)"
+
+# 8. The scheduler starts the internal API for the CMS backups view (E8):
+#    it refuses to start without a token, lists the snapshots for the right
+#    token and nothing for a wrong one.
+out=$(docker run --rm "${ENV[@]}" -v "$P-repo:/repo" "$IMG" schedule 2>&1 || true)
+[[ $out == *BACKUP_API_TOKEN* ]] || fail "schedule without BACKUP_API_TOKEN was not refused: $out"
+docker run -d --name "$P-sched" --network "$P-net" "${ENV[@]}" -e BACKUP_API_TOKEN=api-test-only \
+  -v "$P-db:/volumes/db" -v "$P-media:/volumes/media" -v "$P-repo:/repo" "$IMG" schedule >/dev/null
+api() { # api <token>: GET /backups from another container on the network, prints "<status> <body>"
+  docker run --rm --network "$P-net" --entrypoint sh "$IMG" -c '
+    for i in $(seq 50); do
+      out=$(curl -s -m 30 -w " %{http_code}" -H "X-Backup-Token: $2" "http://$1:8081/backups") && break; sleep 0.2
+    done
+    printf "%s" "$out"' sh "$P-sched" "$1"
+}
+ok=$(api api-test-only)
+[[ $ok == *" 200" && $(grep -o '"shortId"' <<<"$ok" | wc -l | tr -d ' ') == 2 ]] || fail "API did not list the 2 snapshots: $ok"
+[[ $(api wrong-token) == *" 401" ]] || fail "API accepted a wrong token"
+pass "scheduler serves the backups API: lists snapshots for the token, 401 otherwise, refuses to start without one"
 
 echo "backup round trip: all checks passed"

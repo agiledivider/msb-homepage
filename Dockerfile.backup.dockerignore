@@ -1,2 +1,3 @@
 *
 !scripts/backup/msb-backup.sh
+!scripts/backup/backup-api.mjs

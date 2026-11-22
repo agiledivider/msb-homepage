@@ -15,6 +15,7 @@ import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
+import { backupsAdmin } from './plugins/backups'
 import { editorialWorkflow } from './plugins/editorial'
 import { isAdmin } from './plugins/editorial/access'
 import { claudeMcp } from './plugins/mcp'
@@ -73,6 +74,8 @@ export default buildConfig({
     // Publish the static site from the admin (button + auto-publish on change).
     // The build runs in the separate publisher container; see docs/PUBLISHING.md.
     sitePublishing({ collections: ['blog', 'events', 'pages'] }),
+    // Backups view for admins (/admin/backups); data from the backup container. See docs/BACKLOG.md E8.
+    backupsAdmin(),
     // UI-configurable roles & permissions (Roles + Permissions collections).
     // Locked to admins so the permission system can't be edited by others. Any
     // logged-in user may read role names, or their own account shows "Untitled".

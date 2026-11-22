@@ -33,6 +33,9 @@ services:
       KANIDM_CLIENT_ID: ${KANIDM_CLIENT_ID:-}
       KANIDM_CLIENT_SECRET: ${KANIDM_CLIENT_SECRET:-}
       KANIDM_ROLES_CLAIM: ${KANIDM_ROLES_CLAIM:-}
+      # Backups view in the admin (E8): the backup service's internal API.
+      BACKUP_API_URL: http://backup:8081
+      BACKUP_API_TOKEN: ${BACKUP_API_TOKEN:?set BACKUP_API_TOKEN in .env}
     volumes:
       - db:/app/data
       - media:/app/public/media
@@ -54,6 +57,8 @@ services:
       B2_ACCOUNT_KEY: ${B2_ACCOUNT_KEY:-}
       BACKUP_AT: ${BACKUP_AT:-03:30}
       BACKUP_PING_URL: ${BACKUP_PING_URL:-}
+      # internal API for the CMS backups view; same value as in `web`
+      BACKUP_API_TOKEN: ${BACKUP_API_TOKEN:?set BACKUP_API_TOKEN in .env}
     volumes:
       - db:/volumes/db
       - media:/volumes/media

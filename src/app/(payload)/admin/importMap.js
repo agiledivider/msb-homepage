@@ -30,9 +30,11 @@ import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } f
 import { AdminIcon as AdminIcon_80ebcb12978a9db9a1c04af0af89c7ec } from '../../../components/admin/Graphics'
 import { AdminLogo as AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec } from '../../../components/admin/Graphics'
 import { KanidmLoginButton as KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27 } from '../../../components/auth/KanidmLoginButton'
+import { BackupsNavLink as BackupsNavLink_9fb487cc8e1eb156f1048abdeed6649c } from '../../../plugins/backups/components/BackupsNavLink'
 import { ReviewDashboard as ReviewDashboard_eaaae8e46032f1445a954959095ac5e4 } from '../../../plugins/editorial/components/ReviewDashboard'
 import { PublishSite as PublishSite_a4c7146036cdb0d0c6483019f622d27e } from '../../../plugins/publish/components/PublishSite'
 import { NavBrand as NavBrand_d7dd6c791c113ce8ff240c7282294e70 } from '../../../components/admin/NavBrand'
+import { BackupsView as BackupsView_51b8e52c7315dd6a437f9e6a7eff7074 } from '../../../plugins/backups/components/BackupsView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -69,8 +71,10 @@ export const importMap = {
   "/components/admin/Graphics#AdminIcon": AdminIcon_80ebcb12978a9db9a1c04af0af89c7ec,
   "/components/admin/Graphics#AdminLogo": AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec,
   "/components/auth/KanidmLoginButton#KanidmLoginButton": KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27,
+  "/plugins/backups/components/BackupsNavLink#BackupsNavLink": BackupsNavLink_9fb487cc8e1eb156f1048abdeed6649c,
   "/plugins/editorial/components/ReviewDashboard#ReviewDashboard": ReviewDashboard_eaaae8e46032f1445a954959095ac5e4,
   "/plugins/publish/components/PublishSite#PublishSite": PublishSite_a4c7146036cdb0d0c6483019f622d27e,
   "/components/admin/NavBrand#NavBrand": NavBrand_d7dd6c791c113ce8ff240c7282294e70,
+  "/plugins/backups/components/BackupsView#BackupsView": BackupsView_51b8e52c7315dd6a437f9e6a7eff7074,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

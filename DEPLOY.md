@@ -224,6 +224,15 @@ pnpm backup:check                    # snapshots, newest < 36 h old, verify 10 %
 pnpm backup:check --restore ./restore-check   # also restore the latest backup and look inside
 ```
 
+**In the admin:** admins see the backups at `/admin/backups` (sidebar
+"Backups"): date, size, whether the last nightly run worked, and a warning when
+the newest backup is older than 36 h. The `backup` service serves this through
+a small internal API (`scripts/backup/backup-api.mjs`, port 8081, not
+published) that only lists; it can't delete. Set `BACKUP_API_TOKEN` in `.env`
+(`openssl rand -hex 32`); compose passes it to `web` and `backup`, and neither
+starts without it. The "last run" line is unknown after the backup container
+restarts until its next nightly run.
+
 **Alerts:** not set up yet. Set `BACKUP_PING_URL` to a healthchecks.io-style URL
 and that service alerts when a backup fails *or doesn't run*. Until then, look at
 `snapshots` now and then.

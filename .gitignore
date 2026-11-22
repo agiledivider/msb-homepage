@@ -35,3 +35,5 @@ src/payload-types.ts
 
 # backup SSH key for an sftp: restic repository (DEPLOY.md "Backups")
 backup-ssh/
+# local restic repository of `pnpm backup:dev`
+.backup-dev/
