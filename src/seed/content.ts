@@ -23,37 +23,21 @@ import { convertLayout, vereinIntroToBlocks } from './vereinLayout'
 // stays published instead of being routed into review.
 const PUB = { context: { [EDITORIAL_SKIP]: true } } as const
 
-/** "Die kurze Geschichte" on /verein (text from Falk, 2026-11-20). */
+/** "Die kurze Geschichte" on /verein (text from Falk, 2026-11-20; one line per entry since 2026-11-22). */
 export const VEREIN_TIMELINE = [
   { year: '2017', text: 'Der MakerSpace Bonn e.V. wird als gemeinnütziger Verein gegründet.' },
-  {
-    year: '2018',
-    text: 'Eröffnung am 3. März auf 240 qm im ehemaligen Wählersaal der Telekom, mit großem Andrang. Der General-Anzeiger berichtet.',
-  },
-  {
-    year: '2019',
-    text: 'Ein Jahr nach der Eröffnung kommt der General-Anzeiger wieder und beschreibt den MakerSpace als „Ideenschmiede für Tüftler“.',
-  },
+  { year: '2018', text: 'Eröffnung am 3. März auf 240 qm im ehemaligen Wählersaal der Telekom.' },
+  { year: '2019', text: 'Der General-Anzeiger nennt den MakerSpace eine „Ideenschmiede für Tüftler“.' },
   {
     year: '2022',
-    text: 'Die Teckids stoßen dazu. Mit MakeCityBonn startet ein vom BMBF gefördertes MINT-Cluster, zusammen mit Telekom Stiftung, Stadt Bonn und Fraunhofer IAIS.',
+    text: 'Die Teckids stoßen dazu, und mit MakeCityBonn startet ein vom BMBF gefördertes MINT-Cluster.',
   },
-  {
-    year: '2022',
-    text: 'Der MakerSpace richtet den Projekt-Kickoff aus und betreut das Robotik-Angebot beim futurecamp.digital.',
-  },
-  {
-    year: '2023',
-    text: 'Die Stadt Bonn lädt zu IoT-Workshops in den MakerSpace ein. Bei der Digitalfabrik laufen die 3D-Drucker von MakeCity.',
-  },
+  { year: '2023', text: 'Die Stadt Bonn lädt zu IoT-Workshops in den MakerSpace ein.' },
   { year: '2024', text: 'Erster Hackathon für 12- bis 16-Jährige, dazu Plotten beim futurecamp.digital.' },
-  {
-    year: '2025',
-    text: '„Sachen Machen Hackathon“ mit 24 Jugendlichen. Bilanz von MakeCityBonn Phase 1: 237 Workshops, 1.279 Kinder und Jugendliche (41 % Mädchen) und 105 geschulte Fachkräfte.',
-  },
+  { year: '2025', text: 'Bilanz von MakeCityBonn Phase 1: 237 Workshops mit 1.279 Kindern und Jugendlichen.' },
   {
     year: 'Heute',
-    text: 'Offene Werkstatt mit Workshops, Handarbeitstreff, Gast-Events und Community-Kunst wie „Collective Neurogenesis“.',
+    text: 'Offene Werkstatt mit Workshops, Handarbeitstreff, Gast-Events und Community-Kunst.',
   },
 ]
 
