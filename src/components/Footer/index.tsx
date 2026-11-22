@@ -8,6 +8,7 @@ const DEFAULT_LINKS: NavItem[] = [
   { label: 'Der Verein', href: '/verein' },
   { label: 'Werkzeug & Räume', href: '/werkzeug' },
   { label: 'Events & Workshops', href: '/events' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Mitmachen', href: '/mitmachen' },
 ]
 

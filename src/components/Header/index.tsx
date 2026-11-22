@@ -8,10 +8,11 @@ import { BTN_PRIMARY } from '../ui'
 export type NavItem = { label: string; href: string }
 
 const DEFAULT_NAV: NavItem[] = [
-  { label: 'Start', href: '/' },
+  // No "Start": the logo links home (decided 2026-11-22).
   { label: 'Verein', href: '/verein' },
   { label: 'Werkzeug & Räume', href: '/werkzeug' },
   { label: 'Events', href: '/events' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Mitmachen', href: '/mitmachen' },
 ]
 
@@ -19,7 +20,7 @@ const DEFAULT_NAV: NavItem[] = [
    Fond + bold. Desktop: no underline at rest, 2px underline on hover, current
    page green with a fixed 3px underline. Every item is a 44px target. */
 const NAV_LINK =
-  'border-b border-line px-[22px] py-3.5 text-[16px] no-underline -outline-offset-4 md:outline-offset-2 decoration-brand-text decoration-2 underline-offset-[6px] transition-colors hover:bg-fond md:inline-flex md:min-h-11 md:items-center md:border-0 md:p-0 md:text-[15px] md:hover:bg-transparent md:hover:text-brand-text md:hover:underline'
+  'border-b border-line px-[22px] py-3.5 text-[16px] no-underline -outline-offset-4 md:outline-offset-2 decoration-brand-text decoration-2 underline-offset-[6px] transition-colors hover:bg-fond md:inline-flex md:min-h-11 md:items-center md:whitespace-nowrap md:border-0 md:p-0 md:text-[15px] md:hover:bg-transparent md:hover:text-brand-text md:hover:underline'
 const NAV_CURRENT =
   'bg-green-pale font-bold text-brand-text md:bg-transparent md:font-medium md:underline md:decoration-[3px]'
 
@@ -38,7 +39,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-card">
-      <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:px-8 md:py-3.5">
+      <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:gap-4 md:px-8 md:py-3.5 lg:gap-6">
         <Link href="/" className="flex items-center no-underline">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto" />
@@ -47,7 +48,7 @@ export function Header({
         <nav
           className={`${
             open ? 'flex' : 'hidden'
-          } absolute inset-x-0 top-full flex-col items-stretch border-b border-line border-t border-t-line bg-card py-1.5 shadow-[0_18px_34px_-18px_rgba(60,52,30,.55)] md:static md:flex md:flex-row md:items-center md:gap-7 md:border-0 md:bg-transparent md:py-0 md:shadow-none`}
+          } absolute inset-x-0 top-full flex-col items-stretch border-b border-line border-t border-t-line bg-card py-1.5 shadow-[0_18px_34px_-18px_rgba(60,52,30,.55)] md:static md:flex md:flex-row md:items-center md:gap-4 md:border-0 lg:gap-7 md:bg-transparent md:py-0 md:shadow-none`}
         >
           {nav.map((item) => (
             <Link
