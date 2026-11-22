@@ -24,6 +24,16 @@ const sourceFiles = (dir: string): string[] =>
     return /\.tsx$/.test(e.name) ? [full] : []
   })
 
+/**
+ * Deliberate exceptions, per file and exact utility. Hero on phones (Falk
+ * 2026-11-22): the mobile hero is tuned below the styleguide minimum so the
+ * whole face fits on small screens: eyebrow pill 11px, event date 12px, CTA
+ * labels 13px. Anything else below 14px in these files still fails.
+ */
+const ALLOWED: Record<string, string[]> = {
+  'blocks/Hero/Component.tsx': ['text-[11px]', 'text-[12px]', 'text-[13px]'],
+}
+
 const TOO_SMALL = /(?<![\w-])text-(?:\[(\d+(?:\.\d+)?)px\]|xs)(?![\w-])/g
 
 describe('minimum text size (fitness)', () => {
@@ -33,10 +43,12 @@ describe('minimum text size (fitness)', () => {
     expect(files.length).toBeGreaterThan(20)
   })
 
-  it.each(files.map((f) => [path.relative(ROOT, f), f]))('%s has no text below 14px', (_rel, full) => {
+  it.each(files.map((f) => [path.relative(ROOT, f), f]))('%s has no text below 14px', (rel, full) => {
     const src = readFileSync(full, 'utf8')
+    const allowed = ALLOWED[rel] ?? []
     const offending = [...src.matchAll(TOO_SMALL)]
       .filter((m) => m[1] === undefined || Number(m[1]) < 14)
+      .filter((m) => !allowed.includes(m[0]))
       .map((m) => `line ${src.slice(0, m.index).split('\n').length}: ${m[0]}`)
     expect(offending, 'styleguide §9: web text is never below 14px').toEqual([])
   })

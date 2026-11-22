@@ -29,6 +29,8 @@ export type Face = {
   image?: MediaResource
   imagePlaceholder?: string | null
   caption?: string | null
+  /** Phones: the photo may take more of the height (the Werkstatt face, which has little text). */
+  largePhoto?: boolean
 }
 
 export type HeroBlock = { blockType: 'hero'; faces?: Face[] | null }
@@ -52,12 +54,12 @@ const FACE_TF = [
 
 // pill / nav-dot base (the countdown bar is an ::after on the active one)
 const PILL_BASE =
-  'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-[10px] py-[7px] font-mono text-[14px] tracking-normal transition-[border-color,color,background] duration-[250ms] md:px-[13px] md:tracking-[.06em] [&_b]:font-semibold'
+  'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-2 py-[5px] font-mono text-[14px] tracking-normal transition-[border-color,color,background] duration-[250ms] md:px-[13px] md:py-[7px] md:tracking-[.06em] [&_b]:font-semibold'
 
 function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boolean; style?: 'white' | 'orange' }) {
   if (!link?.label) return null
   const base =
-    'cursor-pointer rounded-[10px] no-underline w-full px-2.5 py-[11px] text-center text-[14px] md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
+    'cursor-pointer rounded-[10px] no-underline flex min-h-11 flex-1 items-center justify-center px-2 py-2 text-center text-[13px] leading-tight md:block md:min-h-0 md:flex-none md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
   const cls = primary
     ? style === 'orange'
       ? `bg-orange text-ink font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // Maker-Orange: actions/events
@@ -88,35 +90,46 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
   const isEvent = face.variant === 'event'
   return (
     <CuttingMat cornerLabel={face.cornerLabel}>
-      <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] md:grid md:grid-cols-[1.06fr_.94fr] md:items-stretch md:gap-10 md:pl-2.5 md:pt-1.5">
+      <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] max-md:pl-3 md:grid md:grid-cols-[1.06fr_.94fr] md:items-stretch md:gap-10 md:pl-2.5 md:pt-1.5">
+        {/* On phones the eyebrow pill goes on top, above the photo. */}
+        {face.eyebrow ? (
+          <div
+            className={`-order-1 mb-2 inline-flex items-center gap-1.5 self-start rounded-[20px] border px-1.5 py-px font-mono text-[11px] tracking-normal md:hidden ${eb}`}
+          >
+            {face.eyebrow}
+          </div>
+        ) : null}
         {/* text column (mobile: stacked below the photo, order-2). Desktop: the
             copy takes the free height and clips its long tail; the buttons sit
             on the bottom edge of the mat whatever the copy's length. */}
         <div className="flex min-h-0 min-w-0 flex-col max-md:order-2 max-md:flex-1">
-          <div className="min-h-0 md:flex-1 md:overflow-hidden">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:block">
             {face.eyebrow ? (
+              // Desktop only: on phones the pill sits above the photo (see above).
               <div
-                className={`mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[14px] tracking-normal md:mb-[22px] md:px-[11px] md:py-[5px] md:tracking-[.06em] ${eb}`}
+                className={`inline-flex items-center gap-2 self-start rounded-[20px] border font-mono tracking-normal max-md:hidden md:mb-[22px] md:px-[11px] md:py-[5px] md:text-[14px] md:tracking-[.06em] ${eb}`}
               >
                 {face.eyebrow}
               </div>
             ) : null}
 
             {isEvent && face.eventDay ? (
-              <div className="mb-3 flex items-end gap-4">
-                <div className="font-display text-[46px] font-black leading-[.85] text-kreide md:text-[56px]">
+              // On phones the date sits next to the polaroid instead, see the photo column.
+              <div className="mb-1 flex items-end gap-2 max-md:hidden md:mb-3 md:gap-4">
+                <div className="font-display text-[26px] font-black leading-[.85] text-kreide md:text-[56px]">
                   {face.eventDay}
                 </div>
-                <div className="pb-2 font-mono text-[14px] leading-[1.5] text-green-300">
+                <div className="font-mono text-[12px] leading-none text-green-300 md:pb-2 md:text-[14px] md:leading-[1.5]">
                   {face.eventMonth}
-                  <br />
+                  <span className="md:hidden"> · </span>
+                  <br className="max-md:hidden" />
                   {face.eventWeekday}
                 </div>
               </div>
             ) : null}
 
             <h1
-              className={`mb-[7px] font-display font-black leading-[1.02] tracking-[-.02em] text-kreide text-[30px] md:mb-3.5 md:leading-[.98] ${headlineSize(face.headline, isEvent)}`}
+              className={`mt-3 mb-2.5 font-display text-[21px] font-black leading-[1.02] tracking-[-.02em] text-kreide max-md:[@media(min-height:720px)]:text-[24px] md:mt-0 md:mb-3.5 md:leading-[.98] ${headlineSize(face.headline, isEvent)}`}
             >
               {face.headline.split('\n').map((line, i) => (
                 <Fragment key={i}>
@@ -127,12 +140,12 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
             </h1>
 
             {face.lede ? (
-              <p className="m-0 font-serif text-[18px] font-medium italic leading-[1.4] text-kreide md:mb-4 md:line-clamp-2 md:text-[21px] md:leading-snug">
+              <p className="m-0 line-clamp-2 font-serif text-[16px] font-medium italic leading-[1.35] text-kreide md:mb-4 md:text-[21px] md:leading-snug">
                 {face.lede}
               </p>
             ) : null}
             {face.description ? (
-              <p className="mb-4 hidden max-w-[470px] text-[16.5px] leading-[1.6] text-kreide md:line-clamp-3">
+              <p className="m-0 mt-3 min-h-0 max-w-[470px] flex-1 overflow-hidden text-[14px] leading-[1.45] text-kreide [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.6em),transparent)] md:mt-1.5 md:mb-4 md:line-clamp-3 md:flex-none md:text-[16.5px] md:leading-[1.6] md:[mask-image:none]">
                 {face.description}
               </p>
             ) : null}
@@ -148,22 +161,42 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
             ) : null}
           </div>
 
-          <div className="mt-auto flex shrink-0 flex-col gap-[7px] pt-2 md:flex-row md:flex-wrap md:gap-3 md:pt-4">
+          <div className="mt-auto flex shrink-0 flex-row gap-2 pt-2 md:flex-wrap md:gap-3 md:pt-4">
             <Cta link={face.primary} primary style={face.primaryStyle ?? 'white'} />
             <Cta link={face.secondary} primary={false} />
           </div>
         </div>
 
-        {/* photo column (taped polaroid), centred against the full-height text column */}
-        <div className="md:self-center">
-          <Polaroid
-            rotate={isEvent ? 1.8 : 2.2}
-            image={face.image}
-            placeholder={face.imagePlaceholder ?? 'Foto'}
-            caption={face.caption}
-            sizes="(max-width:767.98px) 100vw, 460px"
-            priority={priority}
-          />
+        {/* photo column (taped polaroid), centred against the full-height text column.
+            Event face on phones: the date goes beside the polaroid (on the left); the polaroid leaves it ~96 px. */}
+        <div
+          className={`md:self-center ${face.largePhoto ? '[--pl-max:calc(min(100svh_-_176px,540px)_/_1.6_+_14px)] [@media(max-height:700px)]:[--pl-max:calc((100svh_-_176px)_/_2.8_+_14px)] [@media(min-height:840px)]:[--pl-max:calc(540px_/_2.2_+_14px)]' : '[--pl-max:calc(min(100svh_-_176px,540px)_/_2.3_+_14px)] [@media(max-height:700px)]:[--pl-max:calc((100svh_-_176px)_/_3.1_+_14px)] [@media(min-height:840px)]:[--pl-max:calc(540px_/_3_+_14px)]'} ${isEvent && face.eventDay ? 'max-md:flex max-md:items-center max-md:gap-4' : ''}`}
+        >
+          <div
+            className={
+              isEvent && face.eventDay ? 'max-md:w-[min(var(--pl-max),calc(100%_-_96px))] max-md:shrink-0' : undefined
+            }
+          >
+            <Polaroid
+              rotate={isEvent ? 1.8 : 2.2}
+              mobileRotate={1.5}
+              image={face.image}
+              placeholder={face.imagePlaceholder ?? 'Foto'}
+              caption={face.caption}
+              sizes="(max-width:767.98px) 100vw, 460px"
+              priority={priority}
+            />
+          </div>
+          {isEvent && face.eventDay ? (
+            <div className="-order-1 md:hidden">
+              <div className="font-display text-[40px] font-black leading-[.85] text-kreide">{face.eventDay}</div>
+              <div className="mt-2 font-mono text-[12px] leading-[1.4] text-green-300">
+                {face.eventMonth}
+                <br />
+                {face.eventWeekday}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </CuttingMat>
@@ -299,7 +332,7 @@ export function HeroComponent({
   return (
     <>
       <div
-        className="relative mx-5 mt-2.5 mb-3 h-[calc(100svh-176px)] perspective-[2000px] [perspective-origin:50%_48%] md:mx-0 md:mt-14 md:mb-[22px] md:h-[500px] md:perspective-[2400px] md:[perspective-origin:50%_42%]"
+        className="relative mx-2.5 mt-2.5 mb-3 h-[min(calc(100svh-176px),540px)] perspective-[2000px] [perspective-origin:50%_48%] md:mx-0 md:mt-14 md:mb-[22px] md:h-[500px] md:perspective-[2400px] md:[perspective-origin:50%_42%]"
         ref={sceneRef}
       >
         <div
@@ -333,7 +366,7 @@ export function HeroComponent({
       </div>
 
       {carousel ? (
-        <div className="mb-3 flex flex-wrap items-center justify-center gap-2.5 md:mb-[38px]" ref={dotsRef}>
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5 md:mb-[38px] md:gap-2.5" ref={dotsRef}>
           {list.map((face, i) => {
             const on = i === cur
             return (
@@ -367,7 +400,7 @@ export function HeroComponent({
             aria-label={userPaused ? 'Automatisches Wechseln fortsetzen' : 'Automatisches Wechseln pausieren'}
             aria-pressed={userPaused}
             title={userPaused ? 'Fortsetzen' : 'Pausieren'}
-            className={`${PILL_BASE} h-[30px] w-[30px] justify-center !px-0 !py-0`}
+            className={`${PILL_BASE} h-[26px] w-[26px] justify-center !px-0 !py-0 md:h-[30px] md:w-[30px]`}
             style={{
               borderColor: 'var(--color-line)',
               color: 'var(--color-brand-text)',

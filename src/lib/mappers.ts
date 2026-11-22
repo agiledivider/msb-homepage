@@ -58,6 +58,7 @@ export function heroToFace(h: HeroSetting): Face {
     image: asMedia(h.image),
     imagePlaceholder: h.imagePlaceholder,
     caption: h.caption,
+    largePhoto: true, // Falk 2026-11-22: the Werkstatt photo can be bigger on phones
   }
 }
 
@@ -97,7 +98,7 @@ export function eventToFace(ev: Event): Face {
     variant: 'event',
     eyebrow: '◆ NÄCHSTER TERMIN · EVENT',
     pillLabel: 'EVENT',
-    cornerLabel: eventTimeText(ev.timeLabel),
+    // No corner label on the event face (Falk 2026-11-22: the time in the corner can go).
     eventDay: day2(d),
     eventMonth: monthLong(d),
     eventWeekday: weekdayLong(d),

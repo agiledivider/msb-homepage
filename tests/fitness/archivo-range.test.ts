@@ -25,6 +25,15 @@ const sourceFiles = (dir: string): string[] =>
     return /\.tsx$/.test(e.name) ? [full] : []
   })
 
+/**
+ * Deliberate exceptions, per file and exact size. Hero on phones (Falk
+ * 2026-11-22): the title is 21px on short phones so the whole face fits; it
+ * stays Archivo to match the larger sizes. Any other size outside 24–56px fails.
+ */
+const ALLOWED: Record<string, number[]> = {
+  'blocks/Hero/Component.tsx': [21],
+}
+
 // Class strings: '…', "…", `…` (template literals checked as a whole).
 const STRINGS = /'[^'\n]*'|"[^"\n]*"|`[^`]*`/g
 // Optional arbitrary-selector prefix like `[&_h2]:`, then font-display.
@@ -47,14 +56,16 @@ describe('Archivo size range (fitness)', () => {
     expect(n).toBeGreaterThan(5)
   })
 
-  it.each(files.map((f) => [path.relative(ROOT, f), f]))('%s sets Archivo only at 24–56px', (_rel, full) => {
+  it.each(files.map((f) => [path.relative(ROOT, f), f]))('%s sets Archivo only at 24–56px', (rel, full) => {
     const src = readFileSync(full, 'utf8')
+    const allowed = ALLOWED[rel] ?? []
     const offending: string[] = []
     for (const m of src.matchAll(STRINGS)) {
       const cls = m[0]
       for (const d of cls.matchAll(DISPLAY)) {
         for (const px of sizesFor(cls, d[1] ?? '')) {
-          if (px < 24 || px > 56) offending.push(`line ${src.slice(0, m.index).split('\n').length}: ${d[0]} at ${px}px`)
+          if ((px < 24 || px > 56) && !allowed.includes(px))
+            offending.push(`line ${src.slice(0, m.index).split('\n').length}: ${d[0]} at ${px}px`)
         }
       }
     }

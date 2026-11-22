@@ -16,6 +16,7 @@ export const HeroSettings: GlobalConfig = {
       'Die erste Seite des Karussells oben auf der Startseite. Blog- und Event-Seiten füllen sich automatisch.',
     livePreview: { url: () => generatePreviewPath({ path: '/' }) },
     preview: () => generatePreviewPath({ path: '/' }),
+    components: { elements: { beforeDocumentControls: ['/components/HeroPreviewButton#HeroPreviewButton'] } },
   },
   fields: [
     {
