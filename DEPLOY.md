@@ -177,6 +177,11 @@ is gitignored and unused by other backends.
 1. In the Hetzner Console, order a Storage Box (BX11 is plenty), enable
    **SSH support** and **External reachability**. A sub-account with its own
    directory keeps the homepage apart from anything else on the box.
+   **With a sub-account, use its own names everywhere below:** user
+   `uXXXXX-subN` *and* host `uXXXXX-subN.your-storagebox.de` (in
+   `install-ssh-key`, `ssh-keyscan` and `config`). The box has the same host key
+   under both names, but ssh checks `known_hosts` by name: a key scanned for the
+   main host fails with "Host key verification failed".
 2. Next to `docker-compose.prod.yml` on the server, create the key, install it
    on the box (asks for the box password once) and pin the host key:
    ```bash
@@ -200,6 +205,11 @@ is gitignored and unused by other backends.
 5. In `.env`: `RESTIC_REPOSITORY=sftp:storagebox:msb-homepage` (a folder in the
    box's home) plus `RESTIC_PASSWORD`. Then `docker compose -f
    docker-compose.prod.yml run --rm backup backup` and look for "backup finished".
+6. Start (or **recreate**) the service: `docker compose -f docker-compose.prod.yml
+   up -d --force-recreate backup`. A running container keeps the mounts and
+   `.env` values it was created with, and restarts with them: after changing
+   `.env`, `BACKUP_SSH_DIR` or replacing `backup-ssh/`, a one-off `run` works
+   while the service still fails until it is recreated.
 
 `pnpm backup:check` on your laptop uses `~/.ssh` (or `BACKUP_SSH_DIR`) and the
 same `Host storagebox` entry: add your own key to the box with `install-ssh-key`
@@ -240,8 +250,12 @@ safety backup (tag `before-restore`, never pruned, marked "vor
 Wiederherstellung" in the list, so the restore can be undone the same way),
 adds the media, swaps the database with SQLite's backup API (atomic, safe with
 the app open; no restart) and removes media the backup didn't have. A backup
-whose migrations differ from the live database is refused: that needs the
-offline `restore` below plus `payload migrate`. "Aus einer Backup-Datei
+whose database **structure** (tables and columns) differs from the live one is
+refused, and the preview names the tables; bring both to the same version
+first. The migration history doesn't count: a backup from a local dev setup
+(which records only "dev" there) restores onto a server with the same code, and
+the server keeps its own migration history, so `payload migrate` on the next
+start sees what it expects. "Aus einer Backup-Datei
 wiederherstellen" does the same with a downloaded file and its password: the
 file streams to the backup service (up to `BACKUP_UPLOAD_MAX_BYTES`, default
 20 GB, so `/work` needs room for it twice), is decrypted and checked (only

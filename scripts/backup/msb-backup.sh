@@ -236,18 +236,43 @@ counts_json() { # counts_json <db>
   done
   printf '{%s}' "$out"
 }
-# The migrations a database has: a backup fits the running code only if they're the same.
-migrations() { sqlite3 "$1" "select name from payload_migrations order by name;" 2>/dev/null || true; }
+# A database's structure, one line per column: "table.column:type:notnull".
+# A backup fits the running code when this is the same as the live database's.
+# Deliberately not the migration history: a dev database (Payload `push`) only
+# records "dev" there, yet has exactly the structure the migrations build.
+schema() {
+  sqlite3 "$1" "select m.name || '.' || p.name || ':' || p.type || ':' || p.\"notnull\"
+    from sqlite_master m join pragma_table_info(m.name) p
+    where m.type = 'table' and m.name not like 'sqlite_%' order by 1;" 2>/dev/null || true
+}
+# Tables whose structure differs between two databases, as a JSON array (at most 10).
+schema_diff_json() { # schema_diff_json <db a> <db b>
+  schema "$1" | sort >"$WORK/.schema-a.$$"
+  schema "$2" | sort >"$WORK/.schema-b.$$"
+  # comm -3: lines in only one of them. (Not diff: BusyBox's prints the unified format.)
+  tables=$(comm -3 "$WORK/.schema-a.$$" "$WORK/.schema-b.$$" | tr -d '\t' | cut -d. -f1 |
+    grep -E '^[A-Za-z0-9_]+$' | sort -u | head -10)
+  rm -f "$WORK/.schema-a.$$" "$WORK/.schema-b.$$"
+  printf '['
+  first=1
+  for t in $tables; do
+    [ $first -eq 1 ] || printf ','
+    printf '"%s"' "$t"
+    first=0
+  done
+  printf ']'
+}
 valid_id() { printf '%s' "$1" | grep -Eq '^[0-9a-f]{8,64}$' || die "invalid snapshot id '$1'"; }
 
 # The restore preview: a backup's database and file count next to the live site's.
 preview_json() { # preview_json <backup db> <backup media file count>
   integrity=$(sqlite3 "$1" 'PRAGMA integrity_check;' 2>/dev/null || true)
+  differences=$(schema_diff_json "$1" "$DB_DIR/$DB_FILE")
   compatible=false
-  [ "$(migrations "$1")" = "$(migrations "$DB_DIR/$DB_FILE")" ] && compatible=true
+  [ "$differences" = '[]' ] && compatible=true
   live_files=$(find "$MEDIA_DIR" -type f | wc -l | tr -d ' ')
-  printf '{"integrity":"%s","compatible":%s,"backup":{"counts":%s,"mediaFiles":%s},"live":{"counts":%s,"mediaFiles":%s}}\n' \
-    "$([ "$integrity" = ok ] && echo ok || echo damaged)" "$compatible" \
+  printf '{"integrity":"%s","compatible":%s,"differences":%s,"backup":{"counts":%s,"mediaFiles":%s},"live":{"counts":%s,"mediaFiles":%s}}\n' \
+    "$([ "$integrity" = ok ] && echo ok || echo damaged)" "$compatible" "$differences" \
     "$(counts_json "$1")" "${2:-0}" "$(counts_json "$DB_DIR/$DB_FILE")" "${live_files:-0}"
 }
 
@@ -328,8 +353,17 @@ apply_restore() {
   db="$tmp$WORK/db/$DB_FILE"
   [ -f "$db" ] || abort no-database "the backup has no database; nothing changed"
   [ "$(sqlite3 "$db" 'PRAGMA integrity_check;')" = ok ] || abort damaged "the database in the backup is damaged; nothing changed"
-  [ "$(migrations "$db")" = "$(migrations "$DB_DIR/$DB_FILE")" ] ||
-    abort other-version "the backup is from another version of the site (other migrations); nothing changed"
+  [ -n "$(schema "$db")" ] || abort damaged "the backup's database structure could not be read; nothing changed"
+  [ "$(schema "$db")" = "$(schema "$DB_DIR/$DB_FILE")" ] ||
+    abort other-version "the backup's database structure differs from the live one (another version of the site); nothing changed"
+  # Same structure: the restored database keeps the live migration history, so
+  # the next `payload migrate` on start sees what it expects (a dev backup only
+  # has a "dev" entry there, which would stop it).
+  if sqlite3 "$DB_DIR/$DB_FILE" "select 1 from payload_migrations limit 1;" >/dev/null 2>&1; then
+    sqlite3 "$db" "ATTACH '$DB_DIR/$DB_FILE' AS live;
+      DELETE FROM main.payload_migrations; INSERT INTO main.payload_migrations SELECT * FROM live.payload_migrations;" ||
+      abort damaged "the backup's migration history could not be aligned; nothing changed"
+  fi
 
   # 2. A safety backup of the current state, so this restore can be undone.
   BACKUP_EXTRA_TAG=before-restore BACKUP_SKIP_FORGET=1 "$0" backup-once || abort safety-failed "the safety backup failed; nothing changed"

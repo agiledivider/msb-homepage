@@ -324,6 +324,7 @@ describe('restore (S8.3)', () => {
     snapshot: snapshot('2026-11-22T13:29:46.000Z', { id: '7bf61efa', shortId: '7bf61efa' }),
     integrity: 'ok',
     compatible: true,
+    differences: [],
     backup: contents(6),
     live: contents(7),
   }
@@ -410,6 +411,7 @@ describe('uploaded backups (S8.4)', () => {
     uploadId: 'a1b2c3d4',
     integrity: 'ok',
     compatible: true,
+    differences: [],
     backup: { counts: { pages: 3, blog: 0, events: 0, media: 0, users: 1 }, mediaFiles: 2 },
     live: { counts: { pages: 4, blog: 0, events: 0, media: 0, users: 1 }, mediaFiles: 3 },
   }

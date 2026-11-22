@@ -186,8 +186,9 @@ export function RestorePanel({
             </p>
           ) : !state.preview.compatible ? (
             <p style={box('error')}>
-              Dieses Backup stammt aus einer anderen Version der Website (andere Datenbank-Migrationen) und lässt sich
-              hier nicht einspielen. Das kann nur jemand mit Zugang zum Server (DEPLOY.md, „Backups“).
+              Dieses Backup passt nicht zur jetzigen Version der Website: die Datenbank-Struktur ist anders
+              {state.preview.differences.length ? ` (Tabellen ${state.preview.differences.join(', ')})` : ''}. Es lässt
+              sich erst einspielen, wenn beide auf demselben Stand sind (DEPLOY.md, „Backups“).
             </p>
           ) : state.kind === 'ready' ? (
             <>

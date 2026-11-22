@@ -17,7 +17,7 @@
 //          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -in F -out backup.tar.gz
 //        There is no unencrypted download.
 //   GET  /backups/<id>/preview → what the backup holds next to the live site, and
-//        whether it fits the running code (same migrations)   (S8.3)
+//        whether it fits the running code (same database structure)   (S8.3)
 //   POST /backups/<id>/restore { confirm, by } → 202, restores while the site runs
 //        (`msb-backup restore-live`: safety backup first). `confirm` must be the
 //        backup's short id; 409 while a backup or restore runs   (S8.3)
@@ -66,7 +66,7 @@ export const RESTORE_CODES = [
   'media-failed',
   'database-failed',
 ]
-/** @typedef {{ integrity: 'ok' | 'damaged', compatible: boolean, backup: Contents, live: Contents }} Preview */
+/** @typedef {{ integrity: 'ok' | 'damaged', compatible: boolean, differences: string[], backup: Contents, live: Contents }} Preview */
 /** @typedef {{ counts: Record<string, number | null>, mediaFiles: number }} Contents */
 
 const isIsoTime = (v) => typeof v === 'string' && !Number.isNaN(Date.parse(v))
@@ -186,7 +186,17 @@ export function parsePreview(text) {
   if (!v || (v.integrity !== 'ok' && v.integrity !== 'damaged') || typeof v.compatible !== 'boolean') {
     throw new Error('inspect: unexpected output')
   }
-  return { integrity: v.integrity, compatible: v.compatible, backup: contents(v.backup), live: contents(v.live) }
+  // Tables whose structure differs from the live database (empty when compatible).
+  const differences = Array.isArray(v.differences)
+    ? v.differences.filter((t) => typeof t === 'string' && /^[A-Za-z0-9_]+$/.test(t)).slice(0, 10)
+    : []
+  return {
+    integrity: v.integrity,
+    compatible: v.compatible,
+    differences,
+    backup: contents(v.backup),
+    live: contents(v.live),
+  }
 }
 
 /** Download name: what it is, when (UTC, sortable) and which snapshot. */

@@ -6,7 +6,7 @@ const FAILED: Record<Exclude<LastRestore['code'], 'restored'>, string> = {
   'no-database': 'Im Backup fehlt die Datenbank. Es wurde nichts verändert.',
   damaged: 'Die Datenbank im Backup ist beschädigt. Es wurde nichts verändert.',
   'other-version':
-    'Das Backup stammt aus einer anderen Version der Website (andere Datenbank-Migrationen). Es wurde nichts verändert.',
+    'Das Backup passt nicht zur jetzigen Version der Website (andere Datenbank-Struktur). Es wurde nichts verändert.',
   'safety-failed': 'Das Sicherheits-Backup vorher ist fehlgeschlagen, deshalb wurde nichts verändert.',
   'media-failed':
     'Beim Kopieren der Medien ist ein Fehler passiert; die Datenbank ist unverändert. Einzelne Dateien können schon ersetzt sein.',

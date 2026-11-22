@@ -30,6 +30,7 @@ import {
 const PREVIEW = {
   integrity: 'ok' as const,
   compatible: true,
+  differences: [] as string[],
   backup: { counts: { pages: 6, blog: 5, events: 238, media: 36, users: 4 }, mediaFiles: 269 },
   live: { counts: { pages: 7, blog: 6, events: 240, media: 38, users: 4 }, mediaFiles: 280 },
 }
@@ -550,6 +551,18 @@ it('turns an unknown outcome code into "unknown"', () => {
 describe('parsePreview', () => {
   it('reads what inspect prints', () => {
     expect(parsePreview(JSON.stringify(PREVIEW))).toEqual(PREVIEW)
+  })
+
+  it('names the tables whose structure differs, and only plain table names', () => {
+    const out = parsePreview(
+      JSON.stringify({ ...PREVIEW, compatible: false, differences: ['pages', 'pages_blocks_press', '<script>'] }),
+    )
+    expect(out.differences).toEqual(['pages', 'pages_blocks_press'])
+  })
+
+  it('has no differences when inspect names none (older backup service)', () => {
+    const { differences: _, ...old } = PREVIEW
+    expect(parsePreview(JSON.stringify(old)).differences).toEqual([])
   })
 
   it('keeps a missing table as unknown', () => {

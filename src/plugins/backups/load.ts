@@ -71,8 +71,10 @@ const CountsSchema = z.object({
 const ContentsSchema = z.object({ counts: CountsSchema, mediaFiles: z.number().int() })
 const ContentsPreviewSchema = z.object({
   integrity: z.enum(['ok', 'damaged']),
-  /** Same migrations as the running site: only then can it be restored here. */
+  /** Same database structure as the running site: only then can it be restored here. */
   compatible: z.boolean(),
+  /** Tables whose structure differs (at most 10); empty when compatible. */
+  differences: z.array(z.string()).default([]),
   backup: ContentsSchema,
   live: ContentsSchema,
 })

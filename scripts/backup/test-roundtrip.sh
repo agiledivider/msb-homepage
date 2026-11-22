@@ -261,4 +261,34 @@ done
   || fail "a refused upload left files behind"
 pass "upload: a file that isn't a backup, and crafted archives (symlink, ..), are refused and leave nothing"
 
+# 13. A dev backup onto a server (Falk, 2026-11-22): dev records only "dev" in
+#     payload_migrations, the server the real migration names. Same structure,
+#     so it restores, and the server keeps its own migration history. A real
+#     structural difference (extra column) is refused and named in the preview.
+shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "create table payload_migrations(id integer primary key, name text, batch numeric);
+  insert into payload_migrations(name, batch) values (\"dev\", -1);"; chown -R 1001:1001 /volumes/db'
+run "$P-db" "$P-media" backup >/dev/null
+devsnap=$(newest | grep -o '[0-9a-f]\{8\}')
+shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "delete from payload_migrations;
+  insert into payload_migrations(name, batch) values (\"20260101_000000_a\", 1), (\"20260102_000000_b\", 2);
+  insert into pages(title) values (\"Nur auf dem Server\");"; chown -R 1001:1001 /volumes/db'
+preview=$(call GET "/backups/$devsnap/preview")
+[[ $preview == *'"compatible":true'* && $preview == *'"differences":[]'* ]] || fail "dev backup not seen as compatible: $preview"
+[[ $(call POST "/backups/$devsnap/restore" "{\"confirm\":\"$devsnap\"}") == *" 202" ]] || fail "dev backup restore did not start"
+for _ in $(seq 120); do status=$(call GET /status); [[ $status == *'"running":null'* ]] && break; sleep 1; done
+[[ $status == *'"lastRestore":{"status":"ok"'* ]] || fail "dev backup restore failed: $status"
+after=$(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select count(*) from pages where title = \"Nur auf dem Server\"; select group_concat(name) from payload_migrations;"')
+[[ $after == $'0\n20260101_000000_a,20260102_000000_b' ]] || fail "content or migration history wrong after a dev restore: $after"
+pass "a dev backup restores onto a server with the same structure, and the server keeps its migration history"
+
+shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "alter table pages add column subtitle text;"; chown -R 1001:1001 /volumes/db'
+preview=$(call GET "/backups/$devsnap/preview")
+[[ $preview == *'"compatible":false'* && $preview == *'"differences":["pages"]'* ]] || fail "structural difference not named: $preview"
+call POST "/backups/$devsnap/restore" "{\"confirm\":\"$devsnap\"}" >/dev/null
+for _ in $(seq 60); do status=$(call GET /status); [[ $status == *'"running":null'* ]] && break; sleep 1; done
+[[ $status == *'"code":"other-version"'* ]] || fail "restore across structures was not refused: $status"
+[[ $(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select count(*) from pragma_table_info(\"pages\") where name = \"subtitle\";"') == 1 ]] \
+  || fail "refused restore changed the live database"
+pass "a backup with another structure is refused, names the table (pages), and changes nothing"
+
 echo "backup round trip: all checks passed"
