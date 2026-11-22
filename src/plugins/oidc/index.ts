@@ -1,4 +1,4 @@
-import { type PayloadRequest, parseCookies } from 'payload'
+import { extractJWT, type PayloadRequest, type Plugin, parseCookies } from 'payload'
 import { OAuth2Plugin } from 'payload-oauth2'
 import { parseKanidmUserInfo } from './claims'
 
@@ -75,7 +75,7 @@ const getToken = async (code: string, req: PayloadRequest): Promise<string> => {
   return data.access_token
 }
 
-export const kanidmOAuth = OAuth2Plugin({
+const baseKanidmOAuth = OAuth2Plugin({
   enabled: kanidmEnabled,
   strategyName: 'kanidm',
   // Match/link users by email so an existing password account and its Kanidm
@@ -134,3 +134,35 @@ export const kanidmOAuth = OAuth2Plugin({
     return '/admin/login?error=oauth'
   },
 })
+
+/** A compact JWS: three base64url parts. Everything else can't be a session token. */
+const COMPACT_JWS = /^[\w-]+\.[\w-]+\.[\w-]*$/
+
+/**
+ * payload-oauth2 (1.0.21) verifies every `Authorization: Bearer …` as a JWT and
+ * logs a failure as ERROR. Claude's MCP key is sent that way and is no JWT, so
+ * each MCP call logged "Invalid Compact JWS". Skip tokens that can't be a JWS;
+ * real JWTs still go through the plugin unchanged.
+ */
+export const kanidmOAuth: Plugin = async (incoming) => {
+  const config = await baseKanidmOAuth(incoming)
+  return {
+    ...config,
+    collections: config.collections?.map((c) => {
+      if (c.slug !== 'users' || typeof c.auth !== 'object') return c
+      const strategies = c.auth.strategies?.map((st) =>
+        st.name === 'kanidm'
+          ? {
+              ...st,
+              authenticate: async (args: Parameters<typeof st.authenticate>[0]) => {
+                const token = extractJWT(args)
+                if (token && !COMPACT_JWS.test(token)) return { user: null }
+                return st.authenticate(args)
+              },
+            }
+          : st,
+      )
+      return { ...c, auth: { ...c.auth, strategies } }
+    }),
+  }
+}

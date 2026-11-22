@@ -130,3 +130,43 @@ describe('Kanidm login never takes over an account through an unverified email',
     expect(await rolesOf('unverified-new@test.de')).toBeUndefined()
   })
 })
+
+describe('the Kanidm strategy and other Bearer tokens', () => {
+  // Claude's MCP key arrives as `Authorization: Bearer <key>`. It is no JWT, and
+  // the strategy used to log "Invalid Compact JWS" as an ERROR on every call.
+  const kanidm = () => {
+    const strategy = payload.collections.users.config.auth.strategies?.find((s) => s.name === 'kanidm')
+    if (!strategy) throw new Error('kanidm strategy not registered')
+    return strategy
+  }
+
+  it('ignores a Bearer token that is not a JWT, without logging an error', async () => {
+    const error = vi.spyOn(payload.logger, 'error')
+    try {
+      const result = await kanidm().authenticate({
+        headers: new Headers({ Authorization: 'Bearer 0b9f6c2e-mcp-api-key-not-a-jwt' }),
+        payload,
+      } as never)
+
+      expect(result.user).toBeNull()
+      expect(error).not.toHaveBeenCalled()
+    } finally {
+      error.mockRestore()
+    }
+  })
+
+  it('still logs in a user with a token Payload signed for them', async () => {
+    const user = (await aUser(`jwt-${Date.now()}@test.de`, ['Redakteur'])) as unknown as { email: string }
+    const { token } = await payload.login({
+      collection: 'users',
+      data: { email: user.email, password: 'local-password' },
+    })
+
+    const result = await kanidm().authenticate({
+      headers: new Headers({ Authorization: `JWT ${token}` }),
+      payload,
+    } as never)
+
+    expect((result.user as { email?: string } | null)?.email).toBe(user.email)
+  })
+})
