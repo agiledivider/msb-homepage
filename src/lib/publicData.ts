@@ -1,6 +1,7 @@
 import { draftMode } from 'next/headers'
 import type { DataFromCollectionSlug, PaginatedDocs, Sort, Where } from 'payload'
 import { getPayloadClient } from '@/lib/getPayload'
+import { verifyPreviewToken } from '@/lib/previewToken'
 
 /**
  * The single read path from the public frontend into editorial collections.
@@ -16,6 +17,8 @@ import { getPayloadClient } from '@/lib/getPayload'
  *                enabled by /next/preview after it has verified a logged-in
  *                Payload user, so this never runs for anonymous visitors.
  *   findForRequest  picks one of the two from the request's draft-mode cookie.
+ *   findByPreviewToken  privileged read of the one draft a signed preview link
+ *                names (Claude has no CMS session); no draft mode involved.
  *
  * Without this, a plain `payload.find` runs with `overrideAccess: true` and
  * returns drafts — which then leak into `<head>` via generateMetadata even
@@ -69,4 +72,32 @@ export async function findBySlug<S extends PublicCollection>(
 ): Promise<DataFromCollectionSlug<S> | undefined> {
   const res = await findForRequest({ collection, where: { slug: { equals: slug } }, limit: 1, depth })
   return res.docs[0]
+}
+
+export type TokenPreview =
+  | { collection: 'blog'; doc: DataFromCollectionSlug<'blog'> }
+  | { collection: 'events'; doc: DataFromCollectionSlug<'events'> }
+
+/**
+ * Privileged: the latest draft of exactly the one document a signed preview link
+ * names (see lib/previewToken.ts), or undefined for a bad or expired token.
+ * Never enables draft mode, so every other read on the page stays public.
+ */
+export async function findByPreviewToken(token: string, now: Date, depth = 2): Promise<TokenPreview | undefined> {
+  const payload = await getPayloadClient()
+  const target = verifyPreviewToken(token, payload.secret, now)
+  if (!target) return undefined
+  const byId = { id: target.id, draft: true, depth, overrideAccess: true } as const
+  try {
+    switch (target.collection) {
+      case 'blog':
+        return { collection: 'blog', doc: await payload.findByID({ collection: 'blog', ...byId }) }
+      case 'events':
+        return { collection: 'events', doc: await payload.findByID({ collection: 'events', ...byId }) }
+      default:
+        return target.collection satisfies never
+    }
+  } catch {
+    return undefined // deleted since the link was made
+  }
 }

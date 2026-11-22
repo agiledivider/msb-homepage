@@ -1,5 +1,6 @@
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import type { CollectionBeforeDeleteHook, CollectionConfig, Config, Field, Plugin } from 'payload'
+import { makePreviewLinkTool } from './previewLink'
 import { makeUploadMediaTool } from './uploadMedia'
 
 /** What Claude may do per collection. No deletes; new media only via `uploadMedia`. */
@@ -11,7 +12,9 @@ after you're done, tell the editor to open the draft in the CMS, check it and
 submit it for review there. You can't publish, approve or delete anything.
 Find existing media first if a post or event should show an image; to add a
 new one, use uploadMedia (public https URL or base64 content) and set its ID as
-the post's cover or the event's image. Uploaded files are public right away.`
+the post's cover or the event's image. Uploaded files are public right away.
+To check how a post or event looks (homepage hero and its own page), call
+previewLink and open the link in a browser; it is valid for 15 minutes.`
 
 /**
  * A new key may use every capability configured above (the plugin defaults
@@ -45,7 +48,7 @@ const basePlugin = mcpPlugin({
     },
   },
   mcp: {
-    tools: [makeUploadMediaTool()],
+    tools: [makeUploadMediaTool(), makePreviewLinkTool()],
     serverOptions: {
       serverInfo: { name: 'MakerSpace Bonn CMS', version: '1.0.0' },
       instructions: INSTRUCTIONS,

@@ -213,6 +213,64 @@ describe('uploading media through Claude', () => {
     expect(media.uploadedByClaude).toBe(false)
   })
 })
+describe('previewing a draft through Claude', () => {
+  const tokenOf = (result: ToolResult) => {
+    const url = result.content?.[0]?.text.match(/https?:\/\/\S+/)?.[0]
+    return new URL(url ?? 'http://invalid').searchParams.get('t') ?? ''
+  }
+  const aDraftPost = async (title: string) =>
+    (await payload.create({
+      collection: 'blog',
+      data: { title, slug: `preview-${randomUUID()}`, _status: 'draft', reviewStatus: 'draft' } as never,
+      context: { [EDITORIAL_SKIP]: true },
+    })) as unknown as Doc
+
+  it('offers previewLink', async () => {
+    const res = await mcp(editor.key, 'tools/list')
+    const names = ((res.body.result?.tools ?? []) as { name: string }[]).map((t) => t.name)
+
+    expect(names).toContain('previewLink')
+  })
+
+  it('gives a link to /preview/link that shows the latest draft of exactly that post', async () => {
+    const post = await aDraftPost('Erster Stand')
+    const other = await aDraftPost('Fremder Entwurf')
+    await callTool(editor.key, 'updateBlog', { id: post.id, title: 'Neuer Stand', draft: true })
+
+    const result = await callTool(editor.key, 'previewLink', { collection: 'blog', id: post.id })
+
+    expect(result.isError).toBeFalsy()
+    expect(result.content?.[0]?.text).toMatch(/\/preview\/link\?t=/)
+    const { findByPreviewToken } = await import('@/lib/publicData')
+    const found = await findByPreviewToken(tokenOf(result), new Date())
+    expect(found?.collection).toBe('blog')
+    expect(found?.doc.id).toBe(post.id)
+    expect(found?.doc.title).toBe('Neuer Stand')
+    expect(found?.doc.id).not.toBe(other.id)
+  })
+
+  it('stops working after 15 minutes', async () => {
+    const post = await aDraftPost('Läuft ab')
+    const result = await callTool(editor.key, 'previewLink', { collection: 'blog', id: post.id })
+    const { findByPreviewToken } = await import('@/lib/publicData')
+
+    expect(await findByPreviewToken(tokenOf(result), new Date(Date.now() + 14 * 60_000))).toBeDefined()
+    expect(await findByPreviewToken(tokenOf(result), new Date(Date.now() + 16 * 60_000))).toBeUndefined()
+  })
+
+  it("won't make a link for a post that doesn't exist", async () => {
+    const result = await callTool(editor.key, 'previewLink', { collection: 'blog', id: 999_999 })
+
+    expect(result?.isError ?? true).toBe(true)
+    expect(result?.content?.[0]?.text ?? '').not.toMatch(/preview\/link/)
+  })
+
+  it("won't make a link for pages or other collections", async () => {
+    const result = await callTool(reviewer.key, 'previewLink', { collection: 'users', id: 1 })
+
+    expect(result?.isError ?? true).toBe(true)
+  })
+})
 
 describe('when someone leaves', () => {
   it('deleting their CMS account also removes their keys, and the key stops working', async () => {

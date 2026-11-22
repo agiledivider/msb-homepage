@@ -37,6 +37,7 @@ under KI-Zugänge if a device is lost.
 | find media and attach existing images by ID | change or delete existing media |
 | upload images (JPEG, PNG, GIF, WebP) and PDFs up to 10 MB, from a public https URL or as base64 content | upload SVG or other file types |
 | | change settings, users, roles, folders |
+| show a blog post or event as it would go live (homepage hero + its own page) via a 15-minute preview link | preview pages |
 
 - Everything Claude writes is a **draft**: on a new document it's the only
   version; on a live page it's a new draft version next to the live one, which
@@ -48,6 +49,9 @@ under KI-Zugänge if a device is lost.
 - An image dropped into a chat can't be uploaded as a file: Claude sees the
   picture, not its bytes. Give a link, or use Claude Code / Desktop on a file on disk.
 - Without a valid key the endpoint answers 401.
+- **Preview links** (`previewLink`) need no login and work for anyone who has
+  the link, for 15 minutes, and show only that one post or event. They aren't
+  indexed and don't leak via Referer.
 
 ## How it works (for developers)
 
@@ -68,7 +72,13 @@ under KI-Zugänge if a device is lost.
   rebinding can't slip through), max 3 redirects, 10 MB, 15 s.
 - Deleting a user deletes their keys first (the plugin's `user_id` is NOT NULL
   with `ON DELETE set null`, which otherwise blocks the delete).
-- Tests: `tests/integration/mcp.test.ts` drives the real endpoint handler.
+- `previewLink` (`src/plugins/mcp/previewLink.ts`) signs a token (HMAC with a
+  key derived from the Payload secret, 15 min, `src/lib/previewToken.ts`) for
+  one blog post or event the key owner can read. `/preview/link?t=…` renders
+  hero + article via `findByPreviewToken` in `publicData.ts`. It deliberately
+  does **not** enable Next draft mode: that cookie would show every draft.
+- Tests: `tests/integration/mcp.test.ts` drives the real endpoint handler;
+  `tests/unit/preview-token.test.ts` covers forged/expired tokens.
 
 **Known gap:** roles follow Kanidm only at login. A key keeps working with the
 roles its owner had at their last login, even after Kanidm removed them. To cut
