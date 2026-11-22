@@ -5,6 +5,7 @@ import { Hero } from './Hero/config'
 import { JoinOptions } from './JoinOptions/config'
 import { PageIntro } from './PageIntro/config'
 import { People } from './People/config'
+import { Press } from './Press/config'
 import { Prose } from './Prose/config'
 import { VereinIntro } from './VereinIntro/config'
 import { Workshops } from './Workshops/config'
@@ -26,6 +27,7 @@ export const msbBlocks = [
   JoinOptions,
   Prose,
   People,
+  Press,
 ]
 
-export { CtaBand, EventFeed, EventsList, Hero, JoinOptions, PageIntro, People, Prose, VereinIntro, Workshops }
+export { CtaBand, EventFeed, EventsList, Hero, JoinOptions, PageIntro, People, Press, Prose, VereinIntro, Workshops }

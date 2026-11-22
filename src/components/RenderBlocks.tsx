@@ -6,6 +6,7 @@ import { type HeroBlock, HeroComponent } from '../blocks/Hero/Component'
 import { type JoinOptionsBlock, JoinOptionsComponent } from '../blocks/JoinOptions/Component'
 import { type PageIntroBlock, PageIntroComponent } from '../blocks/PageIntro/Component'
 import { type PeopleBlock, PeopleComponent } from '../blocks/People/Component'
+import { type PressBlock, PressComponent } from '../blocks/Press/Component'
 import { type ProseBlock, ProseComponent } from '../blocks/Prose/Component'
 import { type VereinIntroBlock, VereinIntroComponent } from '../blocks/VereinIntro/Component'
 import { type WorkshopsBlock, WorkshopsComponent } from '../blocks/Workshops/Component'
@@ -21,6 +22,7 @@ export type MsbBlock =
   | JoinOptionsBlock
   | ProseBlock
   | PeopleBlock
+  | PressBlock
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const REGISTRY: Record<string, (props: any) => ReactNode> = {
@@ -34,6 +36,7 @@ const REGISTRY: Record<string, (props: any) => ReactNode> = {
   joinOptions: JoinOptionsComponent,
   prose: ProseComponent,
   people: PeopleComponent,
+  press: PressComponent,
 }
 
 /**

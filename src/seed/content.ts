@@ -68,6 +68,63 @@ export const VEREIN_PEOPLE_BLOCK = {
   ],
 }
 
+/** The press release PDF, rescued from the old site (it lived under makerspacebonn.de/images/, which the new site replaces). */
+export const PRESS_RELEASE_2018 = 'pressemitteilung-2018-02-13-eroeffnung.pdf'
+
+/**
+ * "Wir in den Medien" on /verein (S3.4; items from the old site's press page,
+ * 2026-11-22). Async: it puts the press release PDF into the media library first.
+ */
+export async function vereinPressBlock(payload: Payload) {
+  const pressRelease = await mediaId(
+    payload,
+    PRESS_RELEASE_2018,
+    'Pressemitteilung des MakerSpace Bonn e.V. zur Eröffnung, 13.02.2018',
+  )
+  return {
+    blockType: 'press' as const,
+    tag: 'PRESSE',
+    heading: 'Wir in den Medien',
+    items: [
+      {
+        outlet: 'General-Anzeiger Bonn',
+        date: '2021-02-04T12:00:00.000Z',
+        title: 'Die kreativen Macher kommen gut durch die Krise',
+        url: 'https://ga.de/bonn/bad-godesberg/verein-makerspace-in-bonn-kommt-gut-durch-die-pandemie_aid-56053561',
+      },
+      {
+        outlet: 'General-Anzeiger Bonn',
+        date: '2019-02-04T12:00:00.000Z',
+        title: 'MakerSpace-Treffpunkt ist eine Ideenschmiede für Tüftler',
+        url: 'https://ga.de/bonn/bad-godesberg/makerspace-treffpunkt-ist-eine-ideenschmiede-fuer-tueftler_aid-44014351',
+      },
+      {
+        outlet: 'General-Anzeiger Bonn',
+        date: '2018-03-05T12:00:00.000Z',
+        title: 'Eröffnung der Makerspace-Werkstatt-Etage in Bad Godesberg',
+        url: 'https://ga.de/bonn/bad-godesberg/eroeffnung-der-makerspace-werkstatt-etage-in-bad-godesberg_aid-43679923',
+      },
+      {
+        outlet: 'MakerSpace Bonn e.V.',
+        date: '2018-02-13T12:00:00.000Z',
+        title: 'Pressemitteilung zur Eröffnung am 3. März 2018',
+        document: pressRelease,
+      },
+    ],
+    // Press address from Falk, 2026-11-22.
+    contactEmail: 'presse@makerspacebonn.de',
+  }
+}
+
+/**
+ * The blocks /verein gets after the intro, in order, by blockType. `run-verein.ts`
+ * adds whichever of them an existing database is missing.
+ */
+export const VEREIN_BLOCKS: [blockType: string, make: (payload: Payload) => Promise<object>][] = [
+  ['people', async () => VEREIN_PEOPLE_BLOCK],
+  ['press', vereinPressBlock],
+]
+
 const UP = path.resolve(process.cwd(), 'uploads')
 const day = 24 * 60 * 60 * 1000
 const at = (offsetDays: number, hour = 10) => {
@@ -326,6 +383,7 @@ export async function seedSiteContent(payload: Payload) {
         ],
       },
       VEREIN_PEOPLE_BLOCK,
+      await vereinPressBlock(payload),
     ],
   })
 

@@ -149,7 +149,7 @@ Visitors can't see who runs the Verein or whom to ask about what. The page shoul
 
 **AC:** `/verein` lists every Vorstand member with full name and role, matching the Impressum; each person shows the address to reach them (changed by Falk 2026-11-22: contact on each person's card instead of a separate list of topic contacts); an editor changes a name, role or address in the CMS and the page shows it.
 
-**Implementation notes:** new page block `people` ("Menschen & Ansprechpartner", `src/blocks/People/`): tag, heading, intro and people (name, role, optional email shown as a mailto link on the card). Seeded with Salim Deeb and Jan Benzenberg (Vorstand, vorstand@makerspacebonn.de) via `VEREIN_PEOPLE_BLOCK`; existing DBs (staging) get it once with `pnpm payload run src/seed/run-verein-people.ts`, which only adds the block where it's missing. Migration `20261122_130104_verein_people_block`. Checked at 1440 px and 375 px (CDP), no horizontal scroll. Covered by `tests/unit/people-block.test.tsx`.
+**Implementation notes:** new page block `people` ("Menschen & Ansprechpartner", `src/blocks/People/`): tag, heading, intro and people (name, role, optional email shown as a mailto link on the card). Seeded with Salim Deeb and Jan Benzenberg (Vorstand, vorstand@makerspacebonn.de) via `VEREIN_PEOPLE_BLOCK`; existing DBs (staging) get it with `pnpm payload run src/seed/run-verein.ts` (since S3.4; was `run-verein-people.ts`), which only adds sections that are missing. Migration `20261122_130104_verein_people_block`. Checked at 1440 px and 375 px (CDP), no horizontal scroll. Covered by `tests/unit/people-block.test.tsx`.
 
 ### ⏳ S3.2 — Visitors see who supports the Verein (S)
 **Needs:** the current list of supporters from the Vorstand.
@@ -163,10 +163,12 @@ Satzung, Hausordnung and Beitragsordnung are only on the old site, hidden behind
 
 **AC:** Satzung, Hausordnung, Beitragsordnung and the proof of Gemeinnützigkeit can be opened from `/verein`, each with its date or version; an editor replaces a PDF in the CMS without a code change; the documents are also in the static bundle.
 
-### ⏳ S3.4 — The press finds coverage and a contact (S)
+### ✅ S3.4 — The press finds coverage and a contact (S) — 2026-11-22
 Journalists and partners can't see what has been written about the Verein, or whom to contact. "Wir in den Medien" should list the press coverage (General-Anzeiger 2018, 2019, 2021, the 2018 press release) and give a press contact.
 
 **AC:** `/verein` lists press articles newest first, each with outlet, date and a link; an editor adds an article in the CMS; a press contact is shown.
+
+**Implementation notes:** new page block `press` ("Wir in den Medien", `src/blocks/Press/`): items (outlet, date, title, link or uploaded file), sorted by date, external links in a new tab, files marked PDF; press contact presse@makerspacebonn.de (from Falk). Seeded from the old site's press page: three General-Anzeiger articles (2018, 2019, 2021) and the 2018 press release, whose PDF moved from `makerspacebonn.de/images/…` into the media library (`uploads/pressemitteilung-2018-02-13-eroeffnung.pdf`). Existing DBs: `pnpm payload run src/seed/run-verein.ts` (replaces `run-verein-people.ts`; adds every missing Verein section). Migration `20261122_144523_verein_press_block`. A web search on 2026-11-22 found no further newspaper coverage (ga.de can't be searched automatically); Falk decided not to add other finds. Checked at 1440 px and 375 px. Covered by `tests/unit/press-block.test.tsx`.
 
 ### ⏳ S3.5 — Newcomers learn what a makerspace is (S)
 People who have never been in a makerspace don't know what to expect. A short explainer near the top of the page says what a makerspace is and what you can do there.
