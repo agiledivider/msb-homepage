@@ -45,12 +45,12 @@ export function InfiniteEvents({ view, events }: { view: 'list' | 'tiles'; event
           <button
             type="button"
             onClick={loadMore}
-            className="rounded-[9px] border border-line bg-card px-5 py-2 font-mono text-[13px] text-muted transition-colors hover:border-brand hover:text-brand-text"
+            className="rounded-[9px] border border-line bg-card px-5 py-2 font-mono text-[14px] text-muted transition-colors hover:border-brand hover:text-brand-text"
           >
             Mehr Termine laden
           </button>
         ) : (
-          <p className="font-mono text-[12.5px] text-faint">Keine weiteren Termine.</p>
+          <p className="font-mono text-[14px] text-muted">Keine weiteren Termine.</p>
         )}
       </div>
     </div>

@@ -16,7 +16,7 @@ export default function NotFound() {
         headline="Hier ist nichts"
         lede="Die Seite gibt es nicht (mehr). Vielleicht hilft einer dieser Wege weiter."
       />
-      <div className="mt-8 flex flex-wrap gap-4 font-mono text-[13px]">
+      <div className="mt-8 flex flex-wrap gap-4 font-mono text-[14px]">
         <Link href="/" className="text-brand-text no-underline hover:underline">
           ← Startseite
         </Link>

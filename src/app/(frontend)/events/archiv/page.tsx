@@ -37,7 +37,7 @@ export default async function EventsArchivePage() {
         lede="A look back at past workshops, open days and meetups at the MakerSpace."
       />
       <div className="mb-8 mt-6">
-        <Link href="/events" className="font-mono text-[13px] text-brand-text no-underline hover:underline">
+        <Link href="/events" className="font-mono text-[14px] text-brand-text no-underline hover:underline">
           ← Kommende Events
         </Link>
       </div>

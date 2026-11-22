@@ -48,17 +48,15 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
           return (
             <div
               key={i}
-              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-white' : 'border border-line bg-[#fffdf8]'}`}
+              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-ink' : 'border border-line bg-[#fffdf8]'}`}
             >
-              <div className={`mb-2.5 font-mono text-[11px] tracking-[.06em] ${green ? 'opacity-85' : 'text-faint'}`}>
+              <div className={`mb-2.5 font-mono text-[14px] tracking-[.06em] ${green ? '' : 'text-muted'}`}>
                 {o.number ? `${o.number} · ` : ''}
                 {o.eyebrow}
               </div>
-              <div className={`mb-2 font-display text-[22px] font-extrabold ${green ? 'text-white' : ''}`}>
-                {o.title}
-              </div>
+              <div className="mb-2 font-display text-[22px] font-extrabold">{o.title}</div>
               {o.text ? (
-                <p className={`m-0 mb-4 text-[14px] leading-[1.6] ${green ? 'opacity-90' : 'text-muted'}`}>{o.text}</p>
+                <p className={`m-0 mb-4 text-[14px] leading-[1.6] ${green ? '' : 'text-muted'}`}>{o.text}</p>
               ) : null}
               {o.link?.label ? (
                 <Link
@@ -78,11 +76,11 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
       {location ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-[14px] border border-line bg-[#fffdf8] p-[26px]">
-            <div className="mb-3 font-mono text-[11.5px] tracking-[.06em] text-faint">{location.eyebrow}</div>
+            <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-muted">{location.eyebrow}</div>
             <div className="mb-1 font-display text-[20px] font-extrabold">{location.title}</div>
             {location.line ? <div className="mb-3.5 text-[15px] text-[#4c4a42]">{location.line}</div> : null}
             {location.transit ? (
-              <div className="whitespace-pre-line font-mono text-[13px] leading-[1.8] text-muted">
+              <div className="whitespace-pre-line font-mono text-[14px] leading-[1.8] text-muted">
                 {location.transit}
               </div>
             ) : null}
@@ -117,7 +115,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
                 </span>
               </span>
             ) : null}
-            <span className="pointer-events-none absolute bottom-2.5 right-2.5 rounded-full bg-white/90 px-3 py-1 font-mono text-[11px] font-semibold text-ink shadow-sm backdrop-blur-sm transition-transform group-hover:-translate-y-0.5">
+            <span className="pointer-events-none absolute bottom-2.5 right-2.5 rounded-full bg-white/90 px-3 py-1 font-mono text-[14px] font-semibold text-ink shadow-sm backdrop-blur-sm transition-transform group-hover:-translate-y-0.5">
               In Maps öffnen ↗
             </span>
           </a>

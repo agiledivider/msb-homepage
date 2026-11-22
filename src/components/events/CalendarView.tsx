@@ -50,7 +50,7 @@ export function CalendarView({
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between gap-3 font-mono text-[13px] text-muted">
+      <div className="mb-4 flex items-center justify-between gap-3 font-mono text-[14px] text-muted">
         <button type="button" onClick={() => onNavigate(prev)} className={navBtn}>
           ← {fmtMonthYear(prev)}
         </button>
@@ -64,7 +64,7 @@ export function CalendarView({
         <div className="min-w-[680px]">
           <div className="grid grid-cols-7 gap-px">
             {WEEKDAYS.map((w) => (
-              <div key={w} className="bg-card py-2 text-center font-mono text-[11.5px] tracking-[.06em] text-faint">
+              <div key={w} className="bg-card py-2 text-center font-mono text-[14px] tracking-[.06em] text-muted">
                 {w}
               </div>
             ))}
@@ -77,8 +77,8 @@ export function CalendarView({
                 <div key={i} className={`min-h-[104px] bg-card p-1.5 ${day ? '' : 'bg-[#f6f2e8]'}`}>
                   {day ? (
                     <div
-                      className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full font-mono text-[12px] ${
-                        isToday(day) ? 'bg-brand font-bold text-white' : 'text-muted'
+                      className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full font-mono text-[14px] ${
+                        isToday(day) ? 'bg-brand font-bold text-ink' : 'text-muted'
                       }`}
                     >
                       {day}
@@ -90,7 +90,7 @@ export function CalendarView({
                         key={e.id}
                         href={e.href}
                         title={`${e.time} · ${e.title}`}
-                        className={`block truncate rounded-[4px] px-1.5 py-0.5 text-[11px] leading-tight no-underline ${eventTagClasses(e.tagColor)}`}
+                        className={`block truncate rounded-[4px] px-1.5 py-0.5 text-[14px] leading-tight no-underline ${eventTagClasses(e.tagColor)}`}
                       >
                         <span className="font-semibold">{e.time}</span> {e.title}
                       </Link>

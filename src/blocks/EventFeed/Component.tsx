@@ -50,12 +50,12 @@ export function EventFeedComponent({ tagLabel, heading, allLink, events, sidebar
           >
             <div className="text-center">
               <div className="font-display text-[34px] font-extrabold leading-none text-brand-text">{e.day}</div>
-              <div className="font-mono text-[12px] text-faint">{e.sub}</div>
+              <div className="font-mono text-[14px] text-muted">{e.sub}</div>
             </div>
             <div>
               {e.tag ? (
                 <div
-                  className={`mb-2 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[11px] ${eventTagClasses(e.tagColor)}`}
+                  className={`mb-2 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[14px] ${eventTagClasses(e.tagColor)}`}
                 >
                   {e.tag}
                 </div>

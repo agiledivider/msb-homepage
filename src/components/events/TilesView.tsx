@@ -40,12 +40,12 @@ function Tile({ e }: { e: EventVM }) {
       <div className="p-4">
         {e.category ? (
           <div
-            className={`mb-2 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[11px] ${eventTagClasses(e.tagColor)}`}
+            className={`mb-2 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[14px] ${eventTagClasses(e.tagColor)}`}
           >
             {e.category}
           </div>
         ) : null}
-        <div className="font-mono text-[11.5px] text-faint">
+        <div className="font-mono text-[14px] text-muted">
           {fmtWeekdayShort(e.date)} {fmtDay2(e.date)}. {fmtMonthShort(e.date)} · {e.time}
         </div>
         <h3 className="m-0 mt-1 font-display text-[18px] font-bold text-ink">{e.title}</h3>

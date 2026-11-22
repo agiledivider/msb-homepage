@@ -19,10 +19,10 @@ export function BlogArticle({ post }: { post: Blog }) {
   const meta = [post.author, post.readingTime].filter(Boolean).join(' · ')
   return (
     <main className="mx-auto max-w-[760px] px-4 py-14 md:px-8">
-      <div className="mb-3 font-mono text-[12px] tracking-[.06em] text-green">AUS DER WERKSTATT · BLOG</div>
+      <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-green">AUS DER WERKSTATT · BLOG</div>
       <h1 className={TITLE}>{post.title}</h1>
-      {post.subtitle ? <p className="m-0 mb-4 font-serif text-[20px] italic text-[#7c766a]">{post.subtitle}</p> : null}
-      {meta ? <div className="mb-8 font-mono text-[12px] text-faint">{meta}</div> : null}
+      {post.subtitle ? <p className="m-0 mb-4 font-serif text-[20px] italic text-muted">{post.subtitle}</p> : null}
+      {meta ? <div className="mb-8 font-mono text-[14px] text-muted">{meta}</div> : null}
       {post.cover && typeof post.cover === 'object' ? (
         <Media
           resource={post.cover}
@@ -52,9 +52,9 @@ const fmt = (d: string) =>
 export function EventArticle({ ev }: { ev: Event }) {
   return (
     <main className="mx-auto max-w-[760px] px-4 py-14 md:px-8">
-      <div className="mb-3 font-mono text-[12px] tracking-[.06em] text-green">NÄCHSTER TERMIN · EVENT</div>
+      <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-green">NÄCHSTER TERMIN · EVENT</div>
       <h1 className={TITLE}>{ev.title}</h1>
-      <div className="mb-8 font-mono text-[13px] text-muted">
+      <div className="mb-8 font-mono text-[14px] text-muted">
         {fmt(ev.date)} · {eventTimeText(ev.timeLabel)}
         {ev.location ? ` · ${ev.location}` : ''}
       </div>

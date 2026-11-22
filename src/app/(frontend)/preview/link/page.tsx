@@ -34,11 +34,11 @@ export default async function PreviewLinkPage({
 
   return (
     <>
-      <div className="bg-ink px-4 py-2 text-center font-mono text-[12px] tracking-[.06em] text-white">
+      <div className="bg-ink px-4 py-2 text-center font-mono text-[14px] tracking-[.06em] text-white">
         VORSCHAU · ENTWURF · NICHT ÖFFENTLICH
       </div>
       {hero}
-      <div className="mx-auto max-w-shell px-4 font-mono text-[11.5px] tracking-[.08em] text-faint md:px-8">
+      <div className="mx-auto max-w-shell px-4 font-mono text-[14px] tracking-[.08em] text-muted md:px-8">
         {found.collection === 'blog' ? 'BLOGBEITRAG' : 'EVENT-SEITE'}
       </div>
       {found.collection === 'blog' ? <BlogArticle post={found.doc} /> : <EventArticle ev={found.doc} />}

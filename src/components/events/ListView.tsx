@@ -16,8 +16,11 @@ export function ListView({ events }: { events: EventVM[] }) {
             <div className="font-display text-[28px] font-extrabold leading-none text-brand-text md:text-[32px]">
               {fmtDay2(e.date)}
             </div>
-            <div className="font-mono text-[11px] text-faint">
-              {fmtMonthShort(e.date)} · {fmtWeekdayShort(e.date)}
+            <div className="font-mono text-[14px] text-muted">
+              {/* Narrow phone column: month and weekday stack instead of wrapping mid-label. */}
+              {fmtMonthShort(e.date)}
+              <span className="max-md:hidden"> · </span>
+              <span className="max-md:block">{fmtWeekdayShort(e.date)}</span>
             </div>
           </div>
 
@@ -31,7 +34,7 @@ export function ListView({ events }: { events: EventVM[] }) {
           <div className="min-w-0">
             {e.category ? (
               <div
-                className={`mb-1.5 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[11px] ${eventTagClasses(e.tagColor)}`}
+                className={`mb-1.5 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[14px] ${eventTagClasses(e.tagColor)}`}
               >
                 {e.category}
               </div>
@@ -46,7 +49,7 @@ export function ListView({ events }: { events: EventVM[] }) {
             ) : null}
           </div>
 
-          <span className="hidden font-mono text-[12px] text-muted md:block md:justify-self-end md:text-right">
+          <span className="hidden font-mono text-[14px] text-muted md:block md:justify-self-end md:text-right">
             {e.time}
             {e.location ? <br /> : null}
             {e.location}

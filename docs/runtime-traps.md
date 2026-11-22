@@ -43,6 +43,7 @@ Collected 2026-11-12 from `LEARNINGS.md` and the session notes kept since July 2
 | see wrong-arch native modules (x86 `sharp`), HMR dead with `TypeError: t.unmask is not a function`, or "inferred workspace root" warnings | `~/node_modules` / `~/package.json` / `~/package-lock.json` leaking in; install the offender locally (`bufferutil`, `utf-8-validate` already are) | Node walks every ancestor `node_modules`; there is no flag to stop it. Root is pinned via `turbopack.root` in `next.config.mjs`. Don't delete the home toolbox | Node 22–26 · 2026-07 |
 | run on Homebrew Node 26 | prefer `node@22` (`/opt/homebrew/opt/node@22/bin`) | Next 16 targets Node 20/22 LTS; 26 works here but is unsupported | Next 16 · 2026-07 |
 | test the dev server on a phone over the LAN | add the LAN IP / subnet to `allowedDevOrigins` in `next.config.mjs` and restart dev | Next blocks cross-origin `/_next/*` (HMR socket **and** JS chunks); the page renders but never hydrates. Works in the iOS Simulator (localhost), dead on the device | Next 16 · 2026-07 |
+| change a token in `src/styles/globals.css` (`@theme`) while `pnpm dev:start` is running | the served CSS actually has the new value (`curl` the page's `/_next/static/…css` and grep the variable); if not, `scripts/dev-server.sh restart` | the running dev server kept serving the old `--color-*` values after two `@theme` edits, while component edits hot-reloaded fine; contrast checks then measured stale colours. Seen in the styleguide 2026-11 contrast fix | Next 16.4.6 · Tailwind 4.3 · 2026-11-22 |
 
 ## Hero prism / CSS
 

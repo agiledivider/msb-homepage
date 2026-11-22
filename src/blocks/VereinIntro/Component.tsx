@@ -35,7 +35,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
 
         {timeline?.length ? (
           <div className="rounded-[14px] border border-line bg-[#fffdf8] p-6">
-            <div className="mb-4 font-mono text-[11.5px] tracking-[.06em] text-faint">{timelineTitle}</div>
+            <div className="mb-4 font-mono text-[14px] tracking-[.06em] text-muted">{timelineTitle}</div>
             <div className="flex flex-col">
               {timeline.map((m, i) => {
                 const last = i === timeline.length - 1

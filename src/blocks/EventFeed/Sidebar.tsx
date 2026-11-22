@@ -19,9 +19,9 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
     <aside className="flex flex-col gap-[18px] lg:sticky lg:top-24">
       {sidebar?.hours?.length ? (
         <div className="overflow-hidden rounded-[14px] border border-line bg-[#fffdf8] shadow-[0_18px_40px_-28px_rgba(60,52,30,.4)]">
-          <div className="flex items-center justify-between bg-brand px-[18px] py-3.5 text-white">
+          <div className="flex items-center justify-between bg-brand px-[18px] py-3.5 text-ink">
             <span className="font-display text-[16px] font-bold">{sidebar.hoursTitle}</span>
-            <span className="font-mono text-[11.5px] opacity-85">{sidebar.hoursBadge}</span>
+            <span className="font-mono text-[14px] opacity-85">{sidebar.hoursBadge}</span>
           </div>
           <div className="px-[18px] pb-3.5 pt-1.5">
             {sidebar.hours.map((r, i) => (
@@ -32,15 +32,15 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
                 }`}
               >
                 <span className={`text-[14px] ${r.highlight ? 'text-brand-text' : ''}`}>
-                  <strong>{r.day}</strong> {r.highlight ? r.note : <span className="text-faint">{r.note}</span>}
+                  <strong>{r.day}</strong> {r.highlight ? r.note : <span className="text-muted">{r.note}</span>}
                 </span>
-                <span className={`font-mono text-[12.5px] ${r.highlight ? 'text-brand-text' : 'text-muted'}`}>
+                <span className={`font-mono text-[14px] ${r.highlight ? 'text-brand-text' : 'text-muted'}`}>
                   {r.time}
                 </span>
               </div>
             ))}
             {sidebar.hoursFootnote ? (
-              <p className="mt-3 text-[12.5px] leading-[1.5] text-faint">{sidebar.hoursFootnote}</p>
+              <p className="mt-3 text-[14px] leading-[1.5] text-muted">{sidebar.hoursFootnote}</p>
             ) : null}
           </div>
         </div>
@@ -48,12 +48,12 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
 
       {sidebar?.infoText ? (
         <div className="rounded-[14px] border border-[#e8d3a6] bg-sand p-[18px]">
-          <div className="mb-2.5 font-mono text-[11.5px] tracking-[.06em] text-brand-text">{sidebar.infoEyebrow}</div>
+          <div className="mb-2.5 font-mono text-[14px] tracking-[.06em] text-brand-text">{sidebar.infoEyebrow}</div>
           <p className="m-0 mb-3.5 text-[14px] leading-[1.55] text-[#4c4a42]">{sidebar.infoText}</p>
           {sidebar.infoLink?.label ? (
             <Link
               href={sidebar.infoLink.url || '#'}
-              className="border-b border-brand-text pb-0.5 font-mono text-[13px] text-brand-text no-underline"
+              className="border-b border-brand-text pb-0.5 font-mono text-[14px] text-brand-text no-underline"
             >
               {sidebar.infoLink.label}
             </Link>

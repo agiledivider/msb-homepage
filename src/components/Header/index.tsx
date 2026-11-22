@@ -55,7 +55,7 @@ export function Header({
           <Link
             href={cta.href}
             onClick={() => setOpen(false)}
-            className="mx-[22px] mb-1.5 mt-3 rounded-[9px] bg-brand px-3 py-3 text-center text-[15px] font-bold text-white no-underline shadow-[0_8px_18px_-10px_rgba(0,0,0,.4)] md:hidden"
+            className="mx-[22px] mb-1.5 mt-3 rounded-[9px] bg-brand-text px-3 py-3 text-center text-[15px] font-bold text-white hover:bg-green-deep no-underline shadow-[0_8px_18px_-10px_rgba(0,0,0,.4)] md:hidden"
           >
             {cta.label} →
           </Link>
@@ -63,7 +63,7 @@ export function Header({
 
         <Link
           href={cta.href}
-          className="hidden whitespace-nowrap rounded-[9px] bg-brand px-[18px] py-2.5 text-[14px] font-semibold text-white no-underline md:block"
+          className="hidden whitespace-nowrap rounded-[9px] bg-brand-text px-[18px] py-2.5 text-[14px] font-semibold text-white hover:bg-green-deep no-underline md:block"
         >
           {cta.label}
         </Link>

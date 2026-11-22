@@ -50,7 +50,7 @@ const FACE_TF = [
 
 // pill / nav-dot base (the countdown bar is an ::after on the active one)
 const PILL_BASE =
-  'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-[13px] py-[7px] font-mono text-[11.5px] tracking-[.06em] transition-[border-color,color,background] duration-[250ms] [&_b]:font-semibold'
+  'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-[10px] py-[7px] font-mono text-[14px] tracking-normal transition md:px-[13px] md:tracking-[.06em]-[border-color,color,background] duration-[250ms] [&_b]:font-semibold'
 
 function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boolean; style?: 'white' | 'orange' }) {
   if (!link?.label) return null
@@ -78,7 +78,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
         <div className="max-md:order-2 max-md:flex max-md:min-h-0 max-md:min-w-0 max-md:flex-1 max-md:flex-col">
           {face.eyebrow ? (
             <div
-              className="mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[11px] tracking-[.06em] md:mb-[22px] md:px-[11px] md:py-[5px] md:text-[12.5px]"
+              className="mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[14px] tracking-normal md:mb-[22px] md:px-[11px] md:py-[5px] md:tracking-[.06em]"
               style={{ color: eb.color, borderColor: eb.border }}
             >
               {face.eyebrow}
@@ -122,7 +122,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
             </p>
           ) : null}
           {face.meta?.length ? (
-            <div className="mb-6 hidden items-center gap-3.5 font-mono text-[12px] text-green-soft md:flex">
+            <div className="mb-6 hidden items-center gap-3.5 font-mono text-[14px] text-green-soft md:flex">
               {face.meta.map((m, i) => (
                 <Fragment key={i}>
                   {i > 0 ? <span className="opacity-50">·</span> : null}
@@ -292,7 +292,7 @@ export function HeroComponent({
             <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>
               {face.badge ? (
                 <div
-                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-yellow px-[15px] py-[9px] font-display text-[13px] font-extrabold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
+                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-yellow px-[15px] py-[9px] font-display text-[14px] font-extrabold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
                   style={{ top: -20, left: -16, transform: `rotate(${badgeRot[i]})` }}
                 >
                   {face.badge}
@@ -328,8 +328,8 @@ export function HeroComponent({
                   on ? 'after:w-[calc(var(--msb-p,0)*100%)]' : ''
                 }`}
                 style={{
-                  borderColor: on ? '#238811' : '#d9d2c1',
-                  color: on ? '#238811' : '#7c766a',
+                  borderColor: on ? 'var(--color-brand-text)' : '#d9d2c1',
+                  color: on ? 'var(--color-brand-text)' : 'var(--color-muted)',
                   background: on ? '#eaf3dd' : '#fbf7ec',
                 }}
               >
@@ -350,7 +350,7 @@ export function HeroComponent({
             aria-pressed={userPaused}
             title={userPaused ? 'Fortsetzen' : 'Pausieren'}
             className={`${PILL_BASE} h-[30px] w-[30px] justify-center !px-0 !py-0`}
-            style={{ borderColor: '#d9d2c1', color: '#238811', background: '#fbf7ec' }}
+            style={{ borderColor: '#d9d2c1', color: 'var(--color-brand-text)', background: '#fbf7ec' }}
           >
             {userPaused ? (
               <svg width="11" height="12" viewBox="0 0 12 12" aria-hidden="true">

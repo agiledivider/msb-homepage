@@ -78,7 +78,7 @@ export function EventsClient({ events, nowIso }: { events: EventDTO[]; nowIso: s
       <div className="mb-8 mt-6 flex flex-wrap items-center justify-between gap-3">
         <ViewSwitcher current={view} onChange={setView} />
         <div className="flex items-center gap-4">
-          <a href="/events/archiv" className="font-mono text-[12.5px] text-muted no-underline hover:text-ink">
+          <a href="/events/archiv" className="font-mono text-[14px] text-muted no-underline hover:text-ink">
             Archiv →
           </a>
           <CalendarSubscribe />

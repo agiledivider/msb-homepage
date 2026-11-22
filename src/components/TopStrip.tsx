@@ -53,17 +53,18 @@ export function TopStrip({
 
   // Until the first fetch resolves, fall back to the CMS-provided text + brand green.
   const labels = state ? stateLabels(state) : { short: status, full: status }
-  const bg = state && !state.open ? 'bg-closed' : 'bg-brand'
+  // Text on Markengrün is ink, never white (styleguide 2026-11 §6).
+  const bg = state && !state.open ? 'bg-closed text-white' : 'bg-brand text-ink'
 
   return (
     <div
-      className={`flex items-center justify-center gap-4 ${bg} px-4 py-2 font-mono text-[11.5px] tracking-[.03em] text-white transition-colors md:justify-between md:px-8 md:text-[12.5px]`}
+      className={`flex items-center justify-center gap-4 ${bg} px-4 py-2 font-mono text-[14px] tracking-[.03em] transition-colors md:justify-between md:px-8 md:text-[14px]`}
     >
       <span>
         <span className="md:hidden">{labels.short}</span>
         <span className="hidden md:inline">{labels.full}</span>
       </span>
-      {address ? <span className="hidden opacity-85 md:inline">{address}</span> : null}
+      {address ? <span className="hidden md:inline">{address}</span> : null}
     </div>
   )
 }

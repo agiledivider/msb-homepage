@@ -14,7 +14,8 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 **Status:** proposed 2026-11-22. The site still follows the February 2026 styleguide. Findings, values and severities: `docs/design-audit-2026-11.md`.
 
-### All text on the site is readable
+### ✅ DONE 2026-11-22 — All text on the site is readable
+**Implemented:** tokens moved to the 2026-11 values (Grüne Schrift `#33791A`, Tinte, Stein `#5F5850`, Kreide, Creme `#FAF2E4`); buttons use `brand-text` with white text, Markengrün surfaces carry ink text; every public-site size is ≥ 14 px, enforced by `tests/fitness/min-text-size.test.ts`. Checked with axe (0 contrast failures on 9 pages at 1440/375 px).
 **Problem:** green link text, grey secondary text and the footer's small print fail WCAG AA contrast (down to 1.94:1); main buttons put white text on Markengrün, which the styleguide shows as a "Nicht so" example; much small text is 11–13.5 px.
 **Desired:** every text and background pairing meets the styleguide's contrast roles (Textgrün, Stein, Tinte, Kreide on dark green), buttons use the styleguide's button colours, and no text on the web is smaller than 14 px.
 **AC:** on start, a page, blog, a post, events and the archive, at 1440 px and 375 px, an automated contrast check reports no AA failures; no rendered text is below 14 px; the layout at 375 px still fits without horizontal scrolling.

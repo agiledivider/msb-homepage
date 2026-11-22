@@ -10,12 +10,12 @@
    …; fonts → font-display / font-hand / …; --container-shell → max-w-shell;
    --animate-msbfade → animate-msbfade. */
 @theme {
-  /* ===== Official MakerSpace Bonn palette (Styleguide V2026-02-15) ===== */
+  /* ===== Official MakerSpace Bonn palette (Styleguide 2026-11.11) ===== */
   /* brand green */
-  --color-brand: #5eb130;        /* MakerSpace Grün — logo, areas, buttons */
-  --color-brand-text: #238811;   /* accessible green for type & links (AA/AAA) */
+  --color-brand: #5eb130;        /* Markengrün — logo, areas; text on it is always ink, never white */
+  --color-brand-text: #33791a;   /* Grüne Schrift — green text, links, buttons with white text (AA) */
   /* fond (backgrounds) */
-  --color-fond: #f5e6c9;         /* cream info boxes */
+  --color-fond: #faf2e4;         /* Creme — info boxes (#f5e6c9 is print only) */
   --color-fond-dark: #325725;    /* dark green */
   /* area accents */
   --color-violet: #6d3e91;       /* MINT accent · text on it = white */
@@ -23,18 +23,17 @@
   --color-yellow: #fcbd30;       /* UGC accent · text on it = black */
   --color-closed: #c0392b;       /* status strip when the space is closed */
   /* neutrals (aligned to spec) */
-  --color-ink: #1a1a1a;          /* headlines / body */
-  --color-ink-muted: #595959;    /* captions / secondary */
-  --color-line: #e0e0e0;         /* hairlines */
+  --color-ink: #1e1c19;          /* Tinte — headlines / body */
+    --color-line: #e0e0e0;         /* hairlines */
 
   /* ---- homepage surface + legacy tokens ---- */
   --color-paper: #f1ede2;        /* graph-paper background */
   --color-card: #fffdf8;
   --color-cream: #fbf7ec;
-  --color-muted: #736e62;        /* warm secondary (legacy) */
-  --color-faint: #9a9484;
-  --color-sand: #f5e6c9;         /* = fond */
-  --color-green: #238811;        /* = brand-text */
+  --color-muted: #5f5850;        /* Stein / Text leise — secondary text (AA on paper and fond) */
+  --color-kreide: #ede8de;       /* Kreide — text on dark green */
+  --color-sand: #faf2e4;         /* = fond */
+  --color-green: #33791a;        /* = brand-text */
   --color-green-deep: #325725;   /* = fond-dark */
   --color-green-lime: #5eb130;   /* = brand */
   --color-green-pale: #eaf3dd;

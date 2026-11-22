@@ -13,7 +13,7 @@ const ORDER: ViewKey[] = ['list', 'calendar', 'tiles']
  */
 export function ViewSwitcher({ current, onChange }: { current: ViewKey; onChange: (v: ViewKey) => void }) {
   return (
-    <div className="inline-flex rounded-[10px] border border-line bg-card p-1 font-mono text-[12.5px]">
+    <div className="inline-flex rounded-[10px] border border-line bg-card p-1 font-mono text-[14px]">
       {ORDER.filter((k) => VIEWS.includes(k)).map((key) => {
         const active = key === current
         return (
@@ -23,7 +23,7 @@ export function ViewSwitcher({ current, onChange }: { current: ViewKey; onChange
             onClick={() => onChange(key)}
             aria-current={active ? 'page' : undefined}
             className={`rounded-[7px] px-3.5 py-1.5 transition-colors ${
-              active ? 'bg-brand text-white' : 'text-muted hover:text-ink'
+              active ? 'bg-brand-text text-white' : 'text-muted hover:text-ink'
             }`}
           >
             {LABELS[key]}

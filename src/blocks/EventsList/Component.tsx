@@ -39,12 +39,12 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
           >
             <div className="text-center">
               <div className="font-display text-[30px] font-extrabold leading-none text-brand-text">{e.day}</div>
-              <div className="font-mono text-[11px] text-faint">{e.sub}</div>
+              <div className="font-mono text-[14px] text-muted">{e.sub}</div>
             </div>
             <div>
               {e.tag ? (
                 <div
-                  className={`mb-1.5 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[11px] ${eventTagClasses(e.tagColor)}`}
+                  className={`mb-1.5 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[14px] ${eventTagClasses(e.tagColor)}`}
                 >
                   {e.tag}
                 </div>
@@ -60,7 +60,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
               </h3>
               {e.text ? <p className="m-0 text-[14px] leading-[1.5] text-muted">{e.text}</p> : null}
             </div>
-            <span className="font-mono text-[12px] text-muted">{e.time}</span>
+            <span className="font-mono text-[14px] text-muted">{e.time}</span>
           </div>
         ))}
       </div>
@@ -68,7 +68,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
       <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
         {sidebar?.bigEvents?.length ? (
           <div className="rounded-[14px] border border-line bg-[#fffdf8] p-5">
-            <div className="mb-3 font-mono text-[11.5px] tracking-[.06em] text-faint">{sidebar.bigTitle}</div>
+            <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-muted">{sidebar.bigTitle}</div>
             {sidebar.bigEvents.map((b, i, arr) => (
               <div
                 key={i}
@@ -77,7 +77,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
                 }`}
               >
                 <div className="font-display text-[16px] font-bold">{b.title}</div>
-                {b.meta ? <div className="text-[13px] text-muted">{b.meta}</div> : null}
+                {b.meta ? <div className="text-[14px] text-muted">{b.meta}</div> : null}
               </div>
             ))}
           </div>
@@ -90,7 +90,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
             {sidebar.infoLink?.label ? (
               <Link
                 href={sidebar.infoLink.url || '#'}
-                className="border-b border-brand-text pb-0.5 font-mono text-[13px] text-brand-text no-underline"
+                className="border-b border-brand-text pb-0.5 font-mono text-[14px] text-brand-text no-underline"
               >
                 {sidebar.infoLink.label}
               </Link>

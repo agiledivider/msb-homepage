@@ -60,10 +60,10 @@ export async function HeroPreview({ edited, draftGlobal, bare, mobileSrc }: Prop
 
   return (
     <main className="mx-auto max-w-shell px-4 pb-16 pt-6 md:px-8">
-      <div className="mb-2 font-mono text-[11.5px] tracking-[.08em] text-faint">DESKTOP</div>
+      <div className="mb-2 font-mono text-[14px] tracking-[.08em] text-muted">DESKTOP</div>
       <HeroComponent faces={faces} initialFace={initialFace} autoPlay={false} />
 
-      <div className="mb-3 mt-12 font-mono text-[11.5px] tracking-[.08em] text-faint">MOBIL · 390 px</div>
+      <div className="mb-3 mt-12 font-mono text-[14px] tracking-[.08em] text-muted">MOBIL · 390 px</div>
       <iframe
         src={mobileSrc}
         title="Mobile Hero-Vorschau"

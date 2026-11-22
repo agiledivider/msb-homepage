@@ -41,7 +41,7 @@ export function Media({
         aria-hidden
         // dashed placeholder mirrors the standalone design's empty image-slot
       >
-        <div className="flex h-full w-full items-center justify-center rounded-[6px] border border-dashed border-black/20 bg-black/[0.03] p-4 text-center font-mono text-xs text-muted">
+        <div className="flex h-full w-full items-center justify-center rounded-[6px] border border-dashed border-black/20 bg-black/[0.03] p-4 text-center font-mono text-sm text-muted">
           {placeholder ?? 'Bild'}
         </div>
       </div>

@@ -19,7 +19,7 @@ export function ProseComponent({ body }: ProseBlock) {
         className={
           'max-w-[760px] ' +
           '[&_h2]:mt-9 [&_h2]:mb-2.5 [&_h2]:font-display [&_h2]:text-[20px] [&_h2]:font-extrabold [&_h2]:text-ink [&_h2:first-child]:mt-0 ' +
-          '[&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-mono [&_h3]:text-[11.5px] [&_h3]:tracking-[.06em] [&_h3]:text-faint ' +
+          '[&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-mono [&_h3]:text-[14px] [&_h3]:tracking-[.06em] [&_h3]:text-muted ' +
           '[&_p]:m-0 [&_p]:mb-4 [&_p]:text-[15.5px] [&_p]:leading-[1.7] [&_p]:text-[#4c4a42] ' +
           '[&_strong]:text-ink ' +
           '[&_a]:text-brand-text [&_a]:underline [&_a]:underline-offset-2 ' +
