@@ -90,7 +90,7 @@ export function CalendarView({
                         key={e.id}
                         href={e.href}
                         title={`${e.time} · ${e.title}`}
-                        className={`block truncate rounded-[4px] px-1.5 py-0.5 text-[14px] leading-tight no-underline ${eventTagClasses(e.tagColor)}`}
+                        className={`block truncate rounded-[4px] px-1.5 py-0.5 text-[14px] leading-tight no-underline decoration-2 underline-offset-2 hover:underline ${eventTagClasses(e.tagColor)}`}
                       >
                         <span className="font-semibold">{e.time}</span> {e.title}
                       </Link>

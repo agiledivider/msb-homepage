@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { MapCard } from '../../components/MapCard'
 import type { MediaResource } from '../../components/Media'
+import { BTN_SECONDARY } from '../../components/ui'
 import type { LinkValue } from '../fields'
 
 type Option = {
@@ -34,7 +35,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
           return (
             <div
               key={i}
-              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-ink' : 'border border-line bg-card'}`}
+              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-ink [--focus-ring:var(--color-ink)]' : 'border border-line bg-card'}`}
             >
               <div className={`mb-2.5 font-mono text-[14px] tracking-[.06em] ${green ? '' : 'text-muted'}`}>
                 {o.number ? `${o.number} · ` : ''}
@@ -47,8 +48,10 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
               {o.link?.label ? (
                 <Link
                   href={o.link.url || '#'}
-                  className={`inline-block rounded-[9px] px-[18px] py-[11px] text-[14px] no-underline ${
-                    green ? 'bg-white font-bold text-brand-text' : 'border border-line font-semibold text-ink'
+                  className={`inline-flex min-h-11 items-center rounded-[9px] px-[18px] text-[14px] ${
+                    green
+                      ? 'bg-white font-bold text-brand-text no-underline transition-colors hover:bg-green-deep hover:text-white'
+                      : `${BTN_SECONDARY} font-semibold`
                   }`}
                 >
                   {o.link.label}

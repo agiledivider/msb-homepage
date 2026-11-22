@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { BTN_PRIMARY } from '../ui'
 
 export type NavItem = { label: string; href: string }
 
@@ -13,6 +14,14 @@ const DEFAULT_NAV: NavItem[] = [
   { label: 'Events', href: '/events' },
   { label: 'Mitmachen', href: '/mitmachen' },
 ]
+
+/* Nav states (styleguide "Zustände"). Mobile rows: hover Fond, current Grüner
+   Fond + bold. Desktop: no underline at rest, 2px underline on hover, current
+   page green with a fixed 3px underline. Every item is a 44px target. */
+const NAV_LINK =
+  'border-b border-line px-[22px] py-3.5 text-[16px] no-underline -outline-offset-4 md:outline-offset-2 decoration-brand-text decoration-2 underline-offset-[6px] transition-colors hover:bg-fond md:inline-flex md:min-h-11 md:items-center md:border-0 md:p-0 md:text-[15px] md:hover:bg-transparent md:hover:text-brand-text md:hover:underline'
+const NAV_CURRENT =
+  'bg-green-pale font-bold text-brand-text md:bg-transparent md:font-medium md:underline md:decoration-[3px]'
 
 export function Header({
   logoSrc = '/logo/logo-horizontal-no-claim.png',
@@ -29,7 +38,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-card">
-      <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:px-8">
+      <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:px-8 md:py-3.5">
         <Link href="/" className="flex items-center no-underline">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto" />
@@ -45,9 +54,8 @@ export function Header({
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className={`border-b border-line px-[22px] py-3.5 text-[16px] font-medium no-underline md:border-0 md:p-0 md:text-[15px] ${
-                isActive(item.href) ? 'text-brand-text' : 'text-ink'
-              }`}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+              className={`${NAV_LINK} ${isActive(item.href) ? NAV_CURRENT : 'font-medium text-ink'}`}
             >
               {item.label}
             </Link>
@@ -55,7 +63,7 @@ export function Header({
           <Link
             href={cta.href}
             onClick={() => setOpen(false)}
-            className="mx-[22px] mb-1.5 mt-3 rounded-[9px] bg-brand-text px-3 py-3 text-center text-[15px] font-bold text-white hover:bg-green-deep no-underline shadow-[0_8px_18px_-10px_rgba(0,0,0,.4)] md:hidden"
+            className={`${BTN_PRIMARY} mx-[22px] mb-1.5 mt-3 rounded-[9px] px-3 py-3 text-center text-[15px] font-bold shadow-[0_8px_18px_-10px_rgba(0,0,0,.4)] md:hidden`}
           >
             {cta.label} →
           </Link>
@@ -63,7 +71,7 @@ export function Header({
 
         <Link
           href={cta.href}
-          className="hidden whitespace-nowrap rounded-[9px] bg-brand-text px-[18px] py-2.5 text-[14px] font-semibold text-white hover:bg-green-deep no-underline md:block"
+          className={`${BTN_PRIMARY} hidden min-h-11 items-center whitespace-nowrap rounded-[9px] px-[18px] text-[14px] font-semibold md:inline-flex`}
         >
           {cta.label}
         </Link>

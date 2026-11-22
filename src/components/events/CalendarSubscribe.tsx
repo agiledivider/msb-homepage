@@ -3,6 +3,7 @@
 import { faCalendarPlus, faCheck, faLink } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useEffect, useState } from 'react'
+import { BTN_SECONDARY } from '@/components/ui'
 
 const FEED_PATH = '/events/calendar.ics'
 
@@ -37,7 +38,7 @@ export function CalendarSubscribe() {
     <div className="inline-flex items-center gap-2">
       <a
         href={webcalUrl}
-        className="inline-flex items-center gap-1.5 rounded-[10px] border border-line bg-card px-3.5 py-2 font-mono text-[14px] text-muted no-underline transition-colors hover:text-ink"
+        className={`${BTN_SECONDARY} inline-flex min-h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-mono text-[14px]`}
         title="Termine im eigenen Kalender abonnieren (Apple, Google, Outlook …)"
       >
         <FontAwesomeIcon icon={faCalendarPlus} className="h-3.5 w-3.5" aria-hidden />
@@ -46,7 +47,7 @@ export function CalendarSubscribe() {
       <button
         type="button"
         onClick={copy}
-        className="inline-flex items-center rounded-[10px] border border-line bg-card px-3 py-2 font-mono text-[14px] text-muted transition-colors hover:text-ink"
+        className={`${BTN_SECONDARY} inline-flex min-h-11 items-center rounded-[10px] px-3 font-mono text-[14px]`}
         title="Kalender-Adresse zum manuellen Abonnieren kopieren"
       >
         <FontAwesomeIcon icon={copied ? faCheck : faLink} className="mr-1.5 h-3.5 w-3.5" aria-hidden />

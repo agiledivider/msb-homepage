@@ -35,14 +35,17 @@ function Logo({ d }: { d: string }) {
   )
 }
 
+/** Light pills on the map: hover is the shared secondary-button shift (green
+ *  border on Grüner Fond); focus is the global ring, forced to Grün 600 so it
+ *  reads on the light map even inside the dark footer. 44px tall targets. */
 const TEXT_BADGE =
-  'rounded-full bg-card px-3 py-1 font-mono text-[14px] font-semibold text-ink no-underline shadow-sm ring-1 ring-line hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-text'
+  'inline-flex min-h-11 items-center rounded-full bg-card px-3 font-mono text-[14px] font-semibold text-ink no-underline shadow-sm ring-1 ring-line transition-colors hover:bg-green-pale hover:text-brand-text hover:ring-brand-text focus-visible:outline-brand-text'
 /** Footer variant: Grün 800 discs with Kreide logos, the footer's own colours,
  *  so the buttons read as part of the footer sitting on the map, not as stray
  *  third-party badges. Hover/focus flip to Markengrün with ink (styleguide:
  *  text on Markengrün is ink). */
 const ICON_BADGE =
-  'flex h-11 w-11 items-center justify-center rounded-full bg-green-deep text-kreide shadow-[0_2px_6px_rgba(0,0,0,0.25)] transition-colors hover:bg-brand hover:text-ink focus-visible:bg-brand focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-deep'
+  'flex h-11 w-11 items-center justify-center rounded-full bg-green-deep text-kreide shadow-[0_2px_6px_rgba(0,0,0,0.25)] transition-colors hover:bg-brand hover:text-ink focus-visible:bg-brand focus-visible:text-ink focus-visible:outline-green-deep'
 
 /**
  * The location map card. A click anywhere on the map opens OpenStreetMap; a

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { eventTagClasses } from '../../components/ui'
+import { CARD_TITLE, eventTagClasses, MONO_LINK } from '../../components/ui'
 import type { LinkValue } from '../fields'
 
 type Event = {
@@ -33,7 +33,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
         {(events ?? []).map((e, i) => (
           <div
             key={i}
-            className={`grid grid-cols-[92px_1fr_auto] items-center gap-[18px] border-t border-line py-5 ${
+            className={`group relative grid grid-cols-[92px_1fr_auto] items-center gap-[18px] border-t border-line py-5 ${
               i === (events?.length ?? 0) - 1 ? 'border-b' : ''
             }`}
           >
@@ -51,7 +51,10 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
               ) : null}
               <h3 className="m-0 mb-1 font-sans text-[19px] font-bold">
                 {e.link?.url ? (
-                  <Link href={e.link.url} className="text-inherit no-underline">
+                  <Link
+                    href={e.link.url}
+                    className={`text-inherit no-underline after:absolute after:inset-0 ${CARD_TITLE}`}
+                  >
                     {e.title}
                   </Link>
                 ) : (
@@ -86,10 +89,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
             <div className="mb-1.5 font-hand text-[22px] font-bold text-brand-text">{sidebar.infoTitle}</div>
             <p className="m-0 mb-3 text-[14px] leading-[1.55] text-ink">{sidebar.infoText}</p>
             {sidebar.infoLink?.label ? (
-              <Link
-                href={sidebar.infoLink.url || '#'}
-                className="border-b border-brand-text pb-0.5 font-mono text-[14px] text-brand-text no-underline"
-              >
+              <Link href={sidebar.infoLink.url || '#'} className={MONO_LINK}>
                 {sidebar.infoLink.label}
               </Link>
             ) : null}

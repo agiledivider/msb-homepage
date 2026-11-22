@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { MONO_LINK } from '../../components/ui'
 import type { LinkValue } from '../fields'
 
 type HourRow = { day?: string | null; note?: string | null; time?: string | null; highlight?: boolean | null }
@@ -51,10 +52,7 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
           <div className="mb-2.5 font-mono text-[14px] tracking-[.06em] text-brand-text">{sidebar.infoEyebrow}</div>
           <p className="m-0 mb-3.5 text-[14px] leading-[1.55] text-ink">{sidebar.infoText}</p>
           {sidebar.infoLink?.label ? (
-            <Link
-              href={sidebar.infoLink.url || '#'}
-              className="border-b border-brand-text pb-0.5 font-mono text-[14px] text-brand-text no-underline"
-            >
+            <Link href={sidebar.infoLink.url || '#'} className={MONO_LINK}>
               {sidebar.infoLink.label}
             </Link>
           ) : null}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { BTN_SECONDARY } from '@/components/ui'
 import { ListView } from './ListView'
 import { type EventVM, PER_PAGE } from './model'
 import { TilesView } from './TilesView'
@@ -45,7 +46,7 @@ export function InfiniteEvents({ view, events }: { view: 'list' | 'tiles'; event
           <button
             type="button"
             onClick={loadMore}
-            className="rounded-[9px] border border-line bg-card px-5 py-2 font-mono text-[14px] text-muted transition-colors hover:border-brand hover:text-brand-text"
+            className={`${BTN_SECONDARY} min-h-11 rounded-[9px] px-5 font-mono text-[14px]`}
           >
             Mehr Termine laden
           </button>

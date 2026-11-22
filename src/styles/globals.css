@@ -72,3 +72,15 @@
     }
   }
 }
+
+/* Keyboard focus, everywhere (styleguide 2026-11.11: 3px ring in Fokus, 2px
+   offset — the styleguide ships the same global rule). One base rule instead of
+   focus classes on every link and button; it sits in the base layer, so a
+   component's own focus-visible:outline-* utility still wins. Dark surfaces
+   set --focus-ring to Kreide (ON_DARK in src/components/ui.tsx). */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--focus-ring, var(--color-brand-text));
+    outline-offset: 2px;
+  }
+}

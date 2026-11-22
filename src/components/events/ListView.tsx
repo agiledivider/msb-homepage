@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Media } from '@/components/Media'
-import { eventTagClasses } from '@/components/ui'
+import { CARD_TITLE, eventTagClasses } from '@/components/ui'
 import { type EventVM, fmtDay2, fmtMonthShort, fmtWeekdayShort } from './model'
 
 /** Dense date list with a small thumbnail per event. */
@@ -10,7 +10,7 @@ export function ListView({ events }: { events: EventVM[] }) {
       {events.map((e) => (
         <article
           key={e.id}
-          className="grid grid-cols-[58px_84px_1fr] items-center gap-4 border-b border-line py-4 md:grid-cols-[72px_128px_1fr_auto] md:gap-5"
+          className="group relative grid grid-cols-[58px_84px_1fr] items-center gap-4 border-b border-line py-4 md:grid-cols-[72px_128px_1fr_auto] md:gap-5"
         >
           <div className="text-center">
             <div className="font-display text-[28px] font-extrabold leading-none text-brand-text md:text-[32px]">
@@ -40,7 +40,7 @@ export function ListView({ events }: { events: EventVM[] }) {
               </div>
             ) : null}
             <h3 className="m-0 mb-1 font-sans text-[18px] font-bold md:text-[19px]">
-              <Link href={e.href} className="text-inherit no-underline hover:text-brand-text">
+              <Link href={e.href} className={`text-inherit no-underline after:absolute after:inset-0 ${CARD_TITLE}`}>
                 {e.title}
               </Link>
             </h3>

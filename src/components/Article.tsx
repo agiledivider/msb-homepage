@@ -2,6 +2,7 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { richTextConverters } from '@/blocks/richtext'
 import { Media } from '@/components/Media'
+import { PROSE_LINKS } from '@/components/ui'
 import { eventTimeText } from '@/lib/eventTime'
 import type { Blog, Event } from '@/payload-types'
 
@@ -10,8 +11,7 @@ import type { Blog, Event } from '@/payload-types'
  * the signed preview link, so a preview shows exactly what goes live.
  */
 
-const PROSE =
-  'text-[17px] leading-[1.7] text-ink [&_a]:text-brand-text [&_a]:underline [&_a]:underline-offset-2 [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[24px] [&_h2]:font-extrabold [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-sans [&_h3]:text-[20px] [&_h3]:font-bold [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1'
+const PROSE = `text-[17px] leading-[1.7] text-ink ${PROSE_LINKS} [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[24px] [&_h2]:font-extrabold [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-sans [&_h3]:text-[20px] [&_h3]:font-bold [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1`
 
 const TITLE =
   'm-0 mb-3 font-display text-[clamp(40px,5vw,48px)] font-black leading-[1.02] tracking-[-.02em] break-words'

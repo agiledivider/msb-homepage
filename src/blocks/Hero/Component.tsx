@@ -5,6 +5,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { CuttingMat } from '../../components/CuttingMat'
 import type { MediaResource } from '../../components/Media'
 import { Polaroid } from '../../components/Polaroid'
+import { BTN_ON_DARK_HOVER, BTN_ON_DARK_SECONDARY } from '../../components/ui'
 import type { LinkValue } from '../fields'
 
 export type Face = {
@@ -56,12 +57,12 @@ const PILL_BASE =
 function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boolean; style?: 'white' | 'orange' }) {
   if (!link?.label) return null
   const base =
-    'cursor-pointer rounded-[10px] no-underline transition w-full px-2.5 py-[11px] text-center text-[14px] md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
+    'cursor-pointer rounded-[10px] no-underline w-full px-2.5 py-[11px] text-center text-[14px] md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
   const cls = primary
     ? style === 'orange'
-      ? 'bg-orange text-ink font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // Maker-Orange: actions/events
-      : 'bg-kreide text-green-deep font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // on the mat: Kreide, Grün 800 text
-    : 'border-[1.5px] border-kreide text-kreide font-semibold'
+      ? `bg-orange text-ink font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // Maker-Orange: actions/events
+      : `bg-kreide text-green-deep font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // on the mat: Kreide, Grün 800 text
+    : `${BTN_ON_DARK_SECONDARY} font-semibold`
   return (
     <Link href={link.url || '#'} className={`${base} ${cls}`}>
       {link.label}

@@ -1,5 +1,6 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
+import { PROSE_LINKS } from '../../components/ui'
 import { richTextConverters } from '../richtext'
 
 export type ProseBlock = {
@@ -22,7 +23,7 @@ export function ProseComponent({ body }: ProseBlock) {
           '[&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-sans [&_h3]:text-[20px] [&_h3]:font-bold [&_h3]:text-ink ' +
           '[&_p]:m-0 [&_p]:mb-4 [&_p]:text-[15.5px] [&_p]:leading-[1.7] [&_p]:text-ink ' +
           '[&_strong]:text-ink ' +
-          '[&_a]:text-brand-text [&_a]:underline [&_a]:underline-offset-2 ' +
+          `${PROSE_LINKS} ` +
           '[&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1 [&_li]:text-[15.5px] [&_li]:leading-[1.7] [&_li]:text-ink'
         }
       />

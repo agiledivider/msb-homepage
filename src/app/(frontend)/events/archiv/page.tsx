@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { ListView } from '@/components/events/ListView'
 import { toEventVM } from '@/components/events/model'
+import { MONO_LINK } from '@/components/ui'
 import { startOfTodayBerlin } from '@/lib/eventTime'
 import { findPublic } from '@/lib/publicData'
 
@@ -37,7 +38,7 @@ export default async function EventsArchivePage() {
         lede="A look back at past workshops, open days and meetups at the MakerSpace."
       />
       <div className="mb-8 mt-6">
-        <Link href="/events" className="font-mono text-[14px] text-brand-text no-underline hover:underline">
+        <Link href="/events" className={MONO_LINK}>
           ← Kommende Events
         </Link>
       </div>

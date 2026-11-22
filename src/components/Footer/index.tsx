@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { NavItem } from '../Header'
 import { MapCard } from '../MapCard'
+import { ON_DARK, TEXT_LINK_ON_DARK } from '../ui'
 import { type SocialLink, SocialLinks } from './SocialLinks'
 
 const DEFAULT_LINKS: NavItem[] = [
@@ -33,7 +34,7 @@ export function Footer({
   social?: SocialLink[]
 }) {
   return (
-    <footer className="bg-green-deep text-kreide">
+    <footer className={`bg-green-deep text-kreide ${ON_DARK}`}>
       <div className="mx-auto grid max-w-shell grid-cols-1 gap-10 px-8 pb-[34px] pt-[52px] md:grid-cols-[1.2fr_1.3fr_1fr]">
         {/* Brand column: who we are and how to reach us. */}
         <div className="flex flex-col gap-6">
@@ -47,11 +48,11 @@ export function Footer({
 
           <div>
             <p className="m-0 font-mono text-[14px] leading-[1.8] text-kreide">
-              <a href={telHref(phone)} className="text-kreide no-underline hover:underline">
+              <a href={telHref(phone)} className={TEXT_LINK_ON_DARK}>
                 {phone}
               </a>
               <br />
-              <a href={`mailto:${email}`} className="text-kreide underline underline-offset-2">
+              <a href={`mailto:${email}`} className={TEXT_LINK_ON_DARK}>
                 {email}
               </a>
             </p>
@@ -85,7 +86,7 @@ export function Footer({
             <div className="mb-3.5 font-mono text-[14px] tracking-[.08em] text-kreide">SEITEN</div>
             <div className="flex flex-col gap-2.5 text-[14px]">
               {links.map((l) => (
-                <Link key={l.href} href={l.href} className="text-kreide no-underline">
+                <Link key={l.href} href={l.href} className={`self-start ${TEXT_LINK_ON_DARK}`}>
                   {l.label}
                 </Link>
               ))}
@@ -99,7 +100,7 @@ export function Footer({
             </p>
             <Link
               href="/mitmachen"
-              className="inline-block rounded-[8px] bg-brand px-4 py-2.5 text-[14px] font-bold text-ink no-underline"
+              className="inline-flex min-h-11 items-center rounded-[8px] bg-brand px-4 text-[14px] font-bold text-ink no-underline transition-colors hover:bg-kreide hover:text-green-deep"
             >
               Jetzt unterstützen →
             </Link>
@@ -111,13 +112,13 @@ export function Footer({
         <div className="mx-auto flex max-w-shell flex-wrap justify-between gap-3 px-8 py-4 font-mono text-[14px] text-kreide">
           <span>© 2026 MakerSpace Bonn e.V. · Gemeinnützig seit 2018</span>
           <span className="flex gap-[18px]">
-            <Link href="/impressum" className="text-kreide no-underline">
+            <Link href="/impressum" className={TEXT_LINK_ON_DARK}>
               Impressum
             </Link>
-            <Link href="/datenschutz" className="text-kreide no-underline">
+            <Link href="/datenschutz" className={TEXT_LINK_ON_DARK}>
               Datenschutz
             </Link>
-            <Link href="/haftung" className="text-kreide no-underline">
+            <Link href="/haftung" className={TEXT_LINK_ON_DARK}>
               Haftung
             </Link>
           </span>

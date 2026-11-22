@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { eventTagClasses, SectionHeading } from '../../components/ui'
+import { CARD_TITLE, eventTagClasses, SectionHeading } from '../../components/ui'
 import type { LinkValue } from '../fields'
 import { EventFeedSidebar } from './Sidebar'
 
@@ -46,7 +46,7 @@ export function EventFeedComponent({ tagLabel, heading, allLink, events, sidebar
           <Link
             key={i}
             href={e.link?.url || '#'}
-            className="grid grid-cols-[96px_1fr] gap-5 border-b border-line py-6 text-inherit no-underline"
+            className="group grid grid-cols-[96px_1fr] gap-5 border-b border-line py-6 text-inherit no-underline"
           >
             <div className="text-center">
               <div className="font-display text-[34px] font-extrabold leading-none text-brand-text">{e.day}</div>
@@ -60,7 +60,7 @@ export function EventFeedComponent({ tagLabel, heading, allLink, events, sidebar
                   {e.tag}
                 </div>
               ) : null}
-              <h3 className="mb-1.5 font-sans text-[20px] font-bold">{e.title}</h3>
+              <h3 className={`mb-1.5 font-sans text-[20px] font-bold ${CARD_TITLE}`}>{e.title}</h3>
               {e.text ? <p className="m-0 text-[14.5px] leading-[1.55] text-muted">{e.text}</p> : null}
             </div>
           </Link>

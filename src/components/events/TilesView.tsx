@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { useEffect, useState } from 'react'
 import { Media } from '@/components/Media'
-import { eventTagClasses } from '@/components/ui'
+import { CARD_LINK, CARD_TITLE, eventTagClasses } from '@/components/ui'
 import { type EventVM, fmtDay2, fmtMonthShort, fmtWeekdayShort } from './model'
 
 // Per-event aspect ratio keyed by id → a tile's height never changes, so it
@@ -28,7 +28,7 @@ function Tile({ e }: { e: EventVM }) {
   return (
     <Link
       href={e.href}
-      className="block overflow-hidden rounded-[14px] border border-line bg-card no-underline shadow-[0_12px_34px_-22px_rgba(0,0,0,.5)] transition-transform hover:-translate-y-0.5"
+      className={`${CARD_LINK} overflow-hidden rounded-[14px] border border-line bg-card shadow-[0_12px_34px_-22px_rgba(0,0,0,.5)]`}
     >
       <Media
         resource={e.image}
@@ -48,7 +48,7 @@ function Tile({ e }: { e: EventVM }) {
         <div className="font-mono text-[14px] text-muted">
           {fmtWeekdayShort(e.date)} {fmtDay2(e.date)}. {fmtMonthShort(e.date)} · {e.time}
         </div>
-        <h3 className="m-0 mt-1 font-sans text-[18px] font-bold text-ink">{e.title}</h3>
+        <h3 className={`m-0 mt-1 font-sans text-[18px] font-bold text-ink ${CARD_TITLE}`}>{e.title}</h3>
         {e.description ? (
           <p className="m-0 mt-1.5 line-clamp-3 text-[14px] leading-[1.5] text-muted">{e.description}</p>
         ) : null}
