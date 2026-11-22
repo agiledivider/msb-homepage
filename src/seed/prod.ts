@@ -92,7 +92,7 @@ const run = async () => {
   // Launch content — only on a fresh DB, so editor changes are never overwritten.
   if (await isFreshDb(payload)) {
     payload.logger.info('fresh DB → seeding launch content')
-    await seedSiteContent(payload) // globals (menu/footer/hero), pages, sample blog + events
+    await seedSiteContent(payload) // globals (menu/footer/hero), pages
     await upsertLegalPages() // Impressum / Datenschutz / Haftung
     await upsertLegacyArticles() // migrated "Aktuelles" → real blog posts + events (301 redirects)
     payload.logger.info('✓ launch content seeded')

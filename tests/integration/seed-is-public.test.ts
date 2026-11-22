@@ -19,7 +19,13 @@ afterAll(async () => {
 })
 
 describe('seedSiteContent', () => {
-  it.each(['blog', 'events', 'pages'] as const)('seeded %s is visible through findPublic', async (collection) => {
+  it('seeds no made-up blog posts or events (those come only from the migrated articles)', async () => {
+    for (const collection of ['blog', 'events'] as const) {
+      expect((await payload.find({ collection, limit: 0 })).totalDocs).toBe(0)
+    }
+  })
+
+  it.each(['pages'] as const)('seeded %s is visible through findPublic', async (collection) => {
     const { findPublic } = await import('@/lib/publicData')
     const seeded = await payload.find({ collection, where: { _status: { equals: 'published' } }, limit: 0 })
     const visible = await findPublic({ collection, limit: 0 })

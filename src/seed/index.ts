@@ -1,17 +1,14 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { seedSiteContent } from './content'
+import { upsertLegacyArticles } from './legacy'
 import { upsertLegalPages } from './legal'
 
 /**
  * Dev seed. Creates local dev users, wipes the content collections for a clean
- * slate, then seeds the hand-authored core content + legal pages. The migrated
- * "Aktuelles" articles and the 200 demo events are seeded separately, on demand:
- *
- *   pnpm payload run src/seed/run-legacy.ts   # real migrated blog + events
- *   pnpm payload run src/seed/events.ts       # 200 synthetic demo events
- *
- * (Production seeds real content on first boot instead — see src/seed/prod.ts.)
+ * slate, then seeds the hand-authored core content, the legal pages and the
+ * migrated "Aktuelles" articles (the real blog posts + events; there is no
+ * made-up demo content). Production seeds the same on first boot, see prod.ts.
  */
 const seed = async () => {
   const payload = await getPayload({ config })
@@ -49,9 +46,10 @@ const seed = async () => {
     await payload.delete({ collection, where: { id: { exists: true } } })
   }
 
-  // 2 · hand-authored content + legal pages
+  // 2 · hand-authored content, legal pages, migrated blog posts + events
   await seedSiteContent(payload)
   await upsertLegalPages()
+  await upsertLegacyArticles()
 
   payload.logger.info('✓ Seed complete.')
 }

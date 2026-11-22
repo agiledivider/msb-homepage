@@ -5,10 +5,11 @@ import { convertLayout, vereinIntroToBlocks } from './vereinLayout'
 
 /**
  * The site's hand-authored core content: hero + site globals (menu, footer),
- * the three structural pages (Verein, Werkzeug, Mitmachen), and a couple of
- * editorial sample blog posts + events.
+ * and the three structural pages (Verein, Werkzeug, Mitmachen). No blog posts or
+ * events: those are the real migrated "Aktuelles" articles (upsertLegacyArticles);
+ * the made-up samples were removed on 2026-11-22.
  *
- * Idempotent — media is matched by filename, pages/blog/events are upserted by
+ * Idempotent — media is matched by filename, pages are upserted by
  * slug, and globals are naturally single-value. Safe to call against a populated
  * DB (it updates in place), but callers that must not clobber editor changes
  * should guard on an empty DB first (see prod.ts). Legal pages and the migrated
@@ -199,13 +200,6 @@ export const VEREIN_BLOCKS: { type: string; make: (payload: Payload) => Promise<
 ]
 
 const UP = path.resolve(process.cwd(), 'uploads')
-const day = 24 * 60 * 60 * 1000
-const at = (offsetDays: number, hour = 10) => {
-  const d = new Date(Date.now() + offsetDays * day)
-  d.setHours(hour, 0, 0, 0)
-  return d.toISOString()
-}
-
 /** Minimal Lexical richText from plain paragraphs. */
 const rt = (paragraphs: string[]) => ({
   root: {
@@ -230,7 +224,16 @@ const rt = (paragraphs: string[]) => ({
 const mediaId = async (payload: Payload, file: string, alt: string) => {
   const ex = await payload.find({ collection: 'media', where: { filename: { equals: file } }, limit: 1 })
   if (ex.totalDocs) return ex.docs[0].id
-  return (await payload.create({ collection: 'media', data: { alt }, filePath: path.resolve(UP, file) })).id
+  // overwriteExistingFiles: a leftover file of the same name would otherwise make
+  // Payload rename the upload, and the filename lookup would never match again.
+  return (
+    await payload.create({
+      collection: 'media',
+      data: { alt },
+      filePath: path.resolve(UP, file),
+      overwriteExistingFiles: true,
+    })
+  ).id
 }
 
 /**
@@ -238,7 +241,7 @@ const mediaId = async (payload: Payload, file: string, alt: string) => {
  * published content counts as reviewed: the public frontend only shows docs that
  * are published *and* approved (src/lib/publicData.ts).
  */
-const upsertBySlug = async (payload: Payload, collection: 'pages' | 'blog' | 'events', slug: string, data: object) => {
+const upsertBySlug = async (payload: Payload, collection: 'pages', slug: string, data: object) => {
   const approved = '_status' in data && data._status === 'published' ? { ...data, reviewStatus: 'approved' } : data
   const ex = await payload.find({ collection, where: { slug: { equals: slug } }, limit: 1 })
   if (ex.totalDocs) return payload.update({ collection, id: ex.docs[0].id, data: approved as never, ...PUB })
@@ -248,8 +251,6 @@ const upsertBySlug = async (payload: Payload, collection: 'pages' | 'blog' | 'ev
 export async function seedSiteContent(payload: Payload) {
   // 1 · media
   const werkstattImg = await mediaId(payload, 'hero-werkstatt.jpg', 'Maker bei der Arbeit in der Werkstatt')
-  const blogImg = await mediaId(payload, 'hero-blog.jpg', 'CNC-Fräse im Einsatz')
-  const eventImg = await mediaId(payload, 'hero-event.jpg', 'Offene Tür in der Werkstatt')
 
   // 2 · globals (hero drives the front-page hero; site settings drive nav + footer)
   await payload.updateGlobal({
@@ -309,123 +310,7 @@ export async function seedSiteContent(payload: Payload) {
     },
   })
 
-  // 3 · blog (newest drives hero face 1)
-  await upsertBySlug(payload, 'blog', 'cnc-gezaehmt', {
-    title: 'Wie wir die CNC gezähmt haben',
-    slug: 'cnc-gezaehmt',
-    author: 'Jonas K.',
-    readingTime: '6 MIN',
-    publishedAt: at(-2),
-    subtitle: 'Three weekends, one big cut — a build log.',
-    excerpt:
-      'Von der ersten Fehlkalibrierung bis zum sauberen Finish: unser Team dokumentiert, wie die Yeti-Smartbench endlich lief — inklusive der Fehler.',
-    badge: 'NEU IM BLOG',
-    cover: blogImg,
-    body: rt([
-      'Drei Wochenenden, eine große Fräsung — und jede Menge Lehrgeld. Hier das komplette Logbuch.',
-      'Am Anfang stand die Kalibrierung. Oder besser: die Fehlkalibrierung. Der erste Schnitt saß daneben, der zweite auch.',
-      'Am Ende lief die Yeti-Smartbench sauber durch. Was wir gelernt haben, steht hier — Fehler inklusive.',
-    ]),
-    _status: 'published',
-  })
-
-  await upsertBySlug(payload, 'blog', 'loeten-einsteiger', {
-    title: 'Löten für Einsteiger:innen',
-    slug: 'loeten-einsteiger',
-    author: 'Mira T.',
-    readingTime: '4 MIN',
-    publishedAt: at(-9),
-    subtitle: 'From cold joints to clean solder.',
-    excerpt:
-      'Ein kurzer Leitfaden aus unserem Elektronik-Workshop — die häufigsten Anfängerfehler und wie du sie vermeidest.',
-    cover: werkstattImg,
-    body: rt([
-      'Löten sieht schwer aus, ist aber schnell gelernt. Hier die Basics aus unserem Workshop.',
-      'Saubere Spitze, richtige Temperatur, genug Flussmittel — der Rest ist Übung.',
-    ]),
-    _status: 'published',
-  })
-
-  // 4 · events (relative to today so "next upcoming" always resolves)
-  const events = [
-    {
-      title: 'Offene Tür — Führung durch die Werkstätten',
-      slug: 'offene-tuer',
-      off: 2,
-      hour: 10,
-      timeLabel: 'ab 10',
-      category: 'FÜR ALLE · KOSTENLOS',
-      tagColor: 'green' as const,
-      description:
-        'Du willst wissen, was bei uns geht? Komm vorbei, lern uns kennen — kostenlose Führung durch alle sechs Werkstätten. Ab 10:00 Uhr, für alle.',
-    },
-    {
-      title: 'Handarbeitstreff & Makerbrunch',
-      slug: 'handarbeitstreff',
-      off: 5,
-      hour: 10,
-      timeLabel: '10–14',
-      category: 'HANDARBEIT',
-      tagColor: 'orange' as const,
-      description: 'Nähen, sticken, stricken, reparieren — plus gemeinsames Brunch. Jede:r bringt was mit.',
-    },
-    {
-      title: 'Spieleabend',
-      slug: 'spieleabend',
-      off: 15,
-      hour: 19,
-      timeLabel: '19–21',
-      category: 'FÜR ALLE',
-      tagColor: 'green' as const,
-      description: 'Jeden dritten Dienstag im Monat. Ein paar Spiele sind da — eigene gerne mitbringen.',
-    },
-    {
-      title: 'Schmieden leicht gemacht — 101',
-      slug: 'schmieden-101',
-      off: 25,
-      hour: 14,
-      timeLabel: '14:00',
-      category: 'WORKSHOP · TICKET',
-      tagColor: 'orange' as const,
-      description: 'Grundlagen & Schutzmaßnahmen, eigenes Werkstück. 10 € / Ticket.',
-    },
-    {
-      title: 'FrOSCon 2026 — Sankt Augustin',
-      slug: 'froscon-2026',
-      off: 40,
-      hour: 9,
-      timeLabel: 'ganztägig',
-      category: 'EXTERN',
-      tagColor: 'neutral' as const,
-      description: 'Wir sind dabei. Die große Open-Source-Konferenz der Region.',
-    },
-    {
-      title: '132. Scrumtisch Bonn',
-      slug: 'scrumtisch-132',
-      off: -10,
-      hour: 19,
-      timeLabel: 'ab 19',
-      category: 'GAST-EVENT',
-      tagColor: 'neutral' as const,
-      description: 'Offener Treff rund um Agile, Scrum, Kanban & Co. Get-Together ab 19:00.',
-    },
-  ]
-  for (const e of events) {
-    await upsertBySlug(payload, 'events', e.slug, {
-      title: e.title,
-      slug: e.slug,
-      date: at(e.off, e.hour),
-      timeLabel: e.timeLabel,
-      location: 'Kennedyallee 18',
-      category: e.category,
-      tagColor: e.tagColor,
-      image: eventImg,
-      description: e.description,
-      _status: 'published',
-    })
-  }
-
-  // 5 · pages (block layouts)
+  // 3 · pages (block layouts)
   await upsertBySlug(payload, 'pages', 'verein', {
     title: 'Der Verein',
     slug: 'verein',
