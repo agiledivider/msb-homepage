@@ -371,6 +371,31 @@ Whichever is chosen, `scripts/publish-static.ts` builds the nginx/Apache redirec
 
 ---
 
+## E9 — Admin area polish
+Small improvements for the people running the CMS: finding their way in the admin sidebar, and keeping an eye on backups.
+
+**Status:** proposed 2026-11-22 from `docs/IDEAS.md`.
+
+### ⏳ S9.1 — The closed admin sidebar still shows its links as icons (S)
+**Source:** IDEAS.md 2026-11-22.
+When an editor closes the admin sidebar, its links disappear completely, so every jump to another collection means opening it again. The sidebar entries already have icons.
+
+**AC:** with the sidebar closed, a narrow strip shows one icon per sidebar entry; clicking an icon opens that collection, global or view; hovering or focusing an icon shows its name; the current section is highlighted; on a phone the sidebar behaves as today.
+
+### ⏳ S9.2 — Admins see how much backup storage is left (S)
+**Source:** IDEAS.md 2026-11-22.
+The backups view shows each backup and its size, but not how much room the backup storage has left, so a full storage would only be noticed when a nightly backup fails.
+
+**AC:** the backups view shows how much space the backups use in total and, where the storage reports it, how much is left; when little space is left, the view warns clearly before backups start failing; when the storage reports no limit, the view says so instead of showing a made-up number.
+
+### ⏳ S9.3 — Backups that changed nothing are recognisable (S)
+**Source:** IDEAS.md 2026-11-22 ("delete byte-identical backups").
+On quiet days the nightly backup stores the same content as the night before. Identical content already takes up no extra storage, but the list fills with entries an admin can't tell apart, which makes picking the right backup to restore harder.
+
+**AC:** a backup whose content is the same as the previous one is marked as unchanged in the backups view; an admin can tell at a glance which backups contain changes; restoring and downloading work for every backup as before; no backup is deleted because of this.
+
+---
+
 ## Done (summaries)
 E8 — Admins manage backups in the CMS:
 - ✅ S8.1 — Admins see which backups exist (2026-11-22) → [archive](backlog-archive/E8-backups.md)
