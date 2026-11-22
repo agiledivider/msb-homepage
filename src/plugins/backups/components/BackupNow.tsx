@@ -4,7 +4,7 @@ import { Button } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
-type Running = { startedAt: string; by: string | null }
+type Running = { startedAt: string; by: string | null; kind?: 'backup' | 'restore' }
 type State =
   | { kind: 'idle' }
   | { kind: 'starting' }
@@ -62,7 +62,11 @@ export function BackupNow({ apiRoute, initialRunning }: { apiRoute: string; init
   return (
     <div style={{ margin: '0 0 20px' }}>
       <Button buttonStyle="primary" disabled={state.kind === 'starting' || state.kind === 'running'} onClick={start}>
-        {state.kind === 'running' ? 'Backup läuft …' : 'Jetzt sichern'}
+        {state.kind !== 'running'
+          ? 'Jetzt sichern'
+          : running?.kind === 'restore'
+            ? 'Wiederherstellung läuft …'
+            : 'Backup läuft …'}
       </Button>
       <p style={{ margin: '8px 0 0', color: 'var(--theme-elevation-600)' }} role="status">
         {state.kind === 'running'

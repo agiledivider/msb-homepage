@@ -3,8 +3,9 @@
 import { Button } from '@payloadcms/ui'
 import { type CSSProperties, useState } from 'react'
 import { generatePassphrase } from '../passphrase'
+import { RestorePanel } from './RestorePanel'
 
-type Row = { id: string; shortId: string; time: string; sizeBytes: number | null }
+type Row = { id: string; shortId: string; time: string; sizeBytes: number | null; beforeRestore: boolean }
 
 const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
 const fmtWhen = (iso: string) => `${BERLIN.format(new Date(iso))} Uhr`
@@ -25,7 +26,7 @@ const ITERATIONS = 600000
 
 /** Backups list with an encrypted download per backup (S8.1 list, S8.2 download). */
 export function BackupTable({ apiRoute, snapshots }: { apiRoute: string; snapshots: Row[] }) {
-  const [picked, setPicked] = useState<Row | null>(null)
+  const [picked, setPicked] = useState<{ row: Row; action: 'download' | 'restore' } | null>(null)
   return (
     <>
       <table style={{ borderCollapse: 'collapse', width: '100%', maxWidth: 720, marginTop: 8 }}>
@@ -34,7 +35,7 @@ export function BackupTable({ apiRoute, snapshots }: { apiRoute: string; snapsho
             <th style={cell}>Datum</th>
             <th style={cell}>Größe</th>
             <th style={cell}>Kennung</th>
-            <th style={cell}>Datei</th>
+            <th style={cell} />
           </tr>
         </thead>
         <tbody>
@@ -42,18 +43,40 @@ export function BackupTable({ apiRoute, snapshots }: { apiRoute: string; snapsho
             <tr key={s.id}>
               <td style={cell}>{fmtWhen(s.time)}</td>
               <td style={cell}>{fmtSize(s.sizeBytes)}</td>
-              <td style={{ ...cell, ...mono }}>{s.shortId}</td>
               <td style={cell}>
-                <Button buttonStyle="secondary" size="small" margin={false} onClick={() => setPicked(s)}>
+                <span style={mono}>{s.shortId}</span>
+                {s.beforeRestore ? (
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-600)' }}>
+                    vor Wiederherstellung
+                  </span>
+                ) : null}
+              </td>
+              <td style={{ ...cell, display: 'flex', gap: 6 }}>
+                <Button
+                  buttonStyle="secondary"
+                  size="small"
+                  margin={false}
+                  onClick={() => setPicked({ row: s, action: 'download' })}
+                >
                   Herunterladen
+                </Button>
+                <Button
+                  buttonStyle="subtle"
+                  size="small"
+                  margin={false}
+                  onClick={() => setPicked({ row: s, action: 'restore' })}
+                >
+                  Wiederherstellen
                 </Button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {picked ? (
-        <DownloadPanel key={picked.id} apiRoute={apiRoute} row={picked} onClose={() => setPicked(null)} />
+      {picked?.action === 'download' ? (
+        <DownloadPanel key={picked.row.id} apiRoute={apiRoute} row={picked.row} onClose={() => setPicked(null)} />
+      ) : picked?.action === 'restore' ? (
+        <RestorePanel key={picked.row.id} apiRoute={apiRoute} row={picked.row} onClose={() => setPicked(null)} />
       ) : null}
     </>
   )

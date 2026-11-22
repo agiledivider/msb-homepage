@@ -343,11 +343,13 @@ An admin who wants a copy of the site (before a big change, for an archive, to m
 
 **Implementation notes:** per D-006 the backup API's `POST /backups/<id>/download { passphrase, by }` streams `restic dump --archive tar` through gzip and encrypts it in OpenSSL `enc` format (AES-256-CBC, PBKDF2-SHA256, 600 000 rounds) with Node's crypto; the file opens with stock `openssl`. CMS: `BackupTable.tsx` panel generates the password (`passphrase.ts`, ~119 bits, rejection sampling), copy button, "saved" checkbox, then a form post to `/api/backups/download` (admin-only; password only in the body). The nightly prune waits for a download's read lock (`--retry-lock 2h`). Covered by unit tests (incl. decrypting with the `openssl` CLI) and section 10 of `pnpm backup:test` (plain OpenSSL in another image); downloaded and decrypted in the browser flow.
 
-### ⏳ S8.3 — Admins restore the site from a backup (L)
+### ✅ S8.3 — Admins restore the site from a backup (L) — 2026-11-22
 **Needs:** S8.1.
 When content is lost or broken (an accidental delete, a bad import), getting it back needs someone on the server.
 
 **AC:** an admin picks a backup, sees its date and what it contains, and has to confirm deliberately (e.g. by typing its date); before anything is overwritten, a fresh backup of the current state is made automatically, so the restore can be undone; afterwards the site and the CMS show the content of that date; a restore that fails halfway leaves the site as it was; every restore is recorded with who, when and which backup; non-admins can't restore.
+
+**Implementation notes:** per D-007 the restore runs while the site keeps running: `msb-backup restore-live` unpacks and checks the backup (integrity, same `payload_migrations` as live; otherwise refused, nothing changed), takes a safety backup (tag `before-restore`, no prune, kept by `--keep-tag`, labelled "vor Wiederherstellung"), copies media in, swaps the database with SQLite's backup API (`.restore`, safe with the app open in rollback-journal mode), then removes media the backup lacks. Outcome codes in `/work/last-restore.json`, worded in German by `restoreText.ts`. API: `GET /backups/<id>/preview` (`msb-backup inspect`: counts backup vs live), `POST /backups/<id>/restore` (confirm = short id). CMS: `RestorePanel.tsx` (preview, typed short id, progress, outcome), admin-only endpoints `/api/backups/preview` and `/api/backups/restore`. Confirmation is the backup's id, not its date (two backups can share a date). Covered by unit tests and section 11 of `pnpm backup:test`; restored on dev in the browser while `next dev` kept running.
 
 ### ⏳ S8.4 — Admins restore from an uploaded backup file (M)
 **Needs:** S8.2, S8.3.

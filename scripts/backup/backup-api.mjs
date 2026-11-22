@@ -16,9 +16,15 @@
 //        rounds), so it opens anywhere with
 //          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -in F -out backup.tar.gz
 //        There is no unencrypted download.
+//   GET  /backups/<id>/preview → what the backup holds next to the live site, and
+//        whether it fits the running code (same migrations)   (S8.3)
+//   POST /backups/<id>/restore { confirm, by } → 202, restores while the site runs
+//        (`msb-backup restore-live`: safety backup first). `confirm` must be the
+//        backup's short id; 409 while a backup or restore runs   (S8.3)
 //
 // lastRun: { status: 'ok'|'failed', at, by } (by: who started it, null = nightly)
-// running: { startedAt, by } or null
+// lastRestore: { status, at, by, snapshot, safety, message } or null
+// running: { startedAt, by, kind: 'backup'|'restore', snapshot } or null
 //
 // Auth: header `X-Backup-Token` must equal BACKUP_API_TOKEN (compared in
 // constant time); without the token the API refuses to start.
@@ -35,9 +41,25 @@ import { PassThrough, pipeline } from 'node:stream'
 import { promisify } from 'node:util'
 import { createGzip } from 'node:zlib'
 
-/** @typedef {{ id: string, shortId: string, time: string, sizeBytes: number | null }} Snapshot */
+/** @typedef {{ id: string, shortId: string, time: string, sizeBytes: number | null, beforeRestore: boolean }} Snapshot */
 /** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null }} LastRun */
-/** @typedef {{ startedAt: string, by: string | null }} Running */
+/** @typedef {{ startedAt: string, by: string | null, kind: 'backup' | 'restore', snapshot: string | null }} Running */
+/** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null, snapshot: string, safety: string | null, code: RestoreCode, message: string }} LastRestore */
+/** @typedef {'restored' | 'unreadable' | 'no-database' | 'damaged' | 'other-version' | 'safety-failed' | 'media-failed' | 'database-failed' | 'unknown'} RestoreCode */
+
+/** What `msb-backup restore-live` records as the outcome; the CMS words each one. */
+export const RESTORE_CODES = [
+  'restored',
+  'unreadable',
+  'no-database',
+  'damaged',
+  'other-version',
+  'safety-failed',
+  'media-failed',
+  'database-failed',
+]
+/** @typedef {{ integrity: 'ok' | 'damaged', compatible: boolean, backup: Contents, live: Contents }} Preview */
+/** @typedef {{ counts: Record<string, number | null>, mediaFiles: number }} Contents */
 
 const isIsoTime = (v) => typeof v === 'string' && !Number.isNaN(Date.parse(v))
 
@@ -71,6 +93,8 @@ export function parseSnapshots(json) {
         shortId: typeof s.short_id === 'string' && s.short_id ? s.short_id : s.id.slice(0, 8),
         time: new Date(s.time).toISOString(),
         sizeBytes: Number.isSafeInteger(size) && size >= 0 ? size : null,
+        // The safety backup a restore took of the state it replaced (S8.3).
+        beforeRestore: Array.isArray(s.tags) && s.tags.includes('before-restore'),
       }
     })
     .sort((a, b) => b.time.localeCompare(a.time))
@@ -105,7 +129,55 @@ export function parseRunning(text, fallbackStartedAt) {
   return {
     startedAt: v && isIsoTime(v.startedAt) ? new Date(v.startedAt).toISOString() : fallbackStartedAt,
     by: cleanBy(v?.by),
+    kind: v?.kind === 'restore' ? 'restore' : 'backup',
+    snapshot: isSnapshotId(v?.snapshot) ? v.snapshot : null,
   }
+}
+
+const isSnapshotId = (v) => typeof v === 'string' && /^[0-9a-f]{8,64}$/.test(v)
+
+/**
+ * The last-restore file (written by `msb-backup restore-live`) → record, or
+ * `null` when there is none (readable).
+ * @returns {LastRestore | null}
+ */
+export function parseLastRestore(text) {
+  let v
+  try {
+    v = JSON.parse(text)
+  } catch {
+    return null
+  }
+  if (!v || (v.status !== 'ok' && v.status !== 'failed') || !isIsoTime(v.at) || !isSnapshotId(v.snapshot)) return null
+  return {
+    status: v.status,
+    at: new Date(v.at).toISOString(),
+    by: cleanBy(v.by),
+    snapshot: v.snapshot,
+    safety: isSnapshotId(v.safety) ? v.safety : null,
+    code: RESTORE_CODES.includes(v.code) ? v.code : 'unknown',
+    message: typeof v.message === 'string' ? v.message.slice(0, 300) : '',
+  }
+}
+
+/**
+ * `msb-backup inspect` output → the restore preview. Throws on anything else.
+ * @returns {Preview}
+ */
+export function parsePreview(text) {
+  const v = JSON.parse(text)
+  const contents = (c) => {
+    if (!c || typeof c !== 'object' || !Number.isSafeInteger(c.mediaFiles)) throw new Error('inspect: bad contents')
+    const counts = {}
+    for (const t of ['pages', 'blog', 'events', 'media', 'users']) {
+      counts[t] = Number.isSafeInteger(c.counts?.[t]) ? c.counts[t] : null
+    }
+    return { counts, mediaFiles: c.mediaFiles }
+  }
+  if (!v || (v.integrity !== 'ok' && v.integrity !== 'damaged') || typeof v.compatible !== 'boolean') {
+    throw new Error('inspect: unexpected output')
+  }
+  return { integrity: v.integrity, compatible: v.compatible, backup: contents(v.backup), live: contents(v.live) }
 }
 
 /** Download name: what it is, when (UTC, sortable) and which snapshot. */
@@ -175,10 +247,24 @@ async function readJsonBody(req) {
  *   readRunning: () => Promise<Running | null>,
  *   startBackup: (by: string | null) => 'started' | 'running',
  *   dumpSnapshot: (id: string) => { stream: import('node:stream').Readable, cancel: () => void },
+ *   readLastRestore: () => Promise<LastRestore | null>,
+ *   inspectSnapshot: (id: string) => Promise<Preview>,
+ *   startRestore: (id: string, by: string | null) => 'started' | 'running',
  *   log: (msg: string) => void,
  * }} deps
  */
-export function makeHandler({ token, listSnapshots, readLastRun, readRunning, startBackup, dumpSnapshot, log }) {
+export function makeHandler({
+  token,
+  listSnapshots,
+  readLastRun,
+  readRunning,
+  startBackup,
+  dumpSnapshot,
+  readLastRestore,
+  inspectSnapshot,
+  startRestore,
+  log,
+}) {
   return async (req, res) => {
     const send = (status, body) => {
       res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
@@ -189,12 +275,43 @@ export function makeHandler({ token, listSnapshots, readLastRun, readRunning, st
 
     try {
       if (req.method === 'GET' && path === '/backups') {
-        const [snapshots, lastRun, running] = await Promise.all([listSnapshots(), readLastRun(), readRunning()])
-        return send(200, { snapshots, lastRun, running })
+        const [snapshots, lastRun, running, lastRestore] = await Promise.all([
+          listSnapshots(),
+          readLastRun(),
+          readRunning(),
+          readLastRestore(),
+        ])
+        return send(200, { snapshots, lastRun, running, lastRestore })
       }
       if (req.method === 'GET' && path === '/status') {
-        const [lastRun, running] = await Promise.all([readLastRun(), readRunning()])
-        return send(200, { lastRun, running })
+        const [lastRun, running, lastRestore] = await Promise.all([readLastRun(), readRunning(), readLastRestore()])
+        return send(200, { lastRun, running, lastRestore })
+      }
+      const findSnapshot = async (id) => (await listSnapshots()).find((s) => s.id === id || s.shortId === id)
+      const preview = /^\/backups\/([0-9a-f]{8,64})\/preview$/.exec(path)
+      if (req.method === 'GET' && preview) {
+        const snapshot = await findSnapshot(preview[1])
+        if (!snapshot) return send(404, { error: 'no such backup' })
+        return send(200, { snapshot, ...(await inspectSnapshot(snapshot.id)) })
+      }
+      const restore = /^\/backups\/([0-9a-f]{8,64})\/restore$/.exec(path)
+      if (req.method === 'POST' && restore) {
+        const body = await readJsonBody(req)
+        if (body === null) return send(400, { error: 'expected a small JSON body' })
+        const snapshot = await findSnapshot(restore[1])
+        if (!snapshot) return send(404, { error: 'no such backup' })
+        // The deliberate confirmation: the caller must name the backup it means.
+        if (body.confirm !== snapshot.shortId) return send(400, { error: 'confirm must be the backup short id' })
+        const by = cleanBy(body.by)
+        const running = await readRunning()
+        if (running || startRestore(snapshot.id, by) === 'running') {
+          return send(409, {
+            error: 'a backup or restore is already running',
+            running: running ?? (await readRunning()),
+          })
+        }
+        log(`restore of ${snapshot.shortId} started by ${by ?? 'unknown'}`)
+        return send(202, { started: true })
       }
       const download = /^\/backups\/([0-9a-f]{8,64})\/download$/.exec(path)
       if (req.method === 'POST' && download) {
@@ -277,10 +394,37 @@ async function main() {
     return text === null ? null : parseLastRun(text)
   }
 
-  // A backup we started and that hasn't exited yet; covers the moment before
-  // msb-backup has taken its lock.
-  /** @type {{ startedAt: string, by: string | null } | null} */
+  const restoreFile = process.env.RESTORE_STATUS_FILE || '/work/last-restore.json'
+  const readLastRestore = async () => {
+    const text = await readOptional(restoreFile)
+    return text === null ? null : parseLastRestore(text)
+  }
+  const inspectSnapshot = async (id) => {
+    const { stdout } = await execFileAsync('msb-backup', ['inspect', id], { timeout: 300_000, maxBuffer: 1024 * 1024 })
+    return parsePreview(stdout)
+  }
+
+  // A backup or restore we started and that hasn't exited yet; covers the
+  // moment before msb-backup has taken its lock. One at a time.
+  /** @type {Running | null} */
   let child = null
+  const run = (args, by, running) => {
+    if (child) return 'running'
+    child = running
+    const proc = spawn('msb-backup', args, {
+      env: { ...process.env, BACKUP_BY: by ?? '' },
+      stdio: ['ignore', 'inherit', 'inherit'],
+    })
+    proc.on('exit', (code) => {
+      log(`${args.join(' ')} (by ${by ?? 'unknown'}) exited with ${code}`)
+      child = null
+    })
+    proc.on('error', (err) => {
+      log(`could not run msb-backup ${args[0]}: ${err.message}`)
+      child = null
+    })
+    return 'started'
+  }
   const readRunning = async () => {
     const pidText = await readOptional(`${lockDir}/pid`)
     const pid = Number(pidText)
@@ -288,24 +432,10 @@ async function main() {
     if (lockHeld) return parseRunning((await readOptional(`${lockDir}/info.json`)) ?? '', new Date().toISOString())
     return child
   }
-  const startBackup = (by) => {
-    if (child) return 'running'
-    child = { startedAt: new Date().toISOString(), by }
-    const proc = spawn('msb-backup', ['backup'], {
-      env: { ...process.env, BACKUP_BY: by ?? '' },
-      stdio: ['ignore', 'inherit', 'inherit'],
-    })
-    const done = (code) => {
-      log(`backup started by ${by ?? 'unknown'} exited with ${code}`)
-      child = null
-    }
-    proc.on('exit', done)
-    proc.on('error', (err) => {
-      log(`could not start the backup: ${err.message}`)
-      child = null
-    })
-    return 'started'
-  }
+  const startBackup = (by) =>
+    run(['backup'], by, { startedAt: new Date().toISOString(), by, kind: 'backup', snapshot: null })
+  const startRestore = (id, by) =>
+    run(['restore-live', id], by, { startedAt: new Date().toISOString(), by, kind: 'restore', snapshot: id })
 
   // restic writes the snapshot as a tar stream (paths as backed up: /work/db/msb.db,
   // /volumes/media/…); gzip makes the database part small.
@@ -323,7 +453,18 @@ async function main() {
   }
 
   const server = createServer(
-    makeHandler({ token, listSnapshots, readLastRun, readRunning, startBackup, dumpSnapshot, log }),
+    makeHandler({
+      token,
+      listSnapshots,
+      readLastRun,
+      readRunning,
+      startBackup,
+      dumpSnapshot,
+      readLastRestore,
+      inspectSnapshot,
+      startRestore,
+      log,
+    }),
   )
   server.requestTimeout = 90_000
   server.listen(port, () => log(`listening on :${port}`))

@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**34 open · 10 done** · ✅ 10 · ⏳ 32 · 🚨 2
+**33 open · 11 done** · ✅ 11 · ⏳ 31 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -56,11 +56,10 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L314)
 - ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L319)
 
-## E8 — Admins manage backups in the CMS (3/5 done)
+## E8 — Admins manage backups in the CMS (4/5 done)
 
-- ⏳ [S8.3 — Admins restore the site from a backup (L)](BACKLOG.md#L346)
-- ⏳ [S8.4 — Admins restore from an uploaded backup file (M)](BACKLOG.md#L352)
+- ⏳ [S8.4 — Admins restore from an uploaded backup file (M)](BACKLOG.md#L354)
 
 ## E7 — Legacy migration (0/1 done)
 
-- ⏳ [S7.1 — ~328 old Joomla articles were never imported (M–L, depends on scope)](BACKLOG.md#L371)
+- ⏳ [S7.1 — ~328 old Joomla articles were never imported (M–L, depends on scope)](BACKLOG.md#L373)

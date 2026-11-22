@@ -18,6 +18,8 @@ const SnapshotSchema = z.object({
   time: z.string().datetime(),
   /** null: restic didn't record a size (snapshots from before restic 0.17). */
   sizeBytes: z.number().int().nonnegative().nullable(),
+  /** The safety backup a restore took of the state it replaced (S8.3). */
+  beforeRestore: z.boolean(),
 })
 const LastRunSchema = z.object({
   status: z.enum(['ok', 'failed']),
@@ -25,11 +27,53 @@ const LastRunSchema = z.object({
   /** Who started it in the CMS; null = the nightly run. */
   by: z.string().nullable(),
 })
-const RunningSchema = z.object({ startedAt: z.string().datetime(), by: z.string().nullable() })
+const RunningSchema = z.object({
+  startedAt: z.string().datetime(),
+  by: z.string().nullable(),
+  kind: z.enum(['backup', 'restore']),
+  snapshot: z.string().nullable(),
+})
+const LastRestoreSchema = z.object({
+  status: z.enum(['ok', 'failed']),
+  at: z.string().datetime(),
+  by: z.string().nullable(),
+  snapshot: z.string(),
+  /** The backup of the state before; null when the restore failed before taking it. */
+  safety: z.string().nullable(),
+  code: z.enum([
+    'restored',
+    'unreadable',
+    'no-database',
+    'damaged',
+    'other-version',
+    'safety-failed',
+    'media-failed',
+    'database-failed',
+    'unknown',
+  ]),
+  message: z.string(),
+})
 const StatusSchema = z.object({
   /** null: no record yet, e.g. the backup container restarted since the last run. */
   lastRun: LastRunSchema.nullable(),
   running: RunningSchema.nullable(),
+  lastRestore: LastRestoreSchema.nullable(),
+})
+const CountsSchema = z.object({
+  pages: z.number().int().nullable(),
+  blog: z.number().int().nullable(),
+  events: z.number().int().nullable(),
+  media: z.number().int().nullable(),
+  users: z.number().int().nullable(),
+})
+const ContentsSchema = z.object({ counts: CountsSchema, mediaFiles: z.number().int() })
+const PreviewSchema = z.object({
+  snapshot: SnapshotSchema,
+  integrity: z.enum(['ok', 'damaged']),
+  /** Same migrations as the running site: only then can it be restored here. */
+  compatible: z.boolean(),
+  backup: ContentsSchema,
+  live: ContentsSchema,
 })
 const BackupListSchema = StatusSchema.extend({ snapshots: z.array(SnapshotSchema) })
 const ConflictSchema = z.object({ running: RunningSchema.nullable() })
@@ -37,13 +81,31 @@ const ConflictSchema = z.object({ running: RunningSchema.nullable() })
 export type Snapshot = z.infer<typeof SnapshotSchema>
 export type LastRun = z.infer<typeof LastRunSchema>
 export type Running = z.infer<typeof RunningSchema>
+export type LastRestore = z.infer<typeof LastRestoreSchema>
+export type Preview = z.infer<typeof PreviewSchema>
 export type BackupApiConfig = { url: string; token: string }
 
 type Denied = { kind: 'forbidden' } | { kind: 'not-configured' } | { kind: 'unavailable' }
 export type BackupsResult =
   | Denied
-  | { kind: 'ok'; snapshots: Snapshot[]; lastRun: LastRun | null; running: Running | null; stale: boolean }
-export type StatusResult = Denied | { kind: 'ok'; lastRun: LastRun | null; running: Running | null }
+  | {
+      kind: 'ok'
+      snapshots: Snapshot[]
+      lastRun: LastRun | null
+      running: Running | null
+      lastRestore: LastRestore | null
+      stale: boolean
+    }
+export type StatusResult =
+  | Denied
+  | { kind: 'ok'; lastRun: LastRun | null; running: Running | null; lastRestore: LastRestore | null }
+export type PreviewResult = Denied | { kind: 'not-found' } | { kind: 'ok'; preview: Preview }
+export type RestoreResult =
+  | Denied
+  | { kind: 'not-found' }
+  | { kind: 'bad-confirm' }
+  | { kind: 'started' }
+  | { kind: 'running'; running: Running | null }
 export type StartResult = Denied | { kind: 'started' } | { kind: 'running'; running: Running | null }
 export type DownloadResult =
   | Denied
@@ -107,7 +169,7 @@ export async function loadBackups(user: unknown, deps: Deps): Promise<BackupsRes
   const snapshots = [...list.snapshots].sort((a, b) => Date.parse(b.time) - Date.parse(a.time))
   const newest = snapshots[0]
   const stale = !newest || deps.now().getTime() - Date.parse(newest.time) > STALE_AFTER_MS
-  return { kind: 'ok', snapshots, lastRun: list.lastRun, running: list.running, stale }
+  return { kind: 'ok', snapshots, lastRun: list.lastRun, running: list.running, lastRestore: list.lastRestore, stale }
 }
 
 /** S8.5: last run and running backup only (no restic call), for polling while a backup runs. */
@@ -161,6 +223,51 @@ export async function openDownload(
     return { kind: 'ok', body: res.body, filename: named?.[1] ?? `msb-backup-${id}.tar.gz.enc` }
   } catch (err) {
     return failed(deps, 'download failed', err)
+  }
+}
+
+/** S8.3: what a backup holds next to the live site, and whether it can be restored here. */
+export async function loadPreview(user: unknown, id: string, deps: Deps): Promise<PreviewResult> {
+  const config = gate(user, deps)
+  if ('kind' in config) return config
+  if (!SNAPSHOT_ID.test(id)) return { kind: 'not-found' }
+  try {
+    // Reading the backup's database out of the repository takes a moment.
+    const res = await call(config, deps, `/backups/${id}/preview`, {}, 120_000)
+    if (res.status === 404) return { kind: 'not-found' }
+    if (!res.ok) throw new Error(`backup API answered ${res.status}`)
+    return { kind: 'ok', preview: PreviewSchema.parse(await res.json()) }
+  } catch (err) {
+    return failed(deps, 'preview failed', err)
+  }
+}
+
+/**
+ * S8.3: restore the whole site from a backup while it runs. `confirm` must be
+ * the backup's short id, typed by the admin. The backup service takes a
+ * safety backup first. Logged with the admin's email.
+ */
+export async function startRestore(user: unknown, id: string, confirm: unknown, deps: Deps): Promise<RestoreResult> {
+  const config = gate(user, deps)
+  if ('kind' in config) return config
+  if (!SNAPSHOT_ID.test(id)) return { kind: 'not-found' }
+  if (typeof confirm !== 'string' || confirm.trim() !== id) return { kind: 'bad-confirm' }
+  const who = whoIs(user)
+  try {
+    const res = await call(config, deps, `/backups/${id}/restore`, {
+      method: 'POST',
+      body: JSON.stringify({ confirm: confirm.trim(), by: who }),
+    })
+    if (res.status === 202) {
+      deps.log('info', `backups: restore of backup ${id} started from the CMS by ${who}`)
+      return { kind: 'started' }
+    }
+    if (res.status === 404) return { kind: 'not-found' }
+    if (res.status === 400) return { kind: 'bad-confirm' }
+    if (res.status === 409) return { kind: 'running', running: ConflictSchema.parse(await res.json()).running }
+    throw new Error(`backup API answered ${res.status}`)
+  } catch (err) {
+    return failed(deps, 'restore failed', err)
   }
 }
 

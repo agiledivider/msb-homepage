@@ -233,10 +233,20 @@ it as one encrypted file, streamed straight from the repository: the page
 generates a password (shown once, with a copy button), and the file opens with
 `openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -in F -out backup.tar.gz`
 (inside: database under `work/db/`, media under `volumes/media/`). There is no
-unencrypted download; the log names who downloaded which backup. The
+unencrypted download; the log names who downloaded which backup. "Wiederherstellen" resets the whole site (database and media) to a backup
+while it keeps running: the page shows what the backup holds next to the live
+site, the admin types the backup's id, and the backup service then takes a
+safety backup (tag `before-restore`, never pruned, marked "vor
+Wiederherstellung" in the list, so the restore can be undone the same way),
+adds the media, swaps the database with SQLite's backup API (atomic, safe with
+the app open; no restart) and removes media the backup didn't have. A backup
+whose migrations differ from the live database is refused: that needs the
+offline `restore` below plus `payload migrate`. Publish the static site again
+afterwards. The "last restore" line, like "last run", is gone after the backup
+container is recreated; the log keeps both. The
 `backup` service serves this through a small internal API
 (`scripts/backup/backup-api.mjs`, port 8081, not published) that lists,
-starts and downloads backups; it can't delete. A download holds a restic read
+starts, downloads and restores backups; it can't delete. A download holds a restic read
 lock; the nightly prune waits for it (`--retry-lock 2h`). Set `BACKUP_API_TOKEN` in `.env`
 (`openssl rand -hex 32`); compose passes it to `web` and `backup`, and neither
 starts without it. The "last run" line is unknown after the backup container

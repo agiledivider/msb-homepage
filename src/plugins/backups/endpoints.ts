@@ -1,7 +1,7 @@
 import type { Endpoint, PayloadRequest } from 'payload'
 import { isCmsUser } from '@/access/admin'
 import { isAdmin } from '@/plugins/editorial/access'
-import { backupApiConfig, type Deps, loadStatus, openDownload, startBackup } from './load'
+import { backupApiConfig, type Deps, loadPreview, loadStatus, openDownload, startBackup, startRestore } from './load'
 
 const deps = (req: PayloadRequest): Deps => ({
   config: backupApiConfig(process.env),
@@ -73,4 +73,46 @@ const downloadEndpoint: Endpoint = {
   },
 }
 
-export const backupEndpoints: Endpoint[] = [runEndpoint, statusEndpoint, downloadEndpoint]
+/** GET /api/backups/preview?id=<snapshot> — what restoring this backup would bring back (S8.3). */
+const previewEndpoint: Endpoint = {
+  path: '/backups/preview',
+  method: 'get',
+  handler: async (req) => {
+    const id = typeof req.query?.id === 'string' ? req.query.id : ''
+    const out = await loadPreview(req.user, id, deps(req))
+    if (out.kind === 'ok') return Response.json(out.preview)
+    if (out.kind === 'not-found') return Response.json({ error: 'no such backup' }, { status: 404 })
+    return denied(req, out.kind)
+  },
+}
+
+/** POST /api/backups/restore { id, confirm } — restore the whole site from a backup (S8.3). */
+const restoreEndpoint: Endpoint = {
+  path: '/backups/restore',
+  method: 'post',
+  handler: async (req) => {
+    const body = (await req.json?.().catch(() => null)) as { id?: unknown; confirm?: unknown } | null
+    const id = typeof body?.id === 'string' ? body.id : ''
+    const out = await startRestore(req.user, id, body?.confirm, deps(req))
+    switch (out.kind) {
+      case 'started':
+        return Response.json(out, { status: 202 })
+      case 'running':
+        return Response.json(out, { status: 409 })
+      case 'not-found':
+        return Response.json({ error: 'no such backup' }, { status: 404 })
+      case 'bad-confirm':
+        return Response.json({ error: 'type the backup id to confirm' }, { status: 400 })
+      default:
+        return denied(req, out.kind)
+    }
+  },
+}
+
+export const backupEndpoints: Endpoint[] = [
+  runEndpoint,
+  statusEndpoint,
+  downloadEndpoint,
+  previewEndpoint,
+  restoreEndpoint,
+]

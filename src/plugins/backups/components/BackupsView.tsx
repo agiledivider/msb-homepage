@@ -3,7 +3,8 @@ import { Gutter } from '@payloadcms/ui'
 import type { AdminViewServerProps } from 'payload'
 import type { CSSProperties } from 'react'
 import { isAdmin } from '@/plugins/editorial/access'
-import { backupApiConfig, type LastRun, loadBackups } from '../load'
+import { backupApiConfig, type LastRestore, type LastRun, loadBackups } from '../load'
+import { restoreOutcome } from '../restoreText'
 import { BackupNow } from './BackupNow'
 import { BackupTable } from './BackupTable'
 
@@ -22,6 +23,17 @@ const box = (tone: 'info' | 'warn' | 'error'): CSSProperties => ({
 })
 
 const startedBy = (lastRun: LastRun) => (lastRun.by ? `gestartet von ${lastRun.by}` : 'nächtliche Sicherung')
+
+function LastRestoreLine({ lastRestore }: { lastRestore: LastRestore | null }) {
+  if (!lastRestore) return null
+  const who = lastRestore.by ? ` von ${lastRestore.by}` : ''
+  return (
+    <p style={lastRestore.status === 'ok' ? undefined : box('error')}>
+      <strong>Letzte Wiederherstellung</strong> ({fmtWhen(lastRestore.at)}
+      {who}): {restoreOutcome(lastRestore)}
+    </p>
+  )
+}
 
 function LastRunLine({ lastRun }: { lastRun: LastRun | null }) {
   if (!lastRun) return <p>Letzter Lauf: unbekannt (seit dem letzten Neustart des Backup-Dienstes noch keiner).</p>
@@ -86,6 +98,7 @@ export async function BackupsView({ initPageResult, params, searchParams }: Admi
             ) : null}
             <BackupNow apiRoute={req.payload.config.routes.api} initialRunning={result.running} />
             <LastRunLine lastRun={result.lastRun} />
+            <LastRestoreLine lastRestore={result.lastRestore} />
             {result.snapshots.length ? (
               <BackupTable apiRoute={req.payload.config.routes.api} snapshots={result.snapshots} />
             ) : null}

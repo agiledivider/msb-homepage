@@ -176,4 +176,47 @@ out=$(docker run --rm -v "$P-dl:/dl" -u 0 --entrypoint sh "$IMG" -c '
 docker logs "$P-sched" 2>&1 | grep -q "backup $id downloaded (encrypted) by admin@test.de" || fail "download not logged with who"
 pass "download: encrypted with the passphrase, opens with plain openssl, intact DB and all media, logged; no passphrase → 400"
 
+# 11. Restore while the service runs (S8.3): change the live data after the
+#     newest backup, preview, restore with the backup's id as confirmation.
+#     The change is gone, a safety backup holds it, and a backup from another
+#     version of the site (other migrations) is refused without touching anything.
+id=$(newest | grep -o '[0-9a-f]\{8\}')
+shell "$P-db" "$P-media" '
+  sqlite3 /volumes/db/msb.db "insert into pages(title) values (\"Neu nach dem Backup\");"
+  echo extra > /volumes/media/extra.webp && echo changed > /volumes/media/hero.webp
+  chown -R 1001:1001 /volumes/db /volumes/media'
+preview=$(call GET "/backups/$id/preview")
+[[ $preview == *'"compatible":true'* && $preview == *'"backup":{"counts":{"pages":3'* && $preview == *'"live":{"counts":{"pages":4'* ]] \
+  || fail "preview does not show backup vs live: $preview"
+[[ $(call POST "/backups/$id/restore" '{"confirm":"nope"}') == *" 400" ]] || fail "restore without the right confirmation was not refused"
+[[ $(call POST "/backups/$id/restore" "{\"confirm\":\"$id\",\"by\":\"admin@test.de\"}") == *" 202" ]] || fail "restore did not start"
+for _ in $(seq 120); do
+  status=$(call GET /status)
+  [[ $status == *'"running":null'* && $status == *'"lastRestore":{'* ]] && break
+  sleep 1
+done
+[[ $status == *'"lastRestore":{"status":"ok"'* && $status == *"\"snapshot\":\"$id"* && $status == *'"by":"admin@test.de"'* ]] \
+  || fail "restore did not finish as recorded: $status"
+safety=$(grep -o '"safety":"[0-9a-f]*"' <<<"$status" | cut -d'"' -f4)
+after=$(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select count(*) from pages;"; ls /volumes/media; cat /volumes/media/hero.webp')
+[[ $after == $'3\nhero.webp\nsub\nhero' ]] || fail "live data is not the backup's after restore: $after"
+[[ -n $safety ]] || fail "no safety backup recorded: $status"
+held=$(docker run --rm "${ENV[@]}" -v "$P-repo:/repo" --entrypoint restic "$IMG" dump "$safety" /work/db/msb.db | \
+  docker run --rm -i --entrypoint sh "$IMG" -c 'cat > /tmp/s.db && sqlite3 /tmp/s.db "select count(*) from pages;"')
+[[ $held == 4 ]] || fail "safety backup $safety does not hold the state before the restore ($held pages)"
+pass "restore while running: preview, confirmation, live data back to the backup, safety backup holds what was replaced"
+
+shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "create table payload_migrations(id integer primary key, name text);
+  insert into payload_migrations(name) values (\"20991231_future\");"; chown -R 1001:1001 /volumes/db'
+[[ $(call POST "/backups/$id/restore" "{\"confirm\":\"$id\"}") == *" 202" ]] || fail "second restore did not start"
+for _ in $(seq 60); do status=$(call GET /status); [[ $status == *'"running":null'* ]] && break; sleep 1; done
+[[ $status == *'"lastRestore":{"status":"failed"'* && $status == *'"code":"other-version"'* ]] || fail "restore across versions was not refused: $status"
+[[ $(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select name from payload_migrations;"') == 20991231_future ]] \
+  || fail "refused restore changed the live database"
+pass "restore of a backup from another version is refused and changes nothing"
+
+run "$P-db" "$P-media" backup >/dev/null
+run "$P-db" "$P-media" snapshots | grep -q "^$safety" || fail "safety backup $safety was pruned by the next backup"
+pass "safety backups survive the regular cleanup (tag before-restore)"
+
 echo "backup round trip: all checks passed"

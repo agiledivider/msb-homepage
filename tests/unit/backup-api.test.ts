@@ -14,12 +14,21 @@ import {
   encryptStream,
   makeHandler,
   PBKDF2_ITERATIONS,
+  parseLastRestore,
   parseLastRun,
+  parsePreview,
   parseRunning,
   parseSnapshots,
   tokenMatches,
   validPassphrase,
 } from '../../scripts/backup/backup-api.mjs'
+
+const PREVIEW = {
+  integrity: 'ok' as const,
+  compatible: true,
+  backup: { counts: { pages: 6, blog: 5, events: 238, media: 36, users: 4 }, mediaFiles: 269 },
+  live: { counts: { pages: 7, blog: 6, events: 240, media: 38, users: 4 }, mediaFiles: 280 },
+}
 
 const resticSnapshot = (over: Record<string, unknown> = {}) => ({
   id: 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2',
@@ -37,6 +46,7 @@ describe('parseSnapshots', () => {
         shortId: 'a1b2c3d4',
         time: '2026-11-21T02:30:12.123Z',
         sizeBytes: 52_428_800,
+        beforeRestore: false,
       },
     ])
   })
@@ -55,6 +65,10 @@ describe('parseSnapshots', () => {
     ['a size that is not a number', { summary: { total_bytes_processed: '12' } }],
   ])('has an unknown size for %s', (_label, over) => {
     expect(parseSnapshots([resticSnapshot(over)])[0].sizeBytes).toBeNull()
+  })
+
+  it('marks the safety backup a restore took', () => {
+    expect(parseSnapshots([resticSnapshot({ tags: ['msb', 'before-restore'] })])[0].beforeRestore).toBe(true)
   })
 
   it('derives the short id when restic leaves it out', () => {
@@ -108,11 +122,24 @@ describe('parseRunning', () => {
     expect(parseRunning('{"startedAt":"2026-11-22T13:00:00Z","by":"admin@test.de"}', 'x')).toEqual({
       startedAt: '2026-11-22T13:00:00.000Z',
       by: 'admin@test.de',
+      kind: 'backup',
+      snapshot: null,
     })
   })
 
+  it('tells a restore apart, with its snapshot', () => {
+    expect(
+      parseRunning('{"startedAt":"2026-11-22T13:00:00Z","by":null,"kind":"restore","snapshot":"7bf61efa"}', 'x'),
+    ).toEqual({ startedAt: '2026-11-22T13:00:00.000Z', by: null, kind: 'restore', snapshot: '7bf61efa' })
+  })
+
   it('still means "running" while the info is being written', () => {
-    expect(parseRunning('', '2026-11-22T13:00:01.000Z')).toEqual({ startedAt: '2026-11-22T13:00:01.000Z', by: null })
+    expect(parseRunning('', '2026-11-22T13:00:01.000Z')).toEqual({
+      startedAt: '2026-11-22T13:00:01.000Z',
+      by: null,
+      kind: 'backup',
+      snapshot: null,
+    })
   })
 })
 
@@ -145,6 +172,9 @@ describe('GET /backups', () => {
         readRunning: async () => null,
         startBackup: () => 'started',
         dumpSnapshot: () => ({ stream: Readable.from([]), cancel: () => {} }),
+        readLastRestore: async () => null,
+        inspectSnapshot: async () => PREVIEW,
+        startRestore: () => 'started' as const,
         log: (m: string) => logs.push(m),
         ...deps,
       }),
@@ -211,10 +241,20 @@ describe('GET /backups', () => {
         listed = true
         return []
       },
-      readRunning: async () => ({ startedAt: '2026-11-22T13:00:00.000Z', by: 'admin@test.de' }),
+      readRunning: async () => ({
+        startedAt: '2026-11-22T13:00:00.000Z',
+        by: 'admin@test.de',
+        kind: 'backup' as const,
+        snapshot: null,
+      }),
     })
     const body = await (await get('/status', 'secret-token')).json()
-    expect(body.running).toEqual({ startedAt: '2026-11-22T13:00:00.000Z', by: 'admin@test.de' })
+    expect(body.running).toEqual({
+      startedAt: '2026-11-22T13:00:00.000Z',
+      by: 'admin@test.de',
+      kind: 'backup',
+      snapshot: null,
+    })
     expect(listed).toBe(false)
   })
 })
@@ -234,12 +274,15 @@ describe('POST /backups (S8.5)', () => {
         token: 'secret-token',
         listSnapshots: async () => [],
         readLastRun: async () => null,
-        readRunning: async () => running,
+        readRunning: async () => running as never,
         startBackup: (by: string | null) => {
           started.push(by)
           return startResult
         },
         dumpSnapshot: () => ({ stream: Readable.from([]), cancel: () => {} }),
+        readLastRestore: async () => null,
+        inspectSnapshot: async () => PREVIEW,
+        startRestore: () => 'started' as const,
         log: (m: string) => logs.push(m),
       }),
     )
@@ -388,6 +431,9 @@ describe('POST /backups/<id>/download (S8.2)', () => {
           dumped.push(id)
           return { stream: Readable.from([Buffer.from('tar-gz-bytes')]), cancel: () => {} }
         },
+        readLastRestore: async () => null,
+        inspectSnapshot: async () => PREVIEW,
+        startRestore: () => 'started' as const,
         log: (m: string) => logs.push(m),
       }),
     )
@@ -455,5 +501,150 @@ describe('POST /backups/<id>/download (S8.2)', () => {
     const { post, dumped } = await start()
     expect((await post(`/backups/${SNAP.id}/download`, { passphrase: PASS }, 'nope')).status).toBe(401)
     expect(dumped).toEqual([])
+  })
+})
+
+describe('parseLastRestore', () => {
+  it('reads a finished restore', () => {
+    const text =
+      '{"status":"ok","at":"2026-11-22T14:00:00Z","by":"admin@test.de","snapshot":"7bf61efa","safety":"a1b2c3d4","code":"restored","message":"restored"}'
+    expect(parseLastRestore(text)).toEqual({
+      status: 'ok',
+      at: '2026-11-22T14:00:00.000Z',
+      by: 'admin@test.de',
+      snapshot: '7bf61efa',
+      safety: 'a1b2c3d4',
+      code: 'restored',
+      message: 'restored',
+    })
+  })
+
+  it('keeps a failure before the safety backup without one', () => {
+    const out = parseLastRestore(
+      '{"status":"failed","at":"2026-11-22T14:00:00Z","by":null,"snapshot":"7bf61efa","safety":null,"code":"other-version","message":"the backup is from another version of the site (other migrations); nothing changed"}',
+    )
+    expect(out?.safety).toBeNull()
+    expect(out?.code).toBe('other-version')
+    expect(out?.message).toContain('nothing changed')
+  })
+
+  it.each([
+    ['broken JSON', '{'],
+    ['no snapshot', '{"status":"ok","at":"2026-11-22T14:00:00Z"}'],
+  ])('is unknown for %s', (_label, text) => {
+    expect(parseLastRestore(text)).toBeNull()
+  })
+})
+
+it('turns an unknown outcome code into "unknown"', () => {
+  expect(
+    parseLastRestore('{"status":"failed","at":"2026-11-22T14:00:00Z","snapshot":"7bf61efa","code":"<script>"}')?.code,
+  ).toBe('unknown')
+})
+
+describe('parsePreview', () => {
+  it('reads what inspect prints', () => {
+    expect(parsePreview(JSON.stringify(PREVIEW))).toEqual(PREVIEW)
+  })
+
+  it('keeps a missing table as unknown', () => {
+    const out = parsePreview(
+      JSON.stringify({ ...PREVIEW, backup: { counts: { pages: 1, blog: null }, mediaFiles: 0 } }),
+    )
+    expect(out.backup.counts).toEqual({ pages: 1, blog: null, events: null, media: null, users: null })
+  })
+
+  it.each([
+    ['no integrity', { ...PREVIEW, integrity: undefined }],
+    ['no media count', { ...PREVIEW, live: { counts: {} } }],
+  ])('refuses %s', (_label, v) => {
+    expect(() => parsePreview(JSON.stringify(v))).toThrow()
+  })
+})
+
+describe('preview and restore (S8.3)', () => {
+  let server: Server | undefined
+  afterEach(() => new Promise<void>((done) => (server ? server.close(() => done()) : done())))
+
+  const SNAP = parseSnapshots([resticSnapshot()])[0]
+  const start = async (running: unknown = null) => {
+    const restored: [string, string | null][] = []
+    const inspected: string[] = []
+    const logs: string[] = []
+    server = createServer(
+      makeHandler({
+        token: 'secret-token',
+        listSnapshots: async () => [SNAP],
+        readLastRun: async () => null,
+        readRunning: async () => running as never,
+        startBackup: () => 'started' as const,
+        dumpSnapshot: () => ({ stream: Readable.from([]), cancel: () => {} }),
+        readLastRestore: async () => null,
+        inspectSnapshot: async (id: string) => {
+          inspected.push(id)
+          return PREVIEW
+        },
+        startRestore: (id: string, by: string | null) => {
+          restored.push([id, by])
+          return 'started' as const
+        },
+        log: (m: string) => logs.push(m),
+      }),
+    )
+    await new Promise<void>((done) => server?.listen(0, '127.0.0.1', done))
+    const { port } = (server as Server).address() as AddressInfo
+    const call = (method: string, path: string, body?: unknown, token = 'secret-token') =>
+      fetch(`http://127.0.0.1:${port}${path}`, {
+        method,
+        headers: { 'X-Backup-Token': token, 'Content-Type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      })
+    return { call, restored, inspected, logs }
+  }
+
+  it('previews a backup next to the live site', async () => {
+    const { call, inspected } = await start()
+    const res = await call('GET', `/backups/${SNAP.shortId}/preview`)
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({ snapshot: SNAP, ...PREVIEW })
+    expect(inspected).toEqual([SNAP.id])
+  })
+
+  it('previews nothing for an unknown backup', async () => {
+    const { call, inspected } = await start()
+    expect((await call('GET', '/backups/deadbeef/preview')).status).toBe(404)
+    expect(inspected).toEqual([])
+  })
+
+  it('starts a restore when the short id is confirmed, and logs who', async () => {
+    const { call, restored, logs } = await start()
+    const res = await call('POST', `/backups/${SNAP.shortId}/restore`, { confirm: SNAP.shortId, by: 'admin@test.de' })
+    expect(res.status).toBe(202)
+    expect(restored).toEqual([[SNAP.id, 'admin@test.de']])
+    expect(logs.join('\n')).toContain(`restore of ${SNAP.shortId} started by admin@test.de`)
+  })
+
+  it.each([
+    ['no confirmation', {}],
+    ['the wrong backup', { confirm: 'deadbeef' }],
+    ['the date instead of the id', { confirm: '22.11.2026' }],
+  ])('refuses %s and restores nothing', async (_label, body) => {
+    const { call, restored } = await start()
+    expect((await call('POST', `/backups/${SNAP.shortId}/restore`, body)).status).toBe(400)
+    expect(restored).toEqual([])
+  })
+
+  it('restores nothing while a backup runs', async () => {
+    const running = { startedAt: '2026-11-22T03:30:00.000Z', by: null, kind: 'backup', snapshot: null }
+    const { call, restored } = await start(running)
+    const res = await call('POST', `/backups/${SNAP.shortId}/restore`, { confirm: SNAP.shortId })
+    expect(res.status).toBe(409)
+    expect(restored).toEqual([])
+  })
+
+  it('refuses a wrong token', async () => {
+    const { call, restored } = await start()
+    expect((await call('POST', `/backups/${SNAP.shortId}/restore`, { confirm: SNAP.shortId }, 'nope')).status).toBe(401)
+    expect(restored).toEqual([])
   })
 })

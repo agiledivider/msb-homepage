@@ -48,3 +48,11 @@ Entries D-001 to D-004 were recorded retroactively on 2026-11-12 from the sessio
 **Why not age:** the `age` CLI takes a passphrase only from a terminal, so it can't encrypt a stream in a service.
 **Consequences:** CBC has no authentication: a damaged or tampered file is noticed when gzip/tar fail, not before. S8.4 (restore from an uploaded file) must ask for the password and decrypt the same way. The password never reaches a URL or a log; it travels in the request body.
 **Revisit when:** age (or another AEAD format with common tooling) can take a passphrase non-interactively, or files must be checked for tampering before they are unpacked.
+
+## D-007 Restores from the CMS run while the site keeps running — Status: decided 2026-11-22
+**Context:** S8.3 lets admins restore the whole site. The backup container may not stop or restart the web container (D-005: no Docker socket, no control over it), and the existing offline restore needs the web service stopped.
+**Options:** A) swap the database file while the app runs; B) write the backup into the live database with SQLite's backup API (`sqlite3 live.db ".restore backup.db"`); C) give the backup service a way to stop and start the app.
+**Decision:** B. The database runs in rollback-journal mode (`journal_mode=delete`), where the backup API writes under SQLite's own locks and other connections see the new content on their next transaction; a file swap (A) would leave the app on the old inode and break with WAL. Verified on dev: restored while `next dev` kept running, the page showed the old content at once and the CMS kept reading and writing.
+**Order:** check the unpacked backup first (integrity, same migrations), then a safety backup (tag `before-restore`, no prune, kept by `--keep-tag`), then media in, then the database, then remove media the backup lacks. Anything failing before the database swap leaves the database untouched.
+**Consequences:** a backup with other migrations than the live database is refused in the CMS, because the running code wouldn't match it; that case stays a server job (offline restore + `payload migrate`). Safety backups accumulate, one per restore (deduplicated, so small). If the database is ever switched to WAL, this needs re-checking.
+**Revisit when:** the database moves off SQLite, to WAL mode, or the app gets a maintenance mode.
