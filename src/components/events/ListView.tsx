@@ -44,6 +44,9 @@ export function ListView({ events }: { events: EventVM[] }) {
                 {e.title}
               </Link>
             </h3>
+            {e.subtitle ? (
+              <p className="m-0 mb-1 font-serif text-[16px] italic leading-[1.35] text-muted">{e.subtitle}</p>
+            ) : null}
             {e.description ? (
               <p className="m-0 line-clamp-2 text-[14px] leading-[1.5] text-muted">{e.description}</p>
             ) : null}

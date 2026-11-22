@@ -14,6 +14,7 @@ export const isViewKey = (v: string | null | undefined): v is ViewKey => (VIEWS 
 export type EventVM = {
   id: number
   title: string
+  subtitle?: string | null
   href: string
   date: Date
   time: string
@@ -45,6 +46,7 @@ export function toEventVM(e: Event): EventVM {
   return {
     id: e.id,
     title: e.title,
+    subtitle: e.subtitle,
     href: `/events/${e.slug ?? e.id}`,
     date,
     time: eventTimeText(e.timeLabel),

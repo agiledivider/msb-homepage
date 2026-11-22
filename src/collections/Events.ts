@@ -29,6 +29,14 @@ export const Events: CollectionConfig = {
   fields: [
     { name: 'title', type: 'text', label: 'Titel', required: true },
     {
+      name: 'subtitle',
+      type: 'text',
+      label: 'Untertitel',
+      admin: {
+        description: 'Kursive Zeile unter dem Titel: auf der Event-Seite, im Startseiten-Karussell und in den Listen.',
+      },
+    },
+    {
       type: 'row',
       fields: [
         {

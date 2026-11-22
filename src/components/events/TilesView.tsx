@@ -49,6 +49,9 @@ function Tile({ e }: { e: EventVM }) {
           {fmtWeekdayShort(e.date)} {fmtDay2(e.date)}. {fmtMonthShort(e.date)} · {e.time}
         </div>
         <h3 className={`m-0 mt-1 font-sans text-[18px] font-bold text-ink ${CARD_TITLE}`}>{e.title}</h3>
+        {e.subtitle ? (
+          <p className="m-0 mt-0.5 font-serif text-[16px] italic leading-[1.35] text-muted">{e.subtitle}</p>
+        ) : null}
         {e.description ? (
           <p className="m-0 mt-1.5 line-clamp-3 text-[14px] leading-[1.5] text-muted">{e.description}</p>
         ) : null}

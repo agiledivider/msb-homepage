@@ -102,6 +102,7 @@ export function eventToFace(ev: Event): Face {
     eventMonth: monthLong(d),
     eventWeekday: weekdayLong(d),
     headline: ev.title,
+    lede: ev.subtitle,
     description: ev.description,
     primaryStyle: 'white',
     primary: { label: 'Platz sichern', url: `/events/${ev.slug}` },

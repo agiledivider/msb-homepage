@@ -16,15 +16,15 @@ const PROSE = `text-[17px] leading-[1.7] text-ink ${PROSE_LINKS} [&_h2]:mt-8 [&_
 const TITLE =
   'm-0 mb-3 font-display text-[clamp(40px,5vw,48px)] font-black leading-[1.02] tracking-[-.02em] break-words'
 
+const SUBTITLE = 'm-0 mb-4 font-serif text-[20px] italic leading-[1.4] text-muted max-w-[34em]'
+
 export function BlogArticle({ post }: { post: Blog }) {
   const meta = [post.author, post.readingTime].filter(Boolean).join(' · ')
   return (
     <main className="mx-auto max-w-[760px] px-4 py-14 md:px-8">
       <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-brand-text">AUS DER WERKSTATT · BLOG</div>
       <h1 className={TITLE}>{post.title}</h1>
-      {post.subtitle ? (
-        <p className="m-0 mb-4 font-serif text-[20px] italic leading-[1.4] text-muted max-w-[34em]">{post.subtitle}</p>
-      ) : null}
+      {post.subtitle ? <p className={SUBTITLE}>{post.subtitle}</p> : null}
       {meta ? <div className="mb-8 font-mono text-[14px] text-muted">{meta}</div> : null}
       {post.cover && typeof post.cover === 'object' ? (
         <Media
@@ -57,6 +57,7 @@ export function EventArticle({ ev }: { ev: Event }) {
     <main className="mx-auto max-w-[760px] px-4 py-14 md:px-8">
       <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-brand-text">NÄCHSTER TERMIN · EVENT</div>
       <h1 className={TITLE}>{ev.title}</h1>
+      {ev.subtitle ? <p className={SUBTITLE}>{ev.subtitle}</p> : null}
       <div className="mb-8 font-mono text-[14px] text-muted">
         {fmt(ev.date)} · {eventTimeText(ev.timeLabel)}
         {ev.location ? ` · ${ev.location}` : ''}
