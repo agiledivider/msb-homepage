@@ -11,9 +11,10 @@ import type { Blog, Event } from '@/payload-types'
  */
 
 const PROSE =
-  'text-[17px] leading-[1.7] text-ink [&_a]:text-brand-text [&_a]:underline [&_a]:underline-offset-2 [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[24px] [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-display [&_h3]:text-[18px] [&_h3]:font-bold [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1'
+  'text-[17px] leading-[1.7] text-ink [&_a]:text-brand-text [&_a]:underline [&_a]:underline-offset-2 [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[24px] [&_h2]:font-extrabold [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-sans [&_h3]:text-[20px] [&_h3]:font-bold [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1'
 
-const TITLE = 'm-0 mb-3 font-display text-[clamp(28px,5vw,44px)] font-black leading-[1.04] tracking-[-.02em]'
+const TITLE =
+  'm-0 mb-3 font-display text-[clamp(40px,5vw,48px)] font-black leading-[1.02] tracking-[-.02em] break-words'
 
 export function BlogArticle({ post }: { post: Blog }) {
   const meta = [post.author, post.readingTime].filter(Boolean).join(' · ')
@@ -21,7 +22,9 @@ export function BlogArticle({ post }: { post: Blog }) {
     <main className="mx-auto max-w-[760px] px-4 py-14 md:px-8">
       <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-brand-text">AUS DER WERKSTATT · BLOG</div>
       <h1 className={TITLE}>{post.title}</h1>
-      {post.subtitle ? <p className="m-0 mb-4 font-serif text-[20px] italic text-muted">{post.subtitle}</p> : null}
+      {post.subtitle ? (
+        <p className="m-0 mb-4 font-serif text-[20px] italic leading-[1.4] text-muted max-w-[34em]">{post.subtitle}</p>
+      ) : null}
       {meta ? <div className="mb-8 font-mono text-[14px] text-muted">{meta}</div> : null}
       {post.cover && typeof post.cover === 'object' ? (
         <Media

@@ -57,11 +57,7 @@ export function WorkshopsComponent({
                 </div>
               ) : null}
               {it.code ? <div className="mb-1.5 font-mono text-[14px] text-brand-text">{it.code}</div> : null}
-              <div
-                className={`mb-1.5 font-display font-bold ${detailed ? 'text-[21px] font-extrabold' : 'text-[18px]'}`}
-              >
-                {it.title}
-              </div>
+              <div className={`mb-1.5 font-sans font-bold ${detailed ? 'text-[21px]' : 'text-[18px]'}`}>{it.title}</div>
               {it.desc ? (
                 <p className={`m-0 leading-[1.5] text-muted ${detailed ? 'text-[14px] leading-[1.6]' : 'text-[14px]'}`}>
                   {it.desc}

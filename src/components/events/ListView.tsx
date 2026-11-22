@@ -39,7 +39,7 @@ export function ListView({ events }: { events: EventVM[] }) {
                 {e.category}
               </div>
             ) : null}
-            <h3 className="m-0 mb-1 font-display text-[18px] font-bold md:text-[19px]">
+            <h3 className="m-0 mb-1 font-sans text-[18px] font-bold md:text-[19px]">
               <Link href={e.href} className="text-inherit no-underline hover:text-brand-text">
                 {e.title}
               </Link>

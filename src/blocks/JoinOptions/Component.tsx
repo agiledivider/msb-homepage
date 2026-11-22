@@ -54,7 +54,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
                 {o.number ? `${o.number} · ` : ''}
                 {o.eyebrow}
               </div>
-              <div className="mb-2 font-display text-[22px] font-extrabold">{o.title}</div>
+              <div className="mb-2 font-sans text-[22px] font-bold">{o.title}</div>
               {o.text ? (
                 <p className={`m-0 mb-4 text-[14px] leading-[1.6] ${green ? '' : 'text-muted'}`}>{o.text}</p>
               ) : null}
@@ -77,7 +77,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-[14px] border border-line bg-card p-[26px]">
             <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-muted">{location.eyebrow}</div>
-            <div className="mb-1 font-display text-[20px] font-extrabold">{location.title}</div>
+            <div className="mb-1 font-sans text-[20px] font-bold">{location.title}</div>
             {location.line ? <div className="mb-3.5 text-[15px] text-ink">{location.line}</div> : null}
             {location.transit ? (
               <div className="whitespace-pre-line font-mono text-[14px] leading-[1.8] text-muted">

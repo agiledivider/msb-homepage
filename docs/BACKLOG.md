@@ -26,7 +26,8 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 **Desired:** every surface uses a named colour from the 2026-11 palette (no ad-hoc hexes, no transparency); yellow appears only on member content, events and actions use Maker-Orange; open/closed status uses calm status colours, not Sicherheitsrot.
 **AC:** side-by-side with the styleguide, background, cards, lines, info boxes, grid and mat show the documented values; no yellow outside member content; a fitness test fails when a colour hex is written outside the design tokens.
 
-### Headings and intros use the brand typeface
+### ✅ DONE 2026-11-22 — Headings and intros use the brand typeface
+**Implemented:** Archivo only at 24–56px (smaller headings are Plex Sans Bold; enforced by `tests/fitness/archivo-range.test.ts`); page titles ≥ 40px on phones; hero headline sizes stay inside the title/heading ranges; Newsreader intros at line height 1.4, the hero intro 18px Medium; the Verein quote is italic with a Markengrün bar and German quotation marks set by `germanQuote()`; polaroid captions are Caveat Bold 20px. The hero headline on phones stays 30px (heading range) because the mat has a fixed height.
 **Status:** decided 2026-11-22: headlines keep Archivo (Plex Sans tops out at 700 and loses the hero's punch); Newsreader stays for intro lines and standalone quotes; Caveat stays for short hand notes on the web. All three are in styleguide §9/§10 since version 2026-11.11.
 **Problem:** headings use Archivo Black, intros Newsreader italic and notes the Caveat font, while the styleguide says "IBM Plex Sans für alles" and lists the typeface as a fixed brand element.
 **Desired:** headings, intros, labels and captions follow the styleguide's type scale and label style; either Plex Sans only, or a heavier heading face that the styleguide then explicitly allows.

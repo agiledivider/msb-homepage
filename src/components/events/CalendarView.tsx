@@ -54,7 +54,7 @@ export function CalendarView({
         <button type="button" onClick={() => onNavigate(prev)} className={navBtn}>
           ← {fmtMonthYear(prev)}
         </button>
-        <h2 className="m-0 font-display text-[20px] font-extrabold text-ink md:text-[22px]">{fmtMonthYear(month)}</h2>
+        <h2 className="m-0 font-sans text-[20px] font-bold text-ink md:text-[22px]">{fmtMonthYear(month)}</h2>
         <button type="button" onClick={() => onNavigate(next)} className={navBtn}>
           {fmtMonthYear(next)} →
         </button>

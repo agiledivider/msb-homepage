@@ -75,10 +75,11 @@ function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boole
  */
 export function headlineSize(headline: string, isEvent: boolean): string {
   const n = headline.replace(/\s+/g, ' ').trim().length
-  if (isEvent) return n <= 30 ? 'md:text-[38px]' : 'md:text-[32px]'
+  // Styleguide §9: Archivo titles 40–56px, headings 24–32px; nothing in between.
+  if (isEvent) return n <= 30 ? 'md:text-[40px]' : 'md:text-[32px]'
   if (n <= 22) return 'md:text-[56px]'
   if (n <= 40) return 'md:text-[46px]'
-  return 'md:text-[38px]'
+  return 'md:text-[40px]'
 }
 
 function FaceContent({ face, priority = false }: { face: Face; priority?: boolean }) {
@@ -102,7 +103,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
 
             {isEvent && face.eventDay ? (
               <div className="mb-3 flex items-end gap-4">
-                <div className="font-display text-[46px] font-black leading-[.85] text-kreide md:text-[74px]">
+                <div className="font-display text-[46px] font-black leading-[.85] text-kreide md:text-[56px]">
                   {face.eventDay}
                 </div>
                 <div className="pb-2 font-mono text-[14px] leading-[1.5] text-green-300">
@@ -125,7 +126,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
             </h1>
 
             {face.lede ? (
-              <p className="m-0 font-serif text-[17px] italic leading-[1.26] text-kreide md:mb-4 md:line-clamp-2 md:text-[21px] md:leading-snug">
+              <p className="m-0 font-serif text-[18px] font-medium italic leading-[1.4] text-kreide md:mb-4 md:line-clamp-2 md:text-[21px] md:leading-snug">
                 {face.lede}
               </p>
             ) : null}
@@ -308,7 +309,7 @@ export function HeroComponent({
             <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>
               {face.badge ? (
                 <div
-                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-orange px-[15px] py-[9px] font-display text-[14px] font-extrabold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
+                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-orange px-[15px] py-[9px] font-sans text-[14px] font-bold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
                   style={{ top: -20, left: -16, transform: `rotate(${badgeRot[i]})` }}
                 >
                   {face.badge}

@@ -36,7 +36,7 @@ export default async function BlogIndexPage() {
               sizes="(max-width:640px) 100vw, 380px"
             />
             <div className="p-5">
-              <h3 className="m-0 mb-1.5 font-display text-[19px] font-bold text-ink">{post.title}</h3>
+              <h3 className="m-0 mb-1.5 font-sans text-[19px] font-bold text-ink">{post.title}</h3>
               {post.excerpt ? (
                 <p className="m-0 line-clamp-3 text-[14px] leading-[1.55] text-muted">{post.excerpt}</p>
               ) : null}

@@ -49,7 +49,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
                   {e.tag}
                 </div>
               ) : null}
-              <h3 className="m-0 mb-1 font-display text-[19px] font-bold">
+              <h3 className="m-0 mb-1 font-sans text-[19px] font-bold">
                 {e.link?.url ? (
                   <Link href={e.link.url} className="text-inherit no-underline">
                     {e.title}
@@ -74,7 +74,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
                 key={i}
                 className={`${i > 0 ? 'mt-3' : ''} ${i < arr.length - 1 ? 'mb-3 border-b border-line pb-3' : ''}`}
               >
-                <div className="font-display text-[16px] font-bold">{b.title}</div>
+                <div className="font-sans text-[16px] font-bold">{b.title}</div>
                 {b.meta ? <div className="text-[14px] text-muted">{b.meta}</div> : null}
               </div>
             ))}

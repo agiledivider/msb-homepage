@@ -60,7 +60,7 @@ export function EventFeedComponent({ tagLabel, heading, allLink, events, sidebar
                   {e.tag}
                 </div>
               ) : null}
-              <h3 className="mb-1.5 font-display text-[20px] font-bold">{e.title}</h3>
+              <h3 className="mb-1.5 font-sans text-[20px] font-bold">{e.title}</h3>
               {e.text ? <p className="m-0 text-[14.5px] leading-[1.55] text-muted">{e.text}</p> : null}
             </div>
           </Link>

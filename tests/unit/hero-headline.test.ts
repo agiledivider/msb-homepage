@@ -10,11 +10,19 @@ describe('hero headline size', () => {
   it.each([
     ['Lebkuchenhaus bauen', false, 'md:text-[56px]'],
     ['Bald mehr aus der Werkstatt.', false, 'md:text-[46px]'],
-    ['Lebkuchenhaus bauen: Workshop mit Bernd am 28. November', false, 'md:text-[38px]'],
-    ['Löten für Einsteiger', true, 'md:text-[38px]'],
+    ['Lebkuchenhaus bauen: Workshop mit Bernd am 28. November', false, 'md:text-[40px]'],
+    ['Löten für Einsteiger', true, 'md:text-[40px]'],
     ['Offene Werkstatt mit Lasercutter-Einweisung', true, 'md:text-[32px]'],
   ])('%s (event: %s) → %s', (headline, isEvent, cls) => {
     expect(headlineSize(headline, isEvent)).toBe(cls)
+  })
+
+  it('stays in the styleguide ranges: titles 40–56px, headings 24–32px', () => {
+    for (const isEvent of [false, true])
+      for (const n of [5, 22, 23, 30, 31, 40, 41, 80]) {
+        const px = Number(headlineSize('x'.repeat(n), isEvent).match(/\d+/)?.[0])
+        expect((px >= 40 && px <= 56) || (px >= 24 && px <= 32), `${n} chars, event ${isEvent}: ${px}px`).toBe(true)
+      }
   })
 
   it('never grows with length', () => {

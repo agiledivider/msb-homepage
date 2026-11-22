@@ -1,5 +1,6 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
+import { germanQuote } from '../../lib/germanQuote'
 import { richTextConverters } from '../richtext'
 
 type Milestone = { year?: string | null; text?: string | null }
@@ -27,9 +28,9 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
             />
           ) : null}
           {quote ? (
-            <div className="mt-[26px] border-l-[3px] border-brand-text py-1 pl-5">
-              <p className="m-0 font-serif text-[22px] leading-[1.4] text-ink">{quote}</p>
-            </div>
+            <blockquote className="m-0 mt-[26px] border-l-[3px] border-brand py-1 pl-5">
+              <p className="m-0 font-serif text-[22px] italic leading-[1.3] text-ink">{germanQuote(quote)}</p>
+            </blockquote>
           ) : null}
         </div>
 
@@ -46,7 +47,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
                       last ? 'border-l-2 border-transparent' : 'border-l-2 border-line pb-4'
                     }`}
                   >
-                    <span className="font-display text-[16px] font-extrabold text-brand-text">{m.year}</span>
+                    <span className="font-sans text-[16px] font-bold text-brand-text">{m.year}</span>
                     <span className="text-[14px] leading-[1.5] text-ink">{m.text}</span>
                   </div>
                 )
@@ -60,7 +61,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
         <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {values.map((v, i) => (
             <div key={i} className="rounded-[12px] border border-line bg-card p-[22px]">
-              <div className="mb-2 font-display text-[19px] font-extrabold">{v.title}</div>
+              <div className="mb-2 font-sans text-[19px] font-bold">{v.title}</div>
               {v.text ? <p className="m-0 text-[14px] leading-[1.55] text-muted">{v.text}</p> : null}
             </div>
           ))}
