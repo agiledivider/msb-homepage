@@ -79,8 +79,11 @@ start() {
     echo "port $PORT is busy (orphaned server?) — reaping before start ..."
     kill_port_listeners
   fi
-  echo "starting dev server on http://localhost:$PORT ..."
   cd "$ROOT"
+  # The dev DB is built by migrations, like the servers' (D-010): apply new ones first.
+  echo "applying migrations ..."
+  pnpm payload migrate >"$LOG_FILE" 2>&1 || { echo "migrations failed — see $LOG_FILE" >&2; exit 1; }
+  echo "starting dev server on http://localhost:$PORT ..."
   # Run detached so it survives this shell; logs go to the log file.
   PORT="$PORT" nohup pnpm dev >"$LOG_FILE" 2>&1 &
   echo $! >"$PID_FILE"

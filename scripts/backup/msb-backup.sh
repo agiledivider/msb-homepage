@@ -356,10 +356,12 @@ apply_restore() {
   [ -n "$(schema "$db")" ] || abort damaged "the backup's database structure could not be read; nothing changed"
   [ "$(schema "$db")" = "$(schema "$DB_DIR/$DB_FILE")" ] ||
     abort other-version "the backup's database structure differs from the live one (another version of the site); nothing changed"
-  # Same structure: the restored database keeps the live migration history, so
-  # the next `payload migrate` on start sees what it expects (a dev backup only
-  # has a "dev" entry there, which would stop it).
-  if sqlite3 "$DB_DIR/$DB_FILE" "select 1 from payload_migrations limit 1;" >/dev/null 2>&1; then
+  # Same structure. Every database is built by migrations since D-010, so a
+  # backup normally brings its own, correct migration history and keeps it.
+  # Only an old dev backup (Payload `push`, history is just "dev") takes over
+  # the live history, so the next `payload migrate` on start sees what it expects.
+  if [ "$(sqlite3 "$db" "select count(*) from payload_migrations where name <> 'dev';" 2>/dev/null)" = 0 ] &&
+    sqlite3 "$DB_DIR/$DB_FILE" "select 1 from payload_migrations limit 1;" >/dev/null 2>&1; then
     sqlite3 "$db" "ATTACH '$DB_DIR/$DB_FILE' AS live;
       DELETE FROM main.payload_migrations; INSERT INTO main.payload_migrations SELECT * FROM live.payload_migrations;" ||
       abort damaged "the backup's migration history could not be aligned; nothing changed"

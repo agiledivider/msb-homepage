@@ -281,6 +281,7 @@ after=$(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select count(*) fr
 [[ $after == $'0\n20260101_000000_a,20260102_000000_b' ]] || fail "content or migration history wrong after a dev restore: $after"
 pass "a dev backup restores onto a server with the same structure, and the server keeps its migration history"
 
+
 shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "alter table pages add column subtitle text;"; chown -R 1001:1001 /volumes/db'
 preview=$(call GET "/backups/$devsnap/preview")
 [[ $preview == *'"compatible":false'* && $preview == *'"differences":["pages"]'* ]] || fail "structural difference not named: $preview"
@@ -290,5 +291,22 @@ for _ in $(seq 60); do status=$(call GET /status); [[ $status == *'"running":nul
 [[ $(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select count(*) from pragma_table_info(\"pages\") where name = \"subtitle\";"') == 1 ]] \
   || fail "refused restore changed the live database"
 pass "a backup with another structure is refused, names the table (pages), and changes nothing"
+
+# 13b. Since D-010 every database is built by migrations, so a backup brings
+#      its own history; it must keep it, not take over the server's (the server's
+#      can lag behind its tables, and `payload migrate` would then recreate them).
+shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "delete from payload_migrations;
+  insert into payload_migrations(name, batch) values (\"20260101_000000_a\", 1), (\"20260102_000000_b\", 1), (\"20260103_000000_c\", 2);"
+  chown -R 1001:1001 /volumes/db'
+run "$P-db" "$P-media" backup >/dev/null
+fullsnap=$(newest | grep -o '[0-9a-f]\{8\}')
+shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "delete from payload_migrations;
+  insert into payload_migrations(name, batch) values (\"20260101_000000_a\", 1);"; chown -R 1001:1001 /volumes/db'
+[[ $(call POST "/backups/$fullsnap/restore" "{\"confirm\":\"$fullsnap\"}") == *" 202" ]] || fail "restore with history did not start"
+for _ in $(seq 120); do status=$(call GET /status); [[ $status == *'"running":null'* ]] && break; sleep 1; done
+[[ $status == *'"lastRestore":{"status":"ok"'* ]] || fail "restore with history failed: $status"
+after=$(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select group_concat(name) from payload_migrations;"')
+[[ $after == '20260101_000000_a,20260102_000000_b,20260103_000000_c' ]] || fail "backup lost its migration history: $after"
+pass "a backup with its own migration history keeps it"
 
 echo "backup round trip: all checks passed"

@@ -12,7 +12,7 @@ pnpm seed                    # demo content into msb.db (stop the dev server fir
 pnpm test                    # vitest: integration (temp SQLite per file) + fitness tests
 pnpm backlog:summary         # after any docs/BACKLOG.md edit (pnpm test fails on a stale summary)
 pnpm generate:types          # after any collection/field change
-pnpm payload migrate:create <name>   # after any schema change; prod runs migrations, not push
+pnpm payload migrate:create <name>   # after any schema change, then dev:restart (runs payload migrate)
 pnpm publish:static          # snapshot the public site into dist/ (docs/STATIC.md)
 pnpm release:app | release:static    # build + push images (DEPLOY.md)
 ```
@@ -28,7 +28,7 @@ pnpm release:app | release:static    # build + push images (DEPLOY.md)
 - **pnpm only** (playbook exception: Next + Payload). Dependency build scripts must be listed in `pnpm-workspace.yaml` → `allowBuilds`.
 - **Public reads go through `findPublic()` / `findForRequest()`** in `src/lib/publicData.ts` (published + approved, `overrideAccess: false`). A direct `payload.find` in `src/app/(frontend)` leaks drafts; `tests/fitness/frontend-reads.test.ts` enforces this.
 - **Seeds that write published content** pass `{ context: { [EDITORIAL_SKIP]: true } }` and `reviewStatus: 'approved'`, or the editorial publish gate silently turns them into drafts.
-- **Schema:** dev uses `push: true`; production runs `payload migrate` on container start. Every schema change ships with a migration in `src/migrations/`.
+- **Schema:** every database is built by migrations, dev included (`push` only for test DBs, D-010). Every schema change ships with a migration in `src/migrations/`; `pnpm test` fails without it. Migrations never use the Local API; content conversions go into `src/seed/prod.ts`.
 - **No auth gate in front of the app** (Basic Auth removed 2026-07-22). Any Payload deployment is public; see the 🚨 go-live blocker in `docs/BACKLOG.md`.
 - **Styling:** Tailwind v4 utilities in the component, tokens only in `@theme` (`src/styles/globals.css`); mobile-first, hero/header switch at `md`; no `!important`. Icons: Font Awesome SVG React components.
 - **Hero prism:** design choices (true 3D prism on all widths, tilt, anticipation + overshoot) are confirmed by Falk; don't change them without asking. Render traps in `docs/runtime-traps.md`.

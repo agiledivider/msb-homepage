@@ -63,10 +63,11 @@ export default buildConfig({
   },
   db: sqliteAdapter({
     client: { url: process.env.DATABASE_URI || 'file:./msb.db' },
-    // Push works against a clean DB (drift-free). If it ever aborts on an
-    // "index already exists" error, the schema has drifted — recreate msb.db and
-    // re-seed, or move to migrations (payload migrate) for production.
-    push: true,
+    // Every real database (dev and server) is built by migrations, so each one
+    // carries its own migration history and backups move freely between them
+    // (D-010). Only the throwaway test DBs use push; tests/integration/
+    // migrations-match-schema.test.ts checks the migrations build the same schema.
+    push: process.env.NODE_ENV === 'test',
   }),
   plugins: [
     editorialWorkflow({

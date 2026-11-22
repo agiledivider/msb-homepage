@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import { seedSiteContent } from './content'
 import { upsertLegacyArticles } from './legacy'
 import { upsertLegalPages } from './legal'
+import { convertVereinPage } from './vereinLayout'
 
 /**
  * Production seed, run on container start (after migrations). Idempotent:
@@ -88,6 +89,11 @@ const run = async () => {
       payload.logger.info(`created init admin: ${email}`)
     }
   }
+
+  // Content conversions that belong to a schema change but need the Local API.
+  // They run here, after *all* migrations (a migration may only touch the tables
+  // as they are at its point in history). Idempotent: no-ops once done.
+  await convertVereinPage(payload) // retired Verein Intro → Zwei Spalten + Werte (S3.7)
 
   // Launch content — only on a fresh DB, so editor changes are never overwritten.
   if (await isFreshDb(payload)) {
