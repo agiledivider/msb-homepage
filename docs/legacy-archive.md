@@ -42,4 +42,4 @@ pnpm payload run src/seed/run-legacy.ts   # dev server stopped
 
 ## Filing into folders
 
-`src/seed/run-file-folders.ts` files every event under `Events / <year> / <month>` (event date) and every blog post under `Blog / <year> / <month>` (publish date, Berlin time), and moves along the images that belong to exactly one of them. Dry run by default, `FILE_FOLDERS_APPLY=1` applies; run it after an import. Editors filing new posts by hand is not automated.
+`src/seed/run-file-folders.ts` files every event under `Events / <year> / <month>` (event date) and every blog post under `Blog / <year> / <month>` (publish date, Berlin time), and moves along the images that belong to exactly one of them. Dry run by default, `FILE_FOLDERS_APPLY=1` applies; run it after an import. New and edited events and posts without a folder are filed the same way on save by `src/plugins/autofile`; a folder an editor picks is kept, and the runner only catches up on content from before the plugin.

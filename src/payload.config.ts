@@ -17,6 +17,7 @@ import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { passwordLoginEnabled } from './lib/passwordLogin'
 import { payloadSecret } from './lib/payloadSecret'
+import { autofilePlugin } from './plugins/autofile/plugin'
 import { backupsAdmin } from './plugins/backups'
 import { editorialWorkflow } from './plugins/editorial'
 import { isAdmin } from './plugins/editorial/access'
@@ -76,6 +77,9 @@ export default buildConfig({
     // Publish the static site from the admin (button + auto-publish on change).
     // The build runs in the separate publisher container; see docs/PUBLISHING.md.
     sitePublishing({ collections: ['blog', 'events', 'pages'] }),
+    // New and edited events / blog posts without a folder are filed into
+    // Events|Blog / year / month, with images only they use (src/plugins/autofile).
+    autofilePlugin(),
     // Backups view for admins (/admin/backups); data from the backup container. See docs/BACKLOG.md E8.
     backupsAdmin(),
     // UI-configurable roles & permissions (Roles + Permissions collections).
