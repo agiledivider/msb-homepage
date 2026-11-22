@@ -95,15 +95,21 @@ const KI_TEXT = { generated: 'Bild generiert', edited: 'Bild bearbeitet' } as co
 
 /**
  * The styleguide's KI label strip (green "KI" + ink field), drawn over the
- * bottom-left corner of whatever crop is visible. Styleguide size: 48 px tall
- * and 72 px from the edge on a 1080 px image, i.e. ~4.4 % and ~6.7 % of the
- * width; clamped to the site's 14 px text minimum on small images.
+ * bottom-left corner of whatever crop is visible. It scales with the image
+ * (cqw) and is deliberately smaller than the styleguide's 48 px on 1080 px
+ * (Falk 2026-11-22: the label must not dominate list thumbnails). On small
+ * images (< 240 px, e.g. list rows) only a tiny "KI" tag remains; the full
+ * wording is in the aria-label.
  */
 function KiLabel({ kind }: { kind: keyof typeof KI_TEXT }) {
   return (
-    <div className="pointer-events-none absolute bottom-[clamp(8px,4cqw,40px)] left-[clamp(8px,4cqw,40px)] flex h-[clamp(26px,4.4cqw,36px)] font-mono text-[clamp(14px,2cqw,16px)] font-medium uppercase leading-none tracking-[.06em]">
-      <span className="flex items-center bg-brand px-[.6em] text-ink">KI</span>
-      <span className="flex items-center bg-ink px-[.7em] text-white">{KI_TEXT[kind]}</span>
+    <div
+      role="img"
+      aria-label={`KI · ${KI_TEXT[kind]}`}
+      className="pointer-events-none absolute bottom-[clamp(4px,2.5cqw,24px)] left-[clamp(4px,2.5cqw,24px)] flex h-[clamp(13px,3cqw,26px)] font-mono text-[clamp(8px,1.4cqw,12px)] font-medium uppercase leading-none tracking-[.06em]"
+    >
+      <span className="flex items-center bg-brand px-[.5em] text-ink">KI</span>
+      <span className="flex items-center bg-ink px-[.6em] text-white @max-[240px]:hidden">{KI_TEXT[kind]}</span>
     </div>
   )
 }
