@@ -305,6 +305,12 @@ Wherever the site crops an image to fit a frame (hero, cards, polaroids, especia
 
 **Implementation notes:** `Media` turns Payload's `focalX`/`focalY` (0–100 %, set via "Edit image" in the admin) into CSS `object-position` on the `object-cover` image, so every frame (hero faces, polaroids, cards, lists, map) and the static export follow it; no new field, no migration. Untouched uploads carry 50/50 = the old centre crop. The KI label sits on the frame, not the image. Tests: `tests/unit/media-focal-point.test.tsx`. Payload 4 (beta, checked 2026-11-22) keeps `focalX`/`focalY` and adds `_transforms`; no focal regions.
 
+### ⏳ S5.8 — Editors jump from a page on the site straight to editing it (S)
+**Source:** IDEAS.md 2026-11-23.
+An editor who spots a typo or an outdated date on the site has to open the CMS, find the right collection and search for the entry. Logged-in editors should see an edit button on every page, blog post and event that opens exactly that entry in the CMS. Visitors never see it.
+
+**AC:** logged in as an editor, every page, post and event shows a "Bearbeiten" button that opens that entry's edit view in the CMS; a visitor who isn't logged in sees no button and no trace of it in the page; an editor without the right to edit that entry sees no button; the statically published site never contains it; the button doesn't cover content at 375 px.
+
 ---
 
 ## E6 — Playbook retrofit
