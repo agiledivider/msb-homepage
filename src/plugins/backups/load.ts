@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { isCmsUser } from '@/access/admin'
+import { isValidPassphrase } from './passphrase'
 
 /**
  * Talking to the backup container for the admin backups view (E8). The backups
@@ -44,6 +45,16 @@ export type BackupsResult =
   | { kind: 'ok'; snapshots: Snapshot[]; lastRun: LastRun | null; running: Running | null; stale: boolean }
 export type StatusResult = Denied | { kind: 'ok'; lastRun: LastRun | null; running: Running | null }
 export type StartResult = Denied | { kind: 'started' } | { kind: 'running'; running: Running | null }
+export type DownloadResult =
+  | Denied
+  | { kind: 'not-found' }
+  | { kind: 'bad-passphrase' }
+  | { kind: 'ok'; body: ReadableStream<Uint8Array>; filename: string }
+
+/** A restic snapshot id, full or short. Anything else never reaches the backup service's URL. */
+const SNAPSHOT_ID = /^[0-9a-f]{8,64}$/
+/** Downloads can be large and slow; this bounds one, it doesn't pace it. */
+const DOWNLOAD_TIMEOUT_MS = 2 * 60 * 60 * 1000
 
 /** Both settings, or none: without either the view says it isn't set up. */
 export function backupApiConfig(env: Record<string, string | undefined>): BackupApiConfig | null {
@@ -69,7 +80,7 @@ function gate(user: unknown, deps: Deps): Denied | BackupApiConfig {
 async function call(config: BackupApiConfig, deps: Deps, path: string, init: RequestInit = {}, timeoutMs = 15_000) {
   return deps.fetch(`${config.url}${path}`, {
     ...init,
-    headers: { 'X-Backup-Token': config.token, 'Content-Type': 'application/json' },
+    headers: { ...init.headers, 'X-Backup-Token': config.token, 'Content-Type': 'application/json' },
     cache: 'no-store',
     signal: AbortSignal.timeout(timeoutMs),
   })
@@ -112,12 +123,52 @@ export async function loadStatus(user: unknown, deps: Deps): Promise<StatusResul
   }
 }
 
+const whoIs = (user: unknown) => {
+  const email = (user as { email?: unknown }).email
+  return typeof email === 'string' && email ? email : `user ${(user as { id?: unknown }).id}`
+}
+
+/**
+ * S8.2: one backup as a stream, encrypted by the backup service with the
+ * passphrase (OpenSSL `enc` format). The passphrase travels in the request
+ * body only, never in a URL or a log line. Logged with the admin's email.
+ */
+export async function openDownload(
+  user: unknown,
+  id: string,
+  passphrase: unknown,
+  deps: Deps,
+): Promise<DownloadResult> {
+  const config = gate(user, deps)
+  if ('kind' in config) return config
+  if (!SNAPSHOT_ID.test(id)) return { kind: 'not-found' }
+  if (!isValidPassphrase(passphrase)) return { kind: 'bad-passphrase' }
+  const who = whoIs(user)
+  try {
+    const res = await call(
+      config,
+      deps,
+      `/backups/${id}/download`,
+      { method: 'POST', body: JSON.stringify({ passphrase, by: who }) },
+      DOWNLOAD_TIMEOUT_MS,
+    )
+    if (res.status === 404) return { kind: 'not-found' }
+    if (!res.ok || !res.body) throw new Error(`backup API answered ${res.status}`)
+    const named = /filename="(msb-backup-[0-9TZ]+-[0-9a-f]{8,64}\.tar\.gz\.enc)"/.exec(
+      res.headers.get('content-disposition') ?? '',
+    )
+    deps.log('info', `backups: backup ${id} downloaded (encrypted) from the CMS by ${who}`)
+    return { kind: 'ok', body: res.body, filename: named?.[1] ?? `msb-backup-${id}.tar.gz.enc` }
+  } catch (err) {
+    return failed(deps, 'download failed', err)
+  }
+}
+
 /** S8.5: start a backup now, recorded with the admin's email. One at a time. */
 export async function startBackup(user: unknown, deps: Deps): Promise<StartResult> {
   const config = gate(user, deps)
   if ('kind' in config) return config
-  const by = (user as { email?: unknown }).email
-  const who = typeof by === 'string' && by ? by : `user ${(user as { id?: unknown }).id}`
+  const who = whoIs(user)
   try {
     const res = await call(config, deps, '/backups', { method: 'POST', body: JSON.stringify({ by: who }) })
     if (res.status === 202) {

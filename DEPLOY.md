@@ -228,9 +228,16 @@ pnpm backup:check --restore ./restore-check   # also restore the latest backup a
 "Backups"): date, size, whether the last nightly run worked, and a warning when
 the newest backup is older than 36 h. "Jetzt sichern" there starts a backup at
 once (one at a time: a lock in the script also covers the nightly run; the log
-and the page name who started it). The `backup` service serves this through
-a small internal API (`scripts/backup/backup-api.mjs`, port 8081, not
-published) that lists and starts backups; it can't delete. Set `BACKUP_API_TOKEN` in `.env`
+and the page name who started it). "Herunterladen" next to a backup gives
+it as one encrypted file, streamed straight from the repository: the page
+generates a password (shown once, with a copy button), and the file opens with
+`openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -in F -out backup.tar.gz`
+(inside: database under `work/db/`, media under `volumes/media/`). There is no
+unencrypted download; the log names who downloaded which backup. The
+`backup` service serves this through a small internal API
+(`scripts/backup/backup-api.mjs`, port 8081, not published) that lists,
+starts and downloads backups; it can't delete. A download holds a restic read
+lock; the nightly prune waits for it (`--retry-lock 2h`). Set `BACKUP_API_TOKEN` in `.env`
 (`openssl rand -hex 32`); compose passes it to `web` and `backup`, and neither
 starts without it. The "last run" line is unknown after the backup container
 restarts until its next nightly run.

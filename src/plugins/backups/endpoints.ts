@@ -1,7 +1,7 @@
 import type { Endpoint, PayloadRequest } from 'payload'
 import { isCmsUser } from '@/access/admin'
 import { isAdmin } from '@/plugins/editorial/access'
-import { backupApiConfig, type Deps, loadStatus, startBackup } from './load'
+import { backupApiConfig, type Deps, loadStatus, openDownload, startBackup } from './load'
 
 const deps = (req: PayloadRequest): Deps => ({
   config: backupApiConfig(process.env),
@@ -42,4 +42,35 @@ const statusEndpoint: Endpoint = {
   },
 }
 
-export const backupEndpoints: Endpoint[] = [runEndpoint, statusEndpoint]
+/**
+ * POST /api/backups/download — one backup, encrypted with the passphrase the
+ * admin was shown (S8.2). A form post (id, passphrase) so the browser saves
+ * the answer as a file and the passphrase never appears in a URL.
+ */
+const downloadEndpoint: Endpoint = {
+  path: '/backups/download',
+  method: 'post',
+  handler: async (req) => {
+    const form = await req.formData?.().catch(() => null)
+    const id = form?.get('id')
+    const out = await openDownload(req.user, typeof id === 'string' ? id : '', form?.get('passphrase'), deps(req))
+    switch (out.kind) {
+      case 'ok':
+        return new Response(out.body, {
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': `attachment; filename="${out.filename}"`,
+            'Cache-Control': 'no-store',
+          },
+        })
+      case 'not-found':
+        return Response.json({ error: 'no such backup' }, { status: 404 })
+      case 'bad-passphrase':
+        return Response.json({ error: 'passphrase missing or too weak' }, { status: 400 })
+      default:
+        return denied(req, out.kind)
+    }
+  },
+}
+
+export const backupEndpoints: Endpoint[] = [runEndpoint, statusEndpoint, downloadEndpoint]

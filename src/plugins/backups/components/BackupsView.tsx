@@ -5,15 +5,10 @@ import type { CSSProperties } from 'react'
 import { isAdmin } from '@/plugins/editorial/access'
 import { backupApiConfig, type LastRun, loadBackups } from '../load'
 import { BackupNow } from './BackupNow'
+import { BackupTable } from './BackupTable'
 
 const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
 const fmtWhen = (iso: string) => `${BERLIN.format(new Date(iso))} Uhr`
-const NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 })
-const fmtSize = (bytes: number | null) => {
-  if (bytes === null) return 'unbekannt'
-  const mb = bytes / 1024 / 1024
-  return mb >= 1024 ? `${NUM.format(mb / 1024)} GB` : `${NUM.format(mb)} MB`
-}
 
 const box = (tone: 'info' | 'warn' | 'error'): CSSProperties => ({
   padding: '12px 16px',
@@ -25,11 +20,6 @@ const box = (tone: 'info' | 'warn' | 'error'): CSSProperties => ({
   background:
     tone === 'info' ? 'var(--theme-elevation-50)' : `var(--theme-${tone === 'warn' ? 'warning' : 'error'}-50)`,
 })
-const cell: CSSProperties = {
-  padding: '8px 12px',
-  borderBottom: '1px solid var(--theme-elevation-100)',
-  textAlign: 'left',
-}
 
 const startedBy = (lastRun: LastRun) => (lastRun.by ? `gestartet von ${lastRun.by}` : 'nächtliche Sicherung')
 
@@ -97,24 +87,7 @@ export async function BackupsView({ initPageResult, params, searchParams }: Admi
             <BackupNow apiRoute={req.payload.config.routes.api} initialRunning={result.running} />
             <LastRunLine lastRun={result.lastRun} />
             {result.snapshots.length ? (
-              <table style={{ borderCollapse: 'collapse', width: '100%', maxWidth: 720, marginTop: 8 }}>
-                <thead>
-                  <tr>
-                    <th style={cell}>Datum</th>
-                    <th style={cell}>Größe</th>
-                    <th style={cell}>Kennung</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.snapshots.map((s) => (
-                    <tr key={s.id}>
-                      <td style={cell}>{fmtWhen(s.time)}</td>
-                      <td style={cell}>{fmtSize(s.sizeBytes)}</td>
-                      <td style={{ ...cell, fontFamily: 'var(--font-mono, monospace)' }}>{s.shortId}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <BackupTable apiRoute={req.payload.config.routes.api} snapshots={result.snapshots} />
             ) : null}
             <p style={{ marginTop: 16, color: 'var(--theme-elevation-600)' }}>
               {result.snapshots.length === 1 ? '1 Backup' : `${result.snapshots.length} Backups`} von Datenbank und

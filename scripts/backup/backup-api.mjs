@@ -10,6 +10,12 @@
 //   GET  /backups  → { snapshots: [{ id, shortId, time, sizeBytes }], lastRun, running }   (S8.1)
 //   GET  /status   → { lastRun, running }      cheap: no restic call, for polling
 //   POST /backups  { by } → 202 { started: true }, or 409 { running } if one runs   (S8.5)
+//   POST /backups/<id>/download { passphrase, by } → the whole backup (database
+//        + media) as one .tar.gz, encrypted with the passphrase, streamed (S8.2).
+//        Format: OpenSSL `enc` (AES-256-CBC, key from PBKDF2-SHA256, 600 000
+//        rounds), so it opens anywhere with
+//          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -in F -out backup.tar.gz
+//        There is no unencrypted download.
 //
 // lastRun: { status: 'ok'|'failed', at, by } (by: who started it, null = nightly)
 // running: { startedAt, by } or null
@@ -22,10 +28,12 @@
 // Plain JS without dependencies: the backup image has Node but no node_modules.
 
 import { execFile, spawn } from 'node:child_process'
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { createCipheriv, createHash, pbkdf2, randomBytes, timingSafeEqual } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
+import { PassThrough, pipeline } from 'node:stream'
 import { promisify } from 'node:util'
+import { createGzip } from 'node:zlib'
 
 /** @typedef {{ id: string, shortId: string, time: string, sizeBytes: number | null }} Snapshot */
 /** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null }} LastRun */
@@ -100,6 +108,40 @@ export function parseRunning(text, fallbackStartedAt) {
   }
 }
 
+/** Download name: what it is, when (UTC, sortable) and which snapshot. */
+export function downloadName(snapshot) {
+  const stamp = snapshot.time.slice(0, 16).replace(/[-:]/g, '')
+  return `msb-backup-${stamp}Z-${snapshot.shortId}.tar.gz.enc`
+}
+
+/** PBKDF2 rounds for downloads; the decrypt command must name the same number. */
+export const PBKDF2_ITERATIONS = 600_000
+
+/** A passphrase the CMS generated: long enough to be one, printable ASCII only. */
+export function validPassphrase(v) {
+  return typeof v === 'string' && v.length >= 20 && v.length <= 200 && /^[\x21-\x7e]+$/.test(v)
+}
+
+/**
+ * Encrypt a stream in OpenSSL's `enc` format: "Salted__", 8 random salt bytes,
+ * then AES-256-CBC with key and IV from PBKDF2-SHA256(passphrase, salt).
+ * Same as `openssl enc -aes-256-cbc -pbkdf2 -iter N -md sha256`.
+ * @returns {Promise<import('node:stream').Readable>}
+ */
+export async function encryptStream(source, passphrase, iterations = PBKDF2_ITERATIONS) {
+  const salt = randomBytes(8)
+  const derived = await new Promise((resolve, reject) =>
+    pbkdf2(passphrase, salt, iterations, 48, 'sha256', (err, key) => (err ? reject(err) : resolve(key))),
+  )
+  const cipher = createCipheriv('aes-256-cbc', derived.subarray(0, 32), derived.subarray(32, 48))
+  const out = new PassThrough()
+  out.write(Buffer.concat([Buffer.from('Salted__'), salt]))
+  pipeline(source, cipher, out, (err) => {
+    if (err) out.destroy(err)
+  })
+  return out
+}
+
 /** Constant-time token check; hashing first makes the lengths equal. */
 export function tokenMatches(given, expected) {
   if (typeof given !== 'string' || !expected) return false
@@ -132,10 +174,11 @@ async function readJsonBody(req) {
  *   readLastRun: () => Promise<LastRun | null>,
  *   readRunning: () => Promise<Running | null>,
  *   startBackup: (by: string | null) => 'started' | 'running',
+ *   dumpSnapshot: (id: string) => { stream: import('node:stream').Readable, cancel: () => void },
  *   log: (msg: string) => void,
  * }} deps
  */
-export function makeHandler({ token, listSnapshots, readLastRun, readRunning, startBackup, log }) {
+export function makeHandler({ token, listSnapshots, readLastRun, readRunning, startBackup, dumpSnapshot, log }) {
   return async (req, res) => {
     const send = (status, body) => {
       res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
@@ -152,6 +195,32 @@ export function makeHandler({ token, listSnapshots, readLastRun, readRunning, st
       if (req.method === 'GET' && path === '/status') {
         const [lastRun, running] = await Promise.all([readLastRun(), readRunning()])
         return send(200, { lastRun, running })
+      }
+      const download = /^\/backups\/([0-9a-f]{8,64})\/download$/.exec(path)
+      if (req.method === 'POST' && download) {
+        const body = await readJsonBody(req)
+        if (body === null || !validPassphrase(body.passphrase)) {
+          return send(400, { error: 'expected { passphrase } of 20 to 200 printable characters' })
+        }
+        const snapshot = (await listSnapshots()).find((s) => s.id === download[1] || s.shortId === download[1])
+        if (!snapshot) return send(404, { error: 'no such backup' })
+        const by = cleanBy(body.by)
+        log(`backup ${snapshot.shortId} downloaded (encrypted) by ${by ?? 'unknown'}`)
+        const { stream, cancel } = dumpSnapshot(snapshot.id)
+        const encrypted = await encryptStream(stream, body.passphrase)
+        res.writeHead(200, {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': `attachment; filename="${downloadName(snapshot)}"`,
+          'Cache-Control': 'no-store',
+        })
+        // A cancelled download stops restic instead of reading the whole repository for nobody.
+        res.on('close', () => {
+          if (!res.writableFinished) cancel()
+        })
+        pipeline(encrypted, res, (err) => {
+          if (err) log(`download of ${snapshot.shortId} broke off: ${err.message}`)
+        })
+        return
       }
       if (req.method === 'POST' && path === '/backups') {
         const body = await readJsonBody(req)
@@ -238,7 +307,24 @@ async function main() {
     return 'started'
   }
 
-  const server = createServer(makeHandler({ token, listSnapshots, readLastRun, readRunning, startBackup, log }))
+  // restic writes the snapshot as a tar stream (paths as backed up: /work/db/msb.db,
+  // /volumes/media/…); gzip makes the database part small.
+  const dumpSnapshot = (id) => {
+    const proc = spawn('restic', ['dump', '--archive', 'tar', id, '/'], { stdio: ['ignore', 'pipe', 'pipe'] })
+    proc.stderr.on('data', (d) => log(`restic dump: ${String(d).trim()}`))
+    const gzip = createGzip()
+    proc.on('exit', (code, signal) => {
+      if (code !== 0 && signal !== 'SIGTERM') gzip.destroy(new Error(`restic dump exited with ${code ?? signal}`))
+    })
+    return {
+      stream: proc.stdout.pipe(gzip),
+      cancel: () => proc.kill('SIGTERM'),
+    }
+  }
+
+  const server = createServer(
+    makeHandler({ token, listSnapshots, readLastRun, readRunning, startBackup, dumpSnapshot, log }),
+  )
   server.requestTimeout = 90_000
   server.listen(port, () => log(`listening on :${port}`))
   const stop = () => server.close(() => process.exit(0))

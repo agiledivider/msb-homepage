@@ -14,7 +14,7 @@ cd "$(dirname "$0")/../.."
 
 IMG=msb-backup:test
 P="msb-bk-test-$$"
-VOLS=("$P-db" "$P-media" "$P-repo" "$P-db2" "$P-media2" "$P-ssh")
+VOLS=("$P-db" "$P-media" "$P-repo" "$P-db2" "$P-media2" "$P-ssh" "$P-dl")
 fail() { printf '\033[31mFAIL\033[0m %s\n' "$*" >&2; exit 1; }
 pass() { printf '\033[32mok\033[0m   %s\n' "$*"; }
 cleanup() {
@@ -147,5 +147,33 @@ done
 after=$(newest)
 [[ -n $after && $after != "$before" ]] || fail "manual backup is not the newest snapshot ($before → $after)"
 pass "backup started through the API: runs once, refuses a second start, records who started it"
+
+# 10. Download (S8.2): the newest backup comes out as one file encrypted with
+#     the passphrase; plain openssl (another image) opens it with the command
+#     the admin is shown, and inside are an intact database and the media.
+#     No passphrase, or an unknown id, gets nothing.
+PASS=k7mq-x3pz-9cdr-wv4h-tn2e-fa8b
+id=$(newest | grep -o '[0-9a-f]\{8\}')
+dl() { # dl <id> <json body>: POST the download into the dl volume, prints headers + status
+  docker run --rm --network "$P-net" -v "$P-dl:/dl" -u 0 --entrypoint sh "$IMG" -c '
+    curl -s -m 120 -D - -o /dl/b.enc -w "status:%{http_code}" -X POST -H "X-Backup-Token: api-test-only" \
+      -H "Content-Type: application/json" --data "$3" "http://$1:8081/backups/$2/download" | tr -d "\r"' \
+    sh "$P-sched" "$1" "$2"
+}
+[[ $(dl "$id" '{}') == *status:400 ]] || fail "download without a passphrase was not refused"
+[[ $(dl deadbeef "{\"passphrase\":\"$PASS\"}") == *status:404 ]] || fail "unknown backup id was not a 404"
+head=$(dl "$id" "{\"passphrase\":\"$PASS\",\"by\":\"admin@test.de\"}")
+[[ $head == *status:200 && $head == *"filename=\"msb-backup-"*"Z-$id.tar.gz.enc\""* ]] || fail "download failed: $head"
+docker run --rm -v "$P-dl:/dl" alpine:3.22 sh -c "apk add -q openssl >/dev/null && \
+  openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -pass pass:$PASS -in /dl/b.enc -out /dl/b.tar.gz" \
+  || fail "openssl could not decrypt the download"
+out=$(docker run --rm -v "$P-dl:/dl" -u 0 --entrypoint sh "$IMG" -c '
+  cd /dl && tar -xzf b.tar.gz && find . -type f -path "./volumes/media/*" | sort
+  sqlite3 work/db/msb.db "PRAGMA integrity_check; select count(*) from pages;"
+  grep -c "Verein" b.enc || true')
+[[ $out == *./volumes/media/hero.webp* && $out == *./volumes/media/sub/satzung.pdf* ]] || fail "download lacks the media: $out"
+[[ $out == *$'ok\n3\n0' ]] || fail "database not intact, or plain text visible in the encrypted file: $out"
+docker logs "$P-sched" 2>&1 | grep -q "backup $id downloaded (encrypted) by admin@test.de" || fail "download not logged with who"
+pass "download: encrypted with the passphrase, opens with plain openssl, intact DB and all media, logged; no passphrase → 400"
 
 echo "backup round trip: all checks passed"

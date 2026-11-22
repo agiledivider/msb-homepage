@@ -40,3 +40,11 @@ Entries D-001 to D-004 were recorded retroactively on 2026-11-12 from the sessio
 **Why:** a break-in into the public CMS must not be able to delete or overwrite the backups. The API only offers what E8 needs; it has no delete or prune.
 **Consequences:** every backup feature in the CMS is an API endpoint in the backup container first; downloads and restores (S8.2–S8.4) stream through it. `web` and `backup` both need `BACKUP_API_TOKEN`.
 **Revisit when:** the backup storage supports append-only access for the app, or the backups move to a managed service with its own access control.
+
+## D-006 Backup downloads are encrypted with a generated password, in OpenSSL's format — Status: decided 2026-11-22
+**Context:** a downloaded backup (S8.2) holds everything, including users' password hashes, the MCP API key table and drafts, and ends up on a laptop, in a cloud sync or in mail.
+**Options:** A) plain `.tar.gz`; B) encrypted with a password the admin chooses; C) encrypted with a password the CMS generates and shows once.
+**Decision:** C (Falk): about 119 bits, six groups of four look-alike-free characters, with a copy button; the download starts only after the admin confirms they saved it. No plain download. Format: OpenSSL `enc`, AES-256-CBC with key and IV from PBKDF2-SHA256 (600 000 rounds), written by Node's crypto in the backup service, so the file opens with the stock `openssl` command.
+**Why not age:** the `age` CLI takes a passphrase only from a terminal, so it can't encrypt a stream in a service.
+**Consequences:** CBC has no authentication: a damaged or tampered file is noticed when gzip/tar fail, not before. S8.4 (restore from an uploaded file) must ask for the password and decrypt the same way. The password never reaches a URL or a log; it travels in the request body.
+**Revisit when:** age (or another AEAD format with common tooling) can take a passphrase non-interactively, or files must be checked for tampering before they are unpacked.

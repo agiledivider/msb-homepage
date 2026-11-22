@@ -105,9 +105,11 @@ do_backup() {
 
   restic unlock >/dev/null 2>&1 || true # only removes stale locks
   restic backup --host msb-homepage --tag msb "$WORK/db" "$MEDIA_DIR"
+  # Pruning needs the repository to itself; a download from the CMS (S8.2)
+  # holds a read lock while it streams, so wait for it instead of failing.
   # shellcheck disable=SC2086  # BACKUP_KEEP is a list of flags
-  restic forget --host msb-homepage --tag msb $BACKUP_KEEP --prune
-  restic check
+  restic forget --retry-lock 2h --host msb-homepage --tag msb $BACKUP_KEEP --prune
+  restic check --retry-lock 2h
   rm -rf "$WORK/db"
 }
 

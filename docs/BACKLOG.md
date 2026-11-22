@@ -335,11 +335,13 @@ Today only someone with a shell on the server or the backup password can tell wh
 
 **Implementation notes:** per D-005 the backup container serves an internal API (`scripts/backup/backup-api.mjs`, port 8081, `X-Backup-Token`, list only, no delete), started by `msb-backup schedule`; the scheduler records each run in `/work/last-run.json` (unknown after a container restart). The CMS view `/admin/backups` and its sidebar link come from `src/plugins/backups/`; `load.ts` checks admin rights before calling the API, parses the answer with zod and flags "stale" after 36 h. New setting `BACKUP_API_TOKEN` (required by `web` and `backup` in prod compose) plus `BACKUP_API_URL`; dev runs the real service with `pnpm backup:dev`. Covered by `tests/unit/backup-api.test.ts`, `tests/unit/backups-load.test.ts` and section 8 of `pnpm backup:test`; checked in the browser as admin, as editor and with the service down.
 
-### ⏳ S8.2 — Admins download a backup (M)
+### ✅ S8.2 — Admins download a backup (M) — 2026-11-22
 **Needs:** S8.1.
 An admin who wants a copy of the site (before a big change, for an archive, to move servers) has no way to get one.
 
-**AC:** an admin downloads one backup (database and media) as a single file from the backups view; the download is recorded with who and when, because the file contains everything, including user accounts and unpublished drafts; non-admins can't download.
+**AC:** an admin downloads one backup (database and media) as a single file from the backups view; the file is encrypted with a strong password the page generates and the admin copies before downloading (changed by Falk 2026-11-22; there is no unencrypted download); the page says how to open the file; the download is recorded with who and when, because the file contains everything, including user accounts and unpublished drafts; non-admins can't download.
+
+**Implementation notes:** per D-006 the backup API's `POST /backups/<id>/download { passphrase, by }` streams `restic dump --archive tar` through gzip and encrypts it in OpenSSL `enc` format (AES-256-CBC, PBKDF2-SHA256, 600 000 rounds) with Node's crypto; the file opens with stock `openssl`. CMS: `BackupTable.tsx` panel generates the password (`passphrase.ts`, ~119 bits, rejection sampling), copy button, "saved" checkbox, then a form post to `/api/backups/download` (admin-only; password only in the body). The nightly prune waits for a download's read lock (`--retry-lock 2h`). Covered by unit tests (incl. decrypting with the `openssl` CLI) and section 10 of `pnpm backup:test` (plain OpenSSL in another image); downloaded and decrypted in the browser flow.
 
 ### ⏳ S8.3 — Admins restore the site from a backup (L)
 **Needs:** S8.1.
@@ -351,7 +353,7 @@ When content is lost or broken (an accidental delete, a bad import), getting it 
 **Needs:** S8.2, S8.3.
 A backup downloaded earlier, or taken from another server, can't be brought back into the site.
 
-**AC:** an admin uploads a file downloaded with S8.2 and restores it the same way as in S8.3 (preview, deliberate confirmation, safety backup first); a file that isn't such a backup, or is damaged, is refused before anything changes.
+**AC:** an admin uploads a file downloaded with S8.2, enters its password, and restores it the same way as in S8.3 (preview, deliberate confirmation, safety backup first); a wrong password, a file that isn't such a backup, or a damaged one is refused before anything changes.
 
 ### ✅ S8.5 — Admins take a backup now (S) — 2026-11-22
 **Needs:** S8.1. **Source:** Falk 2026-11-22.

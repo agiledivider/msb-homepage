@@ -3,7 +3,14 @@
  * at the network boundary (injected fetch); the clock is injected.
  */
 import { describe, expect, it } from 'vitest'
-import { backupApiConfig, loadBackups, loadStatus, STALE_AFTER_MS, startBackup } from '@/plugins/backups/load'
+import {
+  backupApiConfig,
+  loadBackups,
+  loadStatus,
+  openDownload,
+  STALE_AFTER_MS,
+  startBackup,
+} from '@/plugins/backups/load'
 
 const NOW = new Date('2026-11-22T12:00:00Z')
 const CONFIG = { url: 'http://backup:8081', token: 'api-token' }
@@ -185,5 +192,96 @@ describe('loadStatus (S8.5)', () => {
 
   it('is "unavailable" on an unexpected answer', async () => {
     expect(await status(admin, { running: 'yes' })).toEqual({ kind: 'unavailable' })
+  })
+})
+
+describe('openDownload (S8.2)', () => {
+  type Seen = { url: string; method?: string; body: unknown; token: string | null }
+  const PASS = 'k7mq-x3pz-9cdr-wv4h-tn2e-fa8b'
+  const api = (status: number, body: string, headers: Record<string, string> = {}, seen: Seen[] = []) =>
+    (async (url: string | URL | Request, init?: RequestInit) => {
+      seen.push({
+        url: String(url),
+        method: init?.method,
+        body: JSON.parse(String(init?.body ?? 'null')),
+        token: new Headers(init?.headers).get('X-Backup-Token'),
+      })
+      return new Response(body, { status, headers })
+    }) as typeof globalThis.fetch
+  const logs: [string, string][] = []
+  const open = (user: unknown, id: string, fetch: typeof globalThis.fetch, passphrase: unknown = PASS) =>
+    openDownload(user, id, passphrase, {
+      config: CONFIG,
+      fetch,
+      now: () => NOW,
+      isAdmin,
+      log: (l: 'info' | 'error', m: string) => logs.push([l, m]),
+    })
+  const NAME = 'msb-backup-20261122T1329Z-7bf61efa.tar.gz.enc'
+
+  it("asks for the backup encrypted with the passphrase, in the admin's name, and logs who", async () => {
+    const seen: Seen[] = []
+    const out = await open(
+      admin,
+      '7bf61efa',
+      api(200, 'encrypted-bytes', { 'Content-Disposition': `attachment; filename="${NAME}"` }, seen),
+    )
+    expect(out.kind).toBe('ok')
+    if (out.kind !== 'ok') return
+    expect(out.filename).toBe(NAME)
+    expect(await new Response(out.body).text()).toBe('encrypted-bytes')
+    expect(seen).toEqual([
+      {
+        url: 'http://backup:8081/backups/7bf61efa/download',
+        method: 'POST',
+        body: { passphrase: PASS, by: 'admin@test.de' },
+        token: 'api-token',
+      },
+    ])
+    expect(logs).toContainEqual([
+      'info',
+      'backups: backup 7bf61efa downloaded (encrypted) from the CMS by admin@test.de',
+    ])
+    expect(logs.flat().join(' ')).not.toContain(PASS)
+  })
+
+  it.each([
+    ['no passphrase', null],
+    ['a short one', 'short'],
+    ['one with spaces', 'aaaa bbbb cccc dddd eeee'],
+  ])('refuses %s and never asks the backup service', async (_label, passphrase) => {
+    const seen: Seen[] = []
+    expect(await open(admin, '7bf61efa', api(200, 'x', {}, seen), passphrase)).toEqual({ kind: 'bad-passphrase' })
+    expect(seen).toHaveLength(0)
+  })
+
+  it('falls back to a safe name when the service sends an odd one', async () => {
+    const out = await open(
+      admin,
+      '7bf61efa',
+      api(200, 'x', { 'Content-Disposition': 'attachment; filename="../x.sh"' }),
+    )
+    expect(out.kind === 'ok' && out.filename).toBe('msb-backup-7bf61efa.tar.gz.enc')
+  })
+
+  it.each([
+    ['a path trick', '../status'],
+    ['a query trick', '7bf61efa?x=1'],
+    ['a non-hex id', 'latest'],
+    ['too short', 'abc'],
+  ])('never sends %s to the backup service', async (_label, id) => {
+    const seen: Seen[] = []
+    expect(await open(admin, id, api(200, 'x', {}, seen))).toEqual({ kind: 'not-found' })
+    expect(seen).toHaveLength(0)
+  })
+
+  it('passes on "not found"', async () => {
+    expect(await open(admin, 'deadbeef', api(404, '{}'))).toEqual({ kind: 'not-found' })
+  })
+
+  it('gives an editor nothing and never asks the backup service', async () => {
+    const seen: Seen[] = []
+    expect(await open(editor, '7bf61efa', api(200, 'x', {}, seen))).toEqual({ kind: 'forbidden' })
+    expect(seen).toHaveLength(0)
   })
 })

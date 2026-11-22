@@ -2,16 +2,23 @@
  * S8.1: the backup container's internal API lists the backups for the CMS.
  * restic and the scheduler's status file are faked; the HTTP server is real.
  */
+import { execFileSync } from 'node:child_process'
+import { createDecipheriv, pbkdf2Sync } from 'node:crypto'
 import { createServer, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
+import { Readable } from 'node:stream'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   cleanBy,
+  downloadName,
+  encryptStream,
   makeHandler,
+  PBKDF2_ITERATIONS,
   parseLastRun,
   parseRunning,
   parseSnapshots,
   tokenMatches,
+  validPassphrase,
 } from '../../scripts/backup/backup-api.mjs'
 
 const resticSnapshot = (over: Record<string, unknown> = {}) => ({
@@ -137,6 +144,7 @@ describe('GET /backups', () => {
         readLastRun: async () => ({ status: 'ok', at: '2026-11-21T02:31:00.000Z', by: null }),
         readRunning: async () => null,
         startBackup: () => 'started',
+        dumpSnapshot: () => ({ stream: Readable.from([]), cancel: () => {} }),
         log: (m: string) => logs.push(m),
         ...deps,
       }),
@@ -231,6 +239,7 @@ describe('POST /backups (S8.5)', () => {
           started.push(by)
           return startResult
         },
+        dumpSnapshot: () => ({ stream: Readable.from([]), cancel: () => {} }),
         log: (m: string) => logs.push(m),
       }),
     )
@@ -280,5 +289,171 @@ describe('POST /backups (S8.5)', () => {
     const { post, started } = await start(null)
     expect((await post(body)).status).toBe(400)
     expect(started).toEqual([])
+  })
+})
+
+describe('downloadName', () => {
+  it('names the encrypted file by UTC time and short id', () => {
+    expect(downloadName({ time: '2026-11-22T13:29:46.123Z', shortId: '7bf61efa' })).toBe(
+      'msb-backup-20261122T1329Z-7bf61efa.tar.gz.enc',
+    )
+  })
+})
+
+describe('validPassphrase', () => {
+  it.each([
+    ['a generated one', 'k7mq-x3pz-9cdr-wv4h-tn2e-fa8b', true],
+    ['19 characters', 'a'.repeat(19), false],
+    ['201 characters', 'a'.repeat(201), false],
+    ['a space', 'abcdefghij klmnopqrstu', false],
+    ['not a string', 123456789012345, false],
+  ])('%s → %s', (_label, v, ok) => {
+    expect(validPassphrase(v)).toBe(ok)
+  })
+})
+
+/** Decrypt OpenSSL `enc` (AES-256-CBC, PBKDF2-SHA256) independently of the code under test. */
+const decrypt = (data: Buffer, passphrase: string, iterations = PBKDF2_ITERATIONS) => {
+  expect(data.subarray(0, 8).toString()).toBe('Salted__')
+  const key = pbkdf2Sync(passphrase, data.subarray(8, 16), iterations, 48, 'sha256')
+  const d = createDecipheriv('aes-256-cbc', key.subarray(0, 32), key.subarray(32, 48))
+  return Buffer.concat([d.update(data.subarray(16)), d.final()])
+}
+const hasOpenssl = (() => {
+  try {
+    execFileSync('openssl', ['version'])
+    return true
+  } catch {
+    return false
+  }
+})()
+
+describe('encryptStream', () => {
+  const PASS = 'k7mq-x3pz-9cdr-wv4h-tn2e-fa8b'
+  const encrypt = async (text: string, pass = PASS, iterations = 1000) =>
+    Buffer.concat(await (await encryptStream(Readable.from([Buffer.from(text)]), pass, iterations)).toArray())
+
+  it('round-trips with the same passphrase', async () => {
+    expect(decrypt(await encrypt('database and media', PASS, 1000), PASS, 1000).toString()).toBe('database and media')
+  })
+
+  it('does not open with another passphrase', async () => {
+    const data = await encrypt('secret')
+    expect(() => decrypt(data, 'another-passphrase-xyz', 1000)).toThrow()
+  })
+
+  it('uses a fresh salt every time', async () => {
+    expect((await encrypt('same')).subarray(8, 16)).not.toEqual((await encrypt('same')).subarray(8, 16))
+  })
+
+  it.runIf(hasOpenssl)('opens with the openssl command shown to the admin', async () => {
+    const data = await encrypt('opens with openssl', PASS, PBKDF2_ITERATIONS)
+    const out = execFileSync(
+      'openssl',
+      [
+        'enc',
+        '-d',
+        '-aes-256-cbc',
+        '-pbkdf2',
+        '-iter',
+        String(PBKDF2_ITERATIONS),
+        '-md',
+        'sha256',
+        '-pass',
+        `pass:${PASS}`,
+      ],
+      { input: data },
+    )
+    expect(out.toString()).toBe('opens with openssl')
+  })
+})
+
+describe('POST /backups/<id>/download (S8.2)', () => {
+  let server: Server | undefined
+  afterEach(() => new Promise<void>((done) => (server ? server.close(() => done()) : done())))
+
+  const PASS = 'k7mq-x3pz-9cdr-wv4h-tn2e-fa8b'
+  const SNAP = parseSnapshots([resticSnapshot()])[0]
+  const start = async () => {
+    const dumped: string[] = []
+    const logs: string[] = []
+    server = createServer(
+      makeHandler({
+        token: 'secret-token',
+        listSnapshots: async () => [SNAP],
+        readLastRun: async () => null,
+        readRunning: async () => null,
+        startBackup: () => 'started',
+        dumpSnapshot: (id: string) => {
+          dumped.push(id)
+          return { stream: Readable.from([Buffer.from('tar-gz-bytes')]), cancel: () => {} }
+        },
+        log: (m: string) => logs.push(m),
+      }),
+    )
+    await new Promise<void>((done) => server?.listen(0, '127.0.0.1', done))
+    const { port } = server.address() as AddressInfo
+    const post = (path: string, body: unknown, token = 'secret-token') =>
+      fetch(`http://127.0.0.1:${port}${path}`, {
+        method: 'POST',
+        headers: { 'X-Backup-Token': token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+    return { post, dumped, logs }
+  }
+
+  it.each([
+    ['the full id', SNAP.id],
+    ['the short id', SNAP.shortId],
+  ])('streams the backup encrypted with the passphrase by %s, and logs who', async (_label, id) => {
+    const { post, dumped, logs } = await start()
+    const res = await post(`/backups/${id}/download`, { passphrase: PASS, by: 'admin@test.de' })
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-disposition')).toBe(`attachment; filename="${downloadName(SNAP)}"`)
+    const data = Buffer.from(await res.arrayBuffer())
+    expect(data.includes(Buffer.from('tar-gz-bytes'))).toBe(false)
+    expect(decrypt(data, PASS).toString()).toBe('tar-gz-bytes')
+    expect(dumped).toEqual([SNAP.id])
+    expect(logs.join('\n')).toContain(`backup ${SNAP.shortId} downloaded (encrypted) by admin@test.de`)
+  })
+
+  it.each([
+    ['no passphrase', {}],
+    ['a short passphrase', { passphrase: 'short' }],
+  ])('refuses %s, so there is no unencrypted download', async (_label, body) => {
+    const { post, dumped } = await start()
+    expect((await post(`/backups/${SNAP.id}/download`, body)).status).toBe(400)
+    expect(dumped).toEqual([])
+  })
+
+  it('has no GET download any more', async () => {
+    const { dumped } = await start()
+    const { port } = (server as Server).address() as AddressInfo
+    const res = await fetch(`http://127.0.0.1:${port}/backups/${SNAP.id}/download`, {
+      headers: { 'X-Backup-Token': 'secret-token' },
+    })
+    expect(res.status).toBe(404)
+    expect(dumped).toEqual([])
+  })
+
+  it('answers 404 for a backup that does not exist, without dumping', async () => {
+    const { post, dumped } = await start()
+    expect((await post('/backups/deadbeef/download', { passphrase: PASS })).status).toBe(404)
+    expect(dumped).toEqual([])
+  })
+
+  it.each([
+    ['a path trick', '/backups/..%2F..%2Fetc/download'],
+    ['a non-hex id', '/backups/latest/download'],
+  ])('answers 404 for %s', async (_label, path) => {
+    const { post, dumped } = await start()
+    expect((await post(path, { passphrase: PASS })).status).toBe(404)
+    expect(dumped).toEqual([])
+  })
+
+  it('refuses a wrong token', async () => {
+    const { post, dumped } = await start()
+    expect((await post(`/backups/${SNAP.id}/download`, { passphrase: PASS }, 'nope')).status).toBe(401)
+    expect(dumped).toEqual([])
   })
 })
