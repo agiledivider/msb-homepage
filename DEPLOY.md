@@ -89,48 +89,38 @@ unreachable. Leave the vars unset for password-only login.
 
 ### Configure Kanidm
 
-Access and role are separate: a dedicated **access group** (`msb-payload-user`)
-carries the scope map that lets someone log in, while **role groups** carry a
-**claim map** that emits a clean value into a `cms_roles` claim. A user must be in
-the access group *and* a role group. This keeps Kanidm sending only what the app
-needs — no full group list, no UUIDs.
+`scripts/kanidm-setup.sh` sets up the OAuth2 client and its groups. Run it
+on your machine with the `kanidm` CLI logged in as `idm_admin@idm.msbid.de`
+(`kanidm login -D idm_admin@idm.msbid.de`; other account: `--account`); without
+`--apply` it only prints the plan:
 
 ```bash
-# 1. the client + access group scope map (who may log in)
-kanidm system oauth2 create msb-payload "MakerSpace CMS" https://cms.example.com
-kanidm system oauth2 add-redirect-url msb-payload \
-  https://cms.example.com/api/users/oauth/kanidm/callback
-kanidm system oauth2 update-scope-map msb-payload msb-payload-user openid email profile
-
-# 2. one group per role (skip any that already exist), add your people
-kanidm group create msb-payload-admin
-kanidm group create msb-payload-reviewer
-kanidm group create msb-payload-editor
-# a role-holder must also be in the access group:
-kanidm group add-members msb-payload-user  your-account
-kanidm group add-members msb-payload-admin your-account
-
-# 3. claim map — role-group membership → clean value in the `cms_roles` claim
-kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-admin    admin
-kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-reviewer reviewer
-kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-editor   editor
-kanidm system oauth2 update-claim-map-join msb-payload cms_roles array
-
-# 4. the client secret → KANIDM_CLIENT_SECRET
-kanidm system oauth2 show-basic-secret msb-payload
+scripts/kanidm-setup.sh --url https://payload.idiot.games            # dry run
+scripts/kanidm-setup.sh --url https://payload.idiot.games --apply
+#   --client NAME (default payload)   --managed-by NAME (default vereinssoftware_svc)
 ```
 
-`msb-payload-user` decides *who can log in*; the role groups decide *what they can
-do*. A user's token carries just `cms_roles: ["editor"]` (or `admin` / `reviewer`)
-— nothing else. Someone in the access group but no role group logs in with no
-editorial access (deny by default). Group/claim names are examples; the app reads
+Everything is derived from the client name (here `payload`):
+
+| Kanidm | Purpose | `cms_roles` | CMS role |
+|---|---|---|---|
+| `payload` | OAuth2 client, strict redirect `<url>/api/users/oauth/kanidm/callback` | – | – |
+| `dienst_payload` | scope map `openid email profile`: may log in | `editor` | Redakteur |
+| `dienst_payload_reviewer` | nested in `dienst_payload` | `reviewer` | Reviewer: approves and publishes |
+| `dienst_payload_admin` | nested in `dienst_payload` | `admin` | Administrator: also users and roles |
+
+All three groups are entry-managed by `vereinssoftware_svc`, so the Vereinssoftware
+can maintain their members. A person joins exactly one group; an admin's
+token carries `cms_roles: ["editor", "admin"]`. Re-running the script is safe; it never deletes anything. With `--apply` it
+ends by printing the three `KANIDM_*` lines for the server's `.env`, client
+secret included; the CMS server itself needs no `kanidm` CLI. The app reads
 the claim named `cms_roles` unless you set `KANIDM_ROLES_CLAIM`.
 
 Roles are **overwritten at every Kanidm login**: removing someone from all role
 groups takes away their CMS rights the next time they log in. A wrong claim name
 therefore strips everyone who logs in via Kanidm, so keep the local password admin
-as break-glass. To cut someone off *immediately*, also remove them from
-`msb-payload-user` and delete their sessions in the CMS. Kanidm accounts are matched
+as break-glass. To cut someone off *immediately*, remove them from
+their `dienst_<client>` group and delete their sessions in the CMS. Kanidm accounts are matched
 to CMS accounts by email, and only a verified email (`email_verified: true`) is
 accepted; anything else is refused at login.
 
@@ -143,8 +133,8 @@ Add to `.env` (the secret belongs here, never on a command line):
 
 ```env
 KANIDM_ISSUER=https://idm.example.com        # base URL, no trailing slash
-KANIDM_CLIENT_ID=msb-payload
-KANIDM_CLIENT_SECRET=<show-basic-secret output>
+KANIDM_CLIENT_ID=payload                      # the script's --client
+KANIDM_CLIENT_SECRET=<see the script's last step; never paste it into a chat>
 # optional — only if you named the claim something other than cms_roles:
 # KANIDM_ROLES_CLAIM=cms_roles
 ```

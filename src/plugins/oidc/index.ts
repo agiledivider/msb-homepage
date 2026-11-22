@@ -11,26 +11,14 @@ import { parseKanidmUserInfo } from './claims'
  * Kanidm configured simply keeps password-only login:
  *
  *   KANIDM_ISSUER=https://idm.example.com        # base URL, no trailing slash
- *   KANIDM_CLIENT_ID=msb-payload                  # the oauth2 client (resource server) name
- *   KANIDM_CLIENT_SECRET=…                         # `kanidm system oauth2 show-basic-secret msb-payload`
+ *   KANIDM_CLIENT_ID=payload                      # the oauth2 client name
+ *   KANIDM_CLIENT_SECRET=…                         # `kanidm system oauth2 show-basic-secret payload`
  *
- * Kanidm setup (run against your instance). Access and role are separate: the
- * `msb-payload-user` access group carries the scope map (who may log in), while
- * role groups carry a *claim map* that emits a clean `cms_roles` value — so
- * Kanidm sends only what this app needs, no giant groups list, no UUIDs. A user
- * must be in the access group AND a role group. Override the claim name with
- * KANIDM_ROLES_CLAIM. Full walkthrough in DEPLOY.md.
- *
- *   kanidm system oauth2 create msb-payload "MakerSpace CMS" https://cms.example.com
- *   kanidm system oauth2 add-redirect-url msb-payload https://cms.example.com/api/users/oauth/kanidm/callback
- *   # access group scope map (grants login + the OIDC scopes):
- *   kanidm system oauth2 update-scope-map msb-payload msb-payload-user openid email profile
- *   # claim map: role-group membership → clean role value in the `cms_roles` claim:
- *   kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-admin    admin
- *   kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-reviewer reviewer
- *   kanidm system oauth2 update-claim-map msb-payload cms_roles msb-payload-editor   editor
- *   kanidm system oauth2 update-claim-map-join msb-payload cms_roles array
- *   kanidm system oauth2 show-basic-secret msb-payload
+ * Kanidm setup: `scripts/kanidm-setup.sh` (DEPLOY.md "Configure Kanidm"). The
+ * `dienst_<client>` group's scope map decides who may log in; claim maps put a
+ * clean `cms_roles` value (`editor`, `admin`) into the token, so Kanidm sends
+ * only what this app needs, no group list, no UUIDs. Override the claim name
+ * with KANIDM_ROLES_CLAIM.
  *
  * Two Kanidm specifics the generic plugin needs help with, handled below:
  *   1. the token endpoint requires HTTP Basic auth (client_secret_basic), not a
