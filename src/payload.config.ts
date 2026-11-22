@@ -15,6 +15,7 @@ import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
+import { payloadSecret } from './lib/payloadSecret'
 import { backupsAdmin } from './plugins/backups'
 import { editorialWorkflow } from './plugins/editorial'
 import { isAdmin } from './plugins/editorial/access'
@@ -131,7 +132,8 @@ export default buildConfig({
     // No-op unless KANIDM_* env vars are set. See src/plugins/oidc.
     kanidmOAuth,
   ],
-  secret: process.env.PAYLOAD_SECRET || '',
+  // Fails fast instead of running with an empty secret; see src/lib/payloadSecret.ts.
+  secret: payloadSecret(process.env),
   sharp,
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
 })

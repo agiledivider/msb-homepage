@@ -279,6 +279,28 @@ database and you need `--overwrite`. Media files that aren't in the backup are
 left in place by `--overwrite`. `pnpm backup:test` proves the round trip locally
 (Docker, throwaway volumes and repository).
 
+## Moving to a new server
+
+Backups hold the database and the media, **not the secrets in `.env`**. A
+download from the admin leaves the server, so it must not carry its keys. Keep
+these in the password manager, and bring them to the new server's `.env`:
+
+| Variable | Without the old value |
+|---|---|
+| `RESTIC_PASSWORD` | **the backups can't be read at all.** Nothing else helps. |
+| `PAYLOAD_SECRET` | passwords still work (hashed per user with a salt), but every Claude/MCP key stops working and must be issued again (Verwaltung → KI-Zugänge): Payload finds keys by an HMAC keyed with this secret. Everyone has to log in again, and old draft preview links stop working. |
+| `BACKUP_API_TOKEN` | nothing lost: it only links `web` and `backup` on one server; a new one is fine. |
+| `KANIDM_CLIENT_SECRET` | sign-in via Kanidm fails until the new value is set; it can be re-issued in Kanidm. |
+| backend keys (`AWS_*`, `B2_*`, `backup-ssh/`) | no access to the backup storage until they're set up again. |
+
+The app refuses to start without `PAYLOAD_SECRET`, and in production with the
+example value from `.env.production.example` (`src/lib/payloadSecret.ts`).
+
+Steps: set up the new server as in [Run on a server](#run-on-a-server) with the
+old `PAYLOAD_SECRET` and the backup settings, restore the latest backup
+offline as above **before** the first `up -d`, then start the stack and
+publish the static site again.
+
 ## Schema changes
 
 The app uses SQLite `push` in **dev only**. In prod it applies **migrations**.
