@@ -9,6 +9,7 @@ import { generatePreviewPath } from '../lib/preview'
 export const Pages: CollectionConfig = {
   slug: 'pages',
   labels: { singular: 'Seite', plural: 'Seiten' },
+  folders: true,
   admin: {
     group: 'Inhalte',
     useAsTitle: 'title',

@@ -9,6 +9,7 @@ export const Media: CollectionConfig = {
   access: { read: () => true },
   // `filename` leads so its cell (thumbnail preview + name) is the first column.
   labels: { singular: 'Medium', plural: 'Medien' },
+  folders: true,
   admin: { group: 'Inhalte', useAsTitle: 'alt', defaultColumns: ['filename', 'alt', 'mimeType', 'updatedAt'] },
   upload: {
     // MEDIA_DIR lets prod point uploads at a mounted volume (standalone builds

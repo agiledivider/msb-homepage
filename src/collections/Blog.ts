@@ -10,6 +10,7 @@ import { generatePreviewPath } from '../lib/preview'
 export const Blog: CollectionConfig = {
   slug: 'blog',
   labels: { singular: 'Blogbeitrag', plural: 'Blog' },
+  folders: true,
   admin: {
     group: 'Inhalte',
     useAsTitle: 'title',

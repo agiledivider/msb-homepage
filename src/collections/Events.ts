@@ -9,6 +9,7 @@ import { generatePreviewPath } from '../lib/preview'
 export const Events: CollectionConfig = {
   slug: 'events',
   labels: { singular: 'Event', plural: 'Events' },
+  folders: true,
   admin: {
     group: 'Inhalte',
     useAsTitle: 'title',

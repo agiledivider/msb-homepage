@@ -16,6 +16,8 @@ Collected 2026-11-12 from `LEARNINGS.md` and the session notes kept since July 2
 | re-run `pnpm seed` on an existing DB | use the idempotent runners (`src/seed/run-legal.ts`, `run-legacy.ts`) instead | the main seed uses plain `payload.create` and duplicates content | — · 2026-07 |
 | see dev push abort with `SQLITE_ERROR: index … already exists` | recreate the dev DB: `pnpm dev:stop; rm -f msb.db msb.db-wal msb.db-shm; pnpm seed; pnpm payload run src/seed/events.ts; pnpm payload run src/seed/rbac.ts` | the local DB drifted (manual SQL, renames); dev data is reproducible from seeds | Payload db-sqlite 3.x · 2026-07 |
 | change a collection or field | `pnpm generate:types` and `pnpm payload migrate:create <name>`; commit the migration | `push` only runs in development; the prod image runs `payload migrate` on start (`src/migrations/`) | Payload 3.x · 2026-07 |
+| generate a migration that adds a new collection plus relationships to it | run up, down and up again on a seeded DB built from the previous migrations, and compare row counts | the generated SQLite `down` dropped `payload_folders` first and turned foreign keys back on mid-way, so rebuilding `events` failed and left a stray `__new_events` table. Fixed by hand in `20261121_232740_folders.ts` | Payload db-sqlite 3.93 · 2026-11-22 |
+| add a field editors change without editing content (e.g. `folder`) | that the editorial `publishGate` lets it through for published docs | the gate sees the merged doc as `_status: 'published'` and would unpublish a live page an editor merely filed into a folder. `onlyFiled()` in `publishGate.ts` exempts filing-only updates; `tests/integration/folders.test.ts` | Payload 3.93 · 2026-11-22 |
 
 ## Build / deploy
 

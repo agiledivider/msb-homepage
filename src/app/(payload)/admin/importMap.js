@@ -23,7 +23,10 @@ import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ReviewPanel as ReviewPanel_812323546135d17338b9452fd3f00174 } from '../../../plugins/editorial/components/ReviewPanel'
+import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { HeroPreviewButton as HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95 } from '../../../components/HeroPreviewButton'
+import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { AdminIcon as AdminIcon_80ebcb12978a9db9a1c04af0af89c7ec } from '../../../components/admin/Graphics'
 import { AdminLogo as AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec } from '../../../components/admin/Graphics'
 import { KanidmLoginButton as KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27 } from '../../../components/auth/KanidmLoginButton'
@@ -59,7 +62,10 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/plugins/editorial/components/ReviewPanel#ReviewPanel": ReviewPanel_812323546135d17338b9452fd3f00174,
+  "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "/components/HeroPreviewButton#HeroPreviewButton": HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95,
+  "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/components/admin/Graphics#AdminIcon": AdminIcon_80ebcb12978a9db9a1c04af0af89c7ec,
   "/components/admin/Graphics#AdminLogo": AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec,
   "/components/auth/KanidmLoginButton#KanidmLoginButton": KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27,

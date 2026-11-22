@@ -42,6 +42,19 @@ export default buildConfig({
   // Order drives the sidebar: editors' "Inhalte" group first, "Verwaltung" last.
   collections: [Blog, Events, Pages, Media, Users],
   globals: [HeroSettings, SiteSettings],
+  // Folders for media, pages, posts and events (`folders: true` on each).
+  // Logged-in users only, like media uploads: anonymous visitors see no
+  // folders, and the public site never depends on them.
+  folders: {
+    collectionOverrides: [
+      ({ collection }) => ({
+        ...collection,
+        labels: { singular: 'Ordner', plural: 'Ordner' },
+        admin: { ...collection.admin, group: 'Inhalte' },
+        access: { read: loggedIn, create: loggedIn, update: loggedIn, delete: loggedIn },
+      }),
+    ],
+  },
   db: sqliteAdapter({
     client: { url: process.env.DATABASE_URI || 'file:./msb.db' },
     // Push works against a clean DB (drift-free). If it ever aborts on an
