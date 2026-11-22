@@ -2,10 +2,13 @@ import Link from 'next/link'
 import { Media, type MediaResource } from '../../components/Media'
 import type { LinkValue } from '../fields'
 
-/** Stylised brand map used when no map image is uploaded in the CMS. Lives in
- *  /public/media; an editor-uploaded `location.map` still overrides it. */
+/** Stylised brand map used when no map image is uploaded in the CMS; an
+ *  editor-uploaded `location.map` still overrides it. Lives in /public/brand,
+ *  which is committed and ships in the image. Not /public/media: that is the
+ *  Payload upload dir (gitignored, a volume in production), so a file there
+ *  only exists on the machine that put it there. */
 const FALLBACK_MAP: MediaResource = {
-  url: '/media/karte-kennedyallee.webp',
+  url: '/brand/karte-kennedyallee.webp',
   alt: 'Karte: MakerSpace Bonn, Kennedyallee 18, 53175 Bonn',
   width: 1400,
   height: 939,

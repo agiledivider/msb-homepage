@@ -112,9 +112,11 @@ const BUILD_MARKERS: Array<{ re: RegExp; at: number; label: string }> = [
 const MEDIA_SOURCES = [
   { dir: path.join(ROOT, 'public', 'media'), prefixes: ['/media', '/api/media/file'] },
   { dir: path.join(ROOT, 'public', 'diday'), prefixes: ['/diday'] },
+  // Fixed site images rendered through next/image (e.g. the fallback map).
+  { dir: path.join(ROOT, 'public', 'brand'), prefixes: ['/brand'] },
 ]
 /** Copied wholesale (small, and referenced by plain <img src>). */
-const PUBLIC_SKIP = new Set(['media', 'diday'])
+const PUBLIC_SKIP = new Set(['media', 'diday', 'brand'])
 
 const RASTER_RE = /\.(jpe?g|png|webp)$/i
 
@@ -279,7 +281,7 @@ async function collectMediaRefs() {
   const files = (await listFiles(DIST)).filter((f) => f.endsWith('.html'))
   const exact = new Set<string>()
   const ladderBases = new Set<string>()
-  const mediaUrl = /\/(?:api\/media\/file|media|diday)\/[^"'\s\\<>)]+/g
+  const mediaUrl = /\/(?:api\/media\/file|media|diday|brand)\/[^"'\s\\<>)]+/g
   // Case-insensitive: React emits `srcSet=`, hand-written HTML uses `srcset=`.
   const attribute = /(?:src|href|content|srcset)\s*=\s*"([^"]*)"/gi
 

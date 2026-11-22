@@ -22,7 +22,12 @@ const nextConfig = {
     // and the static publish step pre-generates exactly one WebP per width.
     deviceSizes: DEVICE_SIZES,
     imageSizes: IMAGE_SIZES,
-    localPatterns: [{ pathname: '/api/media/file/**' }, { pathname: '/media/**' }, { pathname: '/diday/**' }],
+    localPatterns: [
+      { pathname: '/api/media/file/**' },
+      { pathname: '/media/**' },
+      { pathname: '/diday/**' },
+      { pathname: '/brand/**' },
+    ],
     // Static hosts have no /_next/image optimizer, so point each srcset entry at
     // a pre-built file instead. NOTE: `loader` and `unoptimized` are mutually
     // exclusive — setting both makes Next ignore the loader and ship originals.
