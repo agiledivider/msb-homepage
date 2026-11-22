@@ -10,6 +10,53 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 
 ---
 
+## Styleguide 2026-11 (design audit 2026-11-22)
+
+**Status:** proposed 2026-11-22. The site still follows the February 2026 styleguide. Findings, values and severities: `docs/design-audit-2026-11.md`.
+
+### All text on the site is readable
+**Problem:** green link text, grey secondary text and the footer's small print fail WCAG AA contrast (down to 1.94:1); main buttons put white text on Markengrün, which the styleguide shows as a "Nicht so" example; much small text is 11–13.5 px.
+**Desired:** every text and background pairing meets the styleguide's contrast roles (Textgrün, Stein, Tinte, Kreide on dark green), buttons use the styleguide's button colours, and no text on the web is smaller than 14 px.
+**AC:** on start, a page, blog, a post, events and the archive, at 1440 px and 375 px, an automated contrast check reports no AA failures; no rendered text is below 14 px; the layout at 375 px still fits without horizontal scrolling.
+
+### The site uses the new styleguide palette and accents
+**Problem:** background, cards, lines, info boxes, grid and cutting mat use old or translucent colours; Mitglieder-Gelb is used as a general highlight; the "closed" strip uses a red that is reserved for safety.
+**Desired:** every surface uses a named colour from the 2026-11 palette (no ad-hoc hexes, no transparency); yellow appears only on member content, events and actions use Maker-Orange; open/closed status uses calm status colours, not Sicherheitsrot.
+**AC:** side-by-side with the styleguide, background, cards, lines, info boxes, grid and mat show the documented values; no yellow outside member content; a fitness test fails when a colour hex is written outside the design tokens.
+
+### Headings and intros use the brand typeface
+**Status:** decided 2026-11-22: headlines keep Archivo (Plex Sans tops out at 700 and loses the hero's punch); the styleguide session was asked to add Archivo as an allowed display face. Still open: Newsreader intros and Caveat notes.
+**Problem:** headings use Archivo Black, intros Newsreader italic and notes the Caveat font, while the styleguide says "IBM Plex Sans für alles" and lists the typeface as a fixed brand element.
+**Desired:** headings, intros, labels and captions follow the styleguide's type scale and label style; either Plex Sans only, or a heavier heading face that the styleguide then explicitly allows.
+**AC:** every page uses only the typefaces the styleguide allows; headings and body sizes are within its scale; the hero prism's motion is unchanged.
+
+### Keyboard and touch users can find and hit every control
+**Problem:** focus is only visible as the browser default; many buttons and pills are 30–42 px tall; several text links aren't underlined.
+**Desired:** a clear focus ring in the styleguide's style on every interactive element, touch targets of at least 44 × 44 px, and underlined text links outside navigation and buttons.
+**AC:** tabbing through each page shows the ring on every control; no button, pill or switch is smaller than 44 px; text links outside nav and buttons are underlined.
+
+### Visitors can tell which images are AI-generated
+**Problem:** hero photos, event thumbnails and the location map are AI-generated or AI-edited, but the styleguide requires such images to be labelled and they aren't.
+**Desired:** editors mark an image as "generated" or "edited" in the CMS, and the site shows the styleguide's label ("Bild generiert" / "Bild bearbeitet") wherever that image appears.
+**AC:** a marked image shows its label in every place it appears, including polaroid frames and the static export; unmarked images show nothing; existing AI images are marked.
+
+### Visitors can switch the site to dark mode
+**Problem:** the styleguide now defines a dark "Tannen" palette, but the site has none.
+**Desired:** the site follows the visitor's system setting, offers a toggle that is remembered, and uses the styleguide's dark palette and Negativ logo.
+**AC:** with the system set to dark, every page renders in the Tannen palette and passes the same contrast check as light; the toggle overrides the system setting and survives a reload; the browser bar colour matches.
+
+### Footer, logo and wording follow the styleguide
+**Problem:** the footer shows the all-white logo instead of the Negativ variant; pages carry English sub-ledes although the guide says German; the phone number appears in two formats; one image text spells "Makerspace Bonn".
+**Desired:** the footer uses the Negativ logo, visible copy is German (or English is a deliberate, marked exception), and names and numbers are written one way everywhere.
+**AC:** footer shows the Negativ logo; no unmarked English copy on any page; one phone format; "MakerSpace Bonn" spelled correctly everywhere.
+
+### Feed site patterns back into the styleguide
+**Problem:** the site has patterns the styleguide doesn't cover (polaroids, pegboard, status strip, carousel pills, event tags, radius scale, icon library, map style, English copy), and two of them conflict with it.
+**Desired:** the styleguide team decides on each pattern: adopt it into the guide or drop it from the site.
+**AC:** each gap listed in the audit has a decision recorded in the styleguide or in this backlog.
+
+---
+
 ## From IDEAS.md (2026-11-21)
 
 **Status:** proposed 2026-11-21.
