@@ -23,7 +23,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
             <RichText
               data={body}
               converters={richTextConverters}
-              className="[&_p]:m-0 [&_p]:mb-4 [&_p]:text-[16.5px] [&_p]:leading-[1.7] [&_p]:text-[#4c4a42] [&_strong]:text-ink"
+              className="[&_p]:m-0 [&_p]:mb-4 [&_p]:text-[16.5px] [&_p]:leading-[1.7] [&_p]:text-ink [&_strong]:text-ink"
             />
           ) : null}
           {quote ? (
@@ -34,7 +34,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
         </div>
 
         {timeline?.length ? (
-          <div className="rounded-[14px] border border-line bg-[#fffdf8] p-6">
+          <div className="rounded-[14px] border border-line bg-card p-6">
             <div className="mb-4 font-mono text-[14px] tracking-[.06em] text-muted">{timelineTitle}</div>
             <div className="flex flex-col">
               {timeline.map((m, i) => {
@@ -47,7 +47,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
                     }`}
                   >
                     <span className="font-display text-[16px] font-extrabold text-brand-text">{m.year}</span>
-                    <span className="text-[14px] leading-[1.5] text-[#4c4a42]">{m.text}</span>
+                    <span className="text-[14px] leading-[1.5] text-ink">{m.text}</span>
                   </div>
                 )
               })}
@@ -59,7 +59,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
       {values?.length ? (
         <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {values.map((v, i) => (
-            <div key={i} className="rounded-[12px] border border-line bg-[#fffdf8] p-[22px]">
+            <div key={i} className="rounded-[12px] border border-line bg-card p-[22px]">
               <div className="mb-2 font-display text-[19px] font-extrabold">{v.title}</div>
               {v.text ? <p className="m-0 text-[14px] leading-[1.55] text-muted">{v.text}</p> : null}
             </div>

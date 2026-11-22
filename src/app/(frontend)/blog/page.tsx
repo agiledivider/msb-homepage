@@ -27,7 +27,7 @@ export default async function BlogIndexPage() {
           <Link
             key={post.id}
             href={`/blog/${post.slug}`}
-            className="overflow-hidden rounded-[14px] border border-line bg-[#fffdf8] no-underline shadow-[0_18px_40px_-28px_rgba(60,52,30,.4)]"
+            className="overflow-hidden rounded-[14px] border border-line bg-card no-underline shadow-[0_18px_40px_-28px_rgba(60,52,30,.4)]"
           >
             <Media
               resource={typeof post.cover === 'object' ? post.cover : undefined}

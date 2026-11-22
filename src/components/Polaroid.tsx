@@ -42,7 +42,7 @@ export function Polaroid({
           block — reliable, unlike max-w on a flex item), so it hugs the 4:3 image
           and spare space shows the mat, not stretched cream. Tapes live inside the
           frame so they track it as it shrinks. */}
-      <div className="relative mx-auto bg-cream px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] max-md:w-full max-md:max-w-[calc((100svh_-_176px)_/_1.5_+_14px)] md:px-2.5 md:pt-2.5 md:pb-[42px]">
+      <div className="relative mx-auto bg-fond px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] max-md:w-full max-md:max-w-[calc((100svh_-_176px)_/_1.5_+_14px)] md:px-2.5 md:pt-2.5 md:pb-[42px]">
         <TapeStrip style={{ top: -13, left: 24, width: 78, height: 26, transform: 'rotate(-5deg)' }} />
         <TapeStrip style={{ bottom: -11, right: 30, width: 70, height: 24, transform: 'rotate(-4deg)' }} />
         <Media
@@ -55,7 +55,7 @@ export function Polaroid({
         {caption ? (
           // Sits in the bottom white margin band (== the frame's pb) and centres
           // within it, so the line box never rides up over the photo on small frames.
-          <div className="absolute inset-x-0 bottom-0 flex h-6 items-center justify-center px-2 text-center font-hand text-[15px] font-semibold leading-none text-[#3c4a42] md:h-[42px] md:text-[20px]">
+          <div className="absolute inset-x-0 bottom-0 flex h-6 items-center justify-center px-2 text-center font-hand text-[15px] font-semibold leading-none text-ink md:h-[42px] md:text-[20px]">
             {caption}
           </div>
         ) : null}

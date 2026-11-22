@@ -20,7 +20,8 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 **Desired:** every text and background pairing meets the styleguide's contrast roles (Textgrün, Stein, Tinte, Kreide on dark green), buttons use the styleguide's button colours, and no text on the web is smaller than 14 px.
 **AC:** on start, a page, blog, a post, events and the archive, at 1440 px and 375 px, an automated contrast check reports no AA failures; no rendered text is below 14 px; the layout at 375 px still fits without horizontal scrolling.
 
-### The site uses the new styleguide palette and accents
+### ✅ DONE 2026-11-22 — The site uses the new styleguide palette and accents
+**Implemented:** `@theme` holds only 2026-11 palette roles (Papier, Rastergrün, Fläche, Creme, Linie, Kreide, mat line and scale, Maker-Orange); components use tokens, enforced by `tests/fitness/palette.test.ts` (hex never, translucent colours only in shadows plus two allowlisted material effects). Yellow is left for member content; tags, sticker and blog CTA use Maker-Orange. **Changed by Falk:** the closed strip stays red on purpose, now Sicherheitsrot `#C62828` with white text. The pegboard keeps its own marked tokens until the styleguide decides on it.
 **Problem:** background, cards, lines, info boxes, grid and cutting mat use old or translucent colours; Mitglieder-Gelb is used as a general highlight; the "closed" strip uses a red that is reserved for safety.
 **Desired:** every surface uses a named colour from the 2026-11 palette (no ad-hoc hexes, no transparency); yellow appears only on member content, events and actions use Maker-Orange; open/closed status uses calm status colours, not Sicherheitsrot.
 **AC:** side-by-side with the styleguide, background, cards, lines, info boxes, grid and mat show the documented values; no yellow outside member content; a fitness test fails when a colour hex is written outside the design tokens.

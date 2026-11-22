@@ -53,8 +53,9 @@ export function TopStrip({
 
   // Until the first fetch resolves, fall back to the CMS-provided text + brand green.
   const labels = state ? stateLabels(state) : { short: status, full: status }
-  // Text on Markengrün is ink, never white (styleguide 2026-11 §6).
-  const bg = state && !state.open ? 'bg-closed text-white' : 'bg-brand text-ink'
+  // Open: Markengrün with ink (never white). Closed: Sicherheitsrot with white,
+  // red on purpose so a closed space is unmistakable (Falk, 2026-11-22).
+  const bg = state && !state.open ? 'bg-red text-white' : 'bg-brand text-ink'
 
   return (
     <div

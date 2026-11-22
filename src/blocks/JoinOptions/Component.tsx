@@ -48,7 +48,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
           return (
             <div
               key={i}
-              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-ink' : 'border border-line bg-[#fffdf8]'}`}
+              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-ink' : 'border border-line bg-card'}`}
             >
               <div className={`mb-2.5 font-mono text-[14px] tracking-[.06em] ${green ? '' : 'text-muted'}`}>
                 {o.number ? `${o.number} · ` : ''}
@@ -62,7 +62,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
                 <Link
                   href={o.link.url || '#'}
                   className={`inline-block rounded-[9px] px-[18px] py-[11px] text-[14px] no-underline ${
-                    green ? 'bg-white font-bold text-brand-text' : 'border border-[#cfc9ba] font-semibold text-ink'
+                    green ? 'bg-white font-bold text-brand-text' : 'border border-line font-semibold text-ink'
                   }`}
                 >
                   {o.link.label}
@@ -75,10 +75,10 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
 
       {location ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-[14px] border border-line bg-[#fffdf8] p-[26px]">
+          <div className="rounded-[14px] border border-line bg-card p-[26px]">
             <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-muted">{location.eyebrow}</div>
             <div className="mb-1 font-display text-[20px] font-extrabold">{location.title}</div>
-            {location.line ? <div className="mb-3.5 text-[15px] text-[#4c4a42]">{location.line}</div> : null}
+            {location.line ? <div className="mb-3.5 text-[15px] text-ink">{location.line}</div> : null}
             {location.transit ? (
               <div className="whitespace-pre-line font-mono text-[14px] leading-[1.8] text-muted">
                 {location.transit}

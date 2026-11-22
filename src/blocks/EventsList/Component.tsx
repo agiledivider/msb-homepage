@@ -67,14 +67,12 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
         {sidebar?.bigEvents?.length ? (
-          <div className="rounded-[14px] border border-line bg-[#fffdf8] p-5">
+          <div className="rounded-[14px] border border-line bg-card p-5">
             <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-muted">{sidebar.bigTitle}</div>
             {sidebar.bigEvents.map((b, i, arr) => (
               <div
                 key={i}
-                className={`${i > 0 ? 'mt-3' : ''} ${
-                  i < arr.length - 1 ? 'mb-3 border-b border-[#efeadd] pb-3' : ''
-                }`}
+                className={`${i > 0 ? 'mt-3' : ''} ${i < arr.length - 1 ? 'mb-3 border-b border-line pb-3' : ''}`}
               >
                 <div className="font-display text-[16px] font-bold">{b.title}</div>
                 {b.meta ? <div className="text-[14px] text-muted">{b.meta}</div> : null}
@@ -84,9 +82,9 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
         ) : null}
 
         {sidebar?.infoText ? (
-          <div className="rounded-[14px] border border-[#e8d3a6] bg-sand p-5">
+          <div className="rounded-[14px] border border-line bg-fond p-5">
             <div className="mb-1.5 font-hand text-[22px] font-bold text-brand-text">{sidebar.infoTitle}</div>
-            <p className="m-0 mb-3 text-[14px] leading-[1.55] text-[#4c4a42]">{sidebar.infoText}</p>
+            <p className="m-0 mb-3 text-[14px] leading-[1.55] text-ink">{sidebar.infoText}</p>
             {sidebar.infoLink?.label ? (
               <Link
                 href={sidebar.infoLink.url || '#'}

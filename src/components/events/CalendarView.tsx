@@ -74,7 +74,7 @@ export function CalendarView({
             {cells.map((day, i) => {
               const dayEvents = day ? (byDay.get(day) ?? []) : []
               return (
-                <div key={i} className={`min-h-[104px] bg-card p-1.5 ${day ? '' : 'bg-[#f6f2e8]'}`}>
+                <div key={i} className={`min-h-[104px] bg-card p-1.5 ${day ? '' : 'bg-fond'}`}>
                   {day ? (
                     <div
                       className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full font-mono text-[14px] ${

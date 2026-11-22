@@ -34,9 +34,10 @@ export type HeroBlock = { blockType: 'hero'; faces?: Face[] | null }
 
 const DUR = 5400 // ms per face before auto-flip
 
+// Eyebrow pill on the Grün 800 mat: Grün 300 or Kreide, text and border in one solid colour.
 const EYEBROW = {
-  green: { color: '#cfe9ad', border: 'rgba(207,233,173,.45)' },
-  orange: { color: '#fbe3a0', border: 'rgba(251,227,160,.5)' }, // soft UGC-yellow
+  green: 'text-green-300 border-green-300',
+  orange: 'text-kreide border-kreide',
 }
 
 // Each prism face: rotate into place, then push out by the apothem (--tz, set
@@ -50,7 +51,7 @@ const FACE_TF = [
 
 // pill / nav-dot base (the countdown bar is an ::after on the active one)
 const PILL_BASE =
-  'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-[10px] py-[7px] font-mono text-[14px] tracking-normal transition md:px-[13px] md:tracking-[.06em]-[border-color,color,background] duration-[250ms] [&_b]:font-semibold'
+  'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-[10px] py-[7px] font-mono text-[14px] tracking-normal transition-[border-color,color,background] duration-[250ms] md:px-[13px] md:tracking-[.06em] [&_b]:font-semibold'
 
 function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boolean; style?: 'white' | 'orange' }) {
   if (!link?.label) return null
@@ -58,9 +59,9 @@ function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boole
     'cursor-pointer rounded-[10px] no-underline transition w-full px-2.5 py-[11px] text-center text-[14px] md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
   const cls = primary
     ? style === 'orange'
-      ? 'bg-yellow text-ink font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // UGC-yellow
-      : 'bg-white text-brand-text font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]'
-    : 'border-[1.5px] border-white/[.55] text-white font-semibold'
+      ? 'bg-orange text-ink font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // Maker-Orange: actions/events
+      : 'bg-kreide text-green-deep font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)]' // on the mat: Kreide, Grün 800 text
+    : 'border-[1.5px] border-kreide text-kreide font-semibold'
   return (
     <Link href={link.url || '#'} className={`${base} ${cls}`}>
       {link.label}
@@ -78,8 +79,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
         <div className="max-md:order-2 max-md:flex max-md:min-h-0 max-md:min-w-0 max-md:flex-1 max-md:flex-col">
           {face.eyebrow ? (
             <div
-              className="mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[14px] tracking-normal md:mb-[22px] md:px-[11px] md:py-[5px] md:tracking-[.06em]"
-              style={{ color: eb.color, borderColor: eb.border }}
+              className={`mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[14px] tracking-normal md:mb-[22px] md:px-[11px] md:py-[5px] md:tracking-[.06em] ${eb}`}
             >
               {face.eyebrow}
             </div>
@@ -87,10 +87,10 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
 
           {isEvent && face.eventDay ? (
             <div className="mb-3 flex items-end gap-4">
-              <div className="font-display text-[46px] font-black leading-[.85] text-white md:text-[74px]">
+              <div className="font-display text-[46px] font-black leading-[.85] text-kreide md:text-[74px]">
                 {face.eventDay}
               </div>
-              <div className="pb-2 font-mono text-[14px] leading-[1.5] text-green-soft">
+              <div className="pb-2 font-mono text-[14px] leading-[1.5] text-green-300">
                 {face.eventMonth}
                 <br />
                 {face.eventWeekday}
@@ -99,7 +99,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
           ) : null}
 
           <h1
-            className={`mb-[7px] font-display font-black leading-[1.02] tracking-[-.02em] text-white text-[30px] md:mb-3.5 md:leading-[.98] ${
+            className={`mb-[7px] font-display font-black leading-[1.02] tracking-[-.02em] text-kreide text-[30px] md:mb-3.5 md:leading-[.98] ${
               isEvent ? 'md:text-[38px]' : 'md:text-[56px]'
             }`}
           >
@@ -112,17 +112,17 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
           </h1>
 
           {face.lede ? (
-            <p className="m-0 font-serif text-[17px] italic leading-[1.26] text-white/80 md:mb-5 md:text-[21px] md:leading-normal">
+            <p className="m-0 font-serif text-[17px] italic leading-[1.26] text-kreide md:mb-5 md:text-[21px] md:leading-normal">
               {face.lede}
             </p>
           ) : null}
           {face.description ? (
-            <p className="mb-6 hidden max-w-[470px] text-[16.5px] leading-[1.6] text-white/90 md:block">
+            <p className="mb-6 hidden max-w-[470px] text-[16.5px] leading-[1.6] text-kreide md:block">
               {face.description}
             </p>
           ) : null}
           {face.meta?.length ? (
-            <div className="mb-6 hidden items-center gap-3.5 font-mono text-[14px] text-green-soft md:flex">
+            <div className="mb-6 hidden items-center gap-3.5 font-mono text-[14px] text-green-300 md:flex">
               {face.meta.map((m, i) => (
                 <Fragment key={i}>
                   {i > 0 ? <span className="opacity-50">·</span> : null}
@@ -292,7 +292,7 @@ export function HeroComponent({
             <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>
               {face.badge ? (
                 <div
-                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-yellow px-[15px] py-[9px] font-display text-[14px] font-extrabold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
+                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-orange px-[15px] py-[9px] font-display text-[14px] font-extrabold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
                   style={{ top: -20, left: -16, transform: `rotate(${badgeRot[i]})` }}
                 >
                   {face.badge}
@@ -300,7 +300,7 @@ export function HeroComponent({
               ) : null}
               {face.note ? (
                 <div
-                  className="absolute z-[6] rounded-md border border-dashed border-brand-text bg-cream px-4 py-1.5 font-hand text-[22px] font-bold text-brand-text shadow-[0_6px_16px_-8px_rgba(60,52,30,.5)] max-md:hidden"
+                  className="absolute z-[6] rounded-md border border-dashed border-brand-text bg-fond px-4 py-1.5 font-hand text-[22px] font-bold text-brand-text shadow-[0_6px_16px_-8px_rgba(60,52,30,.5)] max-md:hidden"
                   style={{ top: -16, right: 44, transform: 'rotate(6deg)' }}
                 >
                   {face.note}
@@ -328,9 +328,9 @@ export function HeroComponent({
                   on ? 'after:w-[calc(var(--msb-p,0)*100%)]' : ''
                 }`}
                 style={{
-                  borderColor: on ? 'var(--color-brand-text)' : '#d9d2c1',
+                  borderColor: on ? 'var(--color-brand-text)' : 'var(--color-line)',
                   color: on ? 'var(--color-brand-text)' : 'var(--color-muted)',
-                  background: on ? '#eaf3dd' : '#fbf7ec',
+                  background: on ? 'var(--color-green-pale)' : 'var(--color-card)',
                 }}
               >
                 <b>{String(i + 1).padStart(2, '0')}</b>{' '}
@@ -350,7 +350,11 @@ export function HeroComponent({
             aria-pressed={userPaused}
             title={userPaused ? 'Fortsetzen' : 'Pausieren'}
             className={`${PILL_BASE} h-[30px] w-[30px] justify-center !px-0 !py-0`}
-            style={{ borderColor: '#d9d2c1', color: 'var(--color-brand-text)', background: '#fbf7ec' }}
+            style={{
+              borderColor: 'var(--color-line)',
+              color: 'var(--color-brand-text)',
+              background: 'var(--color-card)',
+            }}
           >
             {userPaused ? (
               <svg width="11" height="12" viewBox="0 0 12 12" aria-hidden="true">

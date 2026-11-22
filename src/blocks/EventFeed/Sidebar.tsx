@@ -18,7 +18,7 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
   return (
     <aside className="flex flex-col gap-[18px] lg:sticky lg:top-24">
       {sidebar?.hours?.length ? (
-        <div className="overflow-hidden rounded-[14px] border border-line bg-[#fffdf8] shadow-[0_18px_40px_-28px_rgba(60,52,30,.4)]">
+        <div className="overflow-hidden rounded-[14px] border border-line bg-card shadow-[0_18px_40px_-28px_rgba(60,52,30,.4)]">
           <div className="flex items-center justify-between bg-brand px-[18px] py-3.5 text-ink">
             <span className="font-display text-[16px] font-bold">{sidebar.hoursTitle}</span>
             <span className="font-mono text-[14px] opacity-85">{sidebar.hoursBadge}</span>
@@ -27,8 +27,8 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
             {sidebar.hours.map((r, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-between border-b border-[#efeadd] py-[11px] ${
-                  r.highlight ? '-mx-[18px] bg-green-mint px-[18px]' : ''
+                className={`flex items-center justify-between border-b border-line py-[11px] ${
+                  r.highlight ? '-mx-[18px] bg-green-pale px-[18px]' : ''
                 }`}
               >
                 <span className={`text-[14px] ${r.highlight ? 'text-brand-text' : ''}`}>
@@ -47,9 +47,9 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
       ) : null}
 
       {sidebar?.infoText ? (
-        <div className="rounded-[14px] border border-[#e8d3a6] bg-sand p-[18px]">
+        <div className="rounded-[14px] border border-line bg-fond p-[18px]">
           <div className="mb-2.5 font-mono text-[14px] tracking-[.06em] text-brand-text">{sidebar.infoEyebrow}</div>
-          <p className="m-0 mb-3.5 text-[14px] leading-[1.55] text-[#4c4a42]">{sidebar.infoText}</p>
+          <p className="m-0 mb-3.5 text-[14px] leading-[1.55] text-ink">{sidebar.infoText}</p>
           {sidebar.infoLink?.label ? (
             <Link
               href={sidebar.infoLink.url || '#'}

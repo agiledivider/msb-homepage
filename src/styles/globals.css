@@ -10,35 +10,42 @@
    …; fonts → font-display / font-hand / …; --container-shell → max-w-shell;
    --animate-msbfade → animate-msbfade. */
 @theme {
-  /* ===== Official MakerSpace Bonn palette (Styleguide 2026-11.11) ===== */
-  /* brand green */
-  --color-brand: #5eb130;        /* Markengrün — logo, areas; text on it is always ink, never white */
-  --color-brand-text: #33791a;   /* Grüne Schrift — green text, links, buttons with white text (AA) */
-  /* fond (backgrounds) */
-  --color-fond: #faf2e4;         /* Creme — info boxes (#f5e6c9 is print only) */
-  --color-fond-dark: #325725;    /* dark green */
-  /* area accents */
-  --color-violet: #6d3e91;       /* MINT accent · text on it = white */
-  --color-mint: #e6f5fc;         /* MINT light fond (pale tint) */
-  --color-yellow: #fcbd30;       /* UGC accent · text on it = black */
-  --color-closed: #c0392b;       /* status strip when the space is closed */
-  /* neutrals (aligned to spec) */
-  --color-ink: #1e1c19;          /* Tinte — headlines / body */
-    --color-line: #e0e0e0;         /* hairlines */
+  /* ===== MakerSpace Bonn palette: Styleguide 2026-11.11 (msb-styleguide, src/build.py) =====
+     Every colour on the public site comes from here; components never write a hex
+     (tests/fitness/palette.test.ts). Fixed values only, no transparency for colours. */
 
-  /* ---- homepage surface + legacy tokens ---- */
-  --color-paper: #f1ede2;        /* graph-paper background */
-  --color-card: #fffdf8;
-  --color-cream: #fbf7ec;
-  --color-muted: #5f5850;        /* Stein / Text leise — secondary text (AA on paper and fond) */
-  --color-kreide: #ede8de;       /* Kreide — text on dark green */
-  --color-sand: #faf2e4;         /* = fond */
-  --color-green: #33791a;        /* = brand-text */
-  --color-green-deep: #325725;   /* = fond-dark */
-  --color-green-lime: #5eb130;   /* = brand */
-  --color-green-pale: #eaf3dd;
-  --color-green-mint: #edf6e0;
-  --color-green-soft: #cfe9ad;
+  /* Light-mode roles */
+  --color-paper: #fbf8f2;        /* Hintergrund · Papier — page background (Ebene 0) */
+  --color-raster: #ebf1df;       /* Raster · Rastergrün — graph-paper line, 1px every 27px; decoration only */
+  --color-card: #ffffff;         /* Fläche · Weiß — cards, header bar (Ebene 1) */
+  --color-fond: #faf2e4;         /* Fond · Creme — info boxes, secondary surfaces (Ebene 2) */
+  --color-line: #e4dccb;         /* Linie — borders around cards, dividers */
+  --color-ink: #1e1c19;          /* Text · Tinte — body and headings; text on Markengrün, yellow, orange */
+  --color-muted: #5f5850;        /* Text leise · Stein — metadata, secondary text */
+  --color-brand-text: #33791a;   /* Grüne Schrift · Grün 600 — green text, links, main button (white text) */
+  --color-green-pale: #f0f7ea;   /* Grüner Fond · Grün 50 — status OK, selected row, tags */
+  --color-fond-gelb: #fdf3d7;    /* Gelber Fond — status "Achtung", soft yellow tags */
+  --color-text-gelb: #8a5a00;    /* Gelbe Schrift · Ocker — text on Gelber Fond */
+
+  /* Brand colours */
+  --color-brand: #5eb130;        /* Markengrün · Grün 500 — logo, bars, surfaces; text on it is ink, never white */
+  --color-green-300: #9cd27d;    /* Grün 300 — light green text on Grün 800/900 */
+  --color-green-deep: #325725;   /* Grün 800 — brand surfaces: cutting mat, footer, CTA band; text on it Kreide */
+  --color-green-900: #1b3714;    /* Grün 900 — darker brand surfaces and dividers */
+  --color-kreide: #ede8de;       /* Kreide — text on Grün 800/900 */
+  --color-mat-line: #49693d;     /* Mattenlinie — cutting-mat grid on Grün 800, 1px every 34px */
+  --color-mat-scale: #98ab92;    /* Mattenskala — ruler ticks on the mat edge; never text */
+  --color-yellow: #fcbd30;       /* Mitglieder-Gelb — member content only; text on it ink */
+  --color-orange: #f2711c;       /* Maker-Orange — stickers, events, calls to action; text on it ink */
+  --color-red: #c62828;          /* Sicherheitsrot — warning surfaces with white text; here also the "closed" strip (Falk, 2026-11-22) */
+  --color-violet: #6d3e91;       /* MINT-Violett — MINT surfaces with white text */
+  --color-mint: #e6f5fc;         /* MINT-Fond — MINT info boxes */
+
+  /* Not in the styleguide yet: the Lochwand behind the workshop cards
+     (styleguide gap 5 in docs/design-audit-2026-11.md; adopt or drop there). */
+  --color-pegboard: #e9dfc9;
+  --color-pegboard-edge: #d7c9a8;
+  --color-pegboard-peg: #c9bfa4;
 
   /* Fonts — IBM Plex Sans is the brand typeface for body/UI; Archivo (Black/900)
      is the display face for thick headlines (Plex Sans caps at Bold/700).

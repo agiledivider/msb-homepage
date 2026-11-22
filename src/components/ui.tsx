@@ -3,8 +3,9 @@ import type { LinkValue } from '../blocks/fields'
 
 /** Slightly-rotated "label tape" tag used at the top of most sections. */
 export function TapeTag({ children, color = 'green' }: { children: React.ReactNode; color?: 'green' | 'orange' }) {
-  // 'orange' = the warm brand accent (UGC yellow, ink label); green = Markengrün with ink label (never white)
-  const bg = color === 'orange' ? 'bg-yellow text-ink' : 'bg-brand text-ink'
+  // 'orange' = Maker-Orange, green = Markengrün; both carry an ink label (never white).
+  // Mitglieder-Gelb is reserved for member content.
+  const bg = color === 'orange' ? 'bg-orange text-ink' : 'bg-brand text-ink'
   return (
     <span
       className={`${bg} inline-block -rotate-2 whitespace-nowrap rounded-[3px] px-2.5 py-[5px] font-mono text-[14px] font-semibold tracking-[.08em] shadow-[0_3px_8px_-4px_rgba(0,0,0,.35)]`}
@@ -48,7 +49,7 @@ export function SectionHeading({
 
 export const eventTagClasses = (color?: string | null) =>
   color === 'orange'
-    ? 'bg-[#fdf2d6] text-[#8a6200]' // soft UGC-yellow tag
+    ? 'bg-fond-gelb text-text-gelb' // Gelber Fond + Ocker (palette roles)
     : color === 'neutral'
-      ? 'bg-[#ece7dd] text-muted'
+      ? 'bg-fond text-muted'
       : 'bg-green-pale text-brand-text'

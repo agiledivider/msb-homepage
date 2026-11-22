@@ -28,7 +28,7 @@ export function Header({
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname?.startsWith(href))
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-[rgba(244,241,233,.92)] backdrop-blur-[8px]">
+    <header className="sticky top-0 z-20 border-b border-line bg-card">
       <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:px-8">
         <Link href="/" className="flex items-center no-underline">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -38,15 +38,15 @@ export function Header({
         <nav
           className={`${
             open ? 'flex' : 'hidden'
-          } absolute inset-x-0 top-full flex-col items-stretch border-b border-line border-t border-t-line bg-[#f4f1e9] py-1.5 shadow-[0_18px_34px_-18px_rgba(60,52,30,.55)] md:static md:flex md:flex-row md:items-center md:gap-7 md:border-0 md:bg-transparent md:py-0 md:shadow-none`}
+          } absolute inset-x-0 top-full flex-col items-stretch border-b border-line border-t border-t-line bg-card py-1.5 shadow-[0_18px_34px_-18px_rgba(60,52,30,.55)] md:static md:flex md:flex-row md:items-center md:gap-7 md:border-0 md:bg-transparent md:py-0 md:shadow-none`}
         >
           {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className={`border-b border-[#ece7db] px-[22px] py-3.5 text-[16px] font-medium no-underline md:border-0 md:p-0 md:text-[15px] ${
-                isActive(item.href) ? 'text-brand-text' : 'text-[#54503f]'
+              className={`border-b border-line px-[22px] py-3.5 text-[16px] font-medium no-underline md:border-0 md:p-0 md:text-[15px] ${
+                isActive(item.href) ? 'text-brand-text' : 'text-ink'
               }`}
             >
               {item.label}
