@@ -1,7 +1,7 @@
 # Design audit: homepage vs. Styleguide 2026-11 (draft)
 
 **Date:** 2026-11-22 · **Styleguide:** `msb-styleguide` version 2026-11.10 (`src/template.html`, palette in `src/build.py`) · **Site:** dev server at the commit after `94d8710`, checked at 1440 px and 375 px in headless Chrome (Blink).
-**Status:** findings only; the work is tracked in `docs/BACKLOG.md` → "Styleguide 2026-11".
+**Status:** findings only; the work is tracked in `docs/BACKLOG.md` → "E4 — Styleguide 2026-11".
 
 ## Verdict
 

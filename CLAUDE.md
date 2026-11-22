@@ -10,6 +10,7 @@ pnpm install                 # one-time after clone (pnpm only, see Rules)
 pnpm dev:start               # dev server on :3000, detached (dev:stop / dev:status / dev:logs)
 pnpm seed                    # demo content into msb.db (stop the dev server first: SQLite lock)
 pnpm test                    # vitest: integration (temp SQLite per file) + fitness tests
+pnpm backlog:summary         # after any docs/BACKLOG.md edit (pnpm test fails on a stale summary)
 pnpm generate:types          # after any collection/field change
 pnpm payload migrate:create <name>   # after any schema change; prod runs migrations, not push
 pnpm publish:static          # snapshot the public site into dist/ (docs/STATIC.md)
