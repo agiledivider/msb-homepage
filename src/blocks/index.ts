@@ -4,6 +4,7 @@ import { EventsList } from './EventsList/config'
 import { Hero } from './Hero/config'
 import { JoinOptions } from './JoinOptions/config'
 import { PageIntro } from './PageIntro/config'
+import { People } from './People/config'
 import { Prose } from './Prose/config'
 import { VereinIntro } from './VereinIntro/config'
 import { Workshops } from './Workshops/config'
@@ -14,6 +15,17 @@ import { Workshops } from './Workshops/config'
  *   import { msbBlocks } from '@/blocks'
  *   { name: 'layout', type: 'blocks', blocks: msbBlocks }
  */
-export const msbBlocks = [Hero, PageIntro, EventFeed, Workshops, CtaBand, VereinIntro, EventsList, JoinOptions, Prose]
+export const msbBlocks = [
+  Hero,
+  PageIntro,
+  EventFeed,
+  Workshops,
+  CtaBand,
+  VereinIntro,
+  EventsList,
+  JoinOptions,
+  Prose,
+  People,
+]
 
-export { CtaBand, EventFeed, EventsList, Hero, JoinOptions, PageIntro, Prose, VereinIntro, Workshops }
+export { CtaBand, EventFeed, EventsList, Hero, JoinOptions, PageIntro, People, Prose, VereinIntro, Workshops }

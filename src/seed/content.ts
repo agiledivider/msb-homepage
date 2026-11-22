@@ -56,6 +56,18 @@ export const VEREIN_TIMELINE = [
   },
 ]
 
+/** "Menschen & Ansprechpartner" on /verein (S3.1, from Falk 2026-11-22). Names as
+ *  in the Impressum (Vorstand nach § 26 BGB, src/seed/impressum.ts). */
+export const VEREIN_PEOPLE_BLOCK = {
+  blockType: 'people' as const,
+  tag: 'VEREIN',
+  heading: 'Menschen & Ansprechpartner',
+  people: [
+    { name: 'Salim Deeb', role: 'Vorstand', email: 'vorstand@makerspacebonn.de' },
+    { name: 'Jan Benzenberg', role: 'Vorstand', email: 'vorstand@makerspacebonn.de' },
+  ],
+}
+
 const UP = path.resolve(process.cwd(), 'uploads')
 const day = 24 * 60 * 60 * 1000
 const at = (offsetDays: number, hour = 10) => {
@@ -313,6 +325,7 @@ export async function seedSiteContent(payload: Payload) {
           { title: 'Wissen teilen', text: 'Workshops, Themenabende & gegenseitiges Lernen.' },
         ],
       },
+      VEREIN_PEOPLE_BLOCK,
     ],
   })
 

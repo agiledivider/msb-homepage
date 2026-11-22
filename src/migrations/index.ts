@@ -8,6 +8,7 @@ import * as migration_20261122_013913_media_uploaded_by_claude from './20261122_
 import * as migration_20261122_024732_mcp_preview_link_tool from './20261122_024732_mcp_preview_link_tool';
 import * as migration_20261122_031734_media_ai_label from './20261122_031734_media_ai_label';
 import * as migration_20261122_104113_footer_contact_social from './20261122_104113_footer_contact_social';
+import * as migration_20261122_130104_verein_people_block from './20261122_130104_verein_people_block';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20261122_104113_footer_contact_social.up,
     down: migration_20261122_104113_footer_contact_social.down,
-    name: '20261122_104113_footer_contact_social'
+    name: '20261122_104113_footer_contact_social',
+  },
+  {
+    up: migration_20261122_130104_verein_people_block.up,
+    down: migration_20261122_130104_verein_people_block.down,
+    name: '20261122_130104_verein_people_block'
   },
 ];

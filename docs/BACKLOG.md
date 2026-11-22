@@ -144,10 +144,12 @@ Visitors learn on `/verein` who the Verein is, who runs it, who supports it, and
 
 **Status:** decided 2026-11-22: one page with sections and no subpages for now (the main menu stays flat). Membership, donations and bank details stay on "Mitmachen"; the Handarbeitstreff becomes a recurring event. Already on the page: intro, quote, values, "Die kurze Geschichte". Content sources: the old site's "Der Verein", "Sponsoren", "Wir in den Medien" and "Mitglied werden" pages on `makerspacebonn.de`.
 
-### ⏳ S3.1 — Visitors find the people behind the Verein (S)
-Visitors can't see who runs the Verein or whom to ask about what. The page should show the Vorstand with full names and roles (no photos for now), and a contact for each topic (e.g. Fundraising, Presse, Workshops).
+### ✅ S3.1 — Visitors find the people behind the Verein (S) — 2026-11-22
+Visitors can't see who runs the Verein or whom to ask about what. The page should show the Vorstand with full names and roles (no photos for now), and how to reach each person.
 
-**AC:** `/verein` lists every Vorstand member with full name and role, matching the Impressum; each topic contact can be reached from the page; an editor changes a name or role in the CMS and the page shows it.
+**AC:** `/verein` lists every Vorstand member with full name and role, matching the Impressum; each person shows the address to reach them (changed by Falk 2026-11-22: contact on each person's card instead of a separate list of topic contacts); an editor changes a name, role or address in the CMS and the page shows it.
+
+**Implementation notes:** new page block `people` ("Menschen & Ansprechpartner", `src/blocks/People/`): tag, heading, intro and people (name, role, optional email shown as a mailto link on the card). Seeded with Salim Deeb and Jan Benzenberg (Vorstand, vorstand@makerspacebonn.de) via `VEREIN_PEOPLE_BLOCK`; existing DBs (staging) get it once with `pnpm payload run src/seed/run-verein-people.ts`, which only adds the block where it's missing. Migration `20261122_130104_verein_people_block`. Checked at 1440 px and 375 px (CDP), no horizontal scroll. Covered by `tests/unit/people-block.test.tsx`.
 
 ### ⏳ S3.2 — Visitors see who supports the Verein (S)
 **Needs:** the current list of supporters from the Vorstand.
