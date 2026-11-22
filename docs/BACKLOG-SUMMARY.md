@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**33 open · 12 done** · ✅ 12 · ⏳ 31 · 🚨 2
+**32 open · 13 done** · ✅ 13 · ⏳ 30 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -54,12 +54,12 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L340)
 - ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L345)
 
-## E7 — Legacy migration (0/1 done)
+## E7 — Legacy migration (1/1 done)
 
-- ⏳ [S7.1 — ~328 old Joomla articles were never imported (M–L, depends on scope)](BACKLOG.md#L355)
+All done.
 
 ## E9 — Admin area polish (0/3 done)
 
-- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L386)
-- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L392)
-- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L398)
+- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L371)
+- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L377)
+- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L383)

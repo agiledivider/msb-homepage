@@ -93,42 +93,58 @@ export const inline = (text: string): Node[] => {
 }
 
 /** Compact block shape used by the legacy-article seed data. */
-export type LegacyBlock = { p: string } | { h2: string } | { ul: string[] }
+export type LegacyBlock = { p: string } | { h2: string } | { ul: string[] } | { img: string; alt?: string }
 
-/** Convert compact legacy blocks (with inline markdown links) into a Lexical doc. */
-export const legacyBodyToLexical = (body: LegacyBlock[]) =>
+/**
+ * Convert compact legacy blocks (with inline markdown links) into a Lexical doc.
+ * Image blocks become upload nodes; `mediaIds` maps their filename to the media
+ * doc (images without an entry are left out).
+ */
+export const legacyBodyToLexical = (body: LegacyBlock[], mediaIds: Record<string, number | string> = {}) =>
   doc(
-    body.map((b) => {
-      if ('h2' in b) return h2(b.h2)
+    body.flatMap((b): Node[] => {
+      if ('img' in b) {
+        const value = mediaIds[b.img]
+        return value === undefined
+          ? []
+          : [{ type: 'upload', version: 3, format: '', id: `img-${b.img}`, fields: null, relationTo: 'media', value }]
+      }
+      if ('h2' in b) return [h2(b.h2)]
       if ('ul' in b) {
-        return {
-          type: 'list',
-          listType: 'bullet',
-          tag: 'ul',
-          start: 1,
-          format: '',
-          indent: 0,
-          version: 1,
-          direction: 'ltr',
-          children: b.ul.map((it, i) => ({
-            type: 'listitem',
-            value: i + 1,
+        return [
+          {
+            type: 'list',
+            listType: 'bullet',
+            tag: 'ul',
+            start: 1,
             format: '',
             indent: 0,
             version: 1,
             direction: 'ltr',
-            children: inline(it),
-          })),
-        }
+            children: b.ul.map((it, i) => ({
+              type: 'listitem',
+              value: i + 1,
+              format: '',
+              indent: 0,
+              version: 1,
+              direction: 'ltr',
+              children: inline(it),
+            })),
+          },
+        ]
       }
-      return p(...inline(b.p))
+      return [p(...inline(b.p))]
     }),
   )
 
-/** First paragraph, stripped of markdown links, truncated — for excerpt / meta description. */
+/** Paragraphs that make a poor teaser: a bare date line or a photo credit (common in the old archive). */
+const NOT_A_LEAD = /^(\d{1,2}\.\d{1,2}\.\d{2,4}\s*$|photo by |foto: |bild: |bildrechte)/i
+
+/** First real paragraph, stripped of markdown links, truncated — for excerpt / meta description. */
 export const firstParagraphText = (body: LegacyBlock[], max = 180): string => {
-  const first = body.find((b) => 'p' in b) as { p: string } | undefined
-  if (!first) return ''
-  const plain = first.p.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1').trim()
+  const strip = (s: string) => s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1').trim()
+  const paragraphs = body.flatMap((b) => ('p' in b ? [strip(b.p)] : []))
+  const plain = paragraphs.find((p) => !NOT_A_LEAD.test(p)) ?? paragraphs[0]
+  if (!plain) return ''
   return plain.length > max ? `${plain.slice(0, max - 1).trimEnd()}…` : plain
 }

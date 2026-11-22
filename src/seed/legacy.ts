@@ -2,6 +2,7 @@ import path from 'node:path'
 import config from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 import { EDITORIAL_SKIP } from '../plugins/editorial/types'
+import { legacyArchive } from './legacy-archive'
 import { legacyArticles } from './legacy-articles'
 import { firstParagraphText, legacyBodyToLexical } from './lexical'
 
@@ -10,7 +11,8 @@ import { firstParagraphText, legacyBodyToLexical } from './lexical'
 const SKIP = { context: { [EDITORIAL_SKIP]: true } } as const
 
 /* -------------------------------------------------------------------------
-   Seed the migrated "Aktuelles" articles (see legacy-articles.ts) into the blog
+   Seed the migrated "Aktuelles" articles (legacy-articles.ts, hand-migrated,
+   plus the generated archive in legacy-archive.ts) into the blog
    and events collections, carrying the legacyId for 301-redirects. Idempotent:
    matches on slug → updates, else creates. Images come from uploads/legacy/.
 
@@ -27,6 +29,10 @@ async function mediaId(payload: Payload, filename: string, alt: string) {
     collection: 'media',
     data: { alt },
     filePath: path.resolve(LEGACY_DIR, filename),
+    // A leftover file of the same name (e.g. after recreating the DB) would make
+    // Payload rename the upload, so the filename lookup above never matches and
+    // every run adds a copy. The file is our own seed image: overwrite it.
+    overwriteExistingFiles: true,
   })
   return doc.id
 }
@@ -44,9 +50,13 @@ export async function upsertLegacyArticles() {
   const payload = await getPayload({ config })
   let events = 0
   let posts = 0
-  for (const art of legacyArticles) {
+  for (const art of [...legacyArticles, ...legacyArchive]) {
     const image = art.image ? await mediaId(payload, art.image, art.title) : undefined
-    const body = legacyBodyToLexical(art.body) as never
+    const inline: Record<string, number | string> = {}
+    for (const b of art.body) {
+      if ('img' in b) inline[b.img] = await mediaId(payload, b.img, b.alt || art.title)
+    }
+    const body = legacyBodyToLexical(art.body, inline) as never
     const lead = firstParagraphText(art.body)
 
     if (art.kind === 'blog') {

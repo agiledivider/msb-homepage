@@ -24,6 +24,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import sharp from 'sharp'
 import { ALL_WIDTHS } from '../src/lib/imageWidths.mjs'
+import legacyPaths from '../src/lib/legacy-paths.json'
 
 const ROOT = process.cwd()
 const DIST = path.join(ROOT, 'dist')
@@ -230,6 +231,14 @@ async function collectRoutes() {
       // but sourced from the live DB so it can't drift from what's published.
       if (typeof doc.legacyId === 'number') redirects.push({ legacyId: doc.legacyId, target })
     }
+  }
+
+  // Old pages that were never imported (opening-hours notices, old static pages)
+  // have no doc to carry their id; their fixed targets come from the generated map.
+  const covered = new Set(redirects.map((r) => r.legacyId))
+  for (const [id, target] of Object.entries(legacyPaths)) {
+    const isArticle = target.startsWith('/blog/') || target.startsWith('/events/')
+    if (!isArticle && !covered.has(Number(id))) redirects.push({ legacyId: Number(id), target })
   }
 
   return { routes: [...routes], redirects }

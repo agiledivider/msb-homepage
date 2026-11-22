@@ -352,29 +352,14 @@ Dockerfiles use floating tags (`node:22-slim`, `nginx:1.27-alpine`). Base images
 ## E7 — Legacy migration
 Old Joomla content and links keep working on the new site.
 
-### ⏳ S7.1 — ~328 old Joomla articles were never imported (M–L, depends on scope)
-**Status:** postponed (2026-07-22). Scope decision needed before any work starts. S1.3 covers the launch-critical part (most-visited links).
-**Impact:** old inbound links 404. Not a go-live blocker, but it is SEO/link rot.
+### ✅ S7.1 — ~328 old Joomla articles were never imported (M–L) — 2026-11-22
+**Impact:** old inbound links 404'd (SEO/link rot); everything older than id 341 was missing from the site.
 
-**What's actually there:** the old Joomla site (`makerspacebonn.de`) is **still online**, and the redirect map only covers what was migrated: `legacyId` **341–374** (34 articles, in `src/seed/legacy-articles.ts`). Everything older 404s, e.g. the reported `/index.php?view=article&id=335:workshop-schmuck-und-patches-am-23-06&catid=10`.
+**Scope decided (Falk 2026-11-22):** migrate everything, including the articles added since the July inventory (ids 375–381), and sort each into event or blog post; opening-hours notices are not imported but redirected.
 
-Probing `/index.php?view=article&id=N` for N in 1–400 (missing ids return a clean 404) found **362 live articles**, spanning 2017–2026:
+**AC:** every old article id redirects somewhere sensible; events show on their real date (not the publish date) in the archive and the upcoming list; blog posts keep their text and pictures; the static bundle carries the same redirects.
 
-| year | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| articles | 1 | 57 | 59 | 55 | 42 | 60 | 31 | 28 | 22 | 6 |
-
-Full id → date → title list: [`legacy-articles-inventory.tsv`](legacy-articles-inventory.tsv) (regenerate by re-probing; don't re-scan casually, it's ~360 requests against their live site).
-
-The category listing (`?option=com_content&view=category&id=10`) shows only 33 of these, so it is **not** a reliable inventory; it omits most older items.
-
-**Scope options:**
-1. **Close the recent gap (~320–340):** ~15 articles, 2024, contiguous with what exists. Small enough to hand-check; covers the links people still follow.
-2. **Migrate everything (~328 missing):** full archive back to 2017. Best link preservation, but a large automated scrape (bodies, images, dates) with real risk of mangled formatting, and it would roughly 10x the events collection with long-past events.
-3. **Redirect-only:** map unmigrated ids to `/events/archiv` so links land somewhere instead of 404-ing. No content recovered.
-4. **Recent gap + redirect the rest.**
-
-Whichever is chosen, `scripts/publish-static.ts` builds the nginx/Apache redirect rules from the DB automatically, so no redirect code needs touching, only the seed data.
+**Implementation notes:** 335 articles scraped (one request per second) and reviewed by hand: 191 events, 74 blog posts; 54 opening-hours notices → `/blog`, 16 old static pages → their new page (Falk). Generated data `src/seed/legacy-archive.json` (zod-checked by `legacy-archive.ts`) and `src/lib/legacy-paths.json` (369 redirects incl. the 34 hand-migrated ones; proxy and `publish:static`). 183 images resized to 1600 px in `uploads/legacy/archive-*`: the first image is the cover, the rest stay in the text as upload nodes; covers for articles without one come from Joomla intro images, which only the old list views show. Links between old articles point at the new pages. Recipe and decisions: `docs/legacy-archive.md`, `scripts/legacy-archive/overrides.py`. Existing DBs: `pnpm payload run src/seed/run-legacy.ts`. Fixed on the way: seeded media were renamed by Payload when an old file of that name existed, so every run added copies (`docs/runtime-traps.md`). Covered by `tests/unit/legacy-archive.test.ts`.
 
 ---
 
