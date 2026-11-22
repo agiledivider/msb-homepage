@@ -10,6 +10,7 @@ import { People } from './People/config'
 import { Press } from './Press/config'
 import { Prose } from './Prose/config'
 import { Quote } from './Quote/config'
+import { Supporters } from './Supporters/config'
 import { Timeline } from './Timeline/config'
 import { Values } from './Values/config'
 import { VereinIntro } from './VereinIntro/config'
@@ -34,6 +35,7 @@ export const msbBlocks = [
   People,
   Press,
   Documents,
+  Supporters,
   Columns,
   Quote,
   Timeline,
@@ -61,6 +63,7 @@ export {
   Press,
   Prose,
   Quote,
+  Supporters,
   Timeline,
   Values,
   VereinIntro,

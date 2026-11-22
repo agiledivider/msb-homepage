@@ -9,7 +9,7 @@ import { convertVereinPage } from './vereinLayout'
      - converts an old "Verein Intro" into Zwei Spalten + Werte, with the
        "Was ist ein Makerspace?" text first on the left (servers get this from
        the migration; dev runs on `push`, so it needs this runner);
-     - appends the sections in VEREIN_BLOCKS (people S3.1, press S3.4, documents S3.3, …) that
+     - appends the sections in VEREIN_BLOCKS (people S3.1, press S3.4, documents S3.3, supporters S3.2, …) that
        the page has no block of yet.
    Leaves every other block, and every page, alone; safe to run again.
    Stop the dev server first (SQLite lock).

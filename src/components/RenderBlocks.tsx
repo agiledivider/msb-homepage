@@ -11,6 +11,7 @@ import { type PeopleBlock, PeopleComponent } from '../blocks/People/Component'
 import { type PressBlock, PressComponent } from '../blocks/Press/Component'
 import { type ProseBlock, ProseComponent } from '../blocks/Prose/Component'
 import { type QuoteBlock, QuoteComponent } from '../blocks/Quote/Component'
+import { type SupportersBlock, SupportersComponent } from '../blocks/Supporters/Component'
 import { type TimelineBlock, TimelineComponent } from '../blocks/Timeline/Component'
 import { type ValuesBlock, ValuesComponent } from '../blocks/Values/Component'
 import { type VereinIntroBlock, VereinIntroComponent } from '../blocks/VereinIntro/Component'
@@ -29,6 +30,7 @@ export type MsbBlock =
   | PeopleBlock
   | PressBlock
   | DocumentsBlock
+  | SupportersBlock
   | ColumnsBlock
   | QuoteBlock
   | TimelineBlock
@@ -48,6 +50,7 @@ const REGISTRY: Record<string, (props: any) => ReactNode> = {
   people: PeopleComponent,
   press: PressComponent,
   documents: DocumentsComponent,
+  supporters: SupportersComponent,
   columns: ColumnsComponent,
   quote: QuoteComponent,
   timeline: TimelineComponent,

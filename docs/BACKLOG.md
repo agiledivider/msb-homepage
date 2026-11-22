@@ -151,11 +151,12 @@ Visitors can't see who runs the Verein or whom to ask about what. The page shoul
 
 **Implementation notes:** new page block `people` ("Menschen & Ansprechpartner", `src/blocks/People/`): tag, heading, intro and people (name, role, optional email shown as a mailto link on the card). Seeded with Salim Deeb and Jan Benzenberg (Vorstand, vorstand@makerspacebonn.de) via `VEREIN_PEOPLE_BLOCK`; existing DBs (staging) get it with `pnpm payload run src/seed/run-verein.ts` (since S3.4; was `run-verein-people.ts`), which only adds sections that are missing. Migration `20261122_130104_verein_people_block`. Checked at 1440 px and 375 px (CDP), no horizontal scroll. Covered by `tests/unit/people-block.test.tsx`.
 
-### ⏳ S3.2 — Visitors see who supports the Verein (S)
-**Needs:** the current list of supporters from the Vorstand.
+### ✅ S3.2 — Visitors see who supports the Verein (S) — 2026-11-22
 The old site's sponsor list is from 2020 and no longer correct, and the new site names no supporters at all. Current supporters should be shown, and earlier ones (Deutsche Telekom, Telekom Stiftung, Bonner Spendenparlament, Conrad Electronic Bonn, Stadt Bonn …) stay visible in a separate "Frühere Förderer" group.
 
 **AC:** `/verein` shows current supporters and, separately, former ones; an editor moves a supporter from current to former in the CMS and the page reflects it; with no current supporters the group is hidden, not empty.
+
+**Implementation notes:** new page block `supporters` ("Förderer", `src/blocks/Supporters/`): per supporter name, link (new tab), logo, optional text and "Fördert uns aktuell". Current supporters show their logo in colour with the text beside it; former ones show it in one colour (CSS mask in the muted ink) and fade to the real colours on hover or focus (Falk); without a logo the name stands in. All logos share one height with a capped width, so square and wide marks weigh about the same. Seeded (Falk 2026-11-22): current Deutsche Telekom (provides the rooms since March 2018); former Telekom Stiftung, Bonner Spendenparlament (no logo file found), Conrad (Bonn store closed, links to conrad.de), Stadt Bonn. Logos are Wikimedia Commons SVGs in `uploads/`, given a viewBox and `<title>`; the Stiftung's white background rect was removed. Existing DBs: `pnpm payload run src/seed/run-verein.ts`. Migration `20261122_183227_verein_supporters_block`. Checked at 1440 px and 375 px incl. hover; `publish:static` copies the logos. Covered by `tests/unit/supporters-block.test.tsx`.
 
 ### ✅ S3.3 — Visitors find the Verein's documents (S) — 2026-11-22
 Satzung, Hausordnung and Beitragsordnung are only on the old site, hidden behind "Mitglied werden", and the proof of Gemeinnützigkeit isn't online at all.

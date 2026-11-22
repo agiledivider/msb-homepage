@@ -158,6 +158,52 @@ export async function vereinDocumentsBlock(payload: Payload) {
 }
 
 /**
+ * "Unsere Förderer" on /verein (S3.2). Current: Deutsche Telekom, which has provided
+ * the space since the opening in 2018 (Falk 2026-11-22). Former: the old site's sponsor list (2020);
+ * Conrad's Bonn store has closed, so it links to the company. Logos from
+ * Wikimedia Commons (viewBox added so they scale); the Bonner Spendenparlament
+ * has no usable logo file, so its name stands in.
+ */
+export async function vereinSupportersBlock(payload: Payload) {
+  const logo = (file: string, name: string) => mediaId(payload, file, `Logo ${name}`)
+  return {
+    blockType: 'supporters' as const,
+    tag: 'DANKE',
+    heading: 'Unsere Förderer',
+    formerHeading: 'Frühere Förderer',
+    supporters: [
+      {
+        name: 'Deutsche Telekom',
+        url: 'https://www.telekom.com/de',
+        description:
+          'Die Deutsche Telekom stellt uns unsere Werkstatt-Räume zur Verfügung – den ehemaligen Wählersaal in Bad Godesberg – und das seit dem Start des MakerSpace im März 2018. Ohne sie gäbe es den MakerSpace Bonn nicht.',
+        logo: await logo('logo-telekom.svg', 'Deutsche Telekom'),
+        current: true,
+      },
+      {
+        name: 'Deutsche Telekom Stiftung',
+        url: 'https://www.telekom-stiftung.de/',
+        logo: await logo('logo-telekom-stiftung.svg', 'Deutsche Telekom Stiftung'),
+        current: false,
+      },
+      { name: 'Bonner Spendenparlament', url: 'https://www.bonner-spendenparlament.de/', current: false },
+      {
+        name: 'Conrad Electronic',
+        url: 'https://www.conrad.de/',
+        logo: await logo('logo-conrad.svg', 'Conrad Electronic'),
+        current: false,
+      },
+      {
+        name: 'Stadt Bonn',
+        url: 'https://www.bonn.de/',
+        logo: await logo('logo-stadt-bonn.svg', 'Stadt Bonn'),
+        current: false,
+      },
+    ],
+  }
+}
+
+/**
  * The sections /verein gets after intro, columns and values, in order, by
  * blockType. `run-verein.ts` adds whichever of them an existing database is missing.
  */
@@ -165,6 +211,7 @@ export const VEREIN_BLOCKS: { type: string; make: (payload: Payload) => Promise<
   { type: 'people', make: async () => VEREIN_PEOPLE_BLOCK },
   { type: 'press', make: vereinPressBlock },
   { type: 'documents', make: vereinDocumentsBlock },
+  { type: 'supporters', make: vereinSupportersBlock },
 ]
 
 const UP = path.resolve(process.cwd(), 'uploads')
@@ -427,6 +474,7 @@ export async function seedSiteContent(payload: Payload) {
       VEREIN_PEOPLE_BLOCK,
       await vereinPressBlock(payload),
       await vereinDocumentsBlock(payload),
+      await vereinSupportersBlock(payload),
     ]).layout,
   })
 

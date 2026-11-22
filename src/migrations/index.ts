@@ -12,6 +12,7 @@ import * as migration_20261122_130104_verein_people_block from './20261122_13010
 import * as migration_20261122_144523_verein_press_block from './20261122_144523_verein_press_block';
 import * as migration_20261122_173633_verein_columns from './20261122_173633_verein_columns';
 import * as migration_20261122_175817_verein_documents_block from './20261122_175817_verein_documents_block';
+import * as migration_20261122_183227_verein_supporters_block from './20261122_183227_verein_supporters_block';
 
 export const migrations = [
   {
@@ -82,6 +83,11 @@ export const migrations = [
   {
     up: migration_20261122_175817_verein_documents_block.up,
     down: migration_20261122_175817_verein_documents_block.down,
-    name: '20261122_175817_verein_documents_block'
+    name: '20261122_175817_verein_documents_block',
+  },
+  {
+    up: migration_20261122_183227_verein_supporters_block.up,
+    down: migration_20261122_183227_verein_supporters_block.down,
+    name: '20261122_183227_verein_supporters_block'
   },
 ];
