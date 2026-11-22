@@ -323,6 +323,36 @@ Dockerfiles use floating tags (`node:22-slim`, `nginx:1.27-alpine`). Base images
 
 ---
 
+## E8 — Admins manage backups in the CMS
+Admins see, download and restore the site's backups themselves, without a shell on the server.
+
+**Status:** proposed 2026-11-22. Builds on the nightly off-server backup (B1). Decided 2026-11-22: a restore always covers the whole site (database and media), no single pages or images.
+
+### ⏳ S8.1 — Admins see which backups exist (M)
+Today only someone with a shell on the server or the backup password can tell whether backups run and which ones exist. Admins should see that in the CMS.
+
+**AC:** an admin opens a backups view in the admin area and sees every backup with its date and size, and whether the last nightly run worked; when the newest backup is older than a day and a half, the view says so clearly; editors and reviewers can't see the view or reach its data.
+
+### ⏳ S8.2 — Admins download a backup (M)
+**Needs:** S8.1.
+An admin who wants a copy of the site (before a big change, for an archive, to move servers) has no way to get one.
+
+**AC:** an admin downloads one backup (database and media) as a single file from the backups view; the download is recorded with who and when, because the file contains everything, including user accounts and unpublished drafts; non-admins can't download.
+
+### ⏳ S8.3 — Admins restore the site from a backup (L)
+**Needs:** S8.1.
+When content is lost or broken (an accidental delete, a bad import), getting it back needs someone on the server.
+
+**AC:** an admin picks a backup, sees its date and what it contains, and has to confirm deliberately (e.g. by typing its date); before anything is overwritten, a fresh backup of the current state is made automatically, so the restore can be undone; afterwards the site and the CMS show the content of that date; a restore that fails halfway leaves the site as it was; every restore is recorded with who, when and which backup; non-admins can't restore.
+
+### ⏳ S8.4 — Admins restore from an uploaded backup file (M)
+**Needs:** S8.2, S8.3.
+A backup downloaded earlier, or taken from another server, can't be brought back into the site.
+
+**AC:** an admin uploads a file downloaded with S8.2 and restores it the same way as in S8.3 (preview, deliberate confirmation, safety backup first); a file that isn't such a backup, or is damaged, is refused before anything changes.
+
+---
+
 ## E7 — Legacy migration
 Old Joomla content and links keep working on the new site.
 
