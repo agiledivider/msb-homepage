@@ -297,6 +297,12 @@ The site names the nearby stops and lines, but visitors coming by public transpo
 
 **AC:** the footer on every page links to the bus and train timetables for the MakerSpace's stops (opening in the transit provider's journey planner or departure board); editors can change the links in the CMS; the links work on a 375 px phone and in the static bundle.
 
+### ⏳ S5.7 — Cropped images keep their subject in view (S)
+**Source:** chat 2026-11-22.
+Wherever the site crops an image to fit a frame (hero, cards, polaroids, especially on a phone), it always keeps the centre. A face or machine at the edge of the photo gets cut off, and editors can't do anything about it. The CMS already lets editors set a focal point on an image, but the site ignores it. The site should frame every crop around the image's focal point.
+
+**AC:** an editor moves an image's focal point towards one edge, and the hero, cards and polaroids that use that image keep that spot in view at 375 px and on desktop, also in the static export; images nobody touched look exactly as they do today; the KI label still sits in the visible corner of the crop.
+
 ---
 
 ## E6 — Playbook retrofit
