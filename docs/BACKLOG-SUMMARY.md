@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**32 open · 13 done** · ✅ 13 · ⏳ 30 · 🚨 2
+**31 open · 14 done** · ✅ 14 · ⏳ 29 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -35,24 +35,23 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S4.7 — Footer, logo and wording follow the styleguide (S)](BACKLOG.md#L248)
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L253)
 
-## E5 — Visitor and editor features (1/7 done)
+## E5 — Visitor and editor features (2/7 done)
 
 - ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L272)
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L277)
 - ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L283)
 - ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L288)
 - ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L294)
-- ⏳ [S5.7 — Cropped images keep their subject in view (S)](BACKLOG.md#L300)
 
 ## E6 — Playbook retrofit (0/7 done)
 
-- ⏳ [S6.1 — Lint is green and stays green (S)](BACKLOG.md#L313)
-- ⏳ [S6.2 — Every push runs the gate in CI (M)](BACKLOG.md#L318)
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L325)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L330)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L335)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L340)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L345)
+- ⏳ [S6.1 — Lint is green and stays green (S)](BACKLOG.md#L315)
+- ⏳ [S6.2 — Every push runs the gate in CI (M)](BACKLOG.md#L320)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L327)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L332)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L337)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L342)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L347)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -60,6 +59,6 @@ All done.
 
 ## E9 — Admin area polish (0/3 done)
 
-- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L371)
-- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L377)
-- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L383)
+- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L373)
+- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L379)
+- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L385)

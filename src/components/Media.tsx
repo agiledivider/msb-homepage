@@ -16,6 +16,9 @@ export type MediaResource =
       width?: number | null
       height?: number | null
       aiLabel?: 'none' | 'generated' | 'edited' | null
+      /** Payload focal point, percent of width / height (S5.7) */
+      focalX?: number | null
+      focalY?: number | null
     }
   | string
   | null
@@ -56,14 +59,36 @@ export function Media({
 
   const alt = (typeof resource === 'object' && resource?.alt) || placeholder || ''
   const ai = typeof resource === 'object' ? resource?.aiLabel : undefined
+  const objectPosition = resource && typeof resource === 'object' ? focalPosition(resource) : undefined
 
   return (
     // container-type lets the KI label scale with the image (cqw), not the viewport.
     <div className={`${className ?? ''} [container-type:inline-size]`} style={{ position: 'relative', ...style }}>
-      <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" priority={priority} />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className="object-cover"
+        style={objectPosition ? { objectPosition } : undefined}
+        priority={priority}
+      />
       {ai === 'generated' || ai === 'edited' ? <KiLabel kind={ai} /> : null}
     </div>
   )
+}
+
+const pct = (v: number) => `${Math.min(100, Math.max(0, v))}%`
+
+/**
+ * The editor's focal point as CSS `object-position`, so every `object-cover`
+ * crop keeps that spot in view (S5.7). Without both coordinates the browser's
+ * default centre crop stays, so untouched images look as before.
+ */
+function focalPosition(m: { focalX?: number | null; focalY?: number | null }): string | undefined {
+  if (typeof m.focalX !== 'number' || typeof m.focalY !== 'number') return undefined
+  if (!Number.isFinite(m.focalX) || !Number.isFinite(m.focalY)) return undefined
+  return `${pct(m.focalX)} ${pct(m.focalY)}`
 }
 
 const KI_TEXT = { generated: 'Bild generiert', edited: 'Bild bearbeitet' } as const
