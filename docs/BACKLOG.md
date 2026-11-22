@@ -157,11 +157,12 @@ The old site's sponsor list is from 2020 and no longer correct, and the new site
 
 **AC:** `/verein` shows current supporters and, separately, former ones; an editor moves a supporter from current to former in the CMS and the page reflects it; with no current supporters the group is hidden, not empty.
 
-### ⏳ S3.3 — Visitors find the Verein's documents (S)
-**Needs:** the current PDFs from the Vorstand (the old site's versions may be out of date).
+### ✅ S3.3 — Visitors find the Verein's documents (S) — 2026-11-22
 Satzung, Hausordnung and Beitragsordnung are only on the old site, hidden behind "Mitglied werden", and the proof of Gemeinnützigkeit isn't online at all.
 
 **AC:** Satzung, Hausordnung, Beitragsordnung and the proof of Gemeinnützigkeit can be opened from `/verein`, each with its date or version; an editor replaces a PDF in the CMS without a code change; the documents are also in the static bundle.
+
+**Implementation notes:** new page block `documents` ("Dokumente", `src/blocks/Documents/`): items (title, "Stand / Fassung", file) side by side in one card with lines between (Falk), stacked on phones. Seeded with the old site's PDFs (Falk: use them until the Vorstand sends current ones): Satzung "Stand: Oktober 2017" (PDF creation date), Hausordnung "Stand: August 2020" (old site's upload date, the PDF states none), Beitragsordnung "beschlossen am 17.06.2023". The Gemeinnützigkeit proof was never online; an editor adds it in the CMS. The Satzung is one media doc (`satzung.pdf`) shared with the Impressum link; the separate legal-seed copy (`upsertSatzung`) is gone. Existing DBs: `pnpm payload run src/seed/run-verein.ts`. Migration `20261122_175817_verein_documents_block`. Checked at 1440 px and 375 px; `publish:static` copies the PDFs into `dist/`. Covered by `tests/unit/documents-block.test.tsx`.
 
 ### ✅ S3.4 — The press finds coverage and a contact (S) — 2026-11-22
 Journalists and partners can't see what has been written about the Verein, or whom to contact. "Wir in den Medien" should list the press coverage (General-Anzeiger 2018, 2019, 2021, the 2018 press release) and give a press contact.

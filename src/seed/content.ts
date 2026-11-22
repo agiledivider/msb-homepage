@@ -117,6 +117,46 @@ export async function vereinPressBlock(payload: Payload) {
   }
 }
 
+/** The one Satzung document: /verein lists it and the Impressum links to
+ *  /api/media/file/satzung.pdf. Keep the filename when swapping the PDF in the
+ *  admin (replace the file of this media doc) so both keep working. */
+export const SATZUNG_FILENAME = 'satzung.pdf'
+
+/**
+ * "Satzung & Ordnungen" on /verein (S3.3). The PDFs are the old site's
+ * (makerspacebonn.de/images/MSB-Files/, fetched 2026-11-22) until the Vorstand
+ * sends current ones; the Gemeinnützigkeit proof was never online, an editor
+ * adds it in the CMS. This is the only seed of the Satzung (SATZUNG_FILENAME),
+ * the same media doc the Impressum links to.
+ * Versions: Satzung from the PDF's creation date, Hausordnung from the old
+ * site's upload date (the PDF states none), Beitragsordnung from its text.
+ */
+export async function vereinDocumentsBlock(payload: Payload) {
+  const doc = (file: string, alt: string) => mediaId(payload, file, alt)
+  return {
+    blockType: 'documents' as const,
+    tag: 'DOKUMENTE',
+    heading: 'Satzung & Ordnungen',
+    items: [
+      {
+        title: 'Satzung',
+        version: 'Stand: Oktober 2017',
+        document: await doc(SATZUNG_FILENAME, 'Satzung des MakerSpace Bonn e. V.'),
+      },
+      {
+        title: 'Hausordnung',
+        version: 'Stand: August 2020',
+        document: await doc('hausordnung.pdf', 'Hausordnung des MakerSpace Bonn e. V.'),
+      },
+      {
+        title: 'Beitragsordnung',
+        version: 'beschlossen am 17.06.2023',
+        document: await doc('beitragsordnung.pdf', 'Beitragsordnung des MakerSpace Bonn e. V.'),
+      },
+    ],
+  }
+}
+
 /**
  * The sections /verein gets after intro, columns and values, in order, by
  * blockType. `run-verein.ts` adds whichever of them an existing database is missing.
@@ -124,6 +164,7 @@ export async function vereinPressBlock(payload: Payload) {
 export const VEREIN_BLOCKS: { type: string; make: (payload: Payload) => Promise<object> }[] = [
   { type: 'people', make: async () => VEREIN_PEOPLE_BLOCK },
   { type: 'press', make: vereinPressBlock },
+  { type: 'documents', make: vereinDocumentsBlock },
 ]
 
 const UP = path.resolve(process.cwd(), 'uploads')
@@ -385,6 +426,7 @@ export async function seedSiteContent(payload: Payload) {
       }),
       VEREIN_PEOPLE_BLOCK,
       await vereinPressBlock(payload),
+      await vereinDocumentsBlock(payload),
     ]).layout,
   })
 

@@ -1,5 +1,6 @@
 import { Columns } from './Columns/config'
 import { CtaBand } from './CtaBand/config'
+import { Documents } from './Documents/config'
 import { EventFeed } from './EventFeed/config'
 import { EventsList } from './EventsList/config'
 import { Hero } from './Hero/config'
@@ -32,6 +33,7 @@ export const msbBlocks = [
   Prose,
   People,
   Press,
+  Documents,
   Columns,
   Quote,
   Timeline,
@@ -49,6 +51,7 @@ export const RETIRED_BLOCKS = ['vereinIntro']
 export {
   Columns,
   CtaBand,
+  Documents,
   EventFeed,
   EventsList,
   Hero,

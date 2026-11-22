@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from 'react'
 import { type ColumnsBlock, ColumnsComponent } from '../blocks/Columns/Component'
 import { type CtaBandBlock, CtaBandComponent } from '../blocks/CtaBand/Component'
+import { type DocumentsBlock, DocumentsComponent } from '../blocks/Documents/Component'
 import { type EventFeedBlock, EventFeedComponent } from '../blocks/EventFeed/Component'
 import { type EventsListBlock, EventsListComponent } from '../blocks/EventsList/Component'
 import { type HeroBlock, HeroComponent } from '../blocks/Hero/Component'
@@ -27,6 +28,7 @@ export type MsbBlock =
   | ProseBlock
   | PeopleBlock
   | PressBlock
+  | DocumentsBlock
   | ColumnsBlock
   | QuoteBlock
   | TimelineBlock
@@ -45,6 +47,7 @@ const REGISTRY: Record<string, (props: any) => ReactNode> = {
   prose: ProseComponent,
   people: PeopleComponent,
   press: PressComponent,
+  documents: DocumentsComponent,
   columns: ColumnsComponent,
   quote: QuoteComponent,
   timeline: TimelineComponent,

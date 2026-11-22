@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**31 open · 10 done** · ✅ 10 · ⏳ 29 · 🚨 2
+**30 open · 11 done** · ✅ 11 · ⏳ 28 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -23,38 +23,37 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S2.3 — Admin and public site send security headers (M)](BACKLOG.md#L124)
 - ⏳ [S2.4 — Small hardening follow-ups (S)](BACKLOG.md#L129)
 
-## E3 — Der Verein page (4/8 done)
+## E3 — Der Verein page (5/8 done)
 
 - ⏳ [S3.2 — Visitors see who supports the Verein (S)](BACKLOG.md#L154)
-- ⏳ [S3.3 — Visitors find the Verein's documents (S)](BACKLOG.md#L160)
-- ⏳ [S3.8 — The retired Verein Intro block is gone (S)](BACKLOG.md#L188)
-- ⏳ [S3.6 — Visitors jump to a section of the Verein page (S)](BACKLOG.md#L194)
+- ⏳ [S3.8 — The retired Verein Intro block is gone (S)](BACKLOG.md#L189)
+- ⏳ [S3.6 — Visitors jump to a section of the Verein page (S)](BACKLOG.md#L195)
 
 ## E4 — Styleguide 2026-11 (design audit 2026-11-22) (4/8 done)
 
-- ⏳ [S4.5 — Visitors can tell which images are AI-generated (M)](BACKLOG.md#L236)
-- ⏳ [S4.6 — Visitors can switch the site to dark mode (L)](BACKLOG.md#L241)
-- ⏳ [S4.7 — Footer, logo and wording follow the styleguide (S)](BACKLOG.md#L246)
-- ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L251)
+- ⏳ [S4.5 — Visitors can tell which images are AI-generated (M)](BACKLOG.md#L237)
+- ⏳ [S4.6 — Visitors can switch the site to dark mode (L)](BACKLOG.md#L242)
+- ⏳ [S4.7 — Footer, logo and wording follow the styleguide (S)](BACKLOG.md#L247)
+- ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L252)
 
 ## E5 — Visitor and editor features (1/6 done)
 
-- ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L270)
-- ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L275)
-- ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L281)
-- ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L286)
-- ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L292)
+- ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L271)
+- ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L276)
+- ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L282)
+- ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L287)
+- ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L293)
 
 ## E6 — Playbook retrofit (0/7 done)
 
-- ⏳ [S6.1 — Lint is green and stays green (S)](BACKLOG.md#L305)
-- ⏳ [S6.2 — Every push runs the gate in CI (M)](BACKLOG.md#L310)
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L317)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L322)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L327)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L332)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L337)
+- ⏳ [S6.1 — Lint is green and stays green (S)](BACKLOG.md#L306)
+- ⏳ [S6.2 — Every push runs the gate in CI (M)](BACKLOG.md#L311)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L318)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L323)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L328)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L333)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L338)
 
 ## E7 — Legacy migration (0/1 done)
 
-- ⏳ [S7.1 — ~328 old Joomla articles were never imported (M–L, depends on scope)](BACKLOG.md#L347)
+- ⏳ [S7.1 — ~328 old Joomla articles were never imported (M–L, depends on scope)](BACKLOG.md#L348)
