@@ -170,10 +170,26 @@ Journalists and partners can't see what has been written about the Verein, or wh
 
 **Implementation notes:** new page block `press` ("Wir in den Medien", `src/blocks/Press/`): items (outlet, date, title, link or uploaded file), sorted by date, external links in a new tab, files marked PDF; press contact presse@makerspacebonn.de (from Falk). Seeded from the old site's press page: three General-Anzeiger articles (2018, 2019, 2021) and the 2018 press release, whose PDF moved from `makerspacebonn.de/images/…` into the media library (`uploads/pressemitteilung-2018-02-13-eroeffnung.pdf`). Existing DBs: `pnpm payload run src/seed/run-verein.ts` (replaces `run-verein-people.ts`; adds every missing Verein section). Migration `20261122_144523_verein_press_block`. A web search on 2026-11-22 found no further newspaper coverage (ga.de can't be searched automatically); Falk decided not to add other finds. Checked at 1440 px and 375 px. Covered by `tests/unit/press-block.test.tsx`.
 
-### ⏳ S3.5 — Newcomers learn what a makerspace is (S)
+### ✅ S3.5 — Newcomers learn what a makerspace is (S) — 2026-11-22
 People who have never been in a makerspace don't know what to expect. A short explainer near the top of the page says what a makerspace is and what you can do there.
 
 **AC:** `/verein` has a short "Was ist ein Makerspace?" section in German, editable in the CMS.
+
+**Implementation notes:** text drafted fresh (the old page mostly quoted Wikipedia): what a makerspace is, how you learn the machines, "Offene Tür" link to /events. It is the first Text block in the left column of "Zwei Spalten" (S3.7), next to "Die kurze Geschichte" as Falk asked; seeded via `VEREIN_EXPLAINER` (`src/seed/vereinLayout.ts`).
+
+### ✅ S3.7 — Editors arrange the Verein page from general blocks (M) — 2026-11-22
+**Source:** Falk 2026-11-22, during S3.5.
+The Verein page was one fixed block ("Verein Intro": text, quote, history, values), so editors couldn't reorder it or put other content beside the history.
+
+**AC:** editors build two-column sections from a "Zwei Spalten" block, choose the split (1:1, 3:2, 2:1, 1:2, 2:3) and fill each column with Text, Zitat, Zeitleiste or Menschen & Ansprechpartner; Zeitleiste, Zitat and Werte are blocks of their own; on phones the columns stack, left first; `/verein` looks as before, with "Was ist ein Makerspace?" and Menschen in the left column and the history on the right; existing pages are converted without losing content.
+
+**Implementation notes:** blocks `columns` (split select, `left`/`right` blocks fields side by side in the editor), `timeline`, `quote`, `values` (`src/blocks/`); People cards use container queries so they fit a column. The old `vereinIntro` stays in the schema but is hidden from the block picker (`RETIRED_BLOCKS`, `filterOptions`). Migration `20261122_173633_verein_columns` creates the tables and converts /verein (`convertVereinPage`, also used by `run-verein.ts` in dev and by the seed); checked against a database built by the previous release. Text block size stays 15.5 px (Falk).
+
+### ⏳ S3.8 — The retired Verein Intro block is gone (S)
+**Needs:** S3.7 deployed everywhere.
+The old "Verein Intro" block is only kept so existing pages could be converted. Its tables and code are dead weight once no page uses it.
+
+**AC:** the block, its component and its database tables are removed by a migration; a database that still has a page using it is converted first, not stripped; nothing visible changes.
 
 ### ⏳ S3.6 — Visitors jump to a section of the Verein page (S)
 **Needs:** at least two of S3.1–S3.5.

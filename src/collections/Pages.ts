@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
 import { publicRead } from '../access/publicRead'
-import { msbBlocks } from '../blocks'
+import { msbBlocks, RETIRED_BLOCKS } from '../blocks'
 import { slugField } from '../fields/slug'
 import { generatePreviewPath } from '../lib/preview'
 
@@ -27,6 +27,12 @@ export const Pages: CollectionConfig = {
   fields: [
     { name: 'title', type: 'text', required: true },
     slugField(),
-    { name: 'layout', type: 'blocks', blocks: msbBlocks },
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: msbBlocks,
+      // Retired blocks stay readable but aren't offered for new content.
+      filterOptions: msbBlocks.map((b) => b.slug).filter((slug) => !RETIRED_BLOCKS.includes(slug)),
+    },
   ],
 }

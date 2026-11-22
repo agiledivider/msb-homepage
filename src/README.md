@@ -17,7 +17,10 @@ src/
     EventFeed/            # Start "Was läuft" feed + sticky sidebar
     Workshops/            # pegboard, variant preview (3-col) | detailed (2-col)
     CtaBand/              # green "Mach mit" band
-    VereinIntro/          # about prose (richText) + history timeline + values
+    VereinIntro/          # retired (2026-11-22): kept for old data, not offered to editors
+    Columns/              # "Zwei Spalten": two columns of Text/Zitat/Zeitleiste, split chosen by the editor
+    Timeline/  Quote/  Values/   # Zeitleiste card, pull quote, value cards (were part of VereinIntro)
+    People/  Press/       # Verein page: people with contacts, press coverage
     EventsList/           # Events page list + sidebar
     JoinOptions/          # Mitmachen option cards + location/map
   components/

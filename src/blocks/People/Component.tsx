@@ -15,11 +15,12 @@ export type PeopleBlock = {
 export function PeopleComponent({ tag, heading, intro, people }: PeopleBlock) {
   if (!people?.length) return null
   return (
-    <section className="pt-11 first:pt-0">
+    // @container: the cards follow the width the block gets (full page or a column), not the window.
+    <section className="@container pt-11 first:pt-0">
       <SectionHeading tag={tag ?? undefined} heading={heading ?? undefined} className="mb-4" />
       {intro ? <p className="m-0 mb-6 max-w-[62ch] text-[16.5px] leading-[1.7] text-ink">{intro}</p> : null}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 @4xl:grid-cols-3">
         {people.map((p) => (
           <div key={p.id ?? p.name} className="rounded-[12px] border border-line bg-card p-[22px]">
             <div className="font-sans text-[19px] font-bold text-ink">{p.name}</div>

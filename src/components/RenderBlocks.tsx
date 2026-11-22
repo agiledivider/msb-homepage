@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from 'react'
+import { type ColumnsBlock, ColumnsComponent } from '../blocks/Columns/Component'
 import { type CtaBandBlock, CtaBandComponent } from '../blocks/CtaBand/Component'
 import { type EventFeedBlock, EventFeedComponent } from '../blocks/EventFeed/Component'
 import { type EventsListBlock, EventsListComponent } from '../blocks/EventsList/Component'
@@ -8,6 +9,9 @@ import { type PageIntroBlock, PageIntroComponent } from '../blocks/PageIntro/Com
 import { type PeopleBlock, PeopleComponent } from '../blocks/People/Component'
 import { type PressBlock, PressComponent } from '../blocks/Press/Component'
 import { type ProseBlock, ProseComponent } from '../blocks/Prose/Component'
+import { type QuoteBlock, QuoteComponent } from '../blocks/Quote/Component'
+import { type TimelineBlock, TimelineComponent } from '../blocks/Timeline/Component'
+import { type ValuesBlock, ValuesComponent } from '../blocks/Values/Component'
 import { type VereinIntroBlock, VereinIntroComponent } from '../blocks/VereinIntro/Component'
 import { type WorkshopsBlock, WorkshopsComponent } from '../blocks/Workshops/Component'
 
@@ -23,6 +27,10 @@ export type MsbBlock =
   | ProseBlock
   | PeopleBlock
   | PressBlock
+  | ColumnsBlock
+  | QuoteBlock
+  | TimelineBlock
+  | ValuesBlock
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const REGISTRY: Record<string, (props: any) => ReactNode> = {
@@ -37,6 +45,10 @@ const REGISTRY: Record<string, (props: any) => ReactNode> = {
   prose: ProseComponent,
   people: PeopleComponent,
   press: PressComponent,
+  columns: ColumnsComponent,
+  quote: QuoteComponent,
+  timeline: TimelineComponent,
+  values: ValuesComponent,
 }
 
 /**

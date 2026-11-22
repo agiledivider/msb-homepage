@@ -1,6 +1,7 @@
 import path from 'node:path'
 import type { Payload } from 'payload'
 import { EDITORIAL_SKIP } from '../plugins/editorial/types'
+import { convertLayout, vereinIntroToBlocks } from './vereinLayout'
 
 /**
  * The site's hand-authored core content: hero + site globals (menu, footer),
@@ -117,12 +118,12 @@ export async function vereinPressBlock(payload: Payload) {
 }
 
 /**
- * The blocks /verein gets after the intro, in order, by blockType. `run-verein.ts`
- * adds whichever of them an existing database is missing.
+ * The sections /verein gets after intro, columns and values, in order, by
+ * blockType. `run-verein.ts` adds whichever of them an existing database is missing.
  */
-export const VEREIN_BLOCKS: [blockType: string, make: (payload: Payload) => Promise<object>][] = [
-  ['people', async () => VEREIN_PEOPLE_BLOCK],
-  ['press', vereinPressBlock],
+export const VEREIN_BLOCKS: { type: string; make: (payload: Payload) => Promise<object> }[] = [
+  { type: 'people', make: async () => VEREIN_PEOPLE_BLOCK },
+  { type: 'press', make: vereinPressBlock },
 ]
 
 const UP = path.resolve(process.cwd(), 'uploads')
@@ -357,7 +358,8 @@ export async function seedSiteContent(payload: Payload) {
     title: 'Der Verein',
     slug: 'verein',
     _status: 'published',
-    layout: [
+    // convertLayout: same final shape as converted pages (Menschen in the left column).
+    layout: convertLayout([
       {
         blockType: 'pageIntro',
         tag: 'DER VEREIN',
@@ -366,8 +368,7 @@ export async function seedSiteContent(payload: Payload) {
         headline: 'Eine offene Werkstatt für Bonn. Für alle.',
         lede: 'An open workshop where a curious community creates, gets inspired and learns from one another.',
       },
-      {
-        blockType: 'vereinIntro',
+      ...vereinIntroToBlocks({
         body: rt([
           'Bei uns findet eine Community von engagierten, neugierigen Menschen zusammen, die kreativ Neues erschaffen. Wenn wir geöffnet haben, kann jede:r kommen und am eigenen Projekt arbeiten.',
           'Brauchst du Hilfe, unterstützen wir gern mit Rat und Denkanstößen — nach dem Motto Hilfe zur Selbsthilfe. Am meisten freuen wir uns, wenn du dein Wissen weitergibst.',
@@ -381,10 +382,10 @@ export async function seedSiteContent(payload: Payload) {
           { title: 'Hilfe zur Selbsthilfe', text: 'Wir helfen ein Stück weiter — bauen tust du selbst.' },
           { title: 'Wissen teilen', text: 'Workshops, Themenabende & gegenseitiges Lernen.' },
         ],
-      },
+      }),
       VEREIN_PEOPLE_BLOCK,
       await vereinPressBlock(payload),
-    ],
+    ]).layout,
   })
 
   await upsertBySlug(payload, 'pages', 'werkzeug', {
