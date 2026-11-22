@@ -1,4 +1,5 @@
 import type { Endpoint, PayloadRequest } from 'payload'
+import { isCmsUser } from '@/access/admin'
 import { isReviewer } from '../../editorial/access'
 import { publisherToken, publisherUrl } from '../types'
 
@@ -24,18 +25,19 @@ async function callPublisher(path: string, init?: RequestInit) {
 }
 
 // Publishing the live site is a reviewer/admin action → editorial:review.
-const allowed = (req: PayloadRequest) => Boolean(req.user) && isReviewer(req.user)
+const allowed = (req: PayloadRequest) => isCmsUser(req.user) && isReviewer(req.user)
 
 /** POST /api/publish/trigger — queue a site rebuild + push. */
 export const makeTriggerEndpoint = (): Endpoint => ({
   path: '/publish/trigger',
   method: 'post',
   handler: async (req: PayloadRequest) => {
-    if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isCmsUser(req.user)) return Response.json({ error: 'Unauthorized' }, { status: 401 })
     if (!allowed(req)) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
     try {
-      const who = req.user.email ?? `user ${req.user.id}`
+      const user = req.user as { email?: string; id: number | string }
+      const who = user.email ?? `user ${user.id}`
       const out = await callPublisher('/publish', {
         method: 'POST',
         body: JSON.stringify({ reason: `manual by ${who}` }),
@@ -54,7 +56,7 @@ export const makeStatusEndpoint = (): Endpoint => ({
   path: '/publish/status',
   method: 'get',
   handler: async (req: PayloadRequest) => {
-    if (!req.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isCmsUser(req.user)) return Response.json({ error: 'Unauthorized' }, { status: 401 })
     if (!allowed(req)) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
     try {

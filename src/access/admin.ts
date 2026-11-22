@@ -15,8 +15,16 @@ export const adminOrSelf: Access = ({ req: { user } }) =>
 /** For admin.hidden / hideRoles / hidePermissions — hide from the nav for non-admins. */
 export const hideForNonAdmins = ({ user }: { user: unknown }): boolean => !isAdmin(user)
 
-/** Any logged-in user. Role names aren't secret, and editors need them to see their own roles. */
-export const loggedIn: Access = ({ req: { user } }) => Boolean(user)
+/**
+ * A real CMS account (the `users` collection). Other auth collections, like the
+ * MCP API keys, can authenticate REST calls as themselves; they carry no roles
+ * and must not count as "logged in".
+ */
+export const isCmsUser = (user: unknown): boolean =>
+  Boolean(user) && (user as { collection?: unknown }).collection === 'users'
+
+/** Any logged-in CMS user. Role names aren't secret, and editors need them to see their own roles. */
+export const loggedIn: Access = ({ req: { user } }) => isCmsUser(user)
 
 /** Field-level read: admins, and the user reading their own account. Keeps
  *  email and IdP subject private now that logged-in users can read names. */

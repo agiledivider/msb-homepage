@@ -1,4 +1,5 @@
 import type { CollectionSlug, Endpoint, PayloadRequest } from 'payload'
+import { isCmsUser } from '@/access/admin'
 import { isReviewer } from '../access'
 import { EDITORIAL_SKIP } from '../types'
 
@@ -39,7 +40,8 @@ export const makeTransitionEndpoint = (collections: Set<string>): Endpoint => ({
   method: 'post',
   handler: async (req: PayloadRequest) => {
     const user = req.user
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    // a real CMS account only, not e.g. an MCP key calling REST as itself
+    if (!user || !isCmsUser(user)) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body: Body = (await req.json?.()) ?? {}
     const { collection, id, action, note } = body

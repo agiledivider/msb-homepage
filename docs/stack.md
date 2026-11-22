@@ -9,6 +9,8 @@ Last reviewed: 2026-11-12 (versions from `package.json`)
 | runtime | Node 22 LTS (`node:22-slim` images) | Node 26 | Next 16 targets 20/22 LTS | 2026-07 |
 | app framework | Next.js 16 (App Router), React 19.2 | TanStack Start (house default) | Payload 3 runs inside Next | 2026-07 |
 | CMS | Payload 3.93 (`@payloadcms/next`, `ui`, `richtext-lexical`, `live-preview-react`) | — | code-first config, runs in the Next app; 3.85 → 3.93 on 2026-11-20 for security advisories | 2026-11 |
+| Claude / AI access to content | `@payloadcms/plugin-mcp` 3.93 (`/api/mcp`, per-user API keys) | a chat panel in the admin on the Verein's API key | official plugin; editors use their own Claude, keys act as their CMS user, Payload access applies; writes forced to drafts (docs/CLAUDE-MCP.md) | 2026-11 |
+| schemas for MCP tool input | `zod` 3.25 (same version as plugin-mcp) | zod 4, hand-written checks | the plugin's tool API takes zod shapes; one zod copy in the tree | 2026-11 |
 | database | SQLite via `@payloadcms/db-sqlite` (dev `push`, prod migrations) | Postgres | one file on a volume; enough for a Verein site | 2026-07 |
 | roles / permissions | `payload-rbac-plugin` 1.1 + own `src/plugins/editorial` (review workflow) | hand-rolled role fields | RBAC CRUD gating; editorial roles were unified onto RBAC 2026-07-24 | 2026-07 |
 | login (SSO) | `payload-oauth2` 1.0 against Kanidm (`src/plugins/oidc`) | — | Kanidm is the Verein IdP (setup in `DEPLOY.md`) | 2026-07 |

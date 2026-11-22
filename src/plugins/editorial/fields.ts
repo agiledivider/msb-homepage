@@ -105,6 +105,22 @@ export const reviewFields = (): Field[] => {
       },
     },
     {
+      // Who created the document: set once from the logged-in user (a session or
+      // an MCP key acting for them), never from the request body.
+      name: 'createdBy',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Erstellt von',
+      access: { create: () => false, update: () => false },
+      hooks: {
+        beforeChange: [
+          ({ operation, req, originalDoc, value }) =>
+            operation === 'create' ? (req.user?.collection === 'users' ? req.user.id : value) : originalDoc?.createdBy,
+        ],
+      },
+      admin: { position: 'sidebar', readOnly: true, condition: whenSet('createdBy') },
+    },
+    {
       name: 'reviewedBy',
       type: 'relationship',
       relationTo: 'users',

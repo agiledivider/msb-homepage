@@ -7,6 +7,7 @@ import { buildConfig } from 'payload'
 import { rbac } from 'payload-rbac-plugin'
 import sharp from 'sharp'
 import { adminOnly, hideForNonAdmins, loggedIn } from './access/admin'
+import { requireCmsUserByDefault } from './access/requireCmsUser'
 import { Blog } from './collections/Blog'
 import { Events } from './collections/Events'
 import { Media } from './collections/Media'
@@ -16,6 +17,7 @@ import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { editorialWorkflow } from './plugins/editorial'
 import { isAdmin } from './plugins/editorial/access'
+import { claudeMcp } from './plugins/mcp'
 import { kanidmOAuth } from './plugins/oidc'
 import { sitePublishing } from './plugins/publish'
 
@@ -116,6 +118,11 @@ export default buildConfig({
               },
       ),
     }),
+    // Claude via MCP, with each editor's own rights; writes are drafts only.
+    claudeMcp,
+    // Unset access rules mean "a real CMS user", not "any authenticated
+    // principal" (an MCP key on REST). After every plugin that adds collections.
+    requireCmsUserByDefault,
     // Kanidm (OIDC) sign-in alongside email/password. Last so it modifies the
     // fully-assembled `users` collection (RBAC `roles` + `canReview` already added).
     // No-op unless KANIDM_* env vars are set. See src/plugins/oidc.

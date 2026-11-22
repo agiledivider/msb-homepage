@@ -55,6 +55,7 @@ tests/                integration/ (boots Payload on a temp DB), fitness/ (grep-
 | Library choices | `docs/stack.md` |
 | Decisions | `docs/DECISIONS.md` |
 | Docker deploy, OIDC | `DEPLOY.md` |
+| Claude in the CMS (MCP) | `docs/CLAUDE-MCP.md` |
 | Static publishing / publish worker | `docs/STATIC.md`, `docs/PUBLISHING.md` |
 | Original `.dc.html` design prototype | `LEARNINGS.md` |
 | Analytics / DSGVO research | `docs/analytics-dsgvo-research.md` |

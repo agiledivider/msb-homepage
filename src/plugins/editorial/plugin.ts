@@ -2,6 +2,7 @@ import type { Config, Field, Plugin } from 'payload'
 import { isReviewer } from './access'
 import { makeTransitionEndpoint } from './endpoints/transition'
 import { canReviewField, reviewFields } from './fields'
+import { makeMcpDraftOnly } from './hooks/mcpDraftOnly'
 import { makePublishGate } from './hooks/publishGate'
 import type { EditorialOptions } from './types'
 
@@ -59,6 +60,7 @@ export const editorialWorkflow =
         },
         hooks: {
           ...col.hooks,
+          beforeOperation: [...(col.hooks?.beforeOperation ?? []), makeMcpDraftOnly()],
           beforeChange: [...(col.hooks?.beforeChange ?? []), makePublishGate()],
         },
       }

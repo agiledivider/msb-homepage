@@ -10,7 +10,11 @@ export const Media: CollectionConfig = {
   // `filename` leads so its cell (thumbnail preview + name) is the first column.
   labels: { singular: 'Medium', plural: 'Medien' },
   folders: true,
-  admin: { group: 'Inhalte', useAsTitle: 'alt', defaultColumns: ['filename', 'alt', 'mimeType', 'updatedAt'] },
+  admin: {
+    group: 'Inhalte',
+    useAsTitle: 'alt',
+    defaultColumns: ['filename', 'alt', 'mimeType', 'uploadedByClaude', 'updatedAt'],
+  },
   upload: {
     // MEDIA_DIR lets prod point uploads at a mounted volume (standalone builds
     // resolve import.meta paths unpredictably); falls back to public/media in dev.
@@ -24,5 +28,22 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
     mimeTypes: ['image/*', 'application/pdf'],
   },
-  fields: [{ name: 'alt', type: 'text', required: true }],
+  fields: [
+    { name: 'alt', type: 'text', required: true },
+    {
+      // Set once on upload from where the request came from, never from the body,
+      // so reviewers can spot what Claude added (docs/CLAUDE-MCP.md).
+      name: 'uploadedByClaude',
+      type: 'checkbox',
+      label: 'Von Claude hochgeladen',
+      access: { create: () => false, update: () => false },
+      hooks: {
+        beforeChange: [
+          ({ operation, req, originalDoc }) =>
+            operation === 'create' ? (req.payloadAPI as string) === 'MCP' : Boolean(originalDoc?.uploadedByClaude),
+        ],
+      },
+      admin: { position: 'sidebar', readOnly: true },
+    },
+  ],
 }
