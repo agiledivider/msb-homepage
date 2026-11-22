@@ -28,7 +28,7 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 **Status:** decided 2026-11-22: headlines keep Archivo (Plex Sans tops out at 700 and loses the hero's punch); the styleguide session was asked to add Archivo as an allowed display face. Still open: Newsreader intros and Caveat notes.
 **Problem:** headings use Archivo Black, intros Newsreader italic and notes the Caveat font, while the styleguide says "IBM Plex Sans für alles" and lists the typeface as a fixed brand element.
 **Desired:** headings, intros, labels and captions follow the styleguide's type scale and label style; either Plex Sans only, or a heavier heading face that the styleguide then explicitly allows.
-**AC:** every page uses only the typefaces the styleguide allows; headings and body sizes are within its scale; the hero prism's motion is unchanged.
+**AC:** every page uses only the typefaces the styleguide allows; headings and body sizes are within its scale; the hero prism's motion is unchanged. Per styleguide §9 (2026-11.10, Archivo rule): Archivo appears only on titles (Black 900, 40–56 px, line height 1.02, tracking −2 %) and headings (ExtraBold 800 or Black, 24–32 px); nothing set in Archivo is smaller than 24 px (smaller headings such as card and event titles use Plex Sans Bold) or larger than 56 px (e.g. the large date numbers); the page title stays at 40 px or more on a 375 px phone, or the styleguide states a smaller phone minimum.
 
 ### Keyboard and touch users can find and hit every control
 **Problem:** focus is only visible as the browser default; many buttons and pills are 30–42 px tall; several text links aren't underlined.
