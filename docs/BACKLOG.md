@@ -30,7 +30,9 @@ Deferred work, newest first. Items tagged **🚨 GO-LIVE BLOCKER** must be resol
 **Desired:** visitors who want to join find a clear way from the homepage (at least on "Mitmachen") to the online application in the Vereinssoftware. While online applications are switched off, the homepage doesn't offer them and says how to join instead.
 **AC:** from "Mitmachen", a visitor reaches the online application in one click and can apply there; editors can change the link and its text in the CMS; with no link set, the page shows the offline way to join instead of a broken link.
 
-### Editors create content by asking Claude
+### ✅ DONE 2026-11-22 — Editors create content by asking Claude
+**Implementation notes:** `@payloadcms/plugin-mcp` at `/api/mcp` (`0ed742f`); editors connect their own Claude with a personal key (Verwaltung → KI-Zugänge) that acts as their CMS user. MCP writes are forced to drafts (`mcpDraftOnly`), no deletes; `uploadMedia` adds images/PDFs by URL or base64 (public at once, marked "Von Claude hochgeladen"). New "Erstellt von" on blog, events, pages. Verified by Falk on staging. Details and the known gap (a key keeps its owner's roles from their last login) in `docs/CLAUDE-MCP.md`.
+
 **Problem:** writing a blog post or entering an event means working through the CMS forms by hand, even when the content already exists elsewhere (a mail, a flyer, notes).
 **Desired:** an editor can ask Claude to create or update blog posts, events and pages in the CMS. Claude works with the editor's own rights and only creates drafts, which go through the normal review and approval before anything is published.
 **AC:** an editor asks Claude to create an event from a flyer text, and the event appears in the CMS as a draft under the editor's name; Claude cannot publish or approve anything, and cannot do anything the editor's own account couldn't; without a valid login it can do nothing.
