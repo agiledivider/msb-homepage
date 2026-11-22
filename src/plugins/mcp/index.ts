@@ -16,7 +16,10 @@ the post's cover or the event's image. Uploaded files are public right away.
 For an AI-made image pass aiLabel "generated" ("edited" for an AI-changed photo);
 the site draws the KI label itself, so never put a label into the file.
 To check how a post or event looks (homepage hero and its own page), call
-previewLink and open the link in a browser; it is valid for 15 minutes.`
+previewLink and open the link in a browser; it is valid for 15 minutes.
+Keep titles short: at most 70 characters for blog posts and 60 for events
+(the start-page hero has no room for more); dates, prices and details go
+into the subtitle or the text.`
 
 /**
  * A new key may use every capability configured above (the plugin defaults

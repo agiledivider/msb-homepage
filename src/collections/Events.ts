@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
 import { publicRead } from '../access/publicRead'
 import { slugField } from '../fields/slug'
+import { TITLE_MAX, titleField } from '../fields/title'
 import { generatePreviewPath } from '../lib/preview'
 
 /** Events. The next upcoming event drives hero face 2; the collection also
@@ -27,7 +28,7 @@ export const Events: CollectionConfig = {
   versions: { drafts: true },
   // Layout only: rows and labels, no named groups, so the stored shape is unchanged.
   fields: [
-    { name: 'title', type: 'text', label: 'Titel', required: true },
+    titleField(TITLE_MAX.events),
     {
       name: 'subtitle',
       type: 'text',

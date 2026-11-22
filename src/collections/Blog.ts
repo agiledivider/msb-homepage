@@ -4,6 +4,7 @@ import { checkPermission } from 'payload-rbac-plugin'
 import { publicRead } from '../access/publicRead'
 import { PolaroidCard } from '../blocks/PolaroidCard/config'
 import { slugField } from '../fields/slug'
+import { TITLE_MAX, titleField } from '../fields/title'
 import { generatePreviewPath } from '../lib/preview'
 
 /** Blog posts. The newest published post drives hero face 1. */
@@ -27,7 +28,7 @@ export const Blog: CollectionConfig = {
   },
   versions: { drafts: true },
   fields: [
-    { name: 'title', type: 'text', required: true },
+    titleField(TITLE_MAX.blog),
     slugField(),
     {
       name: 'legacyId',
