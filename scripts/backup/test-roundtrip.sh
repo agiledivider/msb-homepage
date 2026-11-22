@@ -219,4 +219,46 @@ run "$P-db" "$P-media" backup >/dev/null
 run "$P-db" "$P-media" snapshots | grep -q "^$safety" || fail "safety backup $safety was pruned by the next backup"
 pass "safety backups survive the regular cleanup (tag before-restore)"
 
+# 12. Restore from an uploaded file (S8.4): the encrypted download from step 10
+#     goes back in. Wrong password is refused and the file kept for a retry;
+#     the right one previews and restores it. A file that isn't ours, and a
+#     crafted archive (".." entry, symlink), are refused without unpacking.
+shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "drop table payload_migrations; insert into pages(title) values (\"Neu vor dem Upload\");"
+  chown -R 1001:1001 /volumes/db'
+up() { # up <file in the dl volume>: POST it as an upload, prints "<body> <status>"
+  docker run --rm --network "$P-net" -v "$P-dl:/dl:ro" --entrypoint sh "$IMG" -c '
+    curl -s -m 120 -w " %{http_code}" -H "X-Backup-Token: api-test-only" -H "Content-Type: application/octet-stream" \
+      --data-binary "@/dl/$2" "http://$1:8081/uploads"' sh "$P-sched" "$1"
+}
+res=$(up b.enc)
+[[ $res == *" 201" ]] || fail "upload was not taken: $res"
+upload=$(grep -o '"uploadId":"[0-9a-f]*"' <<<"$res" | cut -d'"' -f4)
+[[ $(call POST "/uploads/$upload/check" '{"passphrase":"wrong-wrong-wrong-wrong"}') == *'"code":"wrong-password"'*" 422" ]] \
+  || fail "a wrong password was not refused"
+checked=$(call POST "/uploads/$upload/check" "{\"passphrase\":\"$PASS\"}")
+[[ $checked == *'"compatible":true'* && $checked == *'"backup":{"counts":{"pages":3'* && $checked == *'"live":{"counts":{"pages":4'* && $checked == *" 200" ]] \
+  || fail "upload with the right password was not previewed (file not kept after the wrong one?): $checked"
+[[ $(call POST "/uploads/$upload/restore" "{\"confirm\":\"$upload\",\"by\":\"admin@test.de\"}") == *" 202" ]] || fail "upload restore did not start"
+for _ in $(seq 120); do status=$(call GET /status); [[ $status == *'"running":null'* ]] && break; sleep 1; done
+[[ $status == *'"lastRestore":{"status":"ok"'* && $status == *'"source":"upload"'* && $status == *"\"snapshot\":\"$upload\""* ]] \
+  || fail "upload restore did not finish as recorded: $status"
+[[ $(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select count(*) from pages;"; ls /tmp >/dev/null') == 3 ]] \
+  || fail "live data is not the uploaded backup's"
+[[ $(docker exec "$P-sched" sh -c 'ls -A /work/uploads 2>/dev/null | wc -l') == 0 ]] || fail "the upload was not cleaned up"
+pass "upload: wrong password refused (file kept), right one previewed and restored, upload removed afterwards"
+
+docker run --rm -v "$P-dl:/dl" -u 0 alpine:3.22 sh -c "apk add -q openssl >/dev/null
+  echo 'not a backup' > /dl/plain.enc
+  mkdir -p /tmp/e/volumes/media && cd /tmp/e && echo x > volumes/media/a.webp && ln -s /work volumes/media/link
+  tar -czf /tmp/link.tar.gz volumes && cd / && echo evil > /tmp/evil && tar -czf /tmp/dots.tar.gz -C /tmp/e volumes/media/a.webp ../evil 2>/dev/null
+  for f in link dots; do openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -md sha256 -pass pass:$PASS -in /tmp/\$f.tar.gz -out /dl/\$f.enc; done"
+for f in plain link dots; do
+  res=$(up "$f.enc"); upload=$(grep -o '"uploadId":"[0-9a-f]*"' <<<"$res" | cut -d'"' -f4)
+  [[ $(call POST "/uploads/$upload/check" "{\"passphrase\":\"$PASS\"}") == *'"code":"not-a-backup"'*" 422" ]] \
+    || fail "$f.enc was not refused as not-a-backup"
+done
+[[ $(docker exec "$P-sched" sh -c 'ls /work/evil /work/uploads/evil 2>/dev/null | wc -l; ls -A /work/uploads | wc -l') == $'0\n0' ]] \
+  || fail "a refused upload left files behind"
+pass "upload: a file that isn't a backup, and crafted archives (symlink, ..), are refused and leave nothing"
+
 echo "backup round trip: all checks passed"

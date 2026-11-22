@@ -4,12 +4,16 @@
  */
 import { execFileSync } from 'node:child_process'
 import { createDecipheriv, pbkdf2Sync } from 'node:crypto'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { createServer, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   cleanBy,
+  decryptFile,
   downloadName,
   encryptStream,
   makeHandler,
@@ -512,6 +516,7 @@ describe('parseLastRestore', () => {
       status: 'ok',
       at: '2026-11-22T14:00:00.000Z',
       by: 'admin@test.de',
+      source: 'backup',
       snapshot: '7bf61efa',
       safety: 'a1b2c3d4',
       code: 'restored',
@@ -646,5 +651,175 @@ describe('preview and restore (S8.3)', () => {
     const { call, restored } = await start()
     expect((await call('POST', `/backups/${SNAP.shortId}/restore`, { confirm: SNAP.shortId }, 'nope')).status).toBe(401)
     expect(restored).toEqual([])
+  })
+})
+
+describe('decryptFile (S8.4)', () => {
+  const PASS = 'k7mq-x3pz-9cdr-wv4h-tn2e-fa8b'
+  const dir = mkdtempSync(join(tmpdir(), 'msb-decrypt-'))
+  const encrypted = async (text: string) => {
+    const file = join(dir, `${Math.random()}.enc`)
+    writeFileSync(
+      file,
+      Buffer.concat(await (await encryptStream(Readable.from([Buffer.from(text)]), PASS, 1000)).toArray()),
+    )
+    return file
+  }
+
+  it('opens a download with its password', async () => {
+    const out = join(dir, 'ok.tar.gz')
+    expect(await decryptFile(await encrypted('the whole site'), out, PASS, 1000)).toBe('ok')
+    expect(readFileSync(out, 'utf8')).toBe('the whole site')
+  })
+
+  it('says "wrong password" and leaves nothing behind', async () => {
+    const out = join(dir, 'wrong.tar.gz')
+    expect(await decryptFile(await encrypted('the whole site'), out, 'another-passphrase-xyz', 1000)).toBe(
+      'wrong-password',
+    )
+    expect(() => readFileSync(out)).toThrow()
+  })
+
+  it('says "not a backup" for a file without the OpenSSL header', async () => {
+    const file = join(dir, 'plain.tar.gz')
+    writeFileSync(file, 'just some file')
+    expect(await decryptFile(file, join(dir, 'x'), PASS, 1000)).toBe('not-a-backup')
+  })
+})
+
+describe('uploads (S8.4)', () => {
+  let server: Server | undefined
+  afterEach(() => new Promise<void>((done) => (server ? server.close(() => done()) : done())))
+
+  const start = async (opts: { running?: unknown; check?: string; ready?: boolean; tooLarge?: boolean } = {}) => {
+    const calls: string[] = []
+    server = createServer(
+      makeHandler({
+        token: 'secret-token',
+        listSnapshots: async () => [],
+        readLastRun: async () => null,
+        readRunning: async () => (opts.running ?? null) as never,
+        startBackup: () => 'started' as const,
+        dumpSnapshot: () => ({ stream: Readable.from([]), cancel: () => {} }),
+        readLastRestore: async () => null,
+        inspectSnapshot: async () => PREVIEW,
+        startRestore: () => 'started' as const,
+        uploads: {
+          receive: async (body: Readable) => {
+            const size = Buffer.concat(await body.toArray()).length
+            calls.push(`receive ${size}`)
+            return opts.tooLarge ? { tooLarge: true as const } : { uploadId: 'a1b2c3d4' }
+          },
+          check: async (id: string, passphrase: string) => {
+            calls.push(`check ${id} ${passphrase}`)
+            const kind = opts.check ?? 'ok'
+            return (kind === 'ok' ? { kind, preview: PREVIEW } : { kind }) as never
+          },
+          ready: async () => opts.ready ?? true,
+          restore: (id: string, by: string | null) => {
+            calls.push(`restore ${id} ${by}`)
+            return 'started' as const
+          },
+          discard: async (id: string) => {
+            calls.push(`discard ${id}`)
+          },
+        },
+        log: () => {},
+      }),
+    )
+    await new Promise<void>((done) => server?.listen(0, '127.0.0.1', done))
+    const { port } = (server as Server).address() as AddressInfo
+    const call = (method: string, path: string, body?: string, token = 'secret-token') =>
+      fetch(`http://127.0.0.1:${port}${path}`, { method, headers: { 'X-Backup-Token': token }, body })
+    return { call, calls }
+  }
+  const PASS = 'k7mq-x3pz-9cdr-wv4h-tn2e-fa8b'
+
+  it('takes an upload and names it', async () => {
+    const { call, calls } = await start()
+    const res = await call('POST', '/uploads', 'x'.repeat(1000))
+    expect(res.status).toBe(201)
+    expect(await res.json()).toEqual({ uploadId: 'a1b2c3d4' })
+    expect(calls).toEqual(['receive 1000'])
+  })
+
+  it('refuses an upload that is too large', async () => {
+    const { call } = await start({ tooLarge: true })
+    expect((await call('POST', '/uploads', 'x')).status).toBe(413)
+  })
+
+  it('takes no upload while a backup or restore runs', async () => {
+    const { call, calls } = await start({ running: { kind: 'restore' } })
+    expect((await call('POST', '/uploads', 'x')).status).toBe(409)
+    expect(calls).toEqual([])
+  })
+
+  it('checks an upload with its password and previews it', async () => {
+    const { call, calls } = await start()
+    const res = await call('POST', '/uploads/a1b2c3d4/check', JSON.stringify({ passphrase: PASS }))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({ uploadId: 'a1b2c3d4', ...PREVIEW })
+    expect(calls).toEqual([`check a1b2c3d4 ${PASS}`])
+  })
+
+  it.each([['wrong-password'], ['not-a-backup']])('answers 422 %s', async (code) => {
+    const { call } = await start({ check: code })
+    const res = await call('POST', '/uploads/a1b2c3d4/check', JSON.stringify({ passphrase: PASS }))
+    expect(res.status).toBe(422)
+    expect(await res.json()).toEqual({ code })
+  })
+
+  it('needs a password to check', async () => {
+    const { call, calls } = await start()
+    expect((await call('POST', '/uploads/a1b2c3d4/check', '{}')).status).toBe(400)
+    expect(calls).toEqual([])
+  })
+
+  it('restores a checked upload when its id is confirmed', async () => {
+    const { call, calls } = await start()
+    const res = await call(
+      'POST',
+      '/uploads/a1b2c3d4/restore',
+      JSON.stringify({ confirm: 'a1b2c3d4', by: 'admin@test.de' }),
+    )
+    expect(res.status).toBe(202)
+    expect(calls).toEqual(['restore a1b2c3d4 admin@test.de'])
+  })
+
+  it.each([
+    ['no confirmation', {}, 400],
+    ['another id', { confirm: 'deadbeef' }, 400],
+  ])('restores nothing with %s', async (_label, body, status) => {
+    const { call, calls } = await start()
+    expect((await call('POST', '/uploads/a1b2c3d4/restore', JSON.stringify(body))).status).toBe(status)
+    expect(calls).toEqual([])
+  })
+
+  it('restores nothing that was not checked', async () => {
+    const { call, calls } = await start({ ready: false })
+    expect((await call('POST', '/uploads/a1b2c3d4/restore', JSON.stringify({ confirm: 'a1b2c3d4' }))).status).toBe(404)
+    expect(calls).toEqual([])
+  })
+
+  it('throws an upload away', async () => {
+    const { call, calls } = await start()
+    expect((await call('DELETE', '/uploads/a1b2c3d4')).status).toBe(204)
+    expect(calls).toEqual(['discard a1b2c3d4'])
+  })
+
+  it.each([
+    ['/uploads/../etc'],
+    ['/uploads/A1B2C3D4/check'],
+    ['/uploads/a1b2c3d4e5/check'],
+  ])('knows no %s', async (path) => {
+    const { call, calls } = await start()
+    expect((await call('POST', path, JSON.stringify({ passphrase: PASS }))).status).toBe(404)
+    expect(calls).toEqual([])
+  })
+
+  it('refuses a wrong token', async () => {
+    const { call, calls } = await start()
+    expect((await call('POST', '/uploads', 'x', 'nope')).status).toBe(401)
+    expect(calls).toEqual([])
   })
 })

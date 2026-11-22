@@ -351,11 +351,13 @@ When content is lost or broken (an accidental delete, a bad import), getting it 
 
 **Implementation notes:** per D-007 the restore runs while the site keeps running: `msb-backup restore-live` unpacks and checks the backup (integrity, same `payload_migrations` as live; otherwise refused, nothing changed), takes a safety backup (tag `before-restore`, no prune, kept by `--keep-tag`, labelled "vor Wiederherstellung"), copies media in, swaps the database with SQLite's backup API (`.restore`, safe with the app open in rollback-journal mode), then removes media the backup lacks. Outcome codes in `/work/last-restore.json`, worded in German by `restoreText.ts`. API: `GET /backups/<id>/preview` (`msb-backup inspect`: counts backup vs live), `POST /backups/<id>/restore` (confirm = short id). CMS: `RestorePanel.tsx` (preview, typed short id, progress, outcome), admin-only endpoints `/api/backups/preview` and `/api/backups/restore`. Confirmation is the backup's id, not its date (two backups can share a date). Covered by unit tests and section 11 of `pnpm backup:test`; restored on dev in the browser while `next dev` kept running.
 
-### ⏳ S8.4 — Admins restore from an uploaded backup file (M)
+### ✅ S8.4 — Admins restore from an uploaded backup file (M) — 2026-11-22
 **Needs:** S8.2, S8.3.
 A backup downloaded earlier, or taken from another server, can't be brought back into the site.
 
 **AC:** an admin uploads a file downloaded with S8.2, enters its password, and restores it the same way as in S8.3 (preview, deliberate confirmation, safety backup first); a wrong password, a file that isn't such a backup, or a damaged one is refused before anything changes.
+
+**Implementation notes:** API `POST /uploads` (stream to `/work/uploads/<id>.enc`, size cap), `/uploads/<id>/check` (Node decrypts; `msb-backup stage-upload` lists the archive and refuses anything but plain files below `work/db/` and `volumes/media/`, then unpacks and prints the preview), `/uploads/<id>/restore` (confirm = upload id; `restore-upload` shares `apply_restore` with S8.3), `DELETE /uploads/<id>`. A wrong password keeps the file for a retry; uploads are removed after a restore and at container start. CMS: `UploadRestore.tsx` (XHR for upload progress, then `RestorePanel` with an upload source), endpoints `/api/backups/upload`, `upload-check`, `upload-restore`, `upload-discard`. `/api/` is now outside the Next proxy matcher, which would otherwise cut request bodies at 10 MB (`docs/runtime-traps.md`). Added on Falk's request: download passwords start with the backup id, and the upload form warns when file name and password name different backups. Covered by unit tests and section 12 of `pnpm backup:test` (incl. crafted archives); restored from an uploaded file by Falk in the browser.
 
 ### ✅ S8.5 — Admins take a backup now (S) — 2026-11-22
 **Needs:** S8.1. **Source:** Falk 2026-11-22.

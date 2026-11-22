@@ -17,6 +17,9 @@
 #                                    CMS starts it): safety backup first, then
 #                                    media, then the database via SQLite's
 #                                    backup API, which is safe with the app open
+#   msb-backup stage-upload UPLOAD   check and unpack an uploaded, already
+#                                    decrypted backup (S8.4); prints the preview
+#   msb-backup restore-upload UPLOAD restore it like restore-live (S8.4)
 #
 # Volumes (mounted by compose):
 #   /volumes/db     the app's `db` volume     (msb.db)
@@ -43,7 +46,8 @@ BACKUP_PING_URL="${BACKUP_PING_URL:-}"
 BACKUP_STATUS_FILE="${BACKUP_STATUS_FILE:-$WORK/last-run.json}"
 BACKUP_LOCK_DIR="${BACKUP_LOCK_DIR:-$WORK/backup.lock}"
 RESTORE_STATUS_FILE="${RESTORE_STATUS_FILE:-$WORK/last-restore.json}"
-export BACKUP_STATUS_FILE BACKUP_LOCK_DIR RESTORE_STATUS_FILE
+UPLOAD_DIR="${UPLOAD_DIR:-$WORK/uploads}"
+export BACKUP_STATUS_FILE BACKUP_LOCK_DIR RESTORE_STATUS_FILE UPLOAD_DIR
 # Who started this backup (set by the API for a backup started in the CMS,
 # S8.5); empty for the nightly run. Kept to email-like characters: it goes into JSON.
 BACKUP_BY=$(printf '%s' "${BACKUP_BY:-}" | tr -cd 'A-Za-z0-9@._+-' | cut -c1-120)
@@ -154,6 +158,7 @@ backup_locked() {
 schedule() {
   [ -n "${BACKUP_API_TOKEN:-}" ] || die "missing setting: BACKUP_API_TOKEN (the CMS backups view needs it)"
   drop_lock # nothing can be running when the container starts
+  rm -rf "$UPLOAD_DIR" # nor waiting: uploads are only kept for one restore
   node /usr/local/lib/msb/backup-api.mjs &
   api=$!
   trap 'log "stopping"; kill $api 2>/dev/null; exit 0' TERM INT
@@ -235,6 +240,17 @@ counts_json() { # counts_json <db>
 migrations() { sqlite3 "$1" "select name from payload_migrations order by name;" 2>/dev/null || true; }
 valid_id() { printf '%s' "$1" | grep -Eq '^[0-9a-f]{8,64}$' || die "invalid snapshot id '$1'"; }
 
+# The restore preview: a backup's database and file count next to the live site's.
+preview_json() { # preview_json <backup db> <backup media file count>
+  integrity=$(sqlite3 "$1" 'PRAGMA integrity_check;' 2>/dev/null || true)
+  compatible=false
+  [ "$(migrations "$1")" = "$(migrations "$DB_DIR/$DB_FILE")" ] && compatible=true
+  live_files=$(find "$MEDIA_DIR" -type f | wc -l | tr -d ' ')
+  printf '{"integrity":"%s","compatible":%s,"backup":{"counts":%s,"mediaFiles":%s},"live":{"counts":%s,"mediaFiles":%s}}\n' \
+    "$([ "$integrity" = ok ] && echo ok || echo damaged)" "$compatible" \
+    "$(counts_json "$1")" "${2:-0}" "$(counts_json "$DB_DIR/$DB_FILE")" "${live_files:-0}"
+}
+
 inspect() {
   id=$1
   valid_id "$id"
@@ -242,19 +258,38 @@ inspect() {
   rm -rf "$tmp" && mkdir -p "$tmp"
   trap 'rm -rf "$tmp"' EXIT
   restic dump "$id" "$WORK/db/$DB_FILE" >"$tmp/$DB_FILE" || die "snapshot $id has no database"
-  integrity=$(sqlite3 "$tmp/$DB_FILE" 'PRAGMA integrity_check;' 2>/dev/null || true)
-  compatible=false
-  [ "$(migrations "$tmp/$DB_FILE")" = "$(migrations "$DB_DIR/$DB_FILE")" ] && compatible=true
-  backup_files=$(restic ls --json --recursive "$id" "$MEDIA_DIR" | grep -c '"type":"file"' || true)
-  live_files=$(find "$MEDIA_DIR" -type f | wc -l | tr -d ' ')
-  printf '{"integrity":"%s","compatible":%s,"backup":{"counts":%s,"mediaFiles":%s},"live":{"counts":%s,"mediaFiles":%s}}\n' \
-    "$([ "$integrity" = ok ] && echo ok || echo damaged)" "$compatible" \
-    "$(counts_json "$tmp/$DB_FILE")" "${backup_files:-0}" "$(counts_json "$DB_DIR/$DB_FILE")" "${live_files:-0}"
+  preview_json "$tmp/$DB_FILE" "$(restic ls --json --recursive "$id" "$MEDIA_DIR" | grep -c '"type":"file"' || true)"
 }
 
-record_restore() { # record_restore ok|failed <snapshot> <safety snapshot or ""> <code> <message>
-  printf '{"status":"%s","at":"%s","by":%s,"snapshot":"%s","safety":%s,"code":"%s","message":"%s"}\n' "$1" \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(by_json)" "$2" "$(json_or_null "$3")" "$4" "$5" >"$RESTORE_STATUS_FILE.tmp" &&
+# An uploaded backup (S8.4), already decrypted by the API to $UPLOAD_DIR/ID.tar.gz.
+# Exit 3: not a readable .tar.gz (wrong password or damaged file);
+# exit 4: readable, but not one of our backups. Nothing is unpacked then.
+stage_upload() {
+  id=$1
+  valid_id "$id"
+  archive="$UPLOAD_DIR/$id.tar.gz" dir="$UPLOAD_DIR/$id"
+  [ -f "$archive" ] || die "no uploaded archive $id"
+  tar -tzf "$archive" >"$archive.list" 2>/dev/null || { rm -f "$archive" "$archive.list"; exit 3; }
+  # Only plain files and directories, only below work/db/ and volumes/media/,
+  # no "..": a crafted archive must not write anywhere else (or via a link).
+  types=$(tar -tvzf "$archive" | cut -c1 | sort -u | tr -d '\n')
+  if ! printf '%s' "$types" | grep -Eq '^[-d]+$' ||
+    sed 's|^\./||; s|^/||' "$archive.list" | grep -Evq '^(work/?|work/db/?|work/db/[^/]+|volumes/?|volumes/media/?|volumes/media/.+)$' ||
+    grep -Eq '(^|/)\.\.(/|$)' "$archive.list"; then
+    rm -f "$archive" "$archive.list"
+    exit 4
+  fi
+  rm -rf "$dir" && mkdir -p "$dir"
+  tar -xzf "$archive" -C "$dir" || { rm -rf "$dir" "$archive" "$archive.list"; exit 3; }
+  rm -f "$archive" "$archive.list"
+  [ -f "$dir$WORK/db/$DB_FILE" ] || { rm -rf "$dir"; exit 4; }
+  preview_json "$dir$WORK/db/$DB_FILE" "$(find "$dir$MEDIA_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')"
+}
+
+record_restore() { # record_restore ok|failed <snapshot or upload id> <safety snapshot or ""> <code> <message>
+  printf '{"status":"%s","at":"%s","by":%s,"source":"%s","snapshot":"%s","safety":%s,"code":"%s","message":"%s"}\n' "$1" \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(by_json)" "${RESTORE_SOURCE:-backup}" "$2" "$(json_or_null "$3")" "$4" "$5" \
+    >"$RESTORE_STATUS_FILE.tmp" &&
     mv "$RESTORE_STATUS_FILE.tmp" "$RESTORE_STATUS_FILE" || log "could not record the restore status (ignored)"
 }
 
@@ -264,12 +299,32 @@ restore_live() {
   take_lock $$ restore "$id" || { log "a backup or restore is already running; not restoring"; exit 75; }
   tmp="$WORK/restore-live"
   trap 'rm -rf "$tmp"; drop_lock' EXIT
-  abort() { log "RESTORE FAILED: $2"; record_restore failed "$id" "$safety" "$1" "$2"; exit 1; } # abort <code> <message>
   log "restore of $id started${BACKUP_BY:+ by $BACKUP_BY}"
-
-  # 1. Unpack and check the backup next to the live data. Nothing has changed yet.
   rm -rf "$tmp" && mkdir -p "$tmp"
   restic restore "$id" --target "$tmp" >/dev/null || abort unreadable "the backup could not be read; nothing changed"
+  apply_restore "$tmp"
+}
+
+restore_upload() {
+  id=$1 safety=''
+  valid_id "$id"
+  RESTORE_SOURCE=upload
+  tmp="$UPLOAD_DIR/$id"
+  [ -d "$tmp" ] || die "no checked upload $id (upload and check it first)"
+  take_lock $$ restore "$id" || { log "a backup or restore is already running; not restoring"; exit 75; }
+  trap 'rm -rf "$tmp"; drop_lock' EXIT # the upload is used once, whatever happens
+  log "restore of uploaded backup $id started${BACKUP_BY:+ by $BACKUP_BY}"
+  apply_restore "$tmp"
+}
+
+abort() { log "RESTORE FAILED: $2"; record_restore failed "$id" "$safety" "$1" "$2"; exit 1; } # abort <code> <message>
+
+# The restore itself, from a directory laid out like the backup ($tmp/work/db,
+# $tmp/volumes/media): check, safety backup, media, database, leftover media.
+apply_restore() {
+  tmp=$1
+
+  # 1. Check what is about to go live. Nothing has changed yet.
   db="$tmp$WORK/db/$DB_FILE"
   [ -f "$db" ] || abort no-database "the backup has no database; nothing changed"
   [ "$(sqlite3 "$db" 'PRAGMA integrity_check;')" = ok ] || abort damaged "the database in the backup is damaged; nothing changed"
@@ -313,5 +368,7 @@ case "$cmd" in
   restore) require_config; restore "$@" ;;
   inspect) require_config; inspect "${1:-}" ;;
   restore-live) require_config; restore_live "${1:-}" ;;
-  *) die "unknown command '$cmd' (schedule | backup | snapshots | restore | inspect | restore-live)" ;;
+  stage-upload) stage_upload "${1:-}" ;;
+  restore-upload) require_config; restore_upload "${1:-}" ;;
+  *) die "unknown command '$cmd' (schedule | backup | snapshots | restore | inspect | restore-live | stage-upload | restore-upload)" ;;
 esac

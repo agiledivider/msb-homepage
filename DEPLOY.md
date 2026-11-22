@@ -241,8 +241,13 @@ Wiederherstellung" in the list, so the restore can be undone the same way),
 adds the media, swaps the database with SQLite's backup API (atomic, safe with
 the app open; no restart) and removes media the backup didn't have. A backup
 whose migrations differ from the live database is refused: that needs the
-offline `restore` below plus `payload migrate`. Publish the static site again
-afterwards. The "last restore" line, like "last run", is gone after the backup
+offline `restore` below plus `payload migrate`. "Aus einer Backup-Datei
+wiederherstellen" does the same with a downloaded file and its password: the
+file streams to the backup service (up to `BACKUP_UPLOAD_MAX_BYTES`, default
+20 GB, so `/work` needs room for it twice), is decrypted and checked (only
+plain files below `work/db/` and `volumes/media/`), previewed, restored like a
+backup, and deleted afterwards. Passwords start with the backup's id, as the
+file name ends with it. Publish the static site again afterwards. The "last restore" line, like "last run", is gone after the backup
 container is recreated; the log keeps both. The
 `backup` service serves this through a small internal API
 (`scripts/backup/backup-api.mjs`, port 8081, not published) that lists,

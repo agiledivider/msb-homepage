@@ -5,13 +5,17 @@
 import { describe, expect, it } from 'vitest'
 import {
   backupApiConfig,
+  checkUpload,
+  discardUpload,
   loadBackups,
   loadPreview,
   loadStatus,
   openDownload,
+  restoreUpload,
   STALE_AFTER_MS,
   startBackup,
   startRestore,
+  uploadBackup,
 } from '@/plugins/backups/load'
 
 const NOW = new Date('2026-11-22T12:00:00Z')
@@ -383,6 +387,112 @@ describe('restore (S8.3)', () => {
     const seen: Seen[] = []
     expect(await startRestore(admin, '../status', '../status', deps(api(202, {}, seen)))).toEqual({ kind: 'not-found' })
     expect(await loadPreview(admin, 'latest', deps(api(200, {}, seen)))).toEqual({ kind: 'not-found' })
+    expect(seen).toHaveLength(0)
+  })
+})
+
+describe('uploaded backups (S8.4)', () => {
+  type Seen = { url: string; method?: string; body: unknown }
+  const PASS = 'k7mq-x3pz-9cdr-wv4h-tn2e-fa8b'
+  const api = (status: number, body: unknown, seen: Seen[] = []) =>
+    (async (url: string | URL | Request, init?: RequestInit) => {
+      const b = init?.body
+      seen.push({
+        url: String(url),
+        method: init?.method,
+        body: b instanceof ReadableStream ? await new Response(b).text() : b ? JSON.parse(String(b)) : undefined,
+      })
+      return new Response(status === 204 ? null : JSON.stringify(body), { status })
+    }) as typeof globalThis.fetch
+  const deps = (fetch: typeof globalThis.fetch) => ({ config: CONFIG, fetch, now: () => NOW, isAdmin, log: () => {} })
+  const stream = (text: string) => new Response(text).body
+  const CHECKED = {
+    uploadId: 'a1b2c3d4',
+    integrity: 'ok',
+    compatible: true,
+    backup: { counts: { pages: 3, blog: 0, events: 0, media: 0, users: 1 }, mediaFiles: 2 },
+    live: { counts: { pages: 4, blog: 0, events: 0, media: 0, users: 1 }, mediaFiles: 3 },
+  }
+
+  it("streams an admin's upload through to the backup service", async () => {
+    const seen: Seen[] = []
+    expect(await uploadBackup(admin, stream('encrypted-file'), deps(api(201, { uploadId: 'a1b2c3d4' }, seen)))).toEqual(
+      {
+        kind: 'ok',
+        uploadId: 'a1b2c3d4',
+      },
+    )
+    expect(seen).toEqual([{ url: 'http://backup:8081/uploads', method: 'POST', body: 'encrypted-file' }])
+  })
+
+  it.each([
+    [413, 'too-large'],
+    [409, 'busy'],
+    [502, 'unavailable'],
+  ])('passes on %s as %s', async (status, kind) => {
+    expect(await uploadBackup(admin, stream('x'), deps(api(status, {})))).toEqual({ kind })
+  })
+
+  it('refuses an upload id the service should never hand out', async () => {
+    expect(await uploadBackup(admin, stream('x'), deps(api(201, { uploadId: '../x' })))).toEqual({
+      kind: 'unavailable',
+    })
+  })
+
+  it('checks an upload with its password and previews it', async () => {
+    const seen: Seen[] = []
+    const out = await checkUpload(admin, 'a1b2c3d4', PASS, deps(api(200, CHECKED, seen)))
+    const { uploadId: _, ...preview } = CHECKED
+    expect(out).toEqual({ kind: 'ok', preview })
+    expect(seen).toEqual([
+      { url: 'http://backup:8081/uploads/a1b2c3d4/check', method: 'POST', body: { passphrase: PASS } },
+    ])
+  })
+
+  it.each([['wrong-password'], ['not-a-backup']])('passes on %s', async (code) => {
+    expect(await checkUpload(admin, 'a1b2c3d4', PASS, deps(api(422, { code })))).toEqual({ kind: code })
+  })
+
+  it('needs a real password before asking the service', async () => {
+    const seen: Seen[] = []
+    expect(await checkUpload(admin, 'a1b2c3d4', 'short', deps(api(200, CHECKED, seen)))).toEqual({
+      kind: 'bad-passphrase',
+    })
+    expect(seen).toHaveLength(0)
+  })
+
+  it('restores a checked upload when its id is typed, and nothing otherwise', async () => {
+    const seen: Seen[] = []
+    expect(await restoreUpload(admin, 'a1b2c3d4', 'a1b2c3d4', deps(api(202, {}, seen)))).toEqual({ kind: 'started' })
+    expect(seen[0]).toEqual({
+      url: 'http://backup:8081/uploads/a1b2c3d4/restore',
+      method: 'POST',
+      body: { confirm: 'a1b2c3d4', by: 'admin@test.de' },
+    })
+    expect(await restoreUpload(admin, 'a1b2c3d4', 'deadbeef', deps(api(202, {})))).toEqual({ kind: 'bad-confirm' })
+  })
+
+  it('throws an upload away', async () => {
+    const seen: Seen[] = []
+    expect(await discardUpload(admin, 'a1b2c3d4', deps(api(204, null, seen)))).toEqual({ kind: 'ok' })
+    expect(seen[0]).toMatchObject({ url: 'http://backup:8081/uploads/a1b2c3d4', method: 'DELETE' })
+  })
+
+  it.each([
+    ['upload', () => uploadBackup(editor, stream('x'), deps(api(201, { uploadId: 'a1b2c3d4' })))],
+    ['check', () => checkUpload(editor, 'a1b2c3d4', PASS, deps(api(200, CHECKED)))],
+    ['restore', () => restoreUpload(editor, 'a1b2c3d4', 'a1b2c3d4', deps(api(202, {})))],
+    ['discard', () => discardUpload(editor, 'a1b2c3d4', deps(api(204, null)))],
+  ])('gives an editor no %s', async (_label, run) => {
+    expect(await run()).toEqual({ kind: 'forbidden' })
+  })
+
+  it('never sends a tricked upload id to the service', async () => {
+    const seen: Seen[] = []
+    expect(await checkUpload(admin, '../status', PASS, deps(api(200, CHECKED, seen)))).toEqual({ kind: 'not-found' })
+    expect(await restoreUpload(admin, 'a1b2c3d4e5', 'a1b2c3d4e5', deps(api(202, {}, seen)))).toEqual({
+      kind: 'not-found',
+    })
     expect(seen).toHaveLength(0)
   })
 })

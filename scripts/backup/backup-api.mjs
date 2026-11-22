@@ -22,6 +22,12 @@
 //        (`msb-backup restore-live`: safety backup first). `confirm` must be the
 //        backup's short id; 409 while a backup or restore runs   (S8.3)
 //
+//   POST   /uploads (raw body: a file from the download above) → 201 { uploadId }   (S8.4)
+//   POST   /uploads/<id>/check { passphrase } → 200 { uploadId, ...preview }, or 422
+//          { code: 'wrong-password' | 'not-a-backup' } (a wrong password keeps the file to retry)
+//   POST   /uploads/<id>/restore { confirm, by } → 202; confirm must be the upload id
+//   DELETE /uploads/<id> → 204, the upload is gone
+//
 // lastRun: { status: 'ok'|'failed', at, by } (by: who started it, null = nightly)
 // lastRestore: { status, at, by, snapshot, safety, message } or null
 // running: { startedAt, by, kind: 'backup'|'restore', snapshot } or null
@@ -34,17 +40,19 @@
 // Plain JS without dependencies: the backup image has Node but no node_modules.
 
 import { execFile, spawn } from 'node:child_process'
-import { createCipheriv, createHash, pbkdf2, randomBytes, timingSafeEqual } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
+import { createCipheriv, createDecipheriv, createHash, pbkdf2, randomBytes, timingSafeEqual } from 'node:crypto'
+import { createReadStream, createWriteStream } from 'node:fs'
+import { mkdir, open, readFile, rm, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { PassThrough, pipeline } from 'node:stream'
+import { pipeline as pipelineAsync } from 'node:stream/promises'
 import { promisify } from 'node:util'
 import { createGzip } from 'node:zlib'
 
 /** @typedef {{ id: string, shortId: string, time: string, sizeBytes: number | null, beforeRestore: boolean }} Snapshot */
 /** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null }} LastRun */
 /** @typedef {{ startedAt: string, by: string | null, kind: 'backup' | 'restore', snapshot: string | null }} Running */
-/** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null, snapshot: string, safety: string | null, code: RestoreCode, message: string }} LastRestore */
+/** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null, source: 'backup' | 'upload', snapshot: string, safety: string | null, code: RestoreCode, message: string }} LastRestore */
 /** @typedef {'restored' | 'unreadable' | 'no-database' | 'damaged' | 'other-version' | 'safety-failed' | 'media-failed' | 'database-failed' | 'unknown'} RestoreCode */
 
 /** What `msb-backup restore-live` records as the outcome; the CMS words each one. */
@@ -153,6 +161,7 @@ export function parseLastRestore(text) {
     status: v.status,
     at: new Date(v.at).toISOString(),
     by: cleanBy(v.by),
+    source: v.source === 'upload' ? 'upload' : 'backup',
     snapshot: v.snapshot,
     safety: isSnapshotId(v.safety) ? v.safety : null,
     code: RESTORE_CODES.includes(v.code) ? v.code : 'unknown',
@@ -214,6 +223,39 @@ export async function encryptStream(source, passphrase, iterations = PBKDF2_ITER
   return out
 }
 
+const deriveKey = (passphrase, salt, iterations) =>
+  new Promise((resolve, reject) =>
+    pbkdf2(passphrase, salt, iterations, 48, 'sha256', (err, key) => (err ? reject(err) : resolve(key))),
+  )
+
+/**
+ * Decrypt a file written by `encryptStream` (OpenSSL `enc` format) to `dst`.
+ * 'not-a-backup': no OpenSSL header; 'wrong-password': the padding at the end
+ * doesn't check out, which is what a wrong password (or a damaged file) gives.
+ * `dst` is removed unless the result is 'ok'.
+ * @returns {Promise<'ok' | 'not-a-backup' | 'wrong-password'>}
+ */
+export async function decryptFile(src, dst, passphrase, iterations = PBKDF2_ITERATIONS) {
+  const fh = await open(src, 'r')
+  const head = Buffer.alloc(16)
+  try {
+    await fh.read(head, 0, 16, 0)
+  } finally {
+    await fh.close()
+  }
+  if (head.subarray(0, 8).toString('latin1') !== 'Salted__') return 'not-a-backup'
+  const key = await deriveKey(passphrase, head.subarray(8, 16), iterations)
+  const decipher = createDecipheriv('aes-256-cbc', key.subarray(0, 32), key.subarray(32, 48))
+  try {
+    await pipelineAsync(createReadStream(src, { start: 16 }), decipher, createWriteStream(dst))
+    return 'ok'
+  } catch (err) {
+    await rm(dst, { force: true })
+    if (err && /bad decrypt|wrong final block length/i.test(String(err.message))) return 'wrong-password'
+    throw err
+  }
+}
+
 /** Constant-time token check; hashing first makes the lengths equal. */
 export function tokenMatches(given, expected) {
   if (typeof given !== 'string' || !expected) return false
@@ -250,6 +292,13 @@ async function readJsonBody(req) {
  *   readLastRestore: () => Promise<LastRestore | null>,
  *   inspectSnapshot: (id: string) => Promise<Preview>,
  *   startRestore: (id: string, by: string | null) => 'started' | 'running',
+ *   uploads?: {
+ *     receive: (body: import('node:stream').Readable) => Promise<{ uploadId: string } | { tooLarge: true }>,
+ *     check: (id: string, passphrase: string) => Promise<{ kind: 'ok', preview: Preview } | { kind: 'not-found' | 'wrong-password' | 'not-a-backup' }>,
+ *     ready: (id: string) => Promise<boolean>,
+ *     restore: (id: string, by: string | null) => 'started' | 'running',
+ *     discard: (id: string) => Promise<void>,
+ *   },
  *   log: (msg: string) => void,
  * }} deps
  */
@@ -263,6 +312,7 @@ export function makeHandler({
   readLastRestore,
   inspectSnapshot,
   startRestore,
+  uploads,
   log,
 }) {
   return async (req, res) => {
@@ -312,6 +362,46 @@ export function makeHandler({
         }
         log(`restore of ${snapshot.shortId} started by ${by ?? 'unknown'}`)
         return send(202, { started: true })
+      }
+      if (uploads && req.method === 'POST' && path === '/uploads') {
+        if (await readRunning()) return send(409, { error: 'a backup or restore is running' })
+        const out = await uploads.receive(req)
+        if ('tooLarge' in out) return send(413, { error: 'file too large' })
+        log(`backup file uploaded as ${out.uploadId}`)
+        return send(201, out)
+      }
+      const upload = /^\/uploads\/([0-9a-f]{8})(\/check|\/restore)?$/.exec(path)
+      if (uploads && upload) {
+        const [, uploadId, action] = upload
+        if (req.method === 'DELETE' && !action) {
+          await uploads.discard(uploadId)
+          res.writeHead(204).end()
+          return
+        }
+        if (req.method === 'POST' && action === '/check') {
+          const body = await readJsonBody(req)
+          if (body === null || !validPassphrase(body.passphrase)) return send(400, { error: 'expected { passphrase }' })
+          const out = await uploads.check(uploadId, body.passphrase)
+          if (out.kind === 'not-found') return send(404, { error: 'no such upload' })
+          if (out.kind !== 'ok') return send(422, { code: out.kind })
+          return send(200, { uploadId, ...out.preview })
+        }
+        if (req.method === 'POST' && action === '/restore') {
+          const body = await readJsonBody(req)
+          if (body === null) return send(400, { error: 'expected a small JSON body' })
+          if (!(await uploads.ready(uploadId))) return send(404, { error: 'no checked upload' })
+          if (body.confirm !== uploadId) return send(400, { error: 'confirm must be the upload id' })
+          const by = cleanBy(body.by)
+          const running = await readRunning()
+          if (running || uploads.restore(uploadId, by) === 'running') {
+            return send(409, {
+              error: 'a backup or restore is already running',
+              running: running ?? (await readRunning()),
+            })
+          }
+          log(`restore of uploaded backup ${uploadId} started by ${by ?? 'unknown'}`)
+          return send(202, { started: true })
+        }
       }
       const download = /^\/backups\/([0-9a-f]{8,64})\/download$/.exec(path)
       if (req.method === 'POST' && download) {
@@ -437,6 +527,70 @@ async function main() {
   const startRestore = (id, by) =>
     run(['restore-live', id], by, { startedAt: new Date().toISOString(), by, kind: 'restore', snapshot: id })
 
+  // Uploaded backups (S8.4): one file at a time in $UPLOAD_DIR, used for one restore.
+  const uploadDir = process.env.UPLOAD_DIR || '/work/uploads'
+  const maxUpload = Number(process.env.BACKUP_UPLOAD_MAX_BYTES || 20 * 1024 ** 3)
+  const uploads = {
+    receive: async (body) => {
+      await rm(uploadDir, { recursive: true, force: true }) // an earlier, unused upload goes
+      await mkdir(uploadDir, { recursive: true })
+      const uploadId = randomBytes(4).toString('hex')
+      const file = `${uploadDir}/${uploadId}.enc`
+      let size = 0
+      let tooLarge = false
+      const counter = new PassThrough()
+      counter.on('data', (chunk) => {
+        size += chunk.length
+        if (size > maxUpload) {
+          tooLarge = true
+          counter.destroy(new Error('too large'))
+        }
+      })
+      try {
+        await pipelineAsync(body, counter, createWriteStream(file))
+      } catch (err) {
+        await rm(file, { force: true })
+        if (tooLarge) return { tooLarge: true }
+        throw err
+      }
+      return { uploadId }
+    },
+    check: async (id, passphrase) => {
+      const enc = `${uploadDir}/${id}.enc`
+      if (!(await stat(enc).catch(() => null))) return { kind: 'not-found' }
+      const decrypted = await decryptFile(enc, `${uploadDir}/${id}.tar.gz`, passphrase)
+      if (decrypted === 'not-a-backup') {
+        await rm(enc, { force: true })
+        return { kind: 'not-a-backup' }
+      }
+      if (decrypted === 'wrong-password') return { kind: 'wrong-password' } // keep the file: try again
+      try {
+        const { stdout } = await execFileAsync('msb-backup', ['stage-upload', id], {
+          timeout: 30 * 60_000,
+          maxBuffer: 1024 * 1024,
+        })
+        await rm(enc, { force: true })
+        return { kind: 'ok', preview: parsePreview(stdout) }
+      } catch (err) {
+        // 3: no readable .tar.gz inside (wrong password that happened to pad right, or a damaged file); 4: not ours.
+        if (err && err.code === 3) return { kind: 'wrong-password' }
+        if (err && err.code === 4) {
+          await rm(enc, { force: true })
+          return { kind: 'not-a-backup' }
+        }
+        throw err
+      }
+    },
+    ready: async (id) => Boolean(await stat(`${uploadDir}/${id}`).catch(() => null)),
+    restore: (id, by) =>
+      run(['restore-upload', id], by, { startedAt: new Date().toISOString(), by, kind: 'restore', snapshot: id }),
+    discard: async (id) => {
+      for (const f of [`${id}.enc`, `${id}.tar.gz`, `${id}.tar.gz.list`, id]) {
+        await rm(`${uploadDir}/${f}`, { recursive: true, force: true })
+      }
+    },
+  }
+
   // restic writes the snapshot as a tar stream (paths as backed up: /work/db/msb.db,
   // /volumes/media/…); gzip makes the database part small.
   const dumpSnapshot = (id) => {
@@ -463,10 +617,12 @@ async function main() {
       readLastRestore,
       inspectSnapshot,
       startRestore,
+      uploads,
       log,
     }),
   )
-  server.requestTimeout = 90_000
+  // Node counts receiving the whole request against this: an upload (S8.4) may take long.
+  server.requestTimeout = 2 * 60 * 60_000
   server.listen(port, () => log(`listening on :${port}`))
   const stop = () => server.close(() => process.exit(0))
   process.on('SIGTERM', stop)

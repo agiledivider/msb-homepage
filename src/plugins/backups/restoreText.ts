@@ -19,7 +19,8 @@ export function restoreOutcome(result: LastRestore | null): string {
   if (!result) return 'Das Ergebnis ist unbekannt; der Backup-Dienst hat keins festgehalten. Bitte das Log prüfen.'
   const safety = result.safety ? ` Das Backup vom Stand davor hat die Kennung ${result.safety}.` : ''
   if (result.status === 'ok' && result.code === 'restored') {
-    return `Die Website ist wiederhergestellt (Backup ${result.snapshot.slice(0, 8)}).${safety} Danach die Website neu veröffentlichen, damit die öffentliche Seite den Stand auch zeigt.`
+    const from = result.source === 'upload' ? 'aus der hochgeladenen Datei' : `Backup ${result.snapshot.slice(0, 8)}`
+    return `Die Website ist wiederhergestellt (${from}).${safety} Danach die Website neu veröffentlichen, damit die öffentliche Seite den Stand auch zeigt.`
   }
   return `${FAILED[result.code === 'restored' ? 'unknown' : result.code]}${safety}`
 }

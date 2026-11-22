@@ -37,6 +37,8 @@ const LastRestoreSchema = z.object({
   status: z.enum(['ok', 'failed']),
   at: z.string().datetime(),
   by: z.string().nullable(),
+  /** A backup from the list, or an uploaded file (S8.4); `snapshot` is then the upload id. */
+  source: z.enum(['backup', 'upload']),
   snapshot: z.string(),
   /** The backup of the state before; null when the restore failed before taking it. */
   safety: z.string().nullable(),
@@ -67,14 +69,15 @@ const CountsSchema = z.object({
   users: z.number().int().nullable(),
 })
 const ContentsSchema = z.object({ counts: CountsSchema, mediaFiles: z.number().int() })
-const PreviewSchema = z.object({
-  snapshot: SnapshotSchema,
+const ContentsPreviewSchema = z.object({
   integrity: z.enum(['ok', 'damaged']),
   /** Same migrations as the running site: only then can it be restored here. */
   compatible: z.boolean(),
   backup: ContentsSchema,
   live: ContentsSchema,
 })
+const PreviewSchema = ContentsPreviewSchema.extend({ snapshot: SnapshotSchema })
+const UploadCheckSchema = ContentsPreviewSchema.extend({ uploadId: z.string() })
 const BackupListSchema = StatusSchema.extend({ snapshots: z.array(SnapshotSchema) })
 const ConflictSchema = z.object({ running: RunningSchema.nullable() })
 
@@ -83,6 +86,8 @@ export type LastRun = z.infer<typeof LastRunSchema>
 export type Running = z.infer<typeof RunningSchema>
 export type LastRestore = z.infer<typeof LastRestoreSchema>
 export type Preview = z.infer<typeof PreviewSchema>
+/** What a restore preview shows, for a backup from the list or an uploaded file. */
+export type ContentsPreview = z.infer<typeof ContentsPreviewSchema>
 export type BackupApiConfig = { url: string; token: string }
 
 type Denied = { kind: 'forbidden' } | { kind: 'not-configured' } | { kind: 'unavailable' }
@@ -100,6 +105,14 @@ export type StatusResult =
   | Denied
   | { kind: 'ok'; lastRun: LastRun | null; running: Running | null; lastRestore: LastRestore | null }
 export type PreviewResult = Denied | { kind: 'not-found' } | { kind: 'ok'; preview: Preview }
+export type UploadResult = Denied | { kind: 'too-large' } | { kind: 'busy' } | { kind: 'ok'; uploadId: string }
+export type UploadCheckResult =
+  | Denied
+  | { kind: 'not-found' }
+  | { kind: 'bad-passphrase' }
+  | { kind: 'wrong-password' }
+  | { kind: 'not-a-backup' }
+  | { kind: 'ok'; preview: ContentsPreview }
 export type RestoreResult =
   | Denied
   | { kind: 'not-found' }
@@ -115,6 +128,10 @@ export type DownloadResult =
 
 /** A restic snapshot id, full or short. Anything else never reaches the backup service's URL. */
 const SNAPSHOT_ID = /^[0-9a-f]{8,64}$/
+/** An upload's id, as the backup service hands them out. */
+const UPLOAD_ID = /^[0-9a-f]{8}$/
+/** Uploads can be large and slow; this bounds one. */
+const UPLOAD_TIMEOUT_MS = 2 * 60 * 60 * 1000
 /** Downloads can be large and slow; this bounds one, it doesn't pace it. */
 const DOWNLOAD_TIMEOUT_MS = 2 * 60 * 60 * 1000
 
@@ -268,6 +285,115 @@ export async function startRestore(user: unknown, id: string, confirm: unknown, 
     throw new Error(`backup API answered ${res.status}`)
   } catch (err) {
     return failed(deps, 'restore failed', err)
+  }
+}
+
+/**
+ * S8.4: pass an uploaded backup file through to the backup service as a
+ * stream (never held in memory here). It replaces any earlier upload.
+ */
+export async function uploadBackup(
+  user: unknown,
+  body: ReadableStream<Uint8Array> | null,
+  deps: Deps,
+): Promise<UploadResult> {
+  const config = gate(user, deps)
+  if ('kind' in config) return config
+  if (!body) return { kind: 'too-large' }
+  try {
+    const res = await call(
+      config,
+      deps,
+      '/uploads',
+      // duplex: Node's fetch needs it to send a stream body.
+      { method: 'POST', body, headers: { 'Content-Type': 'application/octet-stream' }, duplex: 'half' } as RequestInit,
+      UPLOAD_TIMEOUT_MS,
+    )
+    if (res.status === 413) return { kind: 'too-large' }
+    if (res.status === 409) return { kind: 'busy' }
+    if (res.status !== 201) throw new Error(`backup API answered ${res.status}`)
+    const { uploadId } = z.object({ uploadId: z.string().regex(UPLOAD_ID) }).parse(await res.json())
+    deps.log('info', `backups: backup file uploaded as ${uploadId} by ${whoIs(user)}`)
+    return { kind: 'ok', uploadId }
+  } catch (err) {
+    return failed(deps, 'upload failed', err)
+  }
+}
+
+/** S8.4: decrypt and check an upload with its password; on success, what restoring it would bring back. */
+export async function checkUpload(
+  user: unknown,
+  uploadId: string,
+  passphrase: unknown,
+  deps: Deps,
+): Promise<UploadCheckResult> {
+  const config = gate(user, deps)
+  if ('kind' in config) return config
+  if (!UPLOAD_ID.test(uploadId)) return { kind: 'not-found' }
+  if (!isValidPassphrase(passphrase)) return { kind: 'bad-passphrase' }
+  try {
+    // Decrypting and unpacking a large backup takes a while.
+    const res = await call(
+      config,
+      deps,
+      `/uploads/${uploadId}/check`,
+      { method: 'POST', body: JSON.stringify({ passphrase }) },
+      30 * 60_000,
+    )
+    if (res.status === 404) return { kind: 'not-found' }
+    if (res.status === 422) {
+      const { code } = z.object({ code: z.enum(['wrong-password', 'not-a-backup']) }).parse(await res.json())
+      return { kind: code }
+    }
+    if (!res.ok) throw new Error(`backup API answered ${res.status}`)
+    const { uploadId: _id, ...preview } = UploadCheckSchema.parse(await res.json())
+    return { kind: 'ok', preview }
+  } catch (err) {
+    return failed(deps, 'upload check failed', err)
+  }
+}
+
+/** S8.4: restore a checked upload like a backup (S8.3); `confirm` must be the upload id. */
+export async function restoreUpload(
+  user: unknown,
+  uploadId: string,
+  confirm: unknown,
+  deps: Deps,
+): Promise<RestoreResult> {
+  const config = gate(user, deps)
+  if ('kind' in config) return config
+  if (!UPLOAD_ID.test(uploadId)) return { kind: 'not-found' }
+  if (typeof confirm !== 'string' || confirm.trim() !== uploadId) return { kind: 'bad-confirm' }
+  const who = whoIs(user)
+  try {
+    const res = await call(config, deps, `/uploads/${uploadId}/restore`, {
+      method: 'POST',
+      body: JSON.stringify({ confirm: confirm.trim(), by: who }),
+    })
+    if (res.status === 202) {
+      deps.log('info', `backups: restore of uploaded backup ${uploadId} started from the CMS by ${who}`)
+      return { kind: 'started' }
+    }
+    if (res.status === 404) return { kind: 'not-found' }
+    if (res.status === 400) return { kind: 'bad-confirm' }
+    if (res.status === 409) return { kind: 'running', running: ConflictSchema.parse(await res.json()).running }
+    throw new Error(`backup API answered ${res.status}`)
+  } catch (err) {
+    return failed(deps, 'upload restore failed', err)
+  }
+}
+
+/** S8.4: throw an upload away (the admin cancelled). */
+export async function discardUpload(user: unknown, uploadId: string, deps: Deps): Promise<Denied | { kind: 'ok' }> {
+  const config = gate(user, deps)
+  if ('kind' in config) return config
+  if (!UPLOAD_ID.test(uploadId)) return { kind: 'ok' }
+  try {
+    const res = await call(config, deps, `/uploads/${uploadId}`, { method: 'DELETE' })
+    if (res.status !== 204) throw new Error(`backup API answered ${res.status}`)
+    return { kind: 'ok' }
+  } catch (err) {
+    return failed(deps, 'discarding the upload failed', err)
   }
 }
 

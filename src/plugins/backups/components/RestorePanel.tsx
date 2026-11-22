@@ -2,21 +2,25 @@
 
 import { Button } from '@payloadcms/ui'
 import { type CSSProperties, useEffect, useState } from 'react'
-import type { LastRestore, Preview } from '../load'
+import type { ContentsPreview, LastRestore } from '../load'
 import { restoreOutcome } from '../restoreText'
 
 type Row = { id: string; shortId: string; time: string }
+/** What gets restored: a backup from the list (S8.3), or an uploaded, already checked file (S8.4). */
+export type RestoreSource =
+  | { kind: 'backup'; row: Row }
+  | { kind: 'upload'; uploadId: string; preview: ContentsPreview }
 type State =
   | { kind: 'loading' }
   | { kind: 'error'; message: string }
-  | { kind: 'ready'; preview: Preview }
-  | { kind: 'restoring'; preview: Preview }
-  | { kind: 'done'; preview: Preview; result: LastRestore | null }
+  | { kind: 'ready'; preview: ContentsPreview }
+  | { kind: 'restoring'; preview: ContentsPreview }
+  | { kind: 'done'; preview: ContentsPreview; result: LastRestore | null }
 
 const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
 const fmtWhen = (iso: string) => `${BERLIN.format(new Date(iso))} Uhr`
 const POLL_MS = 3000
-const ROWS: [keyof Preview['backup']['counts'], string][] = [
+const ROWS: [keyof ContentsPreview['backup']['counts'], string][] = [
   ['pages', 'Seiten'],
   ['blog', 'Blogbeiträge'],
   ['events', 'Termine'],
@@ -45,18 +49,39 @@ const dangerButton = (disabled: boolean): CSSProperties => ({
 })
 const show = (n: number | null) => (n === null ? '—' : String(n))
 
-/** Restore the whole site from one backup (S8.3): preview, typed confirmation, progress, outcome. */
-export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row: Row; onClose: () => void }) {
-  const [state, setState] = useState<State>({ kind: 'loading' })
+/**
+ * Restore the whole site (S8.3 from a backup, S8.4 from an uploaded file):
+ * preview, typed confirmation, progress, outcome.
+ */
+export function RestorePanel({
+  apiRoute,
+  source,
+  onClose,
+}: {
+  apiRoute: string
+  source: RestoreSource
+  onClose: () => void
+}) {
+  const [state, setState] = useState<State>(
+    source.kind === 'upload' ? { kind: 'ready', preview: source.preview } : { kind: 'loading' },
+  )
   const [typed, setTyped] = useState('')
+  const code = source.kind === 'backup' ? source.row.shortId : source.uploadId
+  const row = source.kind === 'backup' ? source.row : null
+  const title = row
+    ? `Website auf den Stand vom ${fmtWhen(row.time)} zurücksetzen`
+    : 'Website aus der hochgeladenen Datei wiederherstellen'
+  const since = row ? `seit dem ${fmtWhen(row.time)}` : 'seit dem Stand der Datei'
 
+  const previewId = row?.shortId
   useEffect(() => {
+    if (!previewId) return
     let live = true
-    fetch(`${apiRoute}/backups/preview?id=${row.shortId}`, { credentials: 'include', cache: 'no-store' })
+    fetch(`${apiRoute}/backups/preview?id=${previewId}`, { credentials: 'include', cache: 'no-store' })
       .then(async (res) => {
         if (!live) return
         if (!res.ok) throw new Error(String(res.status))
-        setState({ kind: 'ready', preview: (await res.json()) as Preview })
+        setState({ kind: 'ready', preview: (await res.json()) as ContentsPreview })
       })
       .catch(
         () =>
@@ -66,7 +91,7 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
     return () => {
       live = false
     }
-  }, [apiRoute, row.shortId])
+  }, [apiRoute, previewId])
 
   // While restoring, ask for the outcome; the page reloads afterwards, because everything changed.
   useEffect(() => {
@@ -86,14 +111,16 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
     return () => clearInterval(timer)
   }, [state, apiRoute])
 
-  const restore = async (preview: Preview) => {
+  const restore = async (preview: ContentsPreview) => {
     setState({ kind: 'restoring', preview })
     try {
-      const res = await fetch(`${apiRoute}/backups/restore`, {
+      const res = await fetch(`${apiRoute}/backups/${source.kind === 'backup' ? 'restore' : 'upload-restore'}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: row.shortId, confirm: typed }),
+        body: JSON.stringify(
+          source.kind === 'backup' ? { id: code, confirm: typed } : { uploadId: code, confirm: typed },
+        ),
       })
       if (res.status === 202) return
       setState({
@@ -122,7 +149,7 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
         background: 'var(--theme-elevation-50)',
       }}
     >
-      <h2 style={{ margin: '0 0 8px', fontSize: 18 }}>Website auf den Stand vom {fmtWhen(row.time)} zurücksetzen</h2>
+      <h2 style={{ margin: '0 0 8px', fontSize: 18 }}>{title}</h2>
 
       {state.kind === 'loading' ? <p role="status">Prüfe das Backup …</p> : null}
       {state.kind === 'error' ? <p style={box('error')}>{state.message}</p> : null}
@@ -166,8 +193,8 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
             <>
               <div style={box('warn')}>
                 <p style={{ margin: '0 0 6px' }}>
-                  <strong>Alles, was seit dem {fmtWhen(row.time)} geändert wurde, wird ersetzt:</strong> Seiten,
-                  Beiträge, Termine, Bilder und auch Benutzerkonten und Rollen. Vielleicht wirst du danach abgemeldet.
+                  <strong>Alles, was {since} geändert wurde, wird ersetzt:</strong> Seiten, Beiträge, Termine, Bilder
+                  und auch Benutzerkonten und Rollen. Vielleicht wirst du danach abgemeldet.
                 </p>
                 <p style={{ margin: 0 }}>
                   Vorher wird automatisch ein Backup des jetzigen Stands gemacht. Damit lässt sich die Wiederherstellung
@@ -175,7 +202,7 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
                 </p>
               </div>
               <label style={{ display: 'block', margin: '0 0 8px' }}>
-                Zur Bestätigung die Kennung <code>{row.shortId}</code> eintippen:
+                Zur Bestätigung die Kennung <code>{code}</code> eintippen:
                 <input
                   value={typed}
                   onChange={(e) => setTyped(e.target.value)}
@@ -192,9 +219,9 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   type="button"
-                  disabled={typed.trim() !== row.shortId}
+                  disabled={typed.trim() !== code}
                   onClick={() => restore(state.preview)}
-                  style={dangerButton(typed.trim() !== row.shortId)}
+                  style={dangerButton(typed.trim() !== code)}
                 >
                   Website wiederherstellen
                 </button>
@@ -209,7 +236,7 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
               Minuten dauern; bitte die Seite offen lassen.
             </p>
           ) : (
-            <Outcome result={state.result} snapshot={row.id} />
+            <Outcome result={state.result} />
           )}
         </>
       ) : null}
@@ -224,8 +251,8 @@ export function RestorePanel({ apiRoute, row, onClose }: { apiRoute: string; row
   )
 }
 
-function Outcome({ result, snapshot }: { result: LastRestore | null; snapshot: string }) {
-  const ok = result?.status === 'ok' && snapshot.startsWith(result.snapshot.slice(0, 8))
+function Outcome({ result }: { result: LastRestore | null }) {
+  const ok = result?.status === 'ok'
   return (
     <div role="status">
       <p style={ok ? { margin: '0 0 8px' } : box('error')}>{restoreOutcome(result)}</p>

@@ -1,7 +1,19 @@
 import type { Endpoint, PayloadRequest } from 'payload'
 import { isCmsUser } from '@/access/admin'
 import { isAdmin } from '@/plugins/editorial/access'
-import { backupApiConfig, type Deps, loadPreview, loadStatus, openDownload, startBackup, startRestore } from './load'
+import {
+  backupApiConfig,
+  checkUpload,
+  type Deps,
+  discardUpload,
+  loadPreview,
+  loadStatus,
+  openDownload,
+  restoreUpload,
+  startBackup,
+  startRestore,
+  uploadBackup,
+} from './load'
 
 const deps = (req: PayloadRequest): Deps => ({
   config: backupApiConfig(process.env),
@@ -109,10 +121,91 @@ const restoreEndpoint: Endpoint = {
   },
 }
 
+const jsonBody = async (req: PayloadRequest) =>
+  ((await req.json?.().catch(() => null)) ?? {}) as Record<string, unknown>
+const str = (v: unknown) => (typeof v === 'string' ? v : '')
+
+/** POST /api/backups/upload — a backup file (raw body), streamed on to the backup service (S8.4). */
+const uploadEndpoint: Endpoint = {
+  path: '/backups/upload',
+  method: 'post',
+  handler: async (req) => {
+    const out = await uploadBackup(req.user, req.body ?? null, deps(req))
+    switch (out.kind) {
+      case 'ok':
+        return Response.json(out, { status: 201 })
+      case 'too-large':
+        return Response.json({ error: 'file too large' }, { status: 413 })
+      case 'busy':
+        return Response.json({ error: 'a backup or restore is running' }, { status: 409 })
+      default:
+        return denied(req, out.kind)
+    }
+  },
+}
+
+/** POST /api/backups/upload-check { uploadId, passphrase } — decrypt, check and preview an upload (S8.4). */
+const uploadCheckEndpoint: Endpoint = {
+  path: '/backups/upload-check',
+  method: 'post',
+  handler: async (req) => {
+    const body = await jsonBody(req)
+    const out = await checkUpload(req.user, str(body.uploadId), body.passphrase, deps(req))
+    switch (out.kind) {
+      case 'ok':
+        return Response.json(out.preview)
+      case 'not-found':
+        return Response.json({ error: 'no such upload' }, { status: 404 })
+      case 'bad-passphrase':
+      case 'wrong-password':
+      case 'not-a-backup':
+        return Response.json({ code: out.kind }, { status: 422 })
+      default:
+        return denied(req, out.kind)
+    }
+  },
+}
+
+/** POST /api/backups/upload-restore { uploadId, confirm } — restore a checked upload (S8.4). */
+const uploadRestoreEndpoint: Endpoint = {
+  path: '/backups/upload-restore',
+  method: 'post',
+  handler: async (req) => {
+    const body = await jsonBody(req)
+    const out = await restoreUpload(req.user, str(body.uploadId), body.confirm, deps(req))
+    switch (out.kind) {
+      case 'started':
+        return Response.json(out, { status: 202 })
+      case 'running':
+        return Response.json(out, { status: 409 })
+      case 'not-found':
+        return Response.json({ error: 'no checked upload' }, { status: 404 })
+      case 'bad-confirm':
+        return Response.json({ error: 'type the upload id to confirm' }, { status: 400 })
+      default:
+        return denied(req, out.kind)
+    }
+  },
+}
+
+/** POST /api/backups/upload-discard { uploadId } — throw an upload away (S8.4). */
+const uploadDiscardEndpoint: Endpoint = {
+  path: '/backups/upload-discard',
+  method: 'post',
+  handler: async (req) => {
+    const out = await discardUpload(req.user, str((await jsonBody(req)).uploadId), deps(req))
+    return out.kind === 'ok' ? new Response(null, { status: 204 }) : denied(req, out.kind)
+  },
+}
+
 export const backupEndpoints: Endpoint[] = [
   runEndpoint,
   statusEndpoint,
   downloadEndpoint,
   previewEndpoint,
   restoreEndpoint,
+  uploadEndpoint,
+  uploadCheckEndpoint,
+  uploadRestoreEndpoint,
+  uploadDiscardEndpoint,
 ]

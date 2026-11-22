@@ -7,6 +7,7 @@ import { backupApiConfig, type LastRestore, type LastRun, loadBackups } from '..
 import { restoreOutcome } from '../restoreText'
 import { BackupNow } from './BackupNow'
 import { BackupTable } from './BackupTable'
+import { UploadRestore } from './UploadRestore'
 
 const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
 const fmtWhen = (iso: string) => `${BERLIN.format(new Date(iso))} Uhr`
@@ -102,6 +103,7 @@ export async function BackupsView({ initPageResult, params, searchParams }: Admi
             {result.snapshots.length ? (
               <BackupTable apiRoute={req.payload.config.routes.api} snapshots={result.snapshots} />
             ) : null}
+            <UploadRestore apiRoute={req.payload.config.routes.api} />
             <p style={{ marginTop: 16, color: 'var(--theme-elevation-600)' }}>
               {result.snapshots.length === 1 ? '1 Backup' : `${result.snapshots.length} Backups`} von Datenbank und
               Medien. Aufbewahrt werden 7 tägliche, 4 wöchentliche und 12 monatliche.

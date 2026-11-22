@@ -24,6 +24,8 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // Next's own assets, the favicon and public media are never legacy article URLs.
-  matcher: ['/((?!_next/static|_next/image|api/media|favicon.ico).*)'],
+  // Next's own assets, the favicon and the API are never legacy article URLs.
+  // Keep /api out: with a proxy in front, Next buffers request bodies and cuts
+  // them off at 10 MB (proxyClientMaxBodySize), which breaks backup uploads (S8.4).
+  matcher: ['/((?!_next/static|_next/image|api/|favicon.ico).*)'],
 }
