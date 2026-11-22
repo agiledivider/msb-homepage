@@ -24,7 +24,7 @@ const str = (v: unknown): string | undefined => (typeof v === 'string' && v.leng
  *   but `email_verified: true` is refused.
  * - **Roles always follow Kanidm.** Kanidm leaves a claim-map claim out entirely
  *   when the user is in none of its groups, so a missing claim means "no role"
- *   and clears the user's roles. Break-glass is the local password admin.
+ *   and clears the user's roles. Break-glass: PASSWORD_LOGIN=on plus a local admin (DEPLOY.md).
  */
 export const parseKanidmUserInfo = (raw: unknown, rolesClaim: string): KanidmIdentity => {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {

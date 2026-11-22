@@ -3,9 +3,9 @@ import { OAuth2Plugin } from 'payload-oauth2'
 import { parseKanidmUserInfo } from './claims'
 
 /**
- * Kanidm (OIDC) sign-in for the Payload admin, layered on top of the built-in
- * email/password login (both stay available — keep a local admin as break-glass
- * for when the IdP is unreachable).
+ * Kanidm (OIDC) sign-in for the Payload admin. On servers it is the only way in:
+ * email/password login is off unless PASSWORD_LOGIN=on (src/lib/passwordLogin.ts),
+ * which is also the break-glass when Kanidm is unreachable or misconfigured.
  *
  * Enabled only when the three required env vars are set, so a deployment without
  * Kanidm configured simply keeps password-only login:

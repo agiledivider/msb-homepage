@@ -15,12 +15,13 @@ import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
+import { passwordLoginEnabled } from './lib/passwordLogin'
 import { payloadSecret } from './lib/payloadSecret'
 import { backupsAdmin } from './plugins/backups'
 import { editorialWorkflow } from './plugins/editorial'
 import { isAdmin } from './plugins/editorial/access'
 import { claudeMcp } from './plugins/mcp'
-import { kanidmOAuth } from './plugins/oidc'
+import { kanidmEnabled, kanidmOAuth } from './plugins/oidc'
 import { sitePublishing } from './plugins/publish'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -134,6 +135,16 @@ export default buildConfig({
   ],
   // Fails fast instead of running with an empty secret; see src/lib/payloadSecret.ts.
   secret: payloadSecret(process.env),
+  onInit: async (payload) => {
+    // Kanidm only (PASSWORD_LOGIN=off) but Kanidm not configured: nobody can log
+    // into the CMS. Only a warning, because the publisher shares this config and
+    // never logs in. Fix: set KANIDM_* or, as emergency access, PASSWORD_LOGIN=on.
+    if (!passwordLoginEnabled(process.env) && !kanidmEnabled) {
+      payload.logger.warn(
+        'Neither password login (PASSWORD_LOGIN=off) nor Kanidm (KANIDM_* unset) is available: nobody can log into the CMS.',
+      )
+    }
+  },
   sharp,
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
 })

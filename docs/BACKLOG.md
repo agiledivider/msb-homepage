@@ -92,9 +92,9 @@ About 328 old Joomla articles were never imported (see S7.1), so links from othe
 **AC:** a list of the most-visited old addresses exists, and each of them opens a useful page on the new site instead of a 404.
 
 ### ⏳ S1.4 — The site goes live on its real domain and is watched (M)
-Launch still needs things outside the code: the real domain and certificates, a production Kanidm login, a strong emergency admin login, a first database setup on the production server, and someone noticing when the site is down. The site should run on its real domain over HTTPS; editors log in through the production Kanidm; a local emergency admin with a strong password exists and is stored safely; the production database was created by the migrations; an uptime check alerts someone when the site or the CMS stops responding.
+Launch still needs things outside the code: the real domain and certificates, a production Kanidm login, a strong emergency admin login, a first database setup on the production server, and someone noticing when the site is down. The site should run on its real domain over HTTPS; editors log in through the production Kanidm; a local emergency admin with a strong password exists and is stored safely, usable only after password login is switched on (D-009); the production database was created by the migrations; an uptime check alerts someone when the site or the CMS stops responding.
 
-**AC:** the real domain serves the site with a valid certificate; an editor logs in through Kanidm in production; the emergency admin can log in; stopping the site triggers an alert within minutes.
+**AC:** the real domain serves the site with a valid certificate; an editor logs in through Kanidm in production; email/password login is refused, and the emergency admin can log in after switching it on (`PASSWORD_LOGIN=on`, D-009); stopping the site triggers an alert within minutes.
 
 ### ⏳ S1.5 — The live site starts with the content prepared before launch (M)
 **Source:** IDEAS.md 2026-11-22.

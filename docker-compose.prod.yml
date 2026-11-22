@@ -33,6 +33,8 @@ services:
       KANIDM_CLIENT_ID: ${KANIDM_CLIENT_ID:-}
       KANIDM_CLIENT_SECRET: ${KANIDM_CLIENT_SECRET:-}
       KANIDM_ROLES_CLAIM: ${KANIDM_ROLES_CLAIM:-}
+      # email/password login: off = Kanidm only (default); on = emergency access (DEPLOY.md)
+      PASSWORD_LOGIN: ${PASSWORD_LOGIN:-off}
       # Backups view in the admin (E8): the backup service's internal API.
       BACKUP_API_URL: http://backup:8081
       BACKUP_API_TOKEN: ${BACKUP_API_TOKEN:?set BACKUP_API_TOKEN in .env}

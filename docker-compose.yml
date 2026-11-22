@@ -55,6 +55,8 @@ services:
       KANIDM_CLIENT_ID: ${KANIDM_CLIENT_ID:-}
       KANIDM_CLIENT_SECRET: ${KANIDM_CLIENT_SECRET:-}
       KANIDM_ROLES_CLAIM: ${KANIDM_ROLES_CLAIM:-}
+      # email/password login: off = Kanidm only (default); on = emergency access (DEPLOY.md)
+      PASSWORD_LOGIN: ${PASSWORD_LOGIN:-off}
     volumes:
       - db:/app/data
       - media:/app/public/media

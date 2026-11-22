@@ -118,8 +118,8 @@ the claim named `cms_roles` unless you set `KANIDM_ROLES_CLAIM`.
 
 Roles are **overwritten at every Kanidm login**: removing someone from all role
 groups takes away their CMS rights the next time they log in. A wrong claim name
-therefore strips everyone who logs in via Kanidm, so keep the local password admin
-as break-glass. To cut someone off *immediately*, remove them from
+therefore strips everyone who logs in via Kanidm; see "Password login" below for
+the way back in. To cut someone off *immediately*, remove them from
 their `dienst_<client>` group and delete their sessions in the CMS. Kanidm accounts are matched
 to CMS accounts by email, and only a verified email (`email_verified: true`) is
 accepted; anything else is refused at login.
@@ -144,6 +144,24 @@ email. **Roles are re-synced from the `cms_roles` claim on every SSO login** —
 so Kanidm group membership is the source of truth, and changes take effect on the
 user's next login. Roles are hierarchical: admin ⊇ reviewer ⊇ editor. Manage
 roles in Kanidm, not in `/admin`, for SSO users. Implementation: `src/plugins/oidc/`.
+
+### Password login (off on servers)
+
+On servers the CMS accepts **only Kanidm**: `PASSWORD_LOGIN` defaults to `off`
+in production, so email/password login, "forgot password" and first-user
+registration are refused, and the login page shows only the Kanidm button. This
+also covers accounts that came along in a restored dev backup (test users with
+the password `test`). Locally (`pnpm dev`) it defaults to `on`.
+
+**Emergency access** (Kanidm down, or a wrong claim name stripped everyone's
+roles): someone with server access sets `PASSWORD_LOGIN=on` in `.env`, runs
+`docker compose up -d --force-recreate <app service>`, logs in with a local
+admin account, fixes things, and sets it back to `off` (recreate again). Keep
+one local admin with a strong password in the password manager for this; with
+password login off, its password can't be used by anyone else.
+
+If neither Kanidm (`KANIDM_*`) nor password login is available, the app logs a
+warning at start: nobody can log in.
 
 ## What persists
 

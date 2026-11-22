@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { adminOnly, adminOrSelf, adminOrSelfField, hideForNonAdmins, loggedIn } from '../access/admin'
+import { passwordLoginEnabled } from '../lib/passwordLogin'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -8,7 +9,16 @@ export const Users: CollectionConfig = {
   // relationship) to a low-level db.updateOne, which can't bind relationship
   // objects on SQLite. Disabling sessions makes that step a no-op; the plugin
   // still issues the JWT cookie. See src/plugins/oidc.
-  auth: { useSessions: false },
+  auth: {
+    useSessions: false,
+    // PASSWORD_LOGIN=off (default on servers): Kanidm only. Payload then refuses
+    // login, forgot/reset password and first-user registration, and the login
+    // page shows only the SSO button. enableFields keeps email/hash/salt in the
+    // schema, so switching needs no migration. See src/lib/passwordLogin.ts.
+    ...(passwordLoginEnabled(process.env)
+      ? {}
+      : { disableLocalStrategy: { enableFields: true, optionalPassword: true } }),
+  },
   access: {
     // Any logged-in user can read names (lock dialog, "Geprüft von"); email and
     // the Kanidm subject stay admin-or-self via field access below.
