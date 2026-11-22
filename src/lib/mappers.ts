@@ -4,6 +4,7 @@ import type { Face } from '@/blocks/Hero/Component'
 import type { NavItem } from '@/components/Header'
 import type { MediaResource } from '@/components/Media'
 import { BERLIN_TZ, eventTimeText } from '@/lib/eventTime'
+import type { SocialPlatform } from '@/lib/socialPlatforms'
 import type { Blog, Event, HeroSetting, Media, SiteSetting } from '@/payload-types'
 
 // ---- date helpers (German) -------------------------------------------------
@@ -180,6 +181,22 @@ export function navFrom(site?: SiteSetting | null): NavItem[] | undefined {
 export function ctaFrom(site?: SiteSetting | null): NavItem | undefined {
   const c = site?.headerCta
   return c?.label && c?.url ? { label: c.label, href: c.url } : undefined
+}
+
+/** Footer contact + community from Website-Einstellungen; empty fields fall back to the footer's defaults. */
+export function footerFrom(site?: SiteSetting | null): {
+  tagline?: string
+  phone?: string
+  email?: string
+  social: { platform: SocialPlatform; url: string }[]
+} {
+  const f = site?.footer
+  return {
+    tagline: f?.tagline?.trim() || undefined,
+    phone: f?.phone?.trim() || undefined,
+    email: f?.email?.trim() || undefined,
+    social: (f?.social ?? []).filter((x) => x.platform && x.url).map((x) => ({ platform: x.platform, url: x.url })),
+  }
 }
 
 export function footerLinksFrom(site?: SiteSetting | null): NavItem[] | undefined {

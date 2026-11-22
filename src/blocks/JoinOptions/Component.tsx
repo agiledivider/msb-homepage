@@ -1,29 +1,7 @@
 import Link from 'next/link'
-import { Media, type MediaResource } from '../../components/Media'
+import { MapCard } from '../../components/MapCard'
+import type { MediaResource } from '../../components/Media'
 import type { LinkValue } from '../fields'
-
-/** Stylised brand map used when no map image is uploaded in the CMS; an
- *  editor-uploaded `location.map` still overrides it. Lives in /public/brand,
- *  which is committed and ships in the image. Not /public/media: that is the
- *  Payload upload dir (gitignored, a volume in production), so a file there
- *  only exists on the machine that put it there. */
-const FALLBACK_MAP: MediaResource = {
-  url: '/brand/karte-kennedyallee.webp',
-  alt: 'Karte: MakerSpace Bonn, Kennedyallee 18, 53175 Bonn',
-  width: 1400,
-  height: 939,
-}
-/** The MakerSpace's own OpenStreetMap entry ("Makerspace Bonn", Kennedyallee 18;
- *  checked via Nominatim 2026-11-22). The main map link: open data, no tracking. */
-const OSM_URL = 'https://www.openstreetmap.org/node/5454350635'
-const GOOGLE_MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=MakerSpace Bonn,+53175+Bonn'
-const MAP_BADGE =
-  'rounded-full bg-card px-3 py-1 font-mono text-[14px] font-semibold text-ink no-underline shadow-sm ring-1 ring-line hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-text'
-/** Where the MakerSpace sits on the stylised base map (percent of the image).
- *  Kennedyallee 18 (50.69817, 7.14513) is on the SW side of Kennedyallee, just
- *  west of the Burgfriedhof green — i.e. upper-right, on the road left of the
- *  big green block. Matches the red pin in the source screenshot (~68%/22%). */
-const MARKER_POS = { left: '63%', top: '23%' }
 
 type Option = {
   number?: string | null
@@ -93,56 +71,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
               </div>
             ) : null}
           </div>
-          {/* Map card. The image, marker and link row share one grid cell. The
-              OpenStreetMap label is the card's main link: its ::after stretches over
-              the whole card (nearest positioned ancestor), so a click anywhere on the
-              map opens OSM. Google Maps sits above that overlay as a second link. */}
-          <div className="relative grid aspect-[3/2] w-full overflow-hidden rounded-[14px] ring-1 ring-line ring-inset transition-shadow hover:shadow-md">
-            <Media
-              resource={location.map ?? FALLBACK_MAP}
-              placeholder={location.mapPlaceholder ?? 'Karte'}
-              className="h-full w-full [grid-area:1/1]"
-              sizes="(max-width:640px) 100vw, 560px"
-            />
-            {/* Signet marker — only when using our stylised base map (an editor
-                upload is a real photo/map that carries its own marker). Tip of the
-                pin is anchored to MARKER_POS via translate(-50%,-100%). */}
-            {!location.map ? (
-              <span
-                className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.28)]"
-                style={{ left: MARKER_POS.left, top: MARKER_POS.top }}
-                aria-hidden
-              >
-                <span className="block h-9 w-9 -rotate-45 rounded-[50%] rounded-bl-none bg-white ring-1 ring-black/10">
-                  <span className="flex h-full w-full rotate-45 items-center justify-center">
-                    {/* biome-ignore lint/performance/noImgElement: static inline SVG marker — next/image is overkill for an 18px decorative icon */}
-                    <img src="/logo/signet-green.svg" alt="" className="h-[18px] w-[18px]" />
-                  </span>
-                </span>
-              </span>
-            ) : null}
-            {/* Not positioned itself, so the OSM link's ::after reaches the card. */}
-            <div className="z-20 m-2.5 flex flex-wrap justify-end gap-2 self-end justify-self-end [grid-area:1/1]">
-              <a
-                href={OSM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Standort in OpenStreetMap öffnen — Kennedyallee 18, 53175 Bonn"
-                className={`${MAP_BADGE} after:absolute after:inset-0 after:content-['']`}
-              >
-                OpenStreetMap ↗
-              </a>
-              <a
-                href={GOOGLE_MAPS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Standort in Google Maps öffnen — Kennedyallee 18, 53175 Bonn"
-                className={`${MAP_BADGE} relative z-10`}
-              >
-                Google Maps ↗
-              </a>
-            </div>
-          </div>
+          <MapCard map={location.map} placeholder={location.mapPlaceholder} />
         </div>
       ) : null}
     </div>

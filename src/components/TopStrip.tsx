@@ -1,24 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { stateLabels, useSpaceState } from '@/lib/spaceState'
 
 /** Thin status strip above the header (live opening state + address). */
-
-const SPACE_API = 'https://status.makerspacebonn.de/api/spaceapi'
-const REFRESH_MS = 5 * 60 * 1000 // refresh the opening state every five minutes
-
-type SpaceState = { open: boolean; openUntil?: string; message?: string }
-
-/** German labels mirroring the original SpaceAPI iframe script (short = mobile, full = desktop). */
-function stateLabels(state: SpaceState): { short: string; full: string } {
-  if (!state.open) return { short: 'Geschlossen', full: 'Der MakerSpace ist geschlossen' }
-  if (state.openUntil)
-    return {
-      short: `Für Mitglieder bis ${state.openUntil} geöffnet.`,
-      full: `Der MakerSpace ist für Mitglieder bis ${state.openUntil} geöffnet.`,
-    }
-  return { short: 'Für Mitglieder geöffnet', full: 'Der MakerSpace ist für Mitglieder geöffnet' }
-}
 
 export function TopStrip({
   status = '● GEÖFFNET · HEUTE 18:00–21:00 UHR',
@@ -27,29 +11,7 @@ export function TopStrip({
   status?: string
   address?: string
 }) {
-  const [state, setState] = useState<SpaceState | null>(null)
-
-  useEffect(() => {
-    let active = true
-
-    const load = async () => {
-      try {
-        const res = await fetch(SPACE_API)
-        if (!res.ok) throw new Error(`HTTP-Fehler: ${res.status}`)
-        const data = await res.json()
-        if (active) setState(data.state as SpaceState)
-      } catch (error) {
-        console.error('SpaceAPI:', error)
-      }
-    }
-
-    load()
-    const id = setInterval(load, REFRESH_MS)
-    return () => {
-      active = false
-      clearInterval(id)
-    }
-  }, [])
+  const state = useSpaceState()
 
   // Until the first fetch resolves, fall back to the CMS-provided text + brand green.
   const labels = state ? stateLabels(state) : { short: status, full: status }

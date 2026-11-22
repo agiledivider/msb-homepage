@@ -17,6 +17,7 @@ Last reviewed: 2026-11-12 (versions from `package.json`)
 | images | `sharp` 0.35 (Payload sizes + static WebP ladder) | `unoptimized: true` | `srcset` survives static publishing (`docs/runtime-traps.md`) | 2026-07 |
 | styling | Tailwind v4 (CSS-first `@theme`, `@tailwindcss/postcss`) | `tailwind.config.ts`, component CSS in globals | tokens in one place, utilities in components | 2026-07 |
 | icons | Font Awesome 7 SVG React components | emoji, inline SVG, FA webfont | tree-shakeable, SSR-safe, no font requests | 2026-07 |
+| brand logos missing from FA (OpenStreetMap, Google Maps, Matrix) | Simple Icons 13.21.0 paths, inlined as `<svg>` (CC0-1.0) | adding the `simple-icons` package | only three paths needed; no dependency for that. Everything else stays Font Awesome | 2026-11-22 |
 | fonts | `next/font/google` (Archivo Black, IBM Plex Sans) | CSS `@import` | Turbopack strips remote `@import` | 2026-07 |
 | lint + format | Biome 2.5 | eslint, prettier | one fast tool | 2026-07 |
 | tests | vitest 5 (integration on a temp SQLite per file, fitness tests) | jest | Payload boots in-process | 2026-11 |

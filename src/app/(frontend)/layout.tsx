@@ -42,7 +42,7 @@ const fontVars = `${archivo.variable} ${plexSans.variable} ${plexMono.variable} 
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { TopStrip } from '@/components/TopStrip'
-import { ctaFrom, footerLinksFrom, navFrom } from '@/lib/mappers'
+import { ctaFrom, footerFrom, footerLinksFrom, navFrom } from '@/lib/mappers'
 
 export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_SERVER_URL ? new URL(process.env.NEXT_PUBLIC_SERVER_URL) : undefined,
@@ -65,7 +65,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
         <TopStrip status={site?.topStrip?.status ?? undefined} address={site?.topStrip?.address ?? undefined} />
         <Header nav={navFrom(site)} cta={ctaFrom(site)} />
         {children}
-        <Footer links={footerLinksFrom(site)} />
+        <Footer links={footerLinksFrom(site)} {...footerFrom(site)} />
       </body>
     </html>
   )

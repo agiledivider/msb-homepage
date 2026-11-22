@@ -32,7 +32,10 @@ const DISPLAY = /(\[&_[a-z0-9]+\]:)?font-display(?![\w-])/g
 
 function sizesFor(cls: string, selector: string): number[] {
   const esc = selector.replace(/[[\]&]/g, '\\$&')
-  const re = new RegExp(`(?:^|[\\s'"\`{(])(?:[a-z-]+:)*${esc}text-\\[(clamp\\(([0-9.]+)px[^\\]]*\\)|([0-9.]+)px)\\]`, 'g')
+  const re = new RegExp(
+    `(?:^|[\\s'"\`{(])(?:[a-z-]+:)*${esc}text-\\[(clamp\\(([0-9.]+)px[^\\]]*\\)|([0-9.]+)px)\\]`,
+    'g',
+  )
   return [...cls.matchAll(re)].map((m) => Number(m[2] ?? m[3]))
 }
 
@@ -51,8 +54,7 @@ describe('Archivo size range (fitness)', () => {
       const cls = m[0]
       for (const d of cls.matchAll(DISPLAY)) {
         for (const px of sizesFor(cls, d[1] ?? '')) {
-          if (px < 24 || px > 56)
-            offending.push(`line ${src.slice(0, m.index).split('\n').length}: ${d[0]} at ${px}px`)
+          if (px < 24 || px > 56) offending.push(`line ${src.slice(0, m.index).split('\n').length}: ${d[0]} at ${px}px`)
         }
       }
     }

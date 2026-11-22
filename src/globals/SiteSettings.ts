@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 import { linkField } from '../blocks/fields'
 import { generatePreviewPath } from '../lib/preview'
+import { SOCIAL_PLATFORMS } from '../lib/socialPlatforms'
 
 /** SiteSettings — chrome: top strip, nav, footer. Components fall back to
  *  their built-in defaults when a field is empty. */
@@ -42,8 +43,50 @@ export const SiteSettings: GlobalConfig = {
       name: 'footer',
       type: 'group',
       fields: [
-        { name: 'tagline', type: 'textarea' },
-        { name: 'contact', type: 'textarea', admin: { description: 'Zeilenumbrüche bleiben erhalten.' } },
+        { name: 'tagline', type: 'textarea', label: 'Claim', admin: { description: 'Kurzer Satz unter dem Logo.' } },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'phone',
+              type: 'text',
+              label: 'Telefon',
+              admin: { width: '50%', description: 'Wie angezeigt, z. B. +49 228 81 28 69 80.' },
+            },
+            { name: 'email', type: 'email', label: 'E-Mail', admin: { width: '50%' } },
+          ],
+        },
+        {
+          name: 'social',
+          type: 'array',
+          label: 'Community',
+          labels: { singular: 'Kanal', plural: 'Kanäle' },
+          admin: { description: 'Chats und Kanäle, als Icons im Footer. Leer = nichts anzeigen.' },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'platform',
+                  type: 'select',
+                  label: 'Plattform',
+                  required: true,
+                  options: SOCIAL_PLATFORMS.map((p) => ({ label: p.label, value: p.value })),
+                  admin: { width: '35%' },
+                },
+                {
+                  name: 'url',
+                  type: 'text',
+                  label: 'Link',
+                  required: true,
+                  admin: { width: '65%', description: 'Einladungs- oder Profil-Link, beginnt mit https://' },
+                  validate: (v: unknown) =>
+                    typeof v === 'string' && /^https:\/\/\S+$/.test(v) ? true : 'Bitte einen https://-Link angeben.',
+                },
+              ],
+            },
+          ],
+        },
         {
           name: 'links',
           type: 'array',

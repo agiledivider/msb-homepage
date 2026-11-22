@@ -149,7 +149,13 @@ export async function seedSiteContent(payload: Payload) {
       headerCta: { label: 'Mitglied werden', url: '/mitmachen' },
       footer: {
         tagline: 'Eine offene Werkstatt für Bonn. Für alle.',
-        contact: 'Kennedyallee 18 · 53175 Bonn\nTel: +49 (228) 81 28 69 80',
+        phone: '+49 228 81 28 69 80',
+        email: 'office@makerspacebonn.de',
+        social: [
+          { platform: 'discord', url: 'https://discord.gg/example' },
+          { platform: 'github', url: 'https://github.com/makerspacebonn' },
+          { platform: 'instagram', url: 'https://www.instagram.com/makerspacebonn' },
+        ],
         links: [
           { label: 'Der Verein', url: '/verein' },
           { label: 'Werkzeug & Räume', url: '/werkzeug' },
