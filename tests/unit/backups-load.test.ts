@@ -3,11 +3,11 @@
  * at the network boundary (injected fetch); the clock is injected.
  */
 import { describe, expect, it } from 'vitest'
-import { backupApiConfig, loadBackups, STALE_AFTER_MS } from '@/plugins/backups/load'
+import { backupApiConfig, loadBackups, loadStatus, STALE_AFTER_MS, startBackup } from '@/plugins/backups/load'
 
 const NOW = new Date('2026-11-22T12:00:00Z')
 const CONFIG = { url: 'http://backup:8081', token: 'api-token' }
-const admin = { collection: 'users', id: 1 }
+const admin = { collection: 'users', id: 1, email: 'admin@test.de' }
 const editor = { collection: 'users', id: 2 }
 const isAdmin = (u: unknown) => (u as { id?: number } | null)?.id === 1
 
@@ -37,7 +37,8 @@ describe('loadBackups', () => {
       fakeFetch(
         {
           snapshots: [snapshot('2026-11-21T02:30:00.000Z'), snapshot('2026-11-20T02:30:00.000Z')],
-          lastRun: { status: 'ok', at: '2026-11-21T02:31:00.000Z' },
+          lastRun: { status: 'ok', at: '2026-11-21T02:31:00.000Z', by: null },
+          running: null,
         },
         200,
         seen,
@@ -46,7 +47,8 @@ describe('loadBackups', () => {
     expect(out.kind).toBe('ok')
     if (out.kind !== 'ok') return
     expect(out.snapshots.map((s) => s.time)).toEqual(['2026-11-21T02:30:00.000Z', '2026-11-20T02:30:00.000Z'])
-    expect(out.lastRun).toEqual({ status: 'ok', at: '2026-11-21T02:31:00.000Z' })
+    expect(out.lastRun).toEqual({ status: 'ok', at: '2026-11-21T02:31:00.000Z', by: null })
+    expect(out.running).toBeNull()
     expect(out.stale).toBe(false)
     expect(seen).toEqual([{ url: 'http://backup:8081/backups', token: 'api-token' }])
   })
@@ -57,7 +59,9 @@ describe('loadBackups', () => {
     ['an API key (not a CMS user)', { collection: 'mcp-api-keys', id: 1 }],
   ])('gives %s nothing and never calls the backup API', async (_label, user) => {
     const seen: { url?: string }[] = []
-    expect(await load(user, fakeFetch({ snapshots: [], lastRun: null }, 200, seen))).toEqual({ kind: 'forbidden' })
+    expect(await load(user, fakeFetch({ snapshots: [], lastRun: null, running: null }, 200, seen))).toEqual({
+      kind: 'forbidden',
+    })
     expect(seen).toHaveLength(0)
   })
 
@@ -82,12 +86,15 @@ describe('loadBackups', () => {
     ['newest backup just inside the limit', NOW.getTime() - STALE_AFTER_MS + 60_000, false],
     ['newest backup just past the limit', NOW.getTime() - STALE_AFTER_MS - 60_000, true],
   ])('%s → stale: %s', async (_label, at, stale) => {
-    const out = await load(admin, fakeFetch({ snapshots: [snapshot(new Date(at).toISOString())], lastRun: null }))
+    const out = await load(
+      admin,
+      fakeFetch({ snapshots: [snapshot(new Date(at).toISOString())], lastRun: null, running: null }),
+    )
     expect(out.kind === 'ok' && out.stale).toBe(stale)
   })
 
   it('warns when there is no backup at all', async () => {
-    const out = await load(admin, fakeFetch({ snapshots: [], lastRun: null }))
+    const out = await load(admin, fakeFetch({ snapshots: [], lastRun: null, running: null }))
     expect(out.kind === 'ok' && out.stale).toBe(true)
   })
 
@@ -110,5 +117,73 @@ describe('backupApiConfig', () => {
     expect(backupApiConfig({ BACKUP_API_URL: 'http://backup:8081/', BACKUP_API_TOKEN: 't' })?.url).toBe(
       'http://backup:8081',
     )
+  })
+})
+
+describe('startBackup (S8.5)', () => {
+  type Seen = { url: string; method?: string; body?: string; token: string | null }
+  const api = (status: number, body: unknown, seen: Seen[] = []) =>
+    (async (url: string | URL | Request, init?: RequestInit) => {
+      seen.push({
+        url: String(url),
+        method: init?.method,
+        body: init?.body as string,
+        token: new Headers(init?.headers).get('X-Backup-Token'),
+      })
+      return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
+    }) as typeof globalThis.fetch
+  const logs: [string, string][] = []
+  const start = (user: unknown, fetch: typeof globalThis.fetch) =>
+    startBackup(user, { config: CONFIG, fetch, now: () => NOW, isAdmin, log: (l, m) => logs.push([l, m]) })
+
+  it("starts a backup in the admin's name and logs who", async () => {
+    const seen: Seen[] = []
+    expect(await start(admin, api(202, { started: true }, seen))).toEqual({ kind: 'started' })
+    expect(seen).toEqual([
+      { url: 'http://backup:8081/backups', method: 'POST', body: '{"by":"admin@test.de"}', token: 'api-token' },
+    ])
+    expect(logs).toContainEqual(['info', 'backups: backup started from the CMS by admin@test.de'])
+  })
+
+  it('reports the backup that is already running', async () => {
+    const running = { startedAt: '2026-11-22T03:30:00.000Z', by: null }
+    expect(await start(admin, api(409, { error: 'x', running }))).toEqual({ kind: 'running', running })
+  })
+
+  it('never asks the backup service for an editor', async () => {
+    const seen: Seen[] = []
+    expect(await start(editor, api(202, {}, seen))).toEqual({ kind: 'forbidden' })
+    expect(seen).toHaveLength(0)
+  })
+
+  it('is "unavailable" when the service fails', async () => {
+    expect(await start(admin, api(502, { error: 'x' }))).toEqual({ kind: 'unavailable' })
+  })
+})
+
+describe('loadStatus (S8.5)', () => {
+  const status = (user: unknown, body: unknown, status = 200) =>
+    loadStatus(user, {
+      config: CONFIG,
+      fetch: (async () => new Response(JSON.stringify(body), { status })) as unknown as typeof globalThis.fetch,
+      now: () => NOW,
+      isAdmin,
+      log: () => {},
+    })
+
+  it('gives an admin the running backup and the last run', async () => {
+    const body = {
+      running: { startedAt: '2026-11-22T11:59:00.000Z', by: 'admin@test.de' },
+      lastRun: { status: 'failed', at: '2026-11-22T03:31:00.000Z', by: null },
+    }
+    expect(await status(admin, body)).toEqual({ kind: 'ok', ...body })
+  })
+
+  it('gives an editor nothing', async () => {
+    expect(await status(editor, { running: null, lastRun: null })).toEqual({ kind: 'forbidden' })
+  })
+
+  it('is "unavailable" on an unexpected answer', async () => {
+    expect(await status(admin, { running: 'yes' })).toEqual({ kind: 'unavailable' })
   })
 })

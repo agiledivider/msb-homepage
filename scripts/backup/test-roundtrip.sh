@@ -125,4 +125,27 @@ ok=$(api api-test-only)
 [[ $(api wrong-token) == *" 401" ]] || fail "API accepted a wrong token"
 pass "scheduler serves the backups API: lists snapshots for the token, 401 otherwise, refuses to start without one"
 
+# 9. A backup started through the API (S8.5): runs once, a second start while
+#    it runs is refused, and the finished run records who started it.
+call() { # call <method> <path> [body]: prints "<body> <status>" from inside the network
+  docker run --rm --network "$P-net" --entrypoint sh "$IMG" -c '
+    curl -s -m 30 -w " %{http_code}" -X "$2" -H "X-Backup-Token: api-test-only" -H "Content-Type: application/json" \
+      ${4:+--data "$4"} "http://$1:8081$3"' sh "$P-sched" "$1" "$2" "${3-}"
+}
+newest() { call GET /backups | grep -o '"shortId":"[0-9a-f]*"' | head -1; }
+before=$(newest)
+[[ $(call POST /backups '{"by":"admin@test.de"}') == *" 202" ]] || fail "API did not start a backup"
+second=$(call POST /backups '{"by":"other@test.de"}')
+[[ $second == *" 409" && $second == *admin@test.de* ]] || fail "second start while running was not refused: $second"
+for _ in $(seq 120); do
+  status=$(call GET /status)
+  [[ $status == *'"running":null'* && $status == *'"by":"admin@test.de"'* ]] && break
+  sleep 1
+done
+[[ $status == *'"status":"ok"'* && $status == *'"by":"admin@test.de"'* ]] || fail "manual backup did not finish as recorded: $status"
+# (Retention keeps one snapshot per day, so the count stays; the newest one changes.)
+after=$(newest)
+[[ -n $after && $after != "$before" ]] || fail "manual backup is not the newest snapshot ($before → $after)"
+pass "backup started through the API: runs once, refuses a second start, records who started it"
+
 echo "backup round trip: all checks passed"

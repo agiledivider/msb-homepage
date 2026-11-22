@@ -353,11 +353,13 @@ A backup downloaded earlier, or taken from another server, can't be brought back
 
 **AC:** an admin uploads a file downloaded with S8.2 and restores it the same way as in S8.3 (preview, deliberate confirmation, safety backup first); a file that isn't such a backup, or is damaged, is refused before anything changes.
 
-### ⏳ S8.5 — Admins take a backup now (S)
+### ✅ S8.5 — Admins take a backup now (S) — 2026-11-22
 **Needs:** S8.1. **Source:** Falk 2026-11-22.
 Backups only run once a night. Before a risky change (a big import, a restructure, an update) an admin wants a fresh backup first, and today that needs a shell on the server.
 
 **AC:** an admin starts a backup from the backups view and sees that it is running; when it finishes, it appears in the list with the current time, and a failure is shown clearly; a second click while one is running starts no second backup; the nightly backup still runs as usual; the backup is recorded with who started it; non-admins can't start one.
+
+**Implementation notes:** the backup API got `POST /backups` (starts `msb-backup backup` with `BACKUP_BY`, 409 while one runs) and a cheap `GET /status` (running + last run, no restic call). `msb-backup` takes a pid lock (`/work/backup.lock`, mkdir-atomic, stale locks taken over, cleared at container start) for every run, nightly or manual, and the last-run record now names who started it (`by`, null = nightly). CMS: "Jetzt sichern" (`BackupNow.tsx`) posts to `/api/backups/run`, polls `/api/backups/status` every 3 s and refreshes the page when done; both endpoints are admin-only (401/403) and log who started a backup. Covered by the unit tests and section 9 of `pnpm backup:test`; clicked through as admin in the browser, editor and anonymous refused.
 
 ---
 

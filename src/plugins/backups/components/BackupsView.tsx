@@ -4,6 +4,7 @@ import type { AdminViewServerProps } from 'payload'
 import type { CSSProperties } from 'react'
 import { isAdmin } from '@/plugins/editorial/access'
 import { backupApiConfig, type LastRun, loadBackups } from '../load'
+import { BackupNow } from './BackupNow'
 
 const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
 const fmtWhen = (iso: string) => `${BERLIN.format(new Date(iso))} Uhr`
@@ -30,20 +31,23 @@ const cell: CSSProperties = {
   textAlign: 'left',
 }
 
+const startedBy = (lastRun: LastRun) => (lastRun.by ? `gestartet von ${lastRun.by}` : 'nächtliche Sicherung')
+
 function LastRunLine({ lastRun }: { lastRun: LastRun | null }) {
-  if (!lastRun)
-    return <p>Letzter nächtlicher Lauf: unbekannt (seit dem letzten Neustart des Backup-Dienstes noch keiner).</p>
+  if (!lastRun) return <p>Letzter Lauf: unbekannt (seit dem letzten Neustart des Backup-Dienstes noch keiner).</p>
   return lastRun.status === 'ok' ? (
-    <p>Letzter nächtlicher Lauf: erfolgreich, {fmtWhen(lastRun.at)}.</p>
+    <p>
+      Letzter Lauf: erfolgreich, {fmtWhen(lastRun.at)} ({startedBy(lastRun)}).
+    </p>
   ) : (
     <p style={box('error')}>
-      <strong>Der letzte nächtliche Lauf ist fehlgeschlagen</strong> ({fmtWhen(lastRun.at)}). Details stehen im Log des
-      Backup-Dienstes.
+      <strong>Der letzte Lauf ist fehlgeschlagen</strong> ({fmtWhen(lastRun.at)}, {startedBy(lastRun)}). Details stehen
+      im Log des Backup-Dienstes.
     </p>
   )
 }
 
-/** /admin/backups: the site's backups, for admins only (E8, S8.1). */
+/** /admin/backups: the site's backups, for admins only (E8: S8.1 list, S8.5 backup now). */
 export async function BackupsView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { req, locale, permissions, visibleEntities } = initPageResult
   const result = await loadBackups(req.user, {
@@ -51,7 +55,7 @@ export async function BackupsView({ initPageResult, params, searchParams }: Admi
     fetch: globalThis.fetch,
     now: () => new Date(),
     isAdmin,
-    log: (m) => req.payload.logger.error(m),
+    log: (level, m) => req.payload.logger[level](m),
   })
 
   return (
@@ -90,6 +94,7 @@ export async function BackupsView({ initPageResult, params, searchParams }: Admi
                 Die nächtliche Sicherung läuft offenbar nicht; bitte den Backup-Dienst prüfen.
               </p>
             ) : null}
+            <BackupNow apiRoute={req.payload.config.routes.api} initialRunning={result.running} />
             <LastRunLine lastRun={result.lastRun} />
             {result.snapshots.length ? (
               <table style={{ borderCollapse: 'collapse', width: '100%', maxWidth: 720, marginTop: 8 }}>

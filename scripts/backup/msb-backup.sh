@@ -35,7 +35,11 @@ BACKUP_AT="${BACKUP_AT:-03:30}"
 BACKUP_KEEP="${BACKUP_KEEP:---keep-daily 7 --keep-weekly 4 --keep-monthly 12}"
 BACKUP_PING_URL="${BACKUP_PING_URL:-}"
 BACKUP_STATUS_FILE="${BACKUP_STATUS_FILE:-$WORK/last-run.json}"
-export BACKUP_STATUS_FILE
+BACKUP_LOCK_DIR="${BACKUP_LOCK_DIR:-$WORK/backup.lock}"
+export BACKUP_STATUS_FILE BACKUP_LOCK_DIR
+# Who started this backup (set by the API for a backup started in the CMS,
+# S8.5); empty for the nightly run. Kept to email-like characters: it goes into JSON.
+BACKUP_BY=$(printf '%s' "${BACKUP_BY:-}" | tr -cd 'A-Za-z0-9@._+-' | cut -c1-120)
 
 log() { printf '%s [backup] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
@@ -54,10 +58,28 @@ require_config() {
 # Record the last run for the CMS backups view (read by backup-api.mjs).
 # Written atomically; it lives in the container, so it's gone after a restart
 # and the CMS then shows the last run as unknown.
+by_json() { if [ -n "$BACKUP_BY" ]; then printf '"%s"' "$BACKUP_BY"; else printf null; fi; }
+
 record_run() { # record_run ok|failed
-  printf '{"status":"%s","at":"%s"}\n' "$1" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$BACKUP_STATUS_FILE.tmp" &&
+  printf '{"status":"%s","at":"%s","by":%s}\n' "$1" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(by_json)" >"$BACKUP_STATUS_FILE.tmp" &&
     mv "$BACKUP_STATUS_FILE.tmp" "$BACKUP_STATUS_FILE" || log "could not record the run status (ignored)"
 }
+
+# One backup at a time, nightly or started in the CMS: mkdir is atomic. The
+# lock names its holder's pid, so a lock left by a killed run is taken over.
+take_lock() {
+  if ! mkdir "$BACKUP_LOCK_DIR" 2>/dev/null; then
+    holder=$(cat "$BACKUP_LOCK_DIR/pid" 2>/dev/null || true)
+    if [ -n "$holder" ] && kill -0 "$holder" 2>/dev/null; then return 1; fi
+    [ -n "$holder" ] || { sleep 1; [ -s "$BACKUP_LOCK_DIR/pid" ] && return 1; } # its holder is still writing it
+    log "taking over a lock left by a backup that no longer runs"
+    rm -rf "$BACKUP_LOCK_DIR"
+    mkdir "$BACKUP_LOCK_DIR" 2>/dev/null || return 1
+  fi
+  printf '{"startedAt":"%s","by":%s}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(by_json)" >"$BACKUP_LOCK_DIR/info.json"
+  echo "$1" >"$BACKUP_LOCK_DIR/pid"
+}
+drop_lock() { rm -rf "$BACKUP_LOCK_DIR"; }
 
 ping() { # ping <suffix>; never fails the backup, never hangs
   [ -n "$BACKUP_PING_URL" ] || return 0
@@ -90,6 +112,15 @@ do_backup() {
 }
 
 run_backup() {
+  # The lock names a process that lives exactly as long as this backup.
+  "$0" backup-locked &
+  wait $!
+}
+
+backup_locked() {
+  take_lock $$ || { log "a backup is already running; not starting another"; exit 75; }
+  trap drop_lock EXIT
+  log "backup started${BACKUP_BY:+ by $BACKUP_BY}"
   ping /start
   # A separate process: `set -e` does not apply inside an `if` condition.
   if "$0" backup-once; then
@@ -100,12 +131,13 @@ run_backup() {
     log "BACKUP FAILED"
     record_run failed
     ping /fail
-    return 1
+    exit 1
   fi
 }
 
 schedule() {
   [ -n "${BACKUP_API_TOKEN:-}" ] || die "missing setting: BACKUP_API_TOKEN (the CMS backups view needs it)"
+  drop_lock # nothing can be running when the container starts
   node /usr/local/lib/msb/backup-api.mjs &
   api=$!
   trap 'log "stopping"; kill $api 2>/dev/null; exit 0' TERM INT
@@ -177,7 +209,8 @@ cmd="${1:-schedule}"
 case "$cmd" in
   schedule) require_config; ensure_repo; schedule ;;
   backup) require_config; ensure_repo; run_backup ;;
-  backup-once) do_backup ;; # internal, called by run_backup
+  backup-locked) backup_locked ;; # internal, called by run_backup
+  backup-once) do_backup ;; # internal, called by backup_locked
   snapshots) require_config; restic snapshots --host msb-homepage --tag msb ;;
   restore) require_config; restore "$@" ;;
   *) die "unknown command '$cmd' (schedule | backup | snapshots | restore)" ;;
