@@ -13,7 +13,7 @@ export const Media: CollectionConfig = {
   admin: {
     group: 'Inhalte',
     useAsTitle: 'alt',
-    defaultColumns: ['filename', 'alt', 'mimeType', 'uploadedByClaude', 'updatedAt'],
+    defaultColumns: ['filename', 'alt', 'mimeType', 'aiLabel', 'uploadedByClaude', 'updatedAt'],
   },
   upload: {
     // MEDIA_DIR lets prod point uploads at a mounted volume (standalone builds
@@ -30,6 +30,25 @@ export const Media: CollectionConfig = {
   },
   fields: [
     { name: 'alt', type: 'text', required: true },
+    {
+      // Styleguide "Bilder": AI images carry the KI label. The site draws it over
+      // the visible corner of every crop (components/Media.tsx), so the file
+      // itself stays clean.
+      name: 'aiLabel',
+      type: 'select',
+      label: 'KI-Kennzeichen',
+      defaultValue: 'none',
+      options: [
+        { label: 'Kein KI-Bild', value: 'none' },
+        { label: 'KI · Bild generiert', value: 'generated' },
+        { label: 'KI · Bild bearbeitet', value: 'edited' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          '„Generiert“: das Bild stammt komplett von einer KI. „Bearbeitet“: ein echtes Foto wurde mit KI verändert. Die Website zeigt das Kennzeichen dann in der Bildecke.',
+      },
+    },
     {
       // Set once on upload from where the request came from, never from the body,
       // so reviewers can spot what Claude added (docs/CLAUDE-MCP.md).

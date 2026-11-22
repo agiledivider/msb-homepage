@@ -14,7 +14,7 @@ export default defineConfig({
     environment: 'node',
     // payload-rbac-plugin and payload-oauth2 ship extensionless ESM imports Node can't resolve; let Vite transform it.
     server: { deps: { inline: ['payload-rbac-plugin', 'payload-oauth2'] } },
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     setupFiles: ['tests/setup.ts'],
     // Tier B tests boot Payload against their own temp SQLite file; one file at a time.
     fileParallelism: false,

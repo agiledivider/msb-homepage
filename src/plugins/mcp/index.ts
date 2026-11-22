@@ -13,6 +13,8 @@ submit it for review there. You can't publish, approve or delete anything.
 Find existing media first if a post or event should show an image; to add a
 new one, use uploadMedia (public https URL or base64 content) and set its ID as
 the post's cover or the event's image. Uploaded files are public right away.
+For an AI-made image pass aiLabel "generated" ("edited" for an AI-changed photo);
+the site draws the KI label itself, so never put a label into the file.
 To check how a post or event looks (homepage hero and its own page), call
 previewLink and open the link in a browser; it is valid for 15 minutes.`
 

@@ -184,6 +184,17 @@ describe('uploading media through Claude', () => {
     expect(media.uploadedByClaude).toBe(true)
   })
 
+  it('marks an AI image with the KI label the site draws, and leaves other uploads unmarked', async () => {
+    const ai = await callTool(editor.key, 'uploadMedia', { alt: 'KI-Bild', data: PNG, aiLabel: 'generated' })
+    const plain = await callTool(editor.key, 'uploadMedia', { alt: 'Foto', data: PNG })
+    const idOf = (r: ToolResult) => Number(r.content?.[0]?.text.match(/media (\d+)/)?.[1])
+
+    expect(((await payload.findByID({ collection: 'media', id: idOf(ai) })) as unknown as Doc).aiLabel).toBe(
+      'generated',
+    )
+    expect(((await payload.findByID({ collection: 'media', id: idOf(plain) })) as unknown as Doc).aiLabel).toBe('none')
+  })
+
   it('refuses SVG and other files that are not an image or PDF', async () => {
     const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>').toString(
       'base64',

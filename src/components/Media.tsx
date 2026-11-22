@@ -10,7 +10,13 @@ import type { CSSProperties } from 'react'
  * editors see the same "empty slot" the original `image-slot` showed.
  */
 export type MediaResource =
-  | { url?: string | null; alt?: string | null; width?: number | null; height?: number | null }
+  | {
+      url?: string | null
+      alt?: string | null
+      width?: number | null
+      height?: number | null
+      aiLabel?: 'none' | 'generated' | 'edited' | null
+    }
   | string
   | null
   | undefined
@@ -49,10 +55,30 @@ export function Media({
   }
 
   const alt = (typeof resource === 'object' && resource?.alt) || placeholder || ''
+  const ai = typeof resource === 'object' ? resource?.aiLabel : undefined
 
   return (
-    <div className={className} style={{ position: 'relative', ...style }}>
+    // container-type lets the KI label scale with the image (cqw), not the viewport.
+    <div className={`${className ?? ''} [container-type:inline-size]`} style={{ position: 'relative', ...style }}>
       <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" priority={priority} />
+      {ai === 'generated' || ai === 'edited' ? <KiLabel kind={ai} /> : null}
+    </div>
+  )
+}
+
+const KI_TEXT = { generated: 'Bild generiert', edited: 'Bild bearbeitet' } as const
+
+/**
+ * The styleguide's KI label strip (green "KI" + ink field), drawn over the
+ * bottom-left corner of whatever crop is visible. Styleguide size: 48 px tall
+ * and 72 px from the edge on a 1080 px image, i.e. ~4.4 % and ~6.7 % of the
+ * width; clamped to the site's 14 px text minimum on small images.
+ */
+function KiLabel({ kind }: { kind: keyof typeof KI_TEXT }) {
+  return (
+    <div className="pointer-events-none absolute bottom-[clamp(8px,4cqw,40px)] left-[clamp(8px,4cqw,40px)] flex h-[clamp(26px,4.4cqw,36px)] font-mono text-[clamp(14px,2cqw,16px)] font-medium uppercase leading-none tracking-[.06em]">
+      <span className="flex items-center bg-brand px-[.6em] text-ink">KI</span>
+      <span className="flex items-center bg-ink px-[.7em] text-white">{KI_TEXT[kind]}</span>
     </div>
   )
 }

@@ -46,6 +46,10 @@ under KI-Zugänge if a device is lost.
 - **Uploads are public right away** (media has no drafts) and carry the
   "Von Claude hochgeladen" marker, also as a column in the media list. The static
   site only copies a file once a published post or event uses it.
+- **AI images:** pass `aiLabel: "generated"` (or `"edited"` for an AI-changed
+  photo) on upload. The site draws the styleguide's KI label over the visible
+  corner of every crop; don't bake a label into the file. Editors set it in the
+  media sidebar ("KI-Kennzeichen").
 - An image dropped into a chat can't be uploaded as a file: Claude sees the
   picture, not its bytes. Give a link, or use Claude Code / Desktop on a file on disk.
 - Without a valid key the endpoint answers 401.

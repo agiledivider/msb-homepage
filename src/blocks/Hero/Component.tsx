@@ -69,84 +69,100 @@ function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boole
   )
 }
 
+/**
+ * Desktop headline size from its length, so a long title shrinks instead of
+ * pushing lede and buttons off the mat (the mat has a fixed height).
+ */
+export function headlineSize(headline: string, isEvent: boolean): string {
+  const n = headline.replace(/\s+/g, ' ').trim().length
+  if (isEvent) return n <= 30 ? 'md:text-[38px]' : 'md:text-[32px]'
+  if (n <= 22) return 'md:text-[56px]'
+  if (n <= 40) return 'md:text-[46px]'
+  return 'md:text-[38px]'
+}
+
 function FaceContent({ face, priority = false }: { face: Face; priority?: boolean }) {
   const eb = EYEBROW[face.accent ?? 'green']
   const isEvent = face.variant === 'event'
   return (
     <CuttingMat cornerLabel={face.cornerLabel}>
-      <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] md:grid md:grid-cols-[1.06fr_.94fr] md:items-center md:gap-10 md:pl-2.5 md:pt-1.5">
-        {/* text column (mobile: stacked below the photo, order-2) */}
-        <div className="max-md:order-2 max-md:flex max-md:min-h-0 max-md:min-w-0 max-md:flex-1 max-md:flex-col">
-          {face.eyebrow ? (
-            <div
-              className={`mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[14px] tracking-normal md:mb-[22px] md:px-[11px] md:py-[5px] md:tracking-[.06em] ${eb}`}
+      <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] md:grid md:grid-cols-[1.06fr_.94fr] md:items-stretch md:gap-10 md:pl-2.5 md:pt-1.5">
+        {/* text column (mobile: stacked below the photo, order-2). Desktop: the
+            copy takes the free height and clips its long tail; the buttons sit
+            on the bottom edge of the mat whatever the copy's length. */}
+        <div className="flex min-h-0 min-w-0 flex-col max-md:order-2 max-md:flex-1">
+          <div className="min-h-0 md:flex-1 md:overflow-hidden">
+            {face.eyebrow ? (
+              <div
+                className={`mb-[9px] inline-flex items-center gap-2 self-start rounded-[20px] border px-[9px] py-1 font-mono text-[14px] tracking-normal md:mb-[22px] md:px-[11px] md:py-[5px] md:tracking-[.06em] ${eb}`}
+              >
+                {face.eyebrow}
+              </div>
+            ) : null}
+
+            {isEvent && face.eventDay ? (
+              <div className="mb-3 flex items-end gap-4">
+                <div className="font-display text-[46px] font-black leading-[.85] text-kreide md:text-[74px]">
+                  {face.eventDay}
+                </div>
+                <div className="pb-2 font-mono text-[14px] leading-[1.5] text-green-300">
+                  {face.eventMonth}
+                  <br />
+                  {face.eventWeekday}
+                </div>
+              </div>
+            ) : null}
+
+            <h1
+              className={`mb-[7px] font-display font-black leading-[1.02] tracking-[-.02em] text-kreide text-[30px] md:mb-3.5 md:leading-[.98] ${headlineSize(face.headline, isEvent)}`}
             >
-              {face.eyebrow}
-            </div>
-          ) : null}
-
-          {isEvent && face.eventDay ? (
-            <div className="mb-3 flex items-end gap-4">
-              <div className="font-display text-[46px] font-black leading-[.85] text-kreide md:text-[74px]">
-                {face.eventDay}
-              </div>
-              <div className="pb-2 font-mono text-[14px] leading-[1.5] text-green-300">
-                {face.eventMonth}
-                <br />
-                {face.eventWeekday}
-              </div>
-            </div>
-          ) : null}
-
-          <h1
-            className={`mb-[7px] font-display font-black leading-[1.02] tracking-[-.02em] text-kreide text-[30px] md:mb-3.5 md:leading-[.98] ${
-              isEvent ? 'md:text-[38px]' : 'md:text-[56px]'
-            }`}
-          >
-            {face.headline.split('\n').map((line, i) => (
-              <Fragment key={i}>
-                {i > 0 ? <br /> : null}
-                {line}
-              </Fragment>
-            ))}
-          </h1>
-
-          {face.lede ? (
-            <p className="m-0 font-serif text-[17px] italic leading-[1.26] text-kreide md:mb-5 md:text-[21px] md:leading-normal">
-              {face.lede}
-            </p>
-          ) : null}
-          {face.description ? (
-            <p className="mb-6 hidden max-w-[470px] text-[16.5px] leading-[1.6] text-kreide md:block">
-              {face.description}
-            </p>
-          ) : null}
-          {face.meta?.length ? (
-            <div className="mb-6 hidden items-center gap-3.5 font-mono text-[14px] text-green-300 md:flex">
-              {face.meta.map((m, i) => (
+              {face.headline.split('\n').map((line, i) => (
                 <Fragment key={i}>
-                  {i > 0 ? <span className="opacity-50">·</span> : null}
-                  <span>{m.value}</span>
+                  {i > 0 ? <br /> : null}
+                  {line}
                 </Fragment>
               ))}
-            </div>
-          ) : null}
+            </h1>
 
-          <div className="mt-auto flex flex-col gap-[7px] pt-2 md:mt-0 md:flex-row md:flex-wrap md:gap-3 md:pt-0">
+            {face.lede ? (
+              <p className="m-0 font-serif text-[17px] italic leading-[1.26] text-kreide md:mb-4 md:line-clamp-2 md:text-[21px] md:leading-snug">
+                {face.lede}
+              </p>
+            ) : null}
+            {face.description ? (
+              <p className="mb-4 hidden max-w-[470px] text-[16.5px] leading-[1.6] text-kreide md:line-clamp-3">
+                {face.description}
+              </p>
+            ) : null}
+            {face.meta?.length ? (
+              <div className="mb-2 hidden items-center gap-3.5 font-mono text-[14px] text-green-300 md:flex">
+                {face.meta.map((m, i) => (
+                  <Fragment key={i}>
+                    {i > 0 ? <span className="opacity-50">·</span> : null}
+                    <span>{m.value}</span>
+                  </Fragment>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-auto flex shrink-0 flex-col gap-[7px] pt-2 md:flex-row md:flex-wrap md:gap-3 md:pt-4">
             <Cta link={face.primary} primary style={face.primaryStyle ?? 'white'} />
             <Cta link={face.secondary} primary={false} />
           </div>
         </div>
 
-        {/* photo column (taped polaroid) */}
-        <Polaroid
-          rotate={isEvent ? 1.8 : 2.2}
-          image={face.image}
-          placeholder={face.imagePlaceholder ?? 'Foto'}
-          caption={face.caption}
-          sizes="(max-width:767.98px) 100vw, 460px"
-          priority={priority}
-        />
+        {/* photo column (taped polaroid), centred against the full-height text column */}
+        <div className="md:self-center">
+          <Polaroid
+            rotate={isEvent ? 1.8 : 2.2}
+            image={face.image}
+            placeholder={face.imagePlaceholder ?? 'Foto'}
+            caption={face.caption}
+            sizes="(max-width:767.98px) 100vw, 460px"
+            priority={priority}
+          />
+        </div>
       </div>
     </CuttingMat>
   )

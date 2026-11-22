@@ -11,6 +11,13 @@ const parameters = {
     .optional()
     .describe('The file content, base64-encoded (max 10 MB), e.g. a file you read from disk. Give either url or data.'),
   filename: z.string().optional().describe('Optional file name; the extension is set from the real file type.'),
+  aiLabel: z
+    .enum(['none', 'generated', 'edited'])
+    .default('none')
+    .describe(
+      'KI label (styleguide): "generated" if an AI made the whole image, "edited" if a real photo was changed with AI. ' +
+        'The site draws the label over the image corner; never bake it into the file.',
+    ),
 }
 
 const Args = z
@@ -50,7 +57,7 @@ export const makeUploadMediaTool = (fetchDeps: FetchDeps = {}) => ({
 
     const doc = await req.payload.create({
       collection: 'media',
-      data: { alt: args.alt } as never,
+      data: { alt: args.alt, aiLabel: args.aiLabel } as never,
       file: { data: Buffer.from(bytes), mimetype: type.mimeType, name, size: bytes.length },
       user: req.user,
       overrideAccess: false,
