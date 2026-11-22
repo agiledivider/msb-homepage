@@ -13,7 +13,14 @@ media on **persistent volumes**.
 pnpm release:app
 ```
 
-Builds the app image and pushes it, tagged both `:latest` and `:<git-sha>` (so a
+First it runs `pnpm migrate:check`: this commit's migrations and the prod seed,
+on a **copy** of real data, exactly as the container runs them on start. The data
+is the newest backup download in `~/Downloads` (`/admin` → Backups → download;
+it asks for that backup's passphrase), or `MIGRATE_CHECK_DB=path` (a `.enc`
+download or a plain `msb.db`). If they fail, nothing is pushed. Skip only with a
+reason: `SKIP_MIGRATE_CHECK=1 pnpm release:app`.
+
+Then it builds the app image and pushes it, tagged both `:latest` and `:<git-sha>` (so a
 bad release can be rolled back to a known image). Defaults:
 
 | var        | default                              | note                          |

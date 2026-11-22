@@ -1,6 +1,7 @@
 import { type Face, HeroComponent } from '@/blocks/Hero/Component'
 import { getPayloadClient } from '@/lib/getPayload'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
+import { PHONES } from '@/lib/phoneSizes'
 import { findPublic } from '@/lib/publicData'
 import type { Blog, Event } from '@/payload-types'
 
@@ -18,16 +19,6 @@ type Props = {
   mobileSrc: string
 }
 
-/** Common phone viewports (CSS px), small to large, so the hero can be checked on all of them. */
-const PHONES = [
-  { name: 'Kleines Android', w: 360, h: 640 },
-  { name: 'iPhone SE', w: 375, h: 667 },
-  { name: 'Galaxy S8', w: 360, h: 740 },
-  { name: 'iPhone 13 mini', w: 375, h: 812 },
-  { name: 'iPhone 15', w: 393, h: 852 },
-  { name: 'Pixel 7', w: 412, h: 915 },
-  { name: 'iPhone 15 Pro Max', w: 430, h: 932 },
-] as const
 const FRAME = 8 // px border around each phone
 
 /**

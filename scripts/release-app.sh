@@ -49,6 +49,18 @@ git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null || SHA="${
 step "Publishing $IMAGE:$TAG ($SHA) for $PLATFORM"
 echo "  target: $TARGET"
 
+# --- migrations on a copy of real data, before anything is pushed -----------
+# The container runs `payload migrate` + the prod seed on start; a migration
+# that fails there leaves prod in a restart loop (2026-11-22). So run both on a
+# copy of a real backup first. Source: MIGRATE_CHECK_DB, else the newest
+# ~/Downloads/msb-backup-*.tar.gz.enc (scripts/migrate-check.sh).
+if [ "${SKIP_MIGRATE_CHECK:-}" = "1" ]; then
+  printf '\033[33mwarning:\033[0m SKIP_MIGRATE_CHECK=1 — migrations not tried on real data\n'
+else
+  step "Checking migrations on a copy of real data"
+  scripts/migrate-check.sh || die "migration check failed. Fix it, or with a reason: SKIP_MIGRATE_CHECK=1 pnpm release:app"
+fi
+
 # --- demo: snapshot current content into demo-seed/ so it can be baked in -----
 # The `demo` stage COPYs demo-seed/demo.sqlite + demo-seed/media/ into the image.
 if [ "$TARGET" = "demo" ]; then

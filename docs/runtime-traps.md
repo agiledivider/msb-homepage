@@ -39,6 +39,10 @@ Collected 2026-11-12 from `LEARNINGS.md` and the session notes kept since July 2
 | change `deviceSizes` / `imageSizes` | they must come from `src/lib/imageWidths.mjs` | the static publisher only generates those widths; any other width is a silent 404 inside `srcset` | Next 16 · 2026-07 |
 | set `images.loader` | never also set `unoptimized: true` | Next then ignores the loader and ships full-size originals (58 MB of source imagery) | Next 16 · 2026-07 |
 | replace an image in `public/` | write it under a **new filename** | Next caches optimised `<Image>` output by URL (and browsers cache too), so a same-named overwrite keeps serving the stale version | Next 16 · 2026-07 |
+| release an image with new migrations | `pnpm migrate:check` passes on a recent prod backup download (`release:app` runs it and refuses to push otherwise) | the container runs `payload migrate` + prod seed on start; a migration that fails there (here: tables the server already had) keeps prod in a restart loop | Payload 3.93 · 2026-11-22 |
+| see the prod `payload` container restarting after a failed migration | `docker compose stop payload` **first**, copy `msb.db`, list the half-created tables with row counts, drop only empty ones, then `up -d` | SQLite doesn't roll back a half-finished Payload migration, and every restart attempt can leave more half-created tables behind | Payload 3.93 · 2026-11-22 |
+| see `ENOSPC: no space left on device` (e.g. `mkdir '/tmp/tsx-…'`) on container start | the server disk under Docker is full: `df -h /var/lib/docker`, `docker system df`, size of `/var/lib/docker/containers/*/*-json.log`; free with `docker image prune -a`. **Never** `docker volume prune` / `system prune --volumes` | old images pile up with every release and Docker logs have no size limit (a restart loop fills them); the volume prunes delete the `db` and `media` volumes, i.e. the whole site | Docker · 2026-11-22 |
+| see restic `Host key verification failed` against the Storage Box | `known_hosts` has the key under the exact host name the ssh config uses (a sub-account has its own name), port 23 (DEPLOY.md, Hetzner Storage Box) | ssh matches `known_hosts` by name, so a key scanned for the main account doesn't count for `uXXXXX-subN` | restic · 2026-11-22 |
 
 ## Local machine
 
@@ -68,6 +72,7 @@ Collected 2026-11-12 from `LEARNINGS.md` and the session notes kept since July 2
 | cap width with `max-w-*` | put it on a block child, not on a flex/grid item | the cap silently didn't apply on the flex item on short/landscape screens | — · 2026-07 |
 | absolutely position a caption in a frame's bottom padding | `inset-x-0 bottom-0 flex h-6 items-center leading-none` with `h-*` == the frame's `pb-*` | `bottom-3` + line box made text ride over the photo | — · 2026-07 |
 | load web fonts | `next/font/google` in `(frontend)/layout.tsx`, mapped in `@theme` | Turbopack strips remote CSS `@import` | Next 16 · 2026-07 |
+| change anything in the hero for phones | run `pnpm hero:shots` (or with `/preview/hero?collection=…&slug=…&bare=1`) and look at the contact sheets for all 7 sizes and 3 faces before showing Falk; it also fails on sideways scroll | tuning one size at a time took ~25 screenshot rounds; a fix for one size regularly broke another | Chrome · 2026-11-22 |
 
 ## Prototype only (`MakerSpace Bonn Redesign.dc.html`)
 
