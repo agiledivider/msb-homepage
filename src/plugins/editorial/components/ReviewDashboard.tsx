@@ -101,8 +101,14 @@ function SectionBox({ section }: { section: Section }) {
  * holds — a reviewer sees "Zur Freigabe" (in_review), an editor sees "Zu
  * überarbeiten" (changes_requested); someone with both roles sees both.
  */
-export async function ReviewDashboard({ payload, user }: Props) {
+export async function ReviewDashboard({ payload, user: sessionUser }: Props) {
   const collections = workflowCollections(payload)
+  // The dashboard gets the session user with its roles as bare IDs, so every
+  // permission check would fail and both boxes stay hidden. Load the roles and
+  // their permissions, as the RBAC checks expect.
+  const id = (sessionUser as { id?: string | number } | undefined)?.id
+  if (id === undefined) return null
+  const user = await payload.findByID({ collection: 'users', id, depth: 2, overrideAccess: true })
   // review box → editorial:review; edit box → content-edit permission on any workflow collection
   const canReview = isReviewer(user)
   const canEdit = collections.some((slug) => hasPermission(user as never, `${slug}:update`))

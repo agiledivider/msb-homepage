@@ -20,20 +20,29 @@ const onlyFiled = (data: Record<string, unknown>, original: Record<string, unkno
 }
 
 /**
- * beforeChange gate: when a non-reviewer tries to publish, the document is
- * routed into review instead of going live (reviewStatus = 'in_review', stays a
- * draft). Reviewers/admins publish normally and the doc is marked approved.
+ * beforeChange gate, the one place that decides what the two buttons mean:
+ *  - "Veröffentlichen" by a reviewer/admin: goes live, marked approved, an old
+ *    rejection reason is cleared.
+ *  - "Zur Prüfung einreichen" (the same button for an editor): routed into
+ *    review instead of going live (reviewStatus = 'in_review', stays a draft).
+ *  - "Entwurf speichern" on an approved page: the new draft is not approved
+ *    (the live version stays online), so it is marked 'draft' again. In review
+ *    and rejected drafts keep their state until resubmitted.
  * Moving a published document into another folder passes unchanged.
  */
 export const makePublishGate =
   (): CollectionBeforeChangeHook =>
   ({ data, req, context, operation, originalDoc }) => {
     if (context?.[EDITORIAL_SKIP]) return data
-    if (data?._status !== 'published') return data
+    if (data?._status !== 'published') {
+      if (operation === 'update' && data && originalDoc?.reviewStatus === 'approved') data.reviewStatus = 'draft'
+      return data
+    }
     if (operation === 'update' && onlyFiled(data, originalDoc)) return data
 
     if (isReviewer(req.user)) {
       data.reviewStatus = 'approved'
+      data.reviewNote = ''
       if (req.user?.id) data.reviewedBy = req.user.id
       return data
     }

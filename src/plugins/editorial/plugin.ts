@@ -57,6 +57,14 @@ export const editorialWorkflow =
         admin: {
           ...col.admin,
           defaultColumns: uniq([...(col.admin?.defaultColumns ?? []), 'reviewStatus']),
+          // the publish button says what it does for this user (submit vs. publish)
+          components: {
+            ...col.admin?.components,
+            edit: {
+              ...col.admin?.components?.edit,
+              PublishButton: '/plugins/editorial/components/PublishButton#PublishButton',
+            },
+          },
         },
         hooks: {
           ...col.hooks,

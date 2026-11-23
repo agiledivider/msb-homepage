@@ -9,6 +9,7 @@ Global rules (git, done-gate, secrets, verification, where knowledge goes) come 
 pnpm install                 # one-time after clone (pnpm only, see Rules)
 pnpm dev:start               # dev server on :3000, detached (dev:stop / dev:status / dev:logs)
 pnpm seed                    # demo content into msb.db (stop the dev server first: SQLite lock)
+pnpm dev:users               # test accounts editor@test.de / reviewer@test.de (password: DEV_USER_PASSWORD in .env)
 pnpm test                    # vitest: integration (temp SQLite per file) + fitness tests
 pnpm backlog:summary         # after any docs/BACKLOG.md edit (pnpm test fails on a stale summary)
 pnpm generate:types          # after any collection/field change

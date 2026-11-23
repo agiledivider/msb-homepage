@@ -60,7 +60,7 @@ export function DashboardActions({ collectionSlug, id }: { collectionSlug: strin
         className="btn btn--style-primary btn--size-small"
         style={{ margin: 0 }}
       >
-        Freigeben
+        Freigeben &amp; veröffentlichen
       </button>
     </span>
   )

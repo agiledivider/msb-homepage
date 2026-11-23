@@ -14,8 +14,10 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { Workshops } from './collections/Workshops'
+import { devLoginEndpoint } from './endpoints/devLogin'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
+import { devLoginEnabled } from './lib/devLogin'
 import { passwordLoginEnabled } from './lib/passwordLogin'
 import { payloadSecret } from './lib/payloadSecret'
 import { autofilePlugin } from './plugins/autofile/plugin'
@@ -36,7 +38,7 @@ export default buildConfig({
     // "Sign in with Kanidm" button under the password form (renders nothing
     // when Kanidm SSO isn't configured — see src/plugins/oidc).
     components: {
-      afterLogin: ['/components/auth/KanidmLoginButton#KanidmLoginButton'],
+      afterLogin: ['/components/auth/KanidmLoginButton#KanidmLoginButton', '/components/auth/DevLogin#DevLogin'],
       // MSB branding + "Start" link at the top of the sidebar; look in custom.scss.
       beforeNavLinks: ['/components/admin/NavBrand#NavBrand'],
       graphics: {
@@ -46,6 +48,8 @@ export default buildConfig({
     },
   },
   editor: lexicalEditor(),
+  // Dev only: one-click logins as the test accounts (src/lib/devLogin.ts). Not registered elsewhere.
+  endpoints: devLoginEnabled(process.env) ? [devLoginEndpoint] : [],
   // Order drives the sidebar: editors' "Inhalte" group first, "Verwaltung" last.
   collections: [Blog, Events, Pages, Workshops, Media, Users],
   globals: [HeroSettings, SiteSettings],

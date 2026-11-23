@@ -24,6 +24,7 @@
     "nav-icons": "tsx scripts/nav-icons.ts",
     "payload": "payload",
     "seed": "payload run src/seed/index.ts",
+    "dev:users": "payload run src/seed/dev-users.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

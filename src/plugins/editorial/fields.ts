@@ -79,7 +79,7 @@ export const reviewFields = (): Field[] => {
       options: [
         { label: 'Entwurf', value: 'draft' },
         { label: 'In Review', value: 'in_review' },
-        { label: 'Änderungen erbeten', value: 'changes_requested' },
+        { label: 'Abgelehnt', value: 'changes_requested' },
         { label: 'Freigegeben', value: 'approved' },
       ],
       access: reviewerOnly,
@@ -88,9 +88,10 @@ export const reviewFields = (): Field[] => {
     {
       name: 'reviewNote',
       type: 'textarea',
-      label: 'Reviewer-Notiz',
+      label: 'Grund der Ablehnung',
       access: reviewerOnly,
-      admin: { position: 'sidebar', readOnly: true, condition: whenSet('reviewNote') },
+      // shown inside the review panel, under the "Abgelehnt" badge
+      admin: { position: 'sidebar', readOnly: true, hidden: true },
     },
     {
       name: 'submittedAt',
@@ -100,7 +101,7 @@ export const reviewFields = (): Field[] => {
       admin: {
         position: 'sidebar',
         readOnly: true,
-        condition: whenSet('submittedAt'),
+        hidden: true, // the review panel shows it with the status
         date: { pickerAppearance: 'dayAndTime', displayFormat: 'dd.MM.yyyy HH:mm' },
       },
     },

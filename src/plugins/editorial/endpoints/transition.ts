@@ -32,7 +32,7 @@ async function canUpdate(req: PayloadRequest, slug: CollectionSlug, id: string |
  * POST /api/editorial/transition — drives review-state transitions:
  *   submit          (any editor)  draft/changes_requested → in_review
  *   approve         (reviewer)    → published + approved
- *   request-changes (reviewer)    → changes_requested (+ note), stays draft
+ *   request-changes (reviewer)    → changes_requested + required reason, stays draft
  * Updates run with EDITORIAL_SKIP so the publish gate doesn't re-route them.
  */
 export const makeTransitionEndpoint = (collections: Set<string>): Endpoint => ({
@@ -76,12 +76,15 @@ export const makeTransitionEndpoint = (collections: Set<string>): Endpoint => ({
     }
 
     if (action === 'approve') {
-      await update({ _status: 'published', reviewStatus: 'approved', reviewedBy: user.id })
+      await update({ _status: 'published', reviewStatus: 'approved', reviewNote: '', reviewedBy: user.id })
       return Response.json({ ok: true, reviewStatus: 'approved' })
     }
 
     if (action === 'request-changes') {
-      await update({ reviewStatus: 'changes_requested', reviewNote: note ?? '', reviewedBy: user.id }, true)
+      // A rejection always says why: the author has to know what to change.
+      const reason = note?.trim()
+      if (!reason) return Response.json({ error: 'Bitte einen Grund angeben.' }, { status: 400 })
+      await update({ reviewStatus: 'changes_requested', reviewNote: reason, reviewedBy: user.id }, true)
       return Response.json({ ok: true, reviewStatus: 'changes_requested' })
     }
 

@@ -26,10 +26,12 @@ import { ReviewPanel as ReviewPanel_812323546135d17338b9452fd3f00174 } from '../
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { HeroPreviewButton as HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95 } from '../../../components/HeroPreviewButton'
+import { PublishButton as PublishButton_7d02673e38ba1662132c2fde10adbd73 } from '../../../plugins/editorial/components/PublishButton'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { AdminIcon as AdminIcon_80ebcb12978a9db9a1c04af0af89c7ec } from '../../../components/admin/Graphics'
 import { AdminLogo as AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec } from '../../../components/admin/Graphics'
 import { KanidmLoginButton as KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27 } from '../../../components/auth/KanidmLoginButton'
+import { DevLogin as DevLogin_c5a4fbfcec91834b45506686890fddc0 } from '../../../components/auth/DevLogin'
 import { BackupsNavLink as BackupsNavLink_9fb487cc8e1eb156f1048abdeed6649c } from '../../../plugins/backups/components/BackupsNavLink'
 import { ReviewDashboard as ReviewDashboard_eaaae8e46032f1445a954959095ac5e4 } from '../../../plugins/editorial/components/ReviewDashboard'
 import { PublishSite as PublishSite_a4c7146036cdb0d0c6483019f622d27e } from '../../../plugins/publish/components/PublishSite'
@@ -67,10 +69,12 @@ export const importMap = {
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "/components/HeroPreviewButton#HeroPreviewButton": HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95,
+  "/plugins/editorial/components/PublishButton#PublishButton": PublishButton_7d02673e38ba1662132c2fde10adbd73,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/components/admin/Graphics#AdminIcon": AdminIcon_80ebcb12978a9db9a1c04af0af89c7ec,
   "/components/admin/Graphics#AdminLogo": AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec,
   "/components/auth/KanidmLoginButton#KanidmLoginButton": KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27,
+  "/components/auth/DevLogin#DevLogin": DevLogin_c5a4fbfcec91834b45506686890fddc0,
   "/plugins/backups/components/BackupsNavLink#BackupsNavLink": BackupsNavLink_9fb487cc8e1eb156f1048abdeed6649c,
   "/plugins/editorial/components/ReviewDashboard#ReviewDashboard": ReviewDashboard_eaaae8e46032f1445a954959095ac5e4,
   "/plugins/publish/components/PublishSite#PublishSite": PublishSite_a4c7146036cdb0d0c6483019f622d27e,
