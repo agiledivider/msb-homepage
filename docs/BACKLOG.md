@@ -104,6 +104,12 @@ Pages, posts, events and images are being written and polished on an instance th
 
 **AC:** right after go-live, the production site shows the same published pages, posts, events and images as the prepared instance, with the same addresses; drafts still waiting for review are there as drafts; no test or demo account exists in production; a second transfer just before launch picks up the last edits without duplicating anything.
 
+### ⏳ S1.6 — Members find out how the Verein handles their data (S)
+**Source:** IDEAS.md 2026-11-23.
+The Datenschutzerklärung only covers visitors of the website. Members also give the Verein their name, address, bank details and contact data for membership, fees and access, and they are entitled to know what happens with it. Today nothing on the site tells them.
+
+**AC:** a member (or someone about to join) finds, from the Datenschutz page and from Mitmachen, what member data the Verein keeps, why, for how long, who sees it and whom to ask; the Vorstand has confirmed the text (like S1.2); readable at 375 px.
+
 ---
 
 ## E2 — Security hardening (audit 2026-11-20)
@@ -401,6 +407,36 @@ The backups view shows each backup and its size, but not how much room the backu
 On quiet days the nightly backup stores the same content as the night before. Identical content already takes up no extra storage, but the list fills with entries an admin can't tell apart, which makes picking the right backup to restore harder.
 
 **AC:** a backup whose content is the same as the previous one is marked as unchanged in the backups view; an admin can tell at a glance which backups contain changes; restoring and downloading work for every backup as before; no backup is deleted because of this.
+
+---
+
+## E10 — Werkstätten
+Every workshop gets its own page that tells a visitor what they can make there and how to get to the machines.
+
+**Status:** proposed 2026-11-23. **Source:** IDEAS.md 2026-11-23; UX and art-direction mockups 2026-11-23 (the start-page cards already link to `/werkzeug#…` anchors, S10.1 moves them to the pages). Content (Werkstattpat:innen, which machines need an Einweisung, photos of Metall and Holz) has to come from the Verein; start with Elektronik and 3D-Druck/CNC.
+
+### ⏳ S10.1 — Visitors open a page for each workshop and see what they can make there and with which machines (M)
+Today each workshop is one card with a short machine list, and the cards lead only to the same cards on /werkzeug. A visitor can't find out what a workshop is good for, which machines it has, or which of them need an Einweisung.
+
+**AC:** each workshop has its own page with a short promise, what you can make there, a photo, and its machines, each marked as free to use, Einweisung needed, or only with the Werkstattpat:in; editors create and change these pages in the CMS; the cards on the start page and on /werkzeug open the matching page; the way in (Offene Tür → Mitglied → Einweisung) is visible on every workshop page; readable at 375 px.
+
+### ⏳ S10.2 — A workshop page shows its next Einweisungen and workshops (S)
+**Needs:** S10.1.
+People who want to use a machine need an Einweisung, but they have to search the event calendar to find the next one for "their" workshop.
+
+**AC:** a workshop page lists its upcoming Einweisungen and workshops from the calendar, soonest first, without editors entering them twice; past events disappear on their own; with nothing planned, the page says so and points to the Offene Tür.
+
+### ⏳ S10.3 — Visitors know whom to ask and what the rules are in a workshop (S)
+**Needs:** S10.1.
+Newcomers don't know who looks after a workshop, which safety rules apply, or what material costs and whether they can bring their own.
+
+**AC:** a workshop page shows its Werkstattpat:in (name or role and how to reach them, only what that person agreed to publish), the workshop's safety rules, and material and cost notes; a workshop without a Pat:in still shows a general contact.
+
+### ⏳ S10.4 — A workshop page shows projects that were made there (S)
+**Needs:** S10.1.
+Blog posts show what members built, but nothing connects them to the workshop where it happened, so visitors miss the best proof of what's possible.
+
+**AC:** a workshop page shows the latest blog posts about projects from that workshop; editors link a post to one or more workshops when writing it; a workshop without posts hides the section.
 
 ---
 
