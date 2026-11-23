@@ -50,7 +50,15 @@ const aUserWithKey = async (label: string, permissionNames: string[]) => {
 }
 
 const EDITOR_PERMS = ['blog:create', 'blog:read', 'blog:update', 'events:create', 'events:read', 'events:update']
-const REVIEWER_PERMS = [...EDITOR_PERMS, 'pages:create', 'pages:read', 'pages:update', 'editorial:review']
+const REVIEWER_PERMS = [
+  ...EDITOR_PERMS,
+  'pages:create',
+  'pages:read',
+  'pages:update',
+  'workshops:read',
+  'workshops:update',
+  'editorial:review',
+]
 
 /** One JSON-RPC call to the MCP endpoint, as an MCP client sends it. */
 const mcp = async (key: string | null, method: string, params: Record<string, unknown> = {}) => {
@@ -80,7 +88,7 @@ const callTool = async (key: string, name: string, args: Record<string, unknown>
   return res.body.result as ToolResult
 }
 
-const findBySlug = async (collection: 'blog' | 'events' | 'pages', slug: string, draft = false) =>
+const findBySlug = async (collection: 'blog' | 'events' | 'pages' | 'workshops', slug: string, draft = false) =>
   (await payload.find({ collection, where: { slug: { equals: slug } }, draft, depth: 0, limit: 1 }))
     .docs[0] as unknown as Doc | undefined
 
@@ -147,6 +155,30 @@ describe('Claude via MCP', () => {
     expect(published._status).toBe('published')
     expect(published.title).toBe('Live-Titel')
     expect((await findBySlug('pages', slug, true))?.title).toBe('Von Claude')
+  })
+
+  it('fills a live workshop page as a draft, the live page stays as it was (S10.1)', async () => {
+    const slug = `werkstatt-${randomUUID()}`
+    await payload.create({
+      collection: 'workshops',
+      data: { title: 'Werkstatt', slug, _status: 'published', reviewStatus: 'approved' } as never,
+      context: { [EDITORIAL_SKIP]: true },
+    })
+    const live = (await findBySlug('workshops', slug)) as Doc
+
+    const result = await callTool(reviewer.key, 'updateWorkshops', {
+      id: live.id,
+      promise: 'Hier lötest du Schaltungen.',
+      draft: false,
+    })
+
+    expect(result.isError).toBeFalsy()
+    const published = (await findBySlug('workshops', slug)) as Doc & { promise?: string | null }
+    expect(published._status).toBe('published')
+    expect(published.promise ?? null).toBeNull()
+    expect(((await findBySlug('workshops', slug, true)) as Doc & { promise?: string }).promise).toBe(
+      'Hier lötest du Schaltungen.',
+    )
   })
 
   it("can't do what the key owner's account can't", async () => {

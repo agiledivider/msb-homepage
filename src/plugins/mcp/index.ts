@@ -19,7 +19,11 @@ To check how a post or event looks (homepage hero and its own page), call
 previewLink and open the link in a browser; it is valid for 15 minutes.
 Keep titles short: at most 70 characters for blog posts and 60 for events
 (the start-page hero has no room for more); dates, prices and details go
-into the subtitle or the text.`
+into the subtitle or the text.
+Workshops (Werkstätten) are fixed-template pages: fill their fields, don't invent
+facts. Which machines need an Einweisung, contact names, opening times and prices
+must come from the editor; leave a field empty rather than guess. Link events and
+blog posts to a workshop through their "workshops" field.`
 
 /**
  * A new key may use every capability configured above (the plugin defaults
@@ -47,6 +51,11 @@ const basePlugin = mcpPlugin({
     blog: { enabled: writable, description: 'Blog posts of the MakerSpace (Blog).' },
     events: { enabled: writable, description: 'Events: workshops, open evenings, meetups (Termine).' },
     pages: { enabled: writable, description: 'Content pages built from blocks, e.g. Verein, Mitmachen.' },
+    workshops: {
+      enabled: writable,
+      description:
+        'Workshops (Werkstätten), one page each at /werkzeug/<slug>: promise, quick facts, activities, machines with access, safety, material, contact.',
+    },
     media: {
       enabled: { find: true },
       description: 'Images and PDFs; reference them by ID. New files: the uploadMedia tool.',

@@ -16,6 +16,7 @@ import * as migration_20261122_183227_verein_supporters_block from './20261122_1
 import * as migration_20261122_204057_event_subtitle from './20261122_204057_event_subtitle';
 import * as migration_20261123_203510_workshop_cards from './20261123_203510_workshop_cards';
 import * as migration_20261123_212816_workshops_collection from './20261123_212816_workshops_collection';
+import * as migration_20261123_214954_mcp_workshops from './20261123_214954_mcp_workshops';
 
 export const migrations = [
   {
@@ -106,6 +107,11 @@ export const migrations = [
   {
     up: migration_20261123_212816_workshops_collection.up,
     down: migration_20261123_212816_workshops_collection.down,
-    name: '20261123_212816_workshops_collection'
+    name: '20261123_212816_workshops_collection',
+  },
+  {
+    up: migration_20261123_214954_mcp_workshops.up,
+    down: migration_20261123_214954_mcp_workshops.down,
+    name: '20261123_214954_mcp_workshops'
   },
 ];
