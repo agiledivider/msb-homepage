@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**34 open · 17 done** · ✅ 17 · ⏳ 32 · 🚨 2
+**31 open · 20 done** · ✅ 20 · 🟡 1 · ⏳ 28 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -62,9 +62,6 @@ All done.
 - ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L399)
 - ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L405)
 
-## E10 — Werkstätten (0/4 done)
+## E10 — Werkstätten (3/4 done)
 
-- ⏳ [S10.1 — Visitors open a page for each workshop and see what they can make there and with which machines (M)](BACKLOG.md#L418)
-- ⏳ [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L423)
-- ⏳ [S10.3 — Visitors know whom to ask and what the rules are in a workshop (S)](BACKLOG.md#L429)
-- ⏳ [S10.4 — A workshop page shows projects that were made there (S)](BACKLOG.md#L435)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L425)

@@ -415,28 +415,36 @@ Every workshop gets its own page that tells a visitor what they can make there a
 
 **Status:** proposed 2026-11-23. **Source:** IDEAS.md 2026-11-23; UX and art-direction mockups 2026-11-23 (the start-page cards already link to `/werkzeug#…` anchors, S10.1 moves them to the pages). Content (Werkstattpat:innen, which machines need an Einweisung, photos of Metall and Holz) has to come from the Verein; start with Elektronik and 3D-Druck/CNC.
 
-### ⏳ S10.1 — Visitors open a page for each workshop and see what they can make there and with which machines (M)
+### ✅ S10.1 — Visitors open a page for each workshop and see what they can make there and with which machines (M) — 2026-11-23
 Today each workshop is one card with a short machine list, and the cards lead only to the same cards on /werkzeug. A visitor can't find out what a workshop is good for, which machines it has, or which of them need an Einweisung.
 
 **AC:** each workshop has its own page with a short promise, what you can make there, a photo, and its machines, each marked as free to use, Einweisung needed, or only with the Werkstattpat:in; editors create and change these pages in the CMS; the cards on the start page and on /werkzeug open the matching page; the way in (Offene Tür → Mitglied → Einweisung) is visible on every workshop page; readable at 375 px.
 
-### ⏳ S10.2 — A workshop page shows its next Einweisungen and workshops (S)
+**Implementation notes:** `workshops` collection (Werkstätten; editorial review + static publish like pages; Reviewer/Admin edit, not Redakteur) and `/werkzeug/<slug>` in the UX mockup's D1 layout (`src/components/WorkshopPage.tsx`); every section hides while empty. The workshop wall block reads the collection, so cards always lead to a page; its old `items` list is hidden but kept because `src/seed/workshops.ts` reads it once (prod seed creates the six workshops on any DB without them); drop it with a migration later. Machines start as "nach Einweisung". Not in the MCP tools yet.
+
+### 🟡 S10.2 — A workshop page shows its next Einweisungen and workshops (S)
 **Needs:** S10.1.
 People who want to use a machine need an Einweisung, but they have to search the event calendar to find the next one for "their" workshop.
 
 **AC:** a workshop page lists its upcoming Einweisungen and workshops from the calendar, soonest first, without editors entering them twice; past events disappear on their own; with nothing planned, the page says so and points to the Offene Tür.
 
-### ⏳ S10.3 — Visitors know whom to ask and what the rules are in a workshop (S)
+**Status:** 🟡 built 2026-11-23 with S10.1: events get a "Werkstätten" field and the page lists the next 3 linked events. Open: not yet seen with a real linked event, and no "nothing planned → Offene Tür" note in the box (the box just hides).
+
+### ✅ S10.3 — Visitors know whom to ask and what the rules are in a workshop (S) — 2026-11-23
 **Needs:** S10.1.
 Newcomers don't know who looks after a workshop, which safety rules apply, or what material costs and whether they can bring their own.
 
 **AC:** a workshop page shows its Werkstattpat:in (name or role and how to reach them, only what that person agreed to publish), the workshop's safety rules, and material and cost notes; a workshop without a Pat:in still shows a general contact.
 
-### ⏳ S10.4 — A workshop page shows projects that were made there (S)
+**Implementation notes:** built with S10.1: contact group (name, role, optional photo, link, note; no plain e-mail), safety rules, material text. Without a Pat:in the box hides; the general contact is the footer. Real names/rules still have to come from the Verein.
+
+### ✅ S10.4 — A workshop page shows projects that were made there (S) — 2026-11-23
 **Needs:** S10.1.
 Blog posts show what members built, but nothing connects them to the workshop where it happened, so visitors miss the best proof of what's possible.
 
 **AC:** a workshop page shows the latest blog posts about projects from that workshop; editors link a post to one or more workshops when writing it; a workshop without posts hides the section.
+
+**Implementation notes:** built with S10.1: blog posts get a "Werkstätten" field; the page shows the 3 newest linked posts, hidden when none.
 
 ---
 
