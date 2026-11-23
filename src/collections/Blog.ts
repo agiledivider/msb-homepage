@@ -69,6 +69,14 @@ export const Blog: CollectionConfig = {
     { name: 'badge', type: 'text', label: 'Hero-Badge', defaultValue: 'NEU IM BLOG' },
     { name: 'cover', type: 'upload', relationTo: 'media', label: 'Titelbild' },
     {
+      name: 'workshops',
+      type: 'relationship',
+      relationTo: 'workshops',
+      hasMany: true,
+      label: 'Werkstätten',
+      admin: { position: 'sidebar', description: 'Erscheint auf diesen Werkstatt-Seiten.' },
+    },
+    {
       name: 'body',
       type: 'richText',
       label: 'Inhalt',

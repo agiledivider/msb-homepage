@@ -4,7 +4,7 @@
  * hanging on a hook at the left edge of each card. Brand tokens only, so they
  * follow the palette.
  */
-import { TOOL_ICONS, type ToolIconName } from './icons'
+import type { ToolIconName } from './icons'
 
 const INK = 'var(--color-ink)'
 const STEEL = { fill: 'var(--color-kreide)', stroke: INK, strokeWidth: 3, strokeLinejoin: 'round' as const }
@@ -130,5 +130,3 @@ export function ToolIcon({ name, className = '' }: { name: ToolIconName; classNa
     </svg>
   )
 }
-
-export const isToolIcon = (v: unknown): v is ToolIconName => (TOOL_ICONS as readonly unknown[]).includes(v)

@@ -49,9 +49,13 @@ export const Workshops: Block = {
       ],
     },
     {
+      // Retired (S10.1): cards now come from the Werkstätten collection. Kept in
+      // the schema so the workshop seed can read what editors entered here; drop
+      // it with a migration once every server has run that seed.
       name: 'items',
       type: 'array',
       labels: { singular: 'Workshop', plural: 'Workshops' },
+      admin: { hidden: true },
       fields: [
         {
           type: 'row',

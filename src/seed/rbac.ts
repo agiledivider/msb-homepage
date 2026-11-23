@@ -9,7 +9,7 @@ import { getPayload } from 'payload'
  *
  *   pnpm payload run src/seed/rbac.ts
  */
-const COLLECTIONS = ['blog', 'events', 'pages']
+const COLLECTIONS = ['blog', 'events', 'pages', 'workshops']
 const ACTIONS = ['create', 'read', 'update', 'delete']
 
 type IdDoc = { id: string | number }
@@ -48,7 +48,7 @@ const run = async () => {
   await roleId(
     payload,
     'Reviewer',
-    ['blog', 'events', 'pages']
+    ['blog', 'events', 'pages', 'workshops']
       .flatMap((c) => [`${c}:create`, `${c}:read`, `${c}:update`])
       .concat('editorial:review')
       .map((k) => perms[k]),

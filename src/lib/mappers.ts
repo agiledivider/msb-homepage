@@ -20,7 +20,7 @@ const weekdayShort = (d: Date) => strip(de({ weekday: 'short' }).format(d)).toUp
 const longDate = (d: Date) => de({ day: 'numeric', month: 'short', year: 'numeric' }).format(d).toUpperCase()
 
 /** A populated upload comes back as an object; an id (number) means unpopulated. */
-const asMedia = (v: number | Media | null | undefined): MediaResource =>
+export const asMedia = (v: number | Media | null | undefined): MediaResource =>
   v && typeof v === 'object' ? (v as MediaResource) : undefined
 
 /**

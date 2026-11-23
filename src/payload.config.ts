@@ -13,6 +13,7 @@ import { Events } from './collections/Events'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
+import { Workshops } from './collections/Workshops'
 import { HeroSettings } from './globals/HeroSettings'
 import { SiteSettings } from './globals/SiteSettings'
 import { passwordLoginEnabled } from './lib/passwordLogin'
@@ -46,7 +47,7 @@ export default buildConfig({
   },
   editor: lexicalEditor(),
   // Order drives the sidebar: editors' "Inhalte" group first, "Verwaltung" last.
-  collections: [Blog, Events, Pages, Media, Users],
+  collections: [Blog, Events, Pages, Workshops, Media, Users],
   globals: [HeroSettings, SiteSettings],
   // Folders for media, pages, posts and events (`folders: true` on each).
   // Logged-in users only, like media uploads: anonymous visitors see no
@@ -71,13 +72,13 @@ export default buildConfig({
   }),
   plugins: [
     editorialWorkflow({
-      collections: ['blog', 'events', 'pages'],
+      collections: ['blog', 'events', 'pages', 'workshops'],
       // fields only reviewers may edit (editors see them locked)
       lockedFields: { blog: ['publishedAt'] },
     }),
     // Publish the static site from the admin (button + auto-publish on change).
     // The build runs in the separate publisher container; see docs/PUBLISHING.md.
-    sitePublishing({ collections: ['blog', 'events', 'pages'] }),
+    sitePublishing({ collections: ['blog', 'events', 'pages', 'workshops'] }),
     // New and edited events / blog posts without a folder are filed into
     // Events|Blog / year / month, with images only they use (src/plugins/autofile).
     autofilePlugin(),

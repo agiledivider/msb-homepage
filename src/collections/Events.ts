@@ -97,6 +97,14 @@ export const Events: CollectionConfig = {
     },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Bild' },
     {
+      name: 'workshops',
+      type: 'relationship',
+      relationTo: 'workshops',
+      hasMany: true,
+      label: 'Werkstätten',
+      admin: { position: 'sidebar', description: 'Erscheint auf diesen Werkstatt-Seiten.' },
+    },
+    {
       name: 'description',
       type: 'textarea',
       label: 'Kurzbeschreibung',

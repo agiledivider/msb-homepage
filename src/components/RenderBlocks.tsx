@@ -37,7 +37,9 @@ export type MsbBlock =
   | ValuesBlock
 
 /** One renderer per blockType, each typed against its own block. */
-const REGISTRY: { [K in MsbBlock['blockType']]: (props: Extract<MsbBlock, { blockType: K }>) => ReactNode } = {
+const REGISTRY: {
+  [K in MsbBlock['blockType']]: (props: Extract<MsbBlock, { blockType: K }>) => ReactNode | Promise<ReactNode>
+} = {
   hero: HeroComponent,
   pageIntro: PageIntroComponent,
   eventFeed: EventFeedComponent,
@@ -70,7 +72,9 @@ export function RenderBlocks({ blocks }: { blocks?: MsbBlock[] | null }) {
         {blocks.map((block, i) => {
           // Indexing the mapped type by a union loses the K link; the entry for
           // block.blockType does take this block.
-          const Component = REGISTRY[block.blockType] as ((props: MsbBlock) => ReactNode) | undefined
+          const Component = REGISTRY[block.blockType] as
+            | ((props: MsbBlock) => ReactNode | Promise<ReactNode>)
+            | undefined
           if (!Component) return null
           return (
             // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state

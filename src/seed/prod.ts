@@ -5,6 +5,7 @@ import { seedSiteContent } from './content'
 import { upsertLegacyArticles } from './legacy'
 import { upsertLegalPages } from './legal'
 import { convertVereinPage } from './vereinLayout'
+import { upsertWorkshops } from './workshops'
 
 /**
  * Production seed, run on container start (after migrations). Idempotent:
@@ -27,7 +28,7 @@ const isFreshDb = async (payload: Payload) => {
   }
   return true
 }
-const COLLECTIONS = ['blog', 'events', 'pages']
+const COLLECTIONS = ['blog', 'events', 'pages', 'workshops']
 const ACTIONS = ['create', 'read', 'update', 'delete']
 
 type IdDoc = { id: string | number }
@@ -65,7 +66,7 @@ const run = async () => {
   await roleId(
     payload,
     'Reviewer',
-    ['blog', 'events', 'pages']
+    ['blog', 'events', 'pages', 'workshops']
       .flatMap((c) => [`${c}:create`, `${c}:read`, `${c}:update`])
       .concat('editorial:review')
       .map((k) => perms[k]),
@@ -105,6 +106,9 @@ const run = async () => {
   } else {
     payload.logger.info('content already present → skipping content seed')
   }
+  // Workshops arrived after launch content (S10.1): create them on any DB that
+  // has none yet, from the /werkzeug cards. No-op once one exists.
+  await upsertWorkshops(payload)
 
   payload.logger.info('✓ prod seed done')
 }

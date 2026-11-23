@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import { seedSiteContent } from './content'
 import { upsertLegacyArticles } from './legacy'
 import { upsertLegalPages } from './legal'
+import { upsertWorkshops } from './workshops'
 
 /**
  * Dev seed. Creates the local dev admin (from .env), wipes the content collections for a clean
@@ -27,7 +28,7 @@ const seed = async () => {
   }
 
   // wipe content collections so re-running is a clean slate (keeps users)
-  for (const collection of ['pages', 'blog', 'events', 'media'] as const) {
+  for (const collection of ['pages', 'blog', 'events', 'workshops', 'media'] as const) {
     await payload.delete({ collection, where: { id: { exists: true } } })
   }
 
@@ -35,6 +36,7 @@ const seed = async () => {
   await seedSiteContent(payload)
   await upsertLegalPages()
   await upsertLegacyArticles()
+  await upsertWorkshops(payload)
 
   payload.logger.info('✓ Seed complete.')
 }

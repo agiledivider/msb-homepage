@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { BTN_PRIMARY, CARD_LINK, CARD_TITLE, SectionHeading } from '../../components/ui'
+import { findForRequest } from '../../lib/publicData'
 import type { LinkValue } from '../fields'
-import type { ToolIconName } from './icons'
-import { isToolIcon, ToolIcon } from './ToolIcon'
+import { isToolIcon, type ToolIconName } from './icons'
+import { ToolIcon } from './ToolIcon'
 
 type Item = {
   code?: string | null
@@ -26,17 +27,6 @@ export type WorkshopsBlock = {
   hintCta?: LinkValue | null
   footnote?: string | null
 }
-
-/** In-page anchor for a workshop on /werkzeug: "Elektronik & Löten" → "elektronik-loeten". */
-export const workshopAnchor = (title: string) =>
-  title
-    .toLowerCase()
-    .replace(/ä/g, 'ae')
-    .replace(/ö/g, 'oe')
-    .replace(/ü/g, 'ue')
-    .replace(/ß/g, 'ss')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
 
 const CARD_BASE = 'relative rounded-[10px] border border-line bg-card shadow-[0_10px_22px_-14px_rgba(60,52,30,.5)]'
 
@@ -87,31 +77,46 @@ function Card({ it, detailed }: { it: Item; detailed: boolean }) {
     </>
   )
   const layout = `flex items-start gap-3.5 ${detailed ? 'p-[22px]' : 'p-3 sm:p-4'}`
-  const id = detailed ? workshopAnchor(it.title) : undefined
   return it.url ? (
-    <Link id={id} href={it.url} className={`${CARD_BASE} ${CARD_LINK} ${layout} scroll-mt-28 text-ink`}>
+    <Link href={it.url} className={`${CARD_BASE} ${CARD_LINK} ${layout} text-ink`}>
       {body}
     </Link>
   ) : (
-    <div id={id} className={`${CARD_BASE} ${layout} scroll-mt-28`}>
-      {body}
-    </div>
+    <div className={`${CARD_BASE} ${layout}`}>{body}</div>
   )
 }
 
-export function WorkshopsComponent({
+/** The published workshops as cards, each leading to its page (S10.1). */
+async function workshopCards(detailed: boolean): Promise<Item[]> {
+  const { docs } = await findForRequest({ collection: 'workshops', sort: 'order', limit: 50, depth: 0 })
+  return docs.map((w) => ({
+    title: w.title,
+    verbs: w.verbs,
+    desc: detailed ? w.promise || w.summary : w.summary,
+    icon: w.icon,
+    url: `/werkzeug/${w.slug}`,
+  }))
+}
+
+/**
+ * The workshop wall. Cards come from the Werkstätten collection, so every card
+ * leads to an existing workshop page; the block itself only sets the frame
+ * (heading, note, hint). `items` is the old hand-filled card list, read once
+ * by the workshop seed and no longer shown.
+ */
+export async function WorkshopsComponent({
   variant,
   tagLabel,
   tagColor,
   heading,
   allLink,
   note,
-  items,
   hint,
   hintCta,
   footnote,
 }: WorkshopsBlock) {
   const detailed = variant === 'detailed'
+  const items = await workshopCards(detailed)
   return (
     <div className="pt-14 first:pt-0">
       {tagLabel || heading ? (
@@ -131,7 +136,7 @@ export function WorkshopsComponent({
           </div>
         ) : null}
         <div className={`grid gap-2 sm:gap-4 ${detailed ? 'sm:grid-cols-2' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
-          {(items ?? []).map((it) => (
+          {items.map((it) => (
             <Card key={it.title} it={it} detailed={detailed} />
           ))}
         </div>

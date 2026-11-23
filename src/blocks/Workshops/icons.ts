@@ -10,3 +10,5 @@ export const TOOL_ICON_LABELS: Record<ToolIconName, string> = {
   spule: 'Filamentspule (3D-Druck)',
   geodreieck: 'Geodreieck (CAD)',
 }
+
+export const isToolIcon = (v: unknown): v is ToolIconName => (TOOL_ICONS as readonly unknown[]).includes(v)

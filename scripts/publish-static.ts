@@ -223,6 +223,7 @@ async function collectRoutes() {
   for (const [collection, base] of [
     ['blog', '/blog'],
     ['events', '/events'],
+    ['workshops', '/werkzeug'],
   ] as const) {
     for (const doc of await publishedDocs(collection)) {
       if (!doc.slug) continue

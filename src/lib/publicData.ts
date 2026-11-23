@@ -25,7 +25,7 @@ import { verifyPreviewToken } from '@/lib/previewToken'
  * when the page body itself 404s.
  */
 
-export type PublicCollection = 'blog' | 'events' | 'pages'
+export type PublicCollection = 'blog' | 'events' | 'pages' | 'workshops'
 
 export type PublicFindArgs<S extends PublicCollection> = {
   collection: S
