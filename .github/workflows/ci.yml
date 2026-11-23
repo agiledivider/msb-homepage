@@ -1,0 +1,143 @@
+# CI: the project gate on every push and PR; images only after it is green (S6.2).
+#
+#   gate       lint · typecheck · tests (same commands as the local gate, CLAUDE.md)
+#   deps-scan  Trivy over the lockfile; report in the job summary
+#   build      main only, needs gate: build + push the three images, then a
+#              Trivy scan of each pushed image (report in the job summary)
+#
+# `next build` runs inside the app image build, so a broken build also stops
+# before anything is pushed (build-push builds fully, then pushes).
+#
+# Scans report, they don't block yet: known advisories (happy-dom, see BACKLOG
+# S6.2) would keep every build red. The weekly audit (audit.yml) goes red on them.
+#
+# Actions are pinned by commit SHA (tag in the comment); Renovate bumps them.
+# Auth: GITHUB_TOKEN pushes to ghcr.io for this owner, hence packages: write.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push supersedes an in-flight run for the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # pnpm version comes from package.json "packageManager".
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22 # same major as the Dockerfile base image
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  deps-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Trivy (dependencies)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: table
+          output: trivy-deps.txt
+          exit-code: '0'
+      - name: Report
+        if: always()
+        run: |
+          { echo '## Dependency scan (Trivy, HIGH/CRITICAL)'; echo '```'; cat trivy-deps.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: app
+            image: msb-homepage
+            dockerfile: Dockerfile
+            target: runner
+          - name: publisher
+            image: msb-publisher
+            dockerfile: Dockerfile.publisher
+            target: runner
+          - name: backup
+            image: msb-backup
+            dockerfile: Dockerfile.backup
+            target: ''
+    name: build (${{ matrix.name }})
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Moving `latest` tag + an immutable short-sha tag, matching release-app.sh.
+      - name: Compute image tags
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Per-image cache scope so the builds don't clobber each other.
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+      - name: Trivy (image)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}@${{ steps.push.outputs.digest }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          output: trivy-image.txt
+          exit-code: '0'
+      - name: Report
+        if: always()
+        run: |
+          { echo "## Image scan: ${{ matrix.image }} (Trivy, HIGH/CRITICAL, fixable)"; echo '```'; cat trivy-image.txt 2>/dev/null || echo 'no report'; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
