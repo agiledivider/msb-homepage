@@ -129,10 +129,12 @@ The publish service accepts every request when its shared token is not configure
 
 **AC:** starting the publisher without a token fails with a clear message; a request with a wrong or missing token gets 401; the publisher container's process is not root.
 
-### ⏳ S2.3 — Admin and public site send security headers (M)
+### ✅ S2.3 — Admin and public site send security headers (M) — 2026-11-24
 Neither the CMS nor the static site sends security headers, so other sites can frame the admin (clickjacking) and browsers get no HSTS, `nosniff` or CSP. Both deployments should send a sensible baseline of security headers that doesn't break the admin, live preview or the hero.
 
 **AC:** a header scan of `/admin` and of the static site shows frame protection, HSTS, `nosniff` and a CSP; admin, live preview and the start page still work.
+
+**Implementation notes:** one list in `src/lib/securityHeaders.mjs` (CSP, X-Frame-Options SAMEORIGIN, nosniff, Referrer-Policy, Permissions-Policy, HSTS max-age 1y without includeSubDomains; no HSTS and a relaxed CSP in dev). The app sends it via `next.config.mjs` `headers()`; `publish-static.ts` writes it into nginx.conf (repeated in locations with their own add_header, nginx doesn't merge) and .htaccess (`Header always set`). CSP keeps `'unsafe-inline'` (Next/Payload inline scripts have no nonces); connect-src allows the SpaceAPI. Checked 2026-11-24: nginx:alpine serves all headers on pages, `/_next/static` and 404; a local production build showed no CSP violations on start page, workshop page, blog post, admin, live preview and hero preview. Open: header scan on the live deployments after deploy; Apache only covered by a test.
 
 ### ⏳ S2.4 — Small hardening follow-ups (S)
 Several small gaps:
