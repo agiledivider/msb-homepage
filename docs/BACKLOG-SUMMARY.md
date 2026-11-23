@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**30 open · 16 done** · ✅ 16 · ⏳ 28 · 🚨 2
+**29 open · 17 done** · ✅ 17 · ⏳ 27 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -43,14 +43,13 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L296)
 - ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L310)
 
-## E6 — Playbook retrofit (1/7 done)
+## E6 — Playbook retrofit (2/7 done)
 
-- ⏳ [S6.2 — Every push runs the gate in CI (M)](BACKLOG.md#L330)
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L337)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L342)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L347)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L352)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L357)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L341)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L346)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L351)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L356)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L361)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -58,6 +57,6 @@ All done.
 
 ## E9 — Admin area polish (0/3 done)
 
-- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L383)
-- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L389)
-- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L395)
+- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L387)
+- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L393)
+- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L399)

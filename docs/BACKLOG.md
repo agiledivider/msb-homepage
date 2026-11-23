@@ -327,12 +327,16 @@ The project meets the playbook's TypeScript starter checklist, so regressions ar
 
 **Implementation notes:** 0 errors, 0 warnings. Real fixes: `navFrom`/`footerLinksFrom` without `!`, `RenderBlocks` registry typed per blockType (no `any`), Tailwind at-rules parsed so CSS is linted. Deliberate exceptions carry a reason comment: `noArrayIndexKey` on fixed/never-reordered lists, `noImgElement` on the header/footer logo; `biome.jsonc` (renamed for comments) ignores the prototype's `image-slot.js` and disables CSS formatting (keeps the aligned palette comments). "Stays green" is enforced only once S6.2/S6.4 land.
 
-### ⏳ S6.2 — Every push runs the gate in CI (M)
+### ✅ S6.2 — Every push runs the gate in CI (M) — 2026-11-23
 CI only builds and pushes images; lint, typecheck, tests and a vulnerability scan never run, and actions are pinned by tag. A CI job should run lint, typecheck, tests and a container/dependency scan (Trivy) on every push to `main`; images are only pushed when it is green, actions are pinned by SHA, and dependency updates arrive as PRs (Renovate) plus a scheduled audit.
 
 **AC:** a red test blocks the image push; the Actions tab shows the scan result.
 
 **Note (2026-11-20):** `pnpm audit --prod` still reports 2 high advisories in `happy-dom`. Only the HTML-to-Lexical converter uses it, and the app never calls that converter. The fix needs happy-dom 21, which Lexical doesn't allow yet. The scheduled audit should show them clearing.
+
+**Note (2026-11-23):** Payload 3.94.1 brings `@modelcontextprotocol/sdk` 1.32.0 and clears its 4 high advisories. Still open: `zod` < 4.6.6 (GHSA-mrhx-c7xc-m3w5, memory exhaustion on huge arrays against unbounded array schemas). Only fixed in zod 4, and `@payloadcms/plugin-mcp` still needs zod 3. Low exposure: our array schemas parse only shipped files and the backup sidecar's replies, and MCP tool input sits behind the API key. Renovate / the weekly audit show when the plugin moves to zod 4.
+
+**Implementation notes:** `.github/workflows/ci.yml` (was `build-images.yml`): `gate` (generate types, lint, typecheck, test) on every push and PR; image builds only on `main` and `needs: gate`; Trivy scans the lockfile and each pushed image, report-only, in the job summary. `audit.yml`: weekly `pnpm audit --prod --audit-level high`, red while advisories remain. Actions pinned by SHA; `renovate.json` groups updates weekly (needs the Renovate app). Verified 2026-11-23: a deliberately red test on a PR failed the gate and skipped the builds; `main` went green and pushed all three images.
 
 ### ⏳ S6.3 — Stricter TypeScript catches missing data (M)
 `tsconfig.json` lacks `noUncheckedIndexedAccess`, `noImplicitOverride` and `verbatimModuleSyntax` (explicitly `false`). The playbook strict flags should be on, with existing errors fixed.
