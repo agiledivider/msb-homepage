@@ -408,6 +408,14 @@ On quiet days the nightly backup stores the same content as the night before. Id
 
 **AC:** a backup whose content is the same as the previous one is marked as unchanged in the backups view; an admin can tell at a glance which backups contain changes; restoring and downloading work for every backup as before; no backup is deleted because of this.
 
+### ✅ S9.4 — Editors and reviewers see what state a version is in and what each button does (S) — 2026-11-24
+**Source:** Falk 2026-11-24.
+The review box showed a stale status (still "Freigegeben" over a new draft), offered a diff even with nothing to compare, and the main button said "Publish changes" although for editors it only submitted for review. A second submit/approve in the box ignored unsaved edits, rejecting needed no reason, and reviewers never saw their queue on the start page.
+
+**AC:** the box shows Entwurf / In Prüfung / Abgelehnt with the reason / Veröffentlicht, and whether the live version stays online; the main button reads "Zur Prüfung einreichen" for editors and "(Freigeben &) Veröffentlichen" for reviewers; a compare button against the last publication appears only when there is one; rejecting needs a reason; reviewers see "Zur Freigabe" on the start page.
+
+**Implementation notes:** `src/plugins/editorial/` (ReviewPanel, PublishButton, publishGate resets approval on a draft save and clears the reason on publish, transition requires the reason, ReviewDashboard loads the user with permissions). Compare link: Payload's version view with `?versionFrom=<last published>`. Dev only: one-click logins as editor@test.de / reviewer@test.de (`pnpm dev:users`, DEV_USER_PASSWORD). `c2d4172`.
+
 ---
 
 ## E10 — Werkstätten
