@@ -41,6 +41,11 @@ jobs:
           node-version: 22 # same major as the Dockerfile base image
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # src/payload-types.ts is generated, not committed (same step as the Dockerfile).
+      - run: pnpm generate:types
+        env:
+          PAYLOAD_SECRET: ci-placeholder
+          DATABASE_URI: file:/tmp/ci.db
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
