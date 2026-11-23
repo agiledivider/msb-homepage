@@ -26,6 +26,7 @@ import sharp from 'sharp'
 import { ALL_WIDTHS } from '../src/lib/imageWidths.mjs'
 import legacyPaths from '../src/lib/legacy-paths.json'
 import { legacyMenuPaths, legacyViews } from '../src/lib/legacyMenu'
+import { securityHeaders } from '../src/lib/securityHeaders.mjs'
 
 const ROOT = process.cwd()
 const DIST = path.join(ROOT, 'dist')
@@ -439,6 +440,16 @@ type Redirect = { legacyId: number; target: string }
 
 const menuEntries = Object.entries(legacyMenuPaths)
 
+/**
+ * The app's security headers (S2.3) as nginx directives. nginx drops every
+ * server-level add_header in a location that sets its own, so locations with
+ * a Cache-Control header repeat this block.
+ */
+const nginxSecurityHeaders = (indent: string) =>
+  securityHeaders()
+    .map((h) => `${indent}add_header ${h.key} "${h.value}" always;`)
+    .join('\n')
+
 export function nginxConf(redirects: Redirect[]): string {
   // Keyed on both query args at once: a single map plus a single `if` is the
   // one `if`-in-location form nginx actually guarantees (`if` + `return`).
@@ -498,6 +509,10 @@ server {
     # the container is published on a non-80 port.
     absolute_redirect off;
 
+    # Security headers (src/lib/securityHeaders.mjs). Repeated in every location
+    # with its own add_header: nginx does not merge them.
+${nginxSecurityHeaders('    ')}
+
     location / {
         if ($legacy_target) {
             return 301 $legacy_target;
@@ -512,6 +527,7 @@ server {
     location /_next/static/ {
         expires 1y;
         add_header Cache-Control "public, immutable";
+${nginxSecurityHeaders('        ')}
         try_files $uri =404;
     }
 
@@ -520,6 +536,7 @@ server {
     location ~ ^/(media|api/media/file|diday)/ {
         expires 30d;
         add_header Cache-Control "public";
+${nginxSecurityHeaders('        ')}
         try_files $uri =404;
     }
 
@@ -610,6 +627,13 @@ AddType text/calendar .ics
   ExpiresByType image/webp "access plus 30 days"
   ExpiresByType image/jpeg "access plus 30 days"
   ExpiresByType image/png  "access plus 30 days"
+</IfModule>
+
+# Security headers (src/lib/securityHeaders.mjs), on every response incl. errors.
+<IfModule mod_headers.c>
+${securityHeaders()
+  .map((h) => `  Header always set ${h.key} "${h.value}"`)
+  .join('\n')}
 </IfModule>
 
 # Content-hashed build output — safe to cache forever.

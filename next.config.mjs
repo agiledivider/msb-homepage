@@ -1,5 +1,6 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 import { DEVICE_SIZES, IMAGE_SIZES } from './src/lib/imageWidths.mjs'
+import { securityHeaders } from './src/lib/securityHeaders.mjs'
 
 /** Publishing the site as static files (see scripts/publish-static.ts). */
 const STATIC_EXPORT = process.env.STATIC_EXPORT === 'true'
@@ -17,6 +18,15 @@ const nextConfig = {
   // The default bottom-left "N" badge sits exactly on Payload's logout icon at
   // the foot of the admin sidebar, which made logout look missing in dev.
   devIndicators: { position: 'bottom-right' },
+  // Security headers on every app response (S2.3). A static export has no
+  // server: there nginx.conf / .htaccess send the same list (publish-static.ts).
+  ...(STATIC_EXPORT
+    ? {}
+    : {
+        headers: async () => [
+          { source: '/:path*', headers: securityHeaders({ dev: process.env.NODE_ENV !== 'production' }) },
+        ],
+      }),
   images: {
     // Pinned in both modes: these widths drive every `srcset` next/image emits,
     // and the static publish step pre-generates exactly one WebP per width.
