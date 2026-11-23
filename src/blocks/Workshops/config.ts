@@ -1,5 +1,6 @@
 import type { Block } from 'payload'
 import { linkField } from '../fields'
+import { TOOL_ICON_LABELS, TOOL_ICONS } from './icons'
 
 /**
  * Workshops — the pegboard wall of workshop cards.
@@ -59,7 +60,45 @@ export const Workshops: Block = {
             { name: 'title', type: 'text', required: true, admin: { width: '60%' } },
           ],
         },
-        { name: 'desc', type: 'textarea' },
+        {
+          name: 'verbs',
+          type: 'text',
+          label: 'Was man hier tut',
+          admin: { description: 'Kurz, mit Verben: „Löten, messen, reparieren“. Steht unter dem Titel.' },
+        },
+        { name: 'desc', type: 'textarea', label: 'Maschinen / Beschreibung' },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'icon',
+              type: 'select',
+              label: 'Werkzeug-Zeichnung',
+              options: TOOL_ICONS.map((value) => ({ value, label: TOOL_ICON_LABELS[value] })),
+              admin: { width: '50%' },
+            },
+            {
+              name: 'url',
+              type: 'text',
+              label: 'Ziel der Karte',
+              admin: { width: '50%', description: 'z. B. /werkzeug#holzwerkstatt. Leer = Karte ist kein Link.' },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Hinweis unter den Karten (optional)',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'hint',
+          type: 'text',
+          label: 'Hinweis',
+          admin: { description: 'z. B. „Maschinen nutzt du nach einer Einweisung selbstständig.“' },
+        },
+        linkField('hintCta', 'Button neben dem Hinweis'),
       ],
     },
     { name: 'footnote', type: 'text', label: 'Footnote (detailed variant)' },

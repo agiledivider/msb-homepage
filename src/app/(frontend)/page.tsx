@@ -2,7 +2,7 @@ import { draftMode } from 'next/headers'
 import { CtaBandComponent } from '@/blocks/CtaBand/Component'
 import { EventFeedSidebar } from '@/blocks/EventFeed/Sidebar'
 import { type Face, HeroComponent } from '@/blocks/Hero/Component'
-import { WorkshopsComponent } from '@/blocks/Workshops/Component'
+import { WorkshopsComponent, workshopAnchor } from '@/blocks/Workshops/Component'
 import { toEventDTO } from '@/components/events/model'
 import { UpcomingList } from '@/components/events/UpcomingList'
 import { SectionHeading } from '@/components/ui'
@@ -10,6 +10,41 @@ import { startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
 import { findPublic } from '@/lib/publicData'
+
+/** Start-page workshop wall: what you do there first, three machines as detail. */
+const HOME_WORKSHOPS = [
+  {
+    title: 'Elektronik & Löten',
+    icon: 'loetkolben',
+    verbs: 'Löten, messen, reparieren',
+    desc: 'Lötstationen · Oszilloskope · Reflowofen',
+  },
+  {
+    title: 'Metallwerkstatt',
+    icon: 'schluessel',
+    verbs: 'Schweißen, drehen, biegen',
+    desc: 'Schweißgerät · Drehmaschine · Bandsäge',
+  },
+  { title: 'Holzwerkstatt', icon: 'saege', verbs: 'Zuschneiden, Möbel bauen', desc: 'Formatkreissäge · Absauganlage' },
+  {
+    title: 'Textil & Handarbeit',
+    icon: 'schere',
+    verbs: 'Nähen, sticken, plotten',
+    desc: 'Nähmaschinen · Stickmaschine · Folienplotter',
+  },
+  {
+    title: '3D-Druck & CNC',
+    icon: 'spule',
+    verbs: 'Drucken und fräsen nach eigener Datei',
+    desc: '3D-Drucker · Yeti Smartbench CNC-Fräse',
+  },
+  {
+    title: 'CAD & Digital',
+    icon: 'geodreieck',
+    verbs: 'Konstruieren, bevor es an die Maschine geht',
+    desc: 'FreeCAD · Fusion 360 · EstlCAM',
+  },
+] as const
 
 export const dynamic = 'force-dynamic' // always reflect the latest content
 
@@ -108,14 +143,9 @@ export default async function StartPage() {
         heading="Werkzeug & Räume"
         allLink={{ label: 'alle 6 Werkstätten →', url: '/werkzeug' }}
         note="über 40 Maschinen ↴"
-        items={[
-          { code: 'A1', title: 'Elektronik & Löten', desc: 'Lötstationen · Oszilloskope · Reflowofen' },
-          { code: 'A2', title: 'Metallwerkstatt', desc: 'Schweißgerät · Drehmaschine · Bandsäge' },
-          { code: 'A3', title: 'Holzwerkstatt', desc: 'Formatkreissäge · Absauganlage' },
-          { code: 'A4', title: 'Textil & Handarbeit', desc: 'Nähmaschinen · Stickmaschine · Folienplotter' },
-          { code: 'A5', title: '3D-Druck & CNC', desc: '3D-Drucker · Yeti Smartbench CNC-Fräse' },
-          { code: 'A6', title: 'CAD & Digital', desc: 'FreeCAD · Fusion 360 · EstlCAM' },
-        ]}
+        items={HOME_WORKSHOPS.map((w) => ({ ...w, url: `/werkzeug#${workshopAnchor(w.title)}` }))}
+        hint="Maschinen nutzt du nach einer Einweisung selbstständig."
+        hintCta={{ label: 'Offene Tür besuchen →', url: '/events' }}
       />
 
       <CtaBandComponent
