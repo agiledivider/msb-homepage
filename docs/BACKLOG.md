@@ -86,10 +86,12 @@ Impressum and Datenschutzerklärung were written as a baseline by the developers
 
 **AC:** the reviewer confirms in writing that Impressum and Datenschutzerklärung are correct for the launch setup; any corrections are live.
 
-### ⏳ S1.3 — The most-visited old links still work (M)
-About 328 old Joomla articles were never imported (see S7.1), so links from other sites and search engines lead to a 404 at launch. At least the old addresses that still get real visits should lead to the matching new page, or to a fitting overview.
+### ✅ S1.3 — The most-visited old links still work (M) — 2026-11-23
+Links from other sites and search engines point at the old Joomla addresses. Without redirects they lead to a 404 at launch. At least the old addresses that still get real visits should lead to the matching new page, or to a fitting overview.
 
 **AC:** a list of the most-visited old addresses exists, and each of them opens a useful page on the new site instead of a 404.
+
+**Implementation notes:** no access logs or Search Console data, so "most visited" = the old site's menu, list, feed and archive links (read from the live site 2026-11-23) plus every article id (S7.1, `src/lib/legacy-paths.json`). The table lives in `src/lib/legacyMenu.ts`. The proxy (`resolveLegacyPath`) and the nginx/Apache emitters in `scripts/publish-static.ts` use it in the same order: article id → list view (`?view=archive` → `/events/archiv`, `?format=feed` → `/blog`) → menu path (`/index.php/der-verein` → `/verein`, `uns-unterstuetzen` → `/mitmachen`, …; bare `/index.php` → `/`). Unknown `/index.php/…` paths get the 404 page with suggestions (b84ad65, no catch-all). nginx needs `map_hash_bucket_size 128` for the long keys. Tests: `tests/unit/legacy-menu.test.ts`; checked by hand on nginx:alpine and httpd:2.4 in Docker.
 
 ### ⏳ S1.4 — The site goes live on its real domain and is watched (M)
 Launch still needs things outside the code: the real domain and certificates, a production Kanidm login, a strong emergency admin login, a first database setup on the production server, and someone noticing when the site is down. The site should run on its real domain over HTTPS; editors log in through the production Kanidm; a local emergency admin with a strong password exists and is stored safely, usable only after password login is switched on (D-009); the production database was created by the migrations; an uptime check alerts someone when the site or the CMS stops responding.

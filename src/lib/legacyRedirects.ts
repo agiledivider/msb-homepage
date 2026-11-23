@@ -1,5 +1,6 @@
 import { legacyArticles } from '@/seed/legacy-articles'
 import archivePaths from './legacy-paths.json'
+import { legacyMenuPaths, legacyViews } from './legacyMenu'
 
 /**
  * Old Joomla article id → new canonical path. Used by the proxy to 301-redirect
@@ -18,9 +19,23 @@ export const legacyRedirects: Record<number, string> = {
 
 /**
  * Resolve a legacy Joomla request to its new path, or null if it isn't one.
- * Handles `?view=article&id=374:slug&catid=10` and `?view=article&id=374`.
+ * Order: article id (`?view=article&id=374:slug&catid=10`), list view, menu path.
+ * The static adapters in scripts/publish-static.ts emit the same order.
  */
 export function resolveLegacyPath(url: URL): string | null {
+  const article = resolveArticle(url)
+  if (article) return article
+  const isFront = url.pathname === '/' || url.pathname === '/index.php'
+  if (isFront) {
+    const view = legacyViews.find((v) => url.searchParams.get(v.param) === v.value)
+    if (view) return view.target
+  }
+  const menu = /^\/index\.php(?:\/(.*?))?\/?$/.exec(url.pathname)
+  if (!menu) return null
+  return legacyMenuPaths[menu[1] ?? ''] ?? null
+}
+
+function resolveArticle(url: URL): string | null {
   if (url.searchParams.get('view') !== 'article') return null
   const idParam = url.searchParams.get('id')
   if (!idParam) return null

@@ -37,3 +37,6 @@ src/payload-types.ts
 backup-ssh/
 # local restic repository of `pnpm backup:dev`
 .backup-dev/
+
+# StoryHandoff note for the next session
+.handoff.md
