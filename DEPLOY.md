@@ -28,7 +28,6 @@ bad release can be rolled back to a known image). Defaults:
 | `APP_IMAGE`| `ghcr.io/agiledivider/msb-homepage`  | target repository             |
 | `TAG`      | `latest`                             | moving tag                    |
 | `PLATFORM` | `linux/amd64`                        | server arch (cross-built)     |
-| `TARGET`   | `runner`                             | `demo` bakes in `demo-seed/`  |
 
 ```bash
 APP_IMAGE=ghcr.io/you/msb-homepage TAG=v1.2.0 pnpm release:app

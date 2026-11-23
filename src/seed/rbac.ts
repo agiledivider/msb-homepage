@@ -4,9 +4,8 @@ import { getPayload } from 'payload'
 
 /**
  * Seeds RBAC dev data: content CRUD permissions + the editorial:review /
- * editorial:admin capabilities, the Administrator / Reviewer / Redakteur roles,
- * and three test users (password "test") — falk=Administrator,
- * reviewer@test.de=Reviewer, editor@test.de=Redakteur. Idempotent.
+ * editorial:admin capabilities and the Administrator / Reviewer / Redakteur
+ * roles. No users: people get roles via Kanidm or the admin UI. Idempotent.
  *
  *   pnpm payload run src/seed/rbac.ts
  */
@@ -37,18 +36,6 @@ const roleId = async (payload: Payload, name: string, permissions: unknown[]) =>
   return (await create(payload, 'roles', { name, permissions })).id
 }
 
-/** Assign roles to an existing user, or create the test user if missing. */
-const ensureUser = async (payload: Payload, email: string, password: string, name: string, roles: unknown[]) => {
-  const u = await payload.find({ collection: 'users', where: { email: { equals: email } }, limit: 1 })
-  if (u.totalDocs > 0) {
-    await payload.update({ collection: 'users', id: u.docs[0].id, data: { roles } as never })
-    payload.logger.info(`assigned ${email} → ${roles.length} role(s)`)
-  } else {
-    await payload.create({ collection: 'users', data: { email, password, name, roles } as never })
-    payload.logger.info(`created ${email} → ${roles.length} role(s)`)
-  }
-}
-
 const run = async () => {
   const payload = await getPayload({ config })
 
@@ -57,8 +44,8 @@ const run = async () => {
   for (const name of ['editorial:review', 'editorial:admin']) perms[name] = await permId(payload, name)
   payload.logger.info(`permissions: ${Object.keys(perms).length}`)
 
-  const adminRole = await roleId(payload, 'Administrator', Object.values(perms))
-  const reviewerRole = await roleId(
+  await roleId(payload, 'Administrator', Object.values(perms))
+  await roleId(
     payload,
     'Reviewer',
     ['blog', 'events', 'pages']
@@ -66,15 +53,11 @@ const run = async () => {
       .concat('editorial:review')
       .map((k) => perms[k]),
   )
-  const redakteurRole = await roleId(
+  await roleId(
     payload,
     'Redakteur',
     ['blog:create', 'blog:read', 'blog:update', 'events:create', 'events:read', 'events:update'].map((k) => perms[k]),
   )
-
-  await ensureUser(payload, 'falk@kuehnel.eu', 'test', 'Falk Kühnel', [adminRole])
-  await ensureUser(payload, 'reviewer@test.de', 'test', 'Test Reviewer', [reviewerRole])
-  await ensureUser(payload, 'editor@test.de', 'test', 'Test Editor', [redakteurRole])
 
   payload.logger.info('✓ rbac seeded')
 }

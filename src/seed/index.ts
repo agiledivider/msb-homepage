@@ -5,7 +5,7 @@ import { upsertLegacyArticles } from './legacy'
 import { upsertLegalPages } from './legal'
 
 /**
- * Dev seed. Creates local dev users, wipes the content collections for a clean
+ * Dev seed. Creates the local dev admin (from .env), wipes the content collections for a clean
  * slate, then seeds the hand-authored core content, the legal pages and the
  * migrated "Aktuelles" articles (the real blog posts + events; there is no
  * made-up demo content). Production seeds the same on first boot, see prod.ts.
@@ -14,31 +14,16 @@ const seed = async () => {
   const payload = await getPayload({ config })
   payload.logger.info('— Seeding MakerSpace Bonn (dev) —')
 
-  // 1 · dev users (create only if missing)
+  // 1 · dev admin (only into an empty users table). No built-in credentials:
+  // email and password come from .env, so no known password ships anywhere (B2).
   const users = await payload.find({ collection: 'users', limit: 1 })
   if (users.totalDocs === 0) {
-    await payload.create({
-      collection: 'users',
-      data: {
-        name: 'Admin',
-        email: process.env.PAYLOAD_SEED_EMAIL || 'admin@makerspacebonn.de',
-        password: process.env.PAYLOAD_SEED_PASSWORD || 'changeme123',
-      },
-    })
-    payload.logger.info(`admin user: ${process.env.PAYLOAD_SEED_EMAIL || 'admin@makerspacebonn.de'}`)
-  }
-
-  const falk = await payload.find({
-    collection: 'users',
-    where: { email: { equals: 'falk@kuehnel.eu' } },
-    limit: 1,
-  })
-  if (falk.totalDocs === 0) {
-    await payload.create({
-      collection: 'users',
-      data: { name: 'Falk Kühnel', email: 'falk@kuehnel.eu', password: 'test' },
-    })
-    payload.logger.info('admin user: falk@kuehnel.eu')
+    const email = process.env.PAYLOAD_SEED_EMAIL || 'admin@makerspacebonn.de'
+    const password = process.env.PAYLOAD_SEED_PASSWORD
+    if (!password)
+      throw new Error('No users yet and PAYLOAD_SEED_PASSWORD is not set in .env: refusing to create an admin.')
+    await payload.create({ collection: 'users', data: { name: 'Admin', email, password } })
+    payload.logger.info(`admin user: ${email}`)
   }
 
   // wipe content collections so re-running is a clean slate (keeps users)

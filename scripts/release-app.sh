@@ -15,7 +15,6 @@
 #   APP_IMAGE   target repository   (default ghcr.io/agiledivider/msb-homepage)
 #   TAG         moving tag          (default latest)
 #   PLATFORM    target architecture (default linux/amd64)
-#   TARGET      Dockerfile stage    (default runner; `demo` bakes in demo-seed/)
 #
 # Registry auth: reads GHCR_USER + GHCR_TOKEN from the environment or .env and
 # runs `docker login` for you (the token is never printed). Falls back to an
@@ -28,26 +27,17 @@ cd "$(dirname "$0")/.."
 IMAGE="${APP_IMAGE:-ghcr.io/agiledivider/msb-homepage}"
 TAG="${TAG:-latest}"
 PLATFORM="${PLATFORM:-linux/amd64}"
-TARGET="${TARGET:-runner}"
 
 die() { printf '\033[31merror:\033[0m %s\n' "$1" >&2; exit 1; }
 step() { printf '\n\033[36m[release]\033[0m %s\n' "$1"; }
-
-case "$TARGET" in
-  runner|demo) ;;
-  *) die "TARGET must be 'runner' or 'demo' (got '$TARGET')." ;;
-esac
 
 # --- tags --------------------------------------------------------------------
 # An immutable sha tag alongside the moving one, so a bad release can be rolled
 # back to a known image. Uncommitted changes make the sha a lie — say so.
 SHA="$(git rev-parse --short HEAD 2>/dev/null || echo nogit)"
 git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null || SHA="${SHA}-dirty"
-# Keep the two targets from clobbering each other's tags in the same repo.
-[ "$TARGET" = "demo" ] && { TAG="${TAG}-demo"; SHA="${SHA}-demo"; }
 
 step "Publishing $IMAGE:$TAG ($SHA) for $PLATFORM"
-echo "  target: $TARGET"
 
 # --- migrations on a copy of real data, before anything is pushed -----------
 # The container runs `payload migrate` + the prod seed on start; a migration
@@ -59,13 +49,6 @@ if [ "${SKIP_MIGRATE_CHECK:-}" = "1" ]; then
 else
   step "Checking migrations on a copy of real data"
   scripts/migrate-check.sh || die "migration check failed. Fix it, or with a reason: SKIP_MIGRATE_CHECK=1 pnpm release:app"
-fi
-
-# --- demo: snapshot current content into demo-seed/ so it can be baked in -----
-# The `demo` stage COPYs demo-seed/demo.sqlite + demo-seed/media/ into the image.
-if [ "$TARGET" = "demo" ]; then
-  step "Preparing demo-seed/ from the current content DB + media"
-  scripts/prepare-demo-seed.sh
 fi
 
 # --- registry auth -----------------------------------------------------------
@@ -96,7 +79,7 @@ fi
 step "Building + pushing the image"
 docker buildx build \
   --platform "$PLATFORM" \
-  --target "$TARGET" \
+  --target runner \
   --tag "$IMAGE:$TAG" \
   --tag "$IMAGE:$SHA" \
   --push \

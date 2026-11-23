@@ -30,7 +30,7 @@ All content (the CMS database and uploaded media) lives only on the server's Doc
 **AC:** a backup runs without anyone triggering it; a restore onto an empty stack from the latest backup shows the same pages, posts, events and images; someone is notified when a backup fails.
 
 ### 🚨 B2 — Public demo image ships real admin accounts with known passwords (S)
-**Status:** 🟡 exposure removed 2026-07-22: `msb-demo.idiot.games` now serves the **static** site (no Node, no DB, no `/admin`), so there is nothing there to log into. Closes once the host is redeployed from the new `ghcr.io/agiledivider/msb-demo` image.
+**Status:** 🟡 exposure removed 2026-07-22: `msb-demo.idiot.games` now serves the **static** site (no Node, no DB, no `/admin`), so there is nothing there to log into. Code side resolved 2026-11-23 (see **Resolved**). Open, outside the code: rotate `test` / `changeme123` wherever reused, delete the old CMS image versions on GHCR (pullable by digest), delete local `demo-seed/` copies.
 **Severity:** was Critical (full CMS takeover on the public demo) · **Source:** code review #2 (2026-07-11), confirmed live against the baked DB
 
 **Problem:** the public demo used to ship **four privileged accounts baked into the image with trivial dev passwords**, so anyone could open `/admin` and log in as an editorial admin.
@@ -67,7 +67,7 @@ At minimum: **never bake `falk@kuehnel.eu` / `test` with admin rights into a pub
 **Related follow-ups** (not blockers):
 - `/api/media` is public by design: uploaded assets, including covers on unpublished drafts, are fetchable by sequential id. Separate, low severity. (The static bundle only ships media the published pages reference, so it isn't affected.)
 
-**Resolved:** —
+**Resolved:** 2026-11-23 — no test logins in code any more: `pnpm seed` creates no `falk@kuehnel.eu`/`test` user and has no `changeme123` fallback (admin only into an empty users table, password required from `PAYLOAD_SEED_PASSWORD`); `src/seed/rbac.ts` seeds roles only; the `demo` Dockerfile stage, `scripts/prepare-demo-seed.sh` and `release:app`'s `TARGET=demo` are gone. Decision: no demo seed replaces it; production starts from an uploaded backup (S1.5).
 
 ---
 
@@ -99,7 +99,7 @@ Launch still needs things outside the code: the real domain and certificates, a 
 **AC:** the real domain serves the site with a valid certificate; an editor logs in through Kanidm in production; email/password login is refused, and the emergency admin can log in after switching it on (`PASSWORD_LOGIN=on`, D-009); stopping the site triggers an alert within minutes.
 
 ### ⏳ S1.5 — The live site starts with the content prepared before launch (M)
-**Source:** IDEAS.md 2026-11-22.
+**Source:** IDEAS.md 2026-11-22. **Status:** direction 2026-11-23 (Falk): probably start production by uploading a backup of the prepared instance, not from a seed.
 Pages, posts, events and images are being written and polished on an instance that isn't the production server. At go-live the production site must show that same content, not the demo seed or an older state, and none of the instance's test accounts or drafts nobody wants may come along.
 
 **AC:** right after go-live, the production site shows the same published pages, posts, events and images as the prepared instance, with the same addresses; drafts still waiting for review are there as drafts; no test or demo account exists in production; a second transfer just before launch picks up the last edits without duplicating anything.
