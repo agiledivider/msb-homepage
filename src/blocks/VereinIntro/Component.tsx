@@ -42,6 +42,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
                 const last = i === timeline.length - 1
                 return (
                   <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
                     key={i}
                     className={`ml-2 grid grid-cols-[64px_1fr] gap-3.5 pl-[18px] ${
                       last ? 'border-l-2 border-transparent' : 'border-l-2 border-line pb-4'
@@ -60,6 +61,7 @@ export function VereinIntroComponent({ body, quote, timelineTitle, timeline, val
       {values?.length ? (
         <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {values.map((v, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
             <div key={i} className="rounded-[12px] border border-line bg-card p-[22px]">
               <div className="mb-2 font-sans text-[19px] font-bold">{v.title}</div>
               {v.text ? <p className="m-0 text-[14px] leading-[1.55] text-muted">{v.text}</p> : null}

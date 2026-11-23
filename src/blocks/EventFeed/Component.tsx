@@ -44,6 +44,7 @@ export function EventFeedComponent({ tagLabel, heading, allLink, events, sidebar
         />
         {(events ?? []).map((e, i) => (
           <Link
+            // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
             key={i}
             href={e.link?.url || '#'}
             className="group grid grid-cols-[96px_1fr] gap-5 border-b border-line py-6 text-inherit no-underline"

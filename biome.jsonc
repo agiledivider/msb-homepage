@@ -5,9 +5,17 @@
     "clientKind": "git",
     "useIgnoreFile": true
   },
+  // support.js / image-slot.js: helpers of the original .dc.html prototype, not app code.
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/*.html", "!src/migrations", "!support.js", "!src/app/(payload)/admin/importMap.js"]
+    "includes": [
+      "**",
+      "!**/*.html",
+      "!src/migrations",
+      "!support.js",
+      "!image-slot.js",
+      "!src/app/(payload)/admin/importMap.js"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -20,6 +28,12 @@
     "rules": {
       "preset": "recommended"
     }
+  },
+  // CSS: parse Tailwind v4 at-rules (@theme etc.) so it gets linted; no CSS formatting,
+  // it would collapse the hand-aligned comment columns of the palette in globals.css.
+  "css": {
+    "parser": { "tailwindDirectives": true },
+    "formatter": { "enabled": false }
   },
   "javascript": {
     "formatter": {

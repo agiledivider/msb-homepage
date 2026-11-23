@@ -76,6 +76,7 @@ export function TilesView({ events }: { events: EventVM[] }) {
   return (
     <div className="flex items-start gap-5">
       {columns.map((col, ci) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: a column is identified by its position
         <div key={ci} className="flex min-w-0 flex-1 basis-0 flex-col gap-5">
           {col.map((e) => (
             <Tile key={e.id} e={e} />

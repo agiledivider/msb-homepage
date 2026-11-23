@@ -34,6 +34,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
           const green = o.tint === 'green'
           return (
             <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
               key={i}
               className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-ink [--focus-ring:var(--color-ink)]' : 'border border-line bg-card'}`}
             >

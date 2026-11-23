@@ -320,10 +320,12 @@ The project meets the playbook's TypeScript starter checklist, so regressions ar
 
 **Status:** proposed 2026-11-12. Not go-live blockers, but S6.1 and S6.2 should land before launch.
 
-### ⏳ S6.1 — Lint is green and stays green (S)
+### ✅ S6.1 — Lint is green and stays green (S) — 2026-11-23
 `pnpm lint` reports 20 errors and 7 warnings (mostly `noArrayIndexKey`, `noNonNullAssertion`, `noImgElement`), so the fast check can't tell new problems from old ones. Target: zero errors and warnings; anything deliberately allowed is an explicit, commented Biome override.
 
 **AC:** `pnpm lint` exits 0 on a clean checkout.
+
+**Implementation notes:** 0 errors, 0 warnings. Real fixes: `navFrom`/`footerLinksFrom` without `!`, `RenderBlocks` registry typed per blockType (no `any`), Tailwind at-rules parsed so CSS is linted. Deliberate exceptions carry a reason comment: `noArrayIndexKey` on fixed/never-reordered lists, `noImgElement` on the header/footer logo; `biome.jsonc` (renamed for comments) ignores the prototype's `image-slot.js` and disables CSS formatting (keeps the aligned palette comments). "Stays green" is enforced only once S6.2/S6.4 land.
 
 ### ⏳ S6.2 — Every push runs the gate in CI (M)
 CI only builds and pushes images; lint, typecheck, tests and a vulnerability scan never run, and actions are pinned by tag. A CI job should run lint, typecheck, tests and a container/dependency scan (Trivy) on every push to `main`; images are only pushed when it is green, actions are pinned by SHA, and dependency updates arrive as PRs (Renovate) plus a scheduled audit.

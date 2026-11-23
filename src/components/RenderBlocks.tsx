@@ -36,8 +36,8 @@ export type MsbBlock =
   | TimelineBlock
   | ValuesBlock
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const REGISTRY: Record<string, (props: any) => ReactNode> = {
+/** One renderer per blockType, each typed against its own block. */
+const REGISTRY: { [K in MsbBlock['blockType']]: (props: Extract<MsbBlock, { blockType: K }>) => ReactNode } = {
   hero: HeroComponent,
   pageIntro: PageIntroComponent,
   eventFeed: EventFeedComponent,
@@ -68,9 +68,12 @@ export function RenderBlocks({ blocks }: { blocks?: MsbBlock[] | null }) {
     <main className="mx-auto max-w-shell px-4 pb-[72px] md:px-8">
       <div className="animate-msbfade">
         {blocks.map((block, i) => {
-          const Component = REGISTRY[block.blockType]
+          // Indexing the mapped type by a union loses the K link; the entry for
+          // block.blockType does take this block.
+          const Component = REGISTRY[block.blockType] as ((props: MsbBlock) => ReactNode) | undefined
           if (!Component) return null
           return (
+            // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
             <Fragment key={i}>
               <Component {...block} />
             </Fragment>

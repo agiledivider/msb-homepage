@@ -132,6 +132,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
               className={`mt-3 mb-2.5 font-display text-[21px] font-black leading-[1.02] tracking-[-.02em] text-kreide max-md:[@media(min-height:720px)]:text-[24px] md:mt-0 md:mb-3.5 md:leading-[.98] ${headlineSize(face.headline, isEvent)}`}
             >
               {face.headline.split('\n').map((line, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: headline lines may repeat, position is identity
                 <Fragment key={i}>
                   {i > 0 ? <br /> : null}
                   {line}
@@ -152,6 +153,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
             {face.meta?.length ? (
               <div className="mb-2 hidden items-center gap-3.5 font-mono text-[14px] text-green-300 md:flex">
                 {face.meta.map((m, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: meta values may repeat, position is identity
                   <Fragment key={i}>
                     {i > 0 ? <span className="opacity-50">·</span> : null}
                     <span>{m.value}</span>
@@ -340,6 +342,7 @@ export function HeroComponent({
           style={carousel ? ({ '--tz': tz, transform: flipTf, transition: trans } as React.CSSProperties) : undefined}
         >
           {list.map((face, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: exactly 3 faces, the position is the prism side
             <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>
               {face.badge ? (
                 <div
@@ -371,6 +374,7 @@ export function HeroComponent({
             const on = i === cur
             return (
               <button
+                // biome-ignore lint/suspicious/noArrayIndexKey: one dot per prism side, the position is the side
                 key={i}
                 type="button"
                 onClick={() => goHero(i)}

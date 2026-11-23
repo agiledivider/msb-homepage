@@ -41,7 +41,7 @@ export function Header({
     <header className="sticky top-0 z-20 border-b border-line bg-card">
       <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:gap-4 md:px-8 md:py-3.5 lg:gap-6">
         <Link href="/" className="flex items-center no-underline">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {/* biome-ignore lint/performance/noImgElement: static logo PNG sized by CSS height; next/image needs fixed dimensions and adds nothing here */}
           <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto" />
         </Link>
 

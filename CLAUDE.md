@@ -23,7 +23,7 @@ pnpm hero:shots [url-path]           # screenshot the hero at every phone size (
 - Fast check (after every change): `pnpm lint` (Biome; `pnpm lint:fix` applies safe fixes)
 - Full gate (before "done" / commit): `pnpm lint && pnpm typecheck && pnpm test && pnpm build`
 - Evidence: vitest summary line (`Tests N passed`), `tsc` exit 0, `next build` route table.
-- Known baseline (2026-11-12): `pnpm lint` reports 20 pre-existing errors (mostly `noArrayIndexKey`, `noNonNullAssertion`), see `docs/BACKLOG.md`. Don't add new ones; typecheck, 29 tests and build are green.
+- Lint is clean (S6.1, 2026-11-23): keep it at 0 errors and warnings. A deliberate exception gets a `biome-ignore` with a reason (config: `biome.jsonc`).
 
 ## Rules
 - **Next.js APIs:** read `AGENTS.md` first. Next 16.4 is newer than the model's training data, and the docs matching the installed version are in `node_modules/next/dist/docs/`. `next dev` regenerates the file, so commit it rather than deleting it.

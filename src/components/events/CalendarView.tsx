@@ -74,6 +74,7 @@ export function CalendarView({
             {cells.map((day, i) => {
               const dayEvents = day ? (byDay.get(day) ?? []) : []
               return (
+                // biome-ignore lint/suspicious/noArrayIndexKey: a grid cell is identified by its position (blank cells have no day)
                 <div key={i} className={`min-h-[104px] bg-card p-1.5 ${day ? '' : 'bg-fond'}`}>
                   {day ? (
                     <div

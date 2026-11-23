@@ -47,6 +47,7 @@ export function WorkshopsComponent({
         <div className={`grid gap-4 ${detailed ? 'sm:grid-cols-2' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
           {(items ?? []).map((it, i) => (
             <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
               key={i}
               className="relative rounded-[10px] border border-line bg-card p-[18px] shadow-[0_10px_22px_-14px_rgba(60,52,30,.5)]"
             >

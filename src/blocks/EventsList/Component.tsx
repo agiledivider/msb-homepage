@@ -32,6 +32,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
       <div>
         {(events ?? []).map((e, i) => (
           <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
             key={i}
             className={`group relative grid grid-cols-[92px_1fr_auto] items-center gap-[18px] border-t border-line py-5 ${
               i === (events?.length ?? 0) - 1 ? 'border-b' : ''
@@ -74,6 +75,7 @@ export function EventsListComponent({ events, sidebar }: EventsListBlock) {
             <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-muted">{sidebar.bigTitle}</div>
             {sidebar.bigEvents.map((b, i, arr) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
                 key={i}
                 className={`${i > 0 ? 'mt-3' : ''} ${i < arr.length - 1 ? 'mb-3 border-b border-line pb-3' : ''}`}
               >

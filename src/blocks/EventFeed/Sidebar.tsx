@@ -27,6 +27,7 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
           <div className="px-[18px] pb-3.5 pt-1.5">
             {sidebar.hours.map((r, i) => (
               <div
+                // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
                 key={i}
                 className={`flex items-center justify-between border-b border-line py-[11px] ${
                   r.highlight ? '-mx-[18px] bg-green-pale px-[18px]' : ''

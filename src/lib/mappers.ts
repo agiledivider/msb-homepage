@@ -176,7 +176,7 @@ export function eventsToList(events: Event[]): EventsListBlock['events'] {
 // ---- site chrome -----------------------------------------------------------
 
 export function navFrom(site?: SiteSetting | null): NavItem[] | undefined {
-  const items = site?.nav?.filter((n) => n.label && n.url).map((n) => ({ label: n.label!, href: n.url! }))
+  const items = site?.nav?.flatMap((n) => (n.label && n.url ? [{ label: n.label, href: n.url }] : []))
   return items?.length ? items : undefined
 }
 
@@ -202,6 +202,6 @@ export function footerFrom(site?: SiteSetting | null): {
 }
 
 export function footerLinksFrom(site?: SiteSetting | null): NavItem[] | undefined {
-  const items = site?.footer?.links?.filter((l) => l.label && l.url).map((l) => ({ label: l.label!, href: l.url! }))
+  const items = site?.footer?.links?.flatMap((l) => (l.label && l.url ? [{ label: l.label, href: l.url }] : []))
   return items?.length ? items : undefined
 }

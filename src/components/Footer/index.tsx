@@ -41,7 +41,7 @@ export function Footer({
         <div className="flex flex-col gap-6">
           <div>
             <div className="mb-3.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* biome-ignore lint/performance/noImgElement: static logo PNG sized by CSS height; next/image needs fixed dimensions and adds nothing here */}
               <img src={logoSrc} alt="MakerSpace Bonn" className="block h-12 w-auto" />
             </div>
             <p className="m-0 max-w-[320px] text-[14px] leading-[1.65] text-kreide">{tagline}</p>
