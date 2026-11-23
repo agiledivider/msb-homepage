@@ -59,20 +59,6 @@ export function Footer({
             </p>
           </div>
 
-          {social.length ? <SocialLinks items={social} /> : null}
-        </div>
-
-        {/* Anfahrt: same label rhythm as SEITEN/MITMACHEN, the map, and the
-            address as its caption (so it isn't repeated in the brand column).
-            The map hides when the page body already shows one (/mitmachen):
-            CSS :has(), so it works in the static export without route props. */}
-        <div>
-          <div className="mb-3.5 font-mono text-[14px] tracking-[.08em] text-kreide">ANFAHRT</div>
-          <MapCard
-            links="icons"
-            sizes="(max-width:767px) 100vw, 400px"
-            className="mb-3.5 [body:has([data-location-map]:not(footer_*))_&]:hidden"
-          />
           <p className="m-0 font-mono text-[14px] leading-[1.7] text-kreide">
             Kennedyallee 18 · 53175 Bonn
             <br />
@@ -80,20 +66,20 @@ export function Footer({
             <br />
             Hochkreuz/Deutsches Museum
           </p>
+
+          {social.length ? <SocialLinks items={social} /> : null}
+        </div>
+
+        {/* Anfahrt: same label rhythm as MITMACHEN/SEITEN, just the map (the
+            address sits in the brand column). The whole column hides when the
+            page body already shows a map (/mitmachen): CSS :has(), so it works
+            in the static export without route props. */}
+        <div className="[body:has([data-location-map]:not(footer_*))_&]:hidden">
+          <div className="mb-3.5 font-mono text-[14px] tracking-[.08em] text-kreide">ANFAHRT</div>
+          <MapCard links="icons" sizes="(max-width:767px) 100vw, 400px" />
         </div>
 
         <div className="flex flex-col gap-8">
-          <div>
-            <div className="mb-3.5 font-mono text-[14px] tracking-[.08em] text-kreide">SEITEN</div>
-            <div className="flex flex-col gap-2.5 text-[14px]">
-              {links.map((l) => (
-                <Link key={l.href} href={l.href} className={`self-start ${TEXT_LINK_ON_DARK}`}>
-                  {l.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
           <div>
             <div className="mb-3.5 font-mono text-[14px] tracking-[.08em] text-kreide">MITMACHEN</div>
             <p className="m-0 mb-3.5 text-[14px] leading-[1.6] text-kreide">
@@ -105,6 +91,17 @@ export function Footer({
             >
               Jetzt unterstützen →
             </Link>
+          </div>
+
+          <div>
+            <div className="mb-3.5 font-mono text-[14px] tracking-[.08em] text-kreide">SEITEN</div>
+            <div className="flex flex-col gap-2.5 text-[14px]">
+              {links.map((l) => (
+                <Link key={l.href} href={l.href} className={`self-start ${TEXT_LINK_ON_DARK}`}>
+                  {l.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
