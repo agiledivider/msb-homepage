@@ -353,6 +353,12 @@ The blog page lists only the 20 newest posts. The other 57 can only be found thr
 
 **AC:** from the blog page a visitor can page back to the oldest post; each page has its own address; the newest posts stay on the first page as today; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*; usable at 375 px.
 
+### ⏳ S5.11 — The Verein sees how the site is used, without tracking visitors (M)
+**Source:** IDEAS.md 2026-11-24. Background: `docs/analytics-dsgvo-research.md` (2026-07).
+Nobody knows how many people visit the site, which pages and events they read, or where they come from, so the Vorstand and editors decide on content and promotion blind. Common tools send visitor data to third parties and need a cookie banner, which the Verein doesn't want.
+
+**AC:** the Vorstand and editors can see visits per day, the most-read pages, posts and events, and where visitors came from (search, social, other sites), for a chosen period; no cookie banner is needed and no visitor can be identified or followed across sites; the data stays with the Verein (no third-party analytics service); the Datenschutz page explains what is counted and why, confirmed by the Vorstand (like S1.2); the public site doesn't get slower or heavier in a way a visitor notices; counting also works on the statically published site *(optional: only if the static publisher is used; move to its own story if needed)*.
+
 ---
 
 ## E6 — Playbook retrofit
