@@ -2,6 +2,7 @@
 
 import { Button } from '@payloadcms/ui'
 import { type CSSProperties, useState } from 'react'
+import { fmtSize } from '../format'
 import { generatePassphrase } from '../passphrase'
 import { RestorePanel } from './RestorePanel'
 
@@ -9,12 +10,6 @@ type Row = { id: string; shortId: string; time: string; sizeBytes: number | null
 
 const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
 const fmtWhen = (iso: string) => `${BERLIN.format(new Date(iso))} Uhr`
-const NUM = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 })
-const fmtSize = (bytes: number | null) => {
-  if (bytes === null) return 'unbekannt'
-  const mb = bytes / 1024 / 1024
-  return mb >= 1024 ? `${NUM.format(mb / 1024)} GB` : `${NUM.format(mb)} MB`
-}
 
 const cell: CSSProperties = {
   padding: '8px 12px',

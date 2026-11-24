@@ -7,7 +7,8 @@
 // password never leaves this container. There is deliberately no way to
 // delete or prune backups through it (D-005).
 //
-//   GET  /backups  → { snapshots: [{ id, shortId, time, sizeBytes }], lastRun, running }   (S8.1)
+//   GET  /backups  → { snapshots: [{ id, shortId, time, sizeBytes }], lastRun, running, storage }   (S8.1)
+//        storage: { usedBytes, totalBytes, freeBytes } (null where unknown), or null   (S9.2)
 //   GET  /status   → { lastRun, running }      cheap: no restic call, for polling
 //   POST /backups  { by } → 202 { started: true }, or 409 { running } if one runs   (S8.5)
 //   POST /backups/<id>/download { passphrase, by } → the whole backup (database
@@ -36,13 +37,14 @@
 // constant time); without the token the API refuses to start.
 // Env: BACKUP_API_TOKEN (required), BACKUP_API_PORT (default 8081),
 //      BACKUP_STATUS_FILE (default /work/last-run.json, written by msb-backup),
-//      BACKUP_LOCK_DIR (default /work/backup.lock, held by msb-backup while a backup runs).
+//      BACKUP_LOCK_DIR (default /work/backup.lock, held by msb-backup while a backup runs),
+//      RESTIC_REPOSITORY (where the free space is read from, S9.2).
 // Plain JS without dependencies: the backup image has Node but no node_modules.
 
 import { execFile, spawn } from 'node:child_process'
 import { createCipheriv, createDecipheriv, createHash, pbkdf2, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createReadStream, createWriteStream } from 'node:fs'
-import { mkdir, open, readFile, rm, stat } from 'node:fs/promises'
+import { mkdir, open, readFile, rm, stat, statfs } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { PassThrough, pipeline } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
@@ -51,6 +53,7 @@ import { createGzip } from 'node:zlib'
 
 /** @typedef {{ id: string, shortId: string, time: string, sizeBytes: number | null, beforeRestore: boolean }} Snapshot */
 /** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null }} LastRun */
+/** @typedef {{ usedBytes: number | null, totalBytes: number | null, freeBytes: number | null }} Storage */
 /** @typedef {{ startedAt: string, by: string | null, kind: 'backup' | 'restore', snapshot: string | null }} Running */
 /** @typedef {{ status: 'ok' | 'failed', at: string, by: string | null, source: 'backup' | 'upload', snapshot: string, safety: string | null, code: RestoreCode, message: string }} LastRestore */
 /** @typedef {'restored' | 'unreadable' | 'no-database' | 'damaged' | 'other-version' | 'safety-failed' | 'media-failed' | 'database-failed' | 'unknown'} RestoreCode */
@@ -106,6 +109,49 @@ export function parseSnapshots(json) {
       }
     })
     .sort((a, b) => b.time.localeCompare(a.time))
+}
+
+const byteCount = (v) => (Number.isSafeInteger(v) && v >= 0 ? v : null)
+
+/**
+ * `restic stats --mode raw-data --json` → what the backups take up in the
+ * repository (deduplicated and compressed), or null if restic didn't say (S9.2).
+ * @returns {number | null}
+ */
+export function parseRepoUsed(json) {
+  return byteCount(json?.total_size)
+}
+
+/**
+ * Where the repository lives, as far as its free space can be read: a local
+ * path (statfs), `sftp:[user@]host:path` (the SFTP `df` command, which a
+ * Hetzner Storage Box answers with its quota), or anything else (S3, B2,
+ * rest:, URL forms), whose limit restic can't see.
+ * @returns {{ kind: 'local', path: string } | { kind: 'sftp', host: string, path: string } | { kind: 'other' }}
+ */
+export function repoLocation(repo) {
+  if (typeof repo !== 'string') return { kind: 'other' }
+  if (repo.startsWith('/')) return { kind: 'local', path: repo }
+  const sftp = /^sftp:([^/:][^:]*):(.*)$/.exec(repo)
+  if (sftp && !sftp[1].includes('/')) return { kind: 'sftp', host: sftp[1], path: sftp[2] || '.' }
+  return { kind: 'other' }
+}
+
+/**
+ * The SFTP client's `df <path>` output (1 KiB units: Size Used Avail (root)
+ * %Capacity) → total and free bytes. A server that reports a size of 0 has no
+ * limit to tell; that, like unreadable output, gives null.
+ * @returns {{ totalBytes: number, freeBytes: number } | null}
+ */
+export function parseSftpDf(text) {
+  for (const line of String(text).split('\n')) {
+    const m = /^\s*(\d+)\s+(\d+)\s+(\d+)\s+\d+\s+\d+%\s*$/.exec(line)
+    if (!m) continue
+    const [totalBytes, freeBytes] = [Number(m[1]) * 1024, Number(m[3]) * 1024]
+    if (!Number.isSafeInteger(totalBytes) || !Number.isSafeInteger(freeBytes) || totalBytes === 0) return null
+    return { totalBytes, freeBytes }
+  }
+  return null
 }
 
 /**
@@ -295,6 +341,7 @@ async function readJsonBody(req) {
  * @param {{
  *   token: string,
  *   listSnapshots: () => Promise<Snapshot[]>,
+ *   readStorage?: () => Promise<Storage>,
  *   readLastRun: () => Promise<LastRun | null>,
  *   readRunning: () => Promise<Running | null>,
  *   startBackup: (by: string | null) => 'started' | 'running',
@@ -315,6 +362,7 @@ async function readJsonBody(req) {
 export function makeHandler({
   token,
   listSnapshots,
+  readStorage = async () => null,
   readLastRun,
   readRunning,
   startBackup,
@@ -335,13 +383,18 @@ export function makeHandler({
 
     try {
       if (req.method === 'GET' && path === '/backups') {
+        // The storage figures are extra: when they can't be read, the list still shows.
+        const storage = readStorage().catch((err) => {
+          log(`storage figures failed: ${err instanceof Error ? err.message : String(err)}`)
+          return null
+        })
         const [snapshots, lastRun, running, lastRestore] = await Promise.all([
           listSnapshots(),
           readLastRun(),
           readRunning(),
           readLastRestore(),
         ])
-        return send(200, { snapshots, lastRun, running, lastRestore })
+        return send(200, { snapshots, lastRun, running, lastRestore, storage: await storage })
       }
       if (req.method === 'GET' && path === '/status') {
         const [lastRun, running, lastRestore] = await Promise.all([readLastRun(), readRunning(), readLastRestore()])
@@ -489,6 +542,36 @@ async function main() {
     )
     return parseSnapshots(JSON.parse(stdout))
   }
+  const readStorage = async () => {
+    const [stats, space] = await Promise.all([
+      execFileAsync('restic', ['stats', '--mode', 'raw-data', '--json', '--no-lock'], {
+        timeout: 60_000,
+        maxBuffer: 1024 * 1024,
+      }).then(({ stdout }) => parseRepoUsed(JSON.parse(stdout))),
+      readFreeSpace(repoLocation(process.env.RESTIC_REPOSITORY)),
+    ])
+    return { usedBytes: stats, totalBytes: space?.totalBytes ?? null, freeBytes: space?.freeBytes ?? null }
+  }
+  /** @returns {Promise<{ totalBytes: number, freeBytes: number } | null>} */
+  const readFreeSpace = async (where) => {
+    if (where.kind === 'local') {
+      const fs = await statfs(where.path)
+      return { totalBytes: fs.blocks * fs.bsize, freeBytes: fs.bavail * fs.bsize }
+    }
+    if (where.kind === 'sftp') {
+      // Same ssh setup as restic's sftp backend (~/.ssh config, key, known_hosts).
+      const { stdout } = await runWithInput('sftp', ['-q', '-b', '-', where.host], `df ${where.path}\n`, 30_000)
+      return parseSftpDf(stdout)
+    }
+    return null
+  }
+  const runWithInput = (cmd, args, input, timeout) =>
+    new Promise((resolve, reject) => {
+      const proc = execFile(cmd, args, { timeout, maxBuffer: 1024 * 1024 }, (err, stdout) =>
+        err ? reject(err) : resolve({ stdout }),
+      )
+      proc.stdin?.end(input)
+    })
   const readLastRun = async () => {
     const text = await readOptional(statusFile)
     return text === null ? null : parseLastRun(text)
@@ -620,6 +703,7 @@ async function main() {
     makeHandler({
       token,
       listSnapshots,
+      readStorage,
       readLastRun,
       readRunning,
       startBackup,

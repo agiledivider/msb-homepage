@@ -106,6 +106,20 @@ snaps=$(docker run --rm "${SFTP[@]}" "$IMG" snapshots | grep -c msb-homepage || 
 docker exec "$P-sftp" test -f /home/box/msb-homepage/config || fail "sftp repository not in the box user's home"
 pass "backup to an sftp: repository (port 23, key from the read-only .ssh mount)"
 
+# 7b. The backups view's storage figures (S9.2) over the same sftp setup: used
+#     space from restic, size and free space from the server's `df`.
+storage=$(docker run --rm "${SFTP[@]}" --entrypoint sh "$IMG" -c '
+  export BACKUP_API_TOKEN=api-test-only
+  node /usr/local/lib/msb/backup-api.mjs >/dev/null 2>&1 &
+  for i in $(seq 50); do curl -sf -H "X-Backup-Token: api-test-only" localhost:8081/status >/dev/null && break; sleep 0.2; done
+  curl -s -H "X-Backup-Token: api-test-only" localhost:8081/backups' | node -e '
+  let d = ""; process.stdin.on("data", (c) => (d += c)).on("end", () => {
+    const s = JSON.parse(d).storage
+    console.log(s && s.usedBytes > 0 && s.totalBytes > 0 && s.freeBytes > 0 ? "ok" : JSON.stringify(s))
+  })')
+[[ $storage == ok ]] || fail "storage figures over sftp: $storage"
+pass "storage figures over sftp (used from restic, size and free from df)"
+
 # 8. The scheduler starts the internal API for the CMS backups view (E8):
 #    it refuses to start without a token, lists the snapshots for the right
 #    token and nothing for a wrong one.

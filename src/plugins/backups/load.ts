@@ -12,6 +12,9 @@ import { isValidPassphrase } from './passphrase'
 /** Warn when the newest backup is older than this: a day and a half, so one missed night shows. */
 export const STALE_AFTER_MS = 36 * 60 * 60 * 1000
 
+/** Warn when less than this share of the backup storage is free (S9.2). */
+export const LOW_SPACE_SHARE = 0.1
+
 const SnapshotSchema = z.object({
   id: z.string().min(1),
   shortId: z.string().min(1),
@@ -80,10 +83,29 @@ const ContentsPreviewSchema = z.object({
 })
 const PreviewSchema = ContentsPreviewSchema.extend({ snapshot: SnapshotSchema })
 const UploadCheckSchema = ContentsPreviewSchema.extend({ uploadId: z.string() })
-const BackupListSchema = StatusSchema.extend({ snapshots: z.array(SnapshotSchema) })
+const bytes = z.number().int().nonnegative().nullable()
+/** S9.2: null figures are ones the storage doesn't report (e.g. S3 has no limit to tell). */
+const StorageSchema = z.object({ usedBytes: bytes, totalBytes: bytes, freeBytes: bytes })
+const BackupListSchema = StatusSchema.extend({
+  snapshots: z.array(SnapshotSchema),
+  /** null: the backup service couldn't read the figures this time. */
+  storage: StorageSchema.nullable().default(null),
+})
 const ConflictSchema = z.object({ running: RunningSchema.nullable() })
 
 export type Snapshot = z.infer<typeof SnapshotSchema>
+export type Storage = z.infer<typeof StorageSchema>
+/**
+ * What the view says about the backup storage:
+ * - unknown: no figures this time
+ * - no-limit: the storage reports no size (S3, B2, …), so nothing about what's left
+ * - low: less than LOW_SPACE_SHARE free, or not even room for one more full copy
+ * - ok
+ */
+export type StorageState =
+  | { kind: 'unknown' }
+  | { kind: 'no-limit'; usedBytes: number | null }
+  | { kind: 'low' | 'ok'; usedBytes: number | null; totalBytes: number; freeBytes: number }
 export type LastRun = z.infer<typeof LastRunSchema>
 export type Running = z.infer<typeof RunningSchema>
 export type LastRestore = z.infer<typeof LastRestoreSchema>
@@ -102,6 +124,7 @@ export type BackupsResult =
       running: Running | null
       lastRestore: LastRestore | null
       stale: boolean
+      storage: StorageState
     }
 export type StatusResult =
   | Denied
@@ -172,6 +195,19 @@ const failed = (deps: Deps, what: string, err: unknown): Denied => {
   return { kind: 'unavailable' }
 }
 
+/**
+ * S9.2: is the backup storage about to run out? "One more full copy" uses the
+ * newest backup's size: restic only stores what changed, but a night where
+ * everything changed (e.g. after a restore) must still fit.
+ */
+export function storageState(storage: Storage | null, newestSizeBytes: number | null): StorageState {
+  if (!storage) return { kind: 'unknown' }
+  const { usedBytes, totalBytes, freeBytes } = storage
+  if (totalBytes === null || freeBytes === null || totalBytes === 0) return { kind: 'no-limit', usedBytes }
+  const low = freeBytes < totalBytes * LOW_SPACE_SHARE || (newestSizeBytes !== null && freeBytes < newestSizeBytes)
+  return { kind: low ? 'low' : 'ok', usedBytes, totalBytes, freeBytes }
+}
+
 /** S8.1: the list of backups, the last run and a running backup. */
 export async function loadBackups(user: unknown, deps: Deps): Promise<BackupsResult> {
   const config = gate(user, deps)
@@ -188,7 +224,15 @@ export async function loadBackups(user: unknown, deps: Deps): Promise<BackupsRes
   const snapshots = [...list.snapshots].sort((a, b) => Date.parse(b.time) - Date.parse(a.time))
   const newest = snapshots[0]
   const stale = !newest || deps.now().getTime() - Date.parse(newest.time) > STALE_AFTER_MS
-  return { kind: 'ok', snapshots, lastRun: list.lastRun, running: list.running, lastRestore: list.lastRestore, stale }
+  return {
+    kind: 'ok',
+    snapshots,
+    lastRun: list.lastRun,
+    running: list.running,
+    lastRestore: list.lastRestore,
+    stale,
+    storage: storageState(list.storage, newest?.sizeBytes ?? null),
+  }
 }
 
 /** S8.5: last run and running backup only (no restic call), for polling while a backup runs. */

@@ -15,6 +15,7 @@ import {
   STALE_AFTER_MS,
   startBackup,
   startRestore,
+  storageState,
   uploadBackup,
 } from '@/plugins/backups/load'
 
@@ -496,5 +497,45 @@ describe('uploaded backups (S8.4)', () => {
       kind: 'not-found',
     })
     expect(seen).toHaveLength(0)
+  })
+})
+
+describe('storageState (S9.2)', () => {
+  const GB = 1024 ** 3
+  it.each([
+    ['figures unreadable', null, 1 * GB, { kind: 'unknown' }],
+    [
+      'no limit reported (S3, B2)',
+      { usedBytes: 5 * GB, totalBytes: null, freeBytes: null },
+      GB,
+      { kind: 'no-limit', usedBytes: 5 * GB },
+    ],
+    ['plenty free', { usedBytes: 5 * GB, totalBytes: 100 * GB, freeBytes: 50 * GB }, GB, 'ok'],
+    ['under 10 % free', { usedBytes: 5 * GB, totalBytes: 100 * GB, freeBytes: 9 * GB }, GB, 'low'],
+    ['no room for one more full copy', { usedBytes: 5 * GB, totalBytes: 100 * GB, freeBytes: 20 * GB }, 30 * GB, 'low'],
+    ['newest size unknown, enough free', { usedBytes: null, totalBytes: 100 * GB, freeBytes: 20 * GB }, null, 'ok'],
+  ])('%s', (_label, storage, newest, expected) => {
+    const out = storageState(storage, newest)
+    if (typeof expected === 'string') expect(out.kind).toBe(expected)
+    else expect(out).toEqual(expected)
+  })
+
+  it('reaches the view, using the newest backup as the size of one more copy', async () => {
+    const out = await load(
+      admin,
+      fakeFetch({
+        snapshots: [snapshot('2026-11-22T02:30:00.000Z', { sizeBytes: 600 })],
+        lastRun: null,
+        running: null,
+        lastRestore: null,
+        storage: { usedBytes: 2000, totalBytes: 4000, freeBytes: 500 },
+      }),
+    )
+    expect(out.kind === 'ok' && out.storage).toEqual({ kind: 'low', usedBytes: 2000, totalBytes: 4000, freeBytes: 500 })
+  })
+
+  it('treats an older backup service without figures as unknown', async () => {
+    const out = await load(admin, fakeFetch({ snapshots: [], lastRun: null, running: null, lastRestore: null }))
+    expect(out.kind === 'ok' && out.storage).toEqual({ kind: 'unknown' })
   })
 })

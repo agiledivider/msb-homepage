@@ -260,7 +260,12 @@ pnpm backup:check --restore ./restore-check   # also restore the latest backup a
 
 **In the admin:** admins see the backups at `/admin/backups` (sidebar
 "Backups"): date, size, whether the last nightly run worked, and a warning when
-the newest backup is older than 36 h. "Jetzt sichern" there starts a backup at
+the newest backup is older than 36 h. It also shows the storage the backups
+use and, where the storage reports it, how much is left, with a warning under
+10 % free or less room than one more full backup (S9.2): a local repository
+reports its disk, an `sftp:host:path` one the server's `df` (a Storage Box
+answers with its quota), S3/B2/`rest:` report no limit, and the page says so.
+"Jetzt sichern" there starts a backup at
 once (one at a time: a lock in the script also covers the nightly run; the log
 and the page name who started it). "Herunterladen" next to a backup gives
 it as one encrypted file, streamed straight from the repository: the page

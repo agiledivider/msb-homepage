@@ -3,7 +3,8 @@ import { Gutter } from '@payloadcms/ui'
 import type { AdminViewServerProps } from 'payload'
 import type { CSSProperties } from 'react'
 import { isAdmin } from '@/plugins/editorial/access'
-import { backupApiConfig, type LastRestore, type LastRun, loadBackups } from '../load'
+import { fmtSize } from '../format'
+import { backupApiConfig, type LastRestore, type LastRun, loadBackups, type StorageState } from '../load'
 import { restoreOutcome } from '../restoreText'
 import { BackupNow } from './BackupNow'
 import { BackupTable } from './BackupTable'
@@ -50,7 +51,39 @@ function LastRunLine({ lastRun }: { lastRun: LastRun | null }) {
   )
 }
 
-/** /admin/backups: the site's backups, for admins only (E8: S8.1 list, S8.5 backup now). */
+/** S9.2: how much room the backups take and, where the storage says, how much is left. */
+function StorageLine({ storage }: { storage: StorageState }) {
+  switch (storage.kind) {
+    case 'unknown':
+      return <p>Speicherplatz: gerade nicht abrufbar; Details stehen im Log des Backup-Dienstes.</p>
+    case 'no-limit':
+      return (
+        <p>
+          Speicherplatz: Die Backups belegen {fmtSize(storage.usedBytes)}. Der Backup-Speicher meldet keine Obergrenze,
+          deshalb lässt sich nicht sagen, wie viel noch frei ist.
+        </p>
+      )
+    case 'ok':
+      return (
+        <p>
+          Speicherplatz: Die Backups belegen {fmtSize(storage.usedBytes)}; frei sind {fmtSize(storage.freeBytes)} von{' '}
+          {fmtSize(storage.totalBytes)}.
+        </p>
+      )
+    case 'low':
+      return (
+        <p style={box('warn')}>
+          <strong>Der Backup-Speicher ist fast voll:</strong> frei sind nur noch {fmtSize(storage.freeBytes)} von{' '}
+          {fmtSize(storage.totalBytes)} (die Backups belegen {fmtSize(storage.usedBytes)}). Wenn er voll ist, schlagen
+          die nächtlichen Backups fehl; bitte den Speicher rechtzeitig vergrößern.
+        </p>
+      )
+    default:
+      return storage satisfies never
+  }
+}
+
+/** /admin/backups: the site's backups, for admins only (E8: S8.1 list, S8.5 backup now; S9.2 storage). */
 export async function BackupsView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { req, locale, permissions, visibleEntities } = initPageResult
   const result = await loadBackups(req.user, {
@@ -97,9 +130,12 @@ export async function BackupsView({ initPageResult, params, searchParams }: Admi
                 Die nächtliche Sicherung läuft offenbar nicht; bitte den Backup-Dienst prüfen.
               </p>
             ) : null}
+            {/* a nearly full storage goes on top, with the other warnings */}
+            {result.storage.kind === 'low' ? <StorageLine storage={result.storage} /> : null}
             <BackupNow apiRoute={req.payload.config.routes.api} initialRunning={result.running} />
             <LastRunLine lastRun={result.lastRun} />
             <LastRestoreLine lastRestore={result.lastRestore} />
+            {result.storage.kind === 'low' ? null : <StorageLine storage={result.storage} />}
             {result.snapshots.length ? (
               <BackupTable apiRoute={req.payload.config.routes.api} snapshots={result.snapshots} />
             ) : null}

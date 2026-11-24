@@ -21,8 +21,11 @@ import {
   parseLastRestore,
   parseLastRun,
   parsePreview,
+  parseRepoUsed,
   parseRunning,
+  parseSftpDf,
   parseSnapshots,
+  repoLocation,
   tokenMatches,
   validPassphrase,
 } from '../../scripts/backup/backup-api.mjs'
@@ -86,6 +89,47 @@ describe('parseSnapshots', () => {
     ['an entry with a broken time', [resticSnapshot({ time: 'yesterday' })]],
   ])('refuses %s', (_label, json) => {
     expect(() => parseSnapshots(json)).toThrow()
+  })
+})
+
+describe('storage figures (S9.2)', () => {
+  it('reads what the backups take up from restic stats, and nothing made up', () => {
+    expect(parseRepoUsed({ total_size: 81240246, snapshots_count: 6 })).toBe(81240246)
+    expect(parseRepoUsed({})).toBeNull()
+    expect(parseRepoUsed({ total_size: -1 })).toBeNull()
+  })
+
+  it.each([
+    ['/repo', { kind: 'local', path: '/repo' }],
+    ['sftp:storagebox:msb-homepage', { kind: 'sftp', host: 'storagebox', path: 'msb-homepage' }],
+    [
+      'sftp:u123@u123.your-storagebox.de:/home/backups',
+      { kind: 'sftp', host: 'u123@u123.your-storagebox.de', path: '/home/backups' },
+    ],
+    ['sftp://u123@box:23//msb', { kind: 'other' }],
+    ['s3:s3.amazonaws.com/bucket', { kind: 'other' }],
+    ['b2:bucket:path', { kind: 'other' }],
+    ['rest:https://host/', { kind: 'other' }],
+    [undefined, { kind: 'other' }],
+  ])('%s → %o', (repo, where) => {
+    expect(repoLocation(repo)).toEqual(where)
+  })
+
+  it('reads total and free space from the SFTP df output (KiB)', () => {
+    // real output of OpenSSH's `sftp -b -` with `df msb-homepage`
+    const out = `sftp> df msb-homepage
+        Size         Used        Avail       (root)    %Capacity
+   536369016    315831700    193258016    220537316          58%
+`
+    expect(parseSftpDf(out)).toEqual({ totalBytes: 536369016 * 1024, freeBytes: 193258016 * 1024 })
+  })
+
+  it.each([
+    ['no output', ''],
+    ['a size of 0 (no limit reported)', '  0  0  0  0  0%\n'],
+    ['human-readable units', '   512GB    301GB    184GB    210GB          58%\n'],
+  ])('gives null for %s', (_label, out) => {
+    expect(parseSftpDf(out)).toBeNull()
   })
 })
 
@@ -231,6 +275,26 @@ describe('GET /backups', () => {
     expect(res.status).toBe(502)
     expect(await res.text()).not.toContain('password')
     expect(logs.join('\n')).toContain('wrong password')
+  })
+
+  it('adds the storage figures to the list (S9.2)', async () => {
+    const storage = { usedBytes: 81240246, totalBytes: 1000, freeBytes: 500 }
+    const { get } = await start({ readStorage: async () => storage })
+    expect((await (await get('/backups', 'secret-token')).json()).storage).toEqual(storage)
+  })
+
+  it('still lists the backups when the storage figures fail, and logs why', async () => {
+    const { get, logs } = await start({
+      readStorage: async () => {
+        throw new Error('sftp: connection refused')
+      },
+    })
+    const res = await get('/backups', 'secret-token')
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.snapshots).toHaveLength(1)
+    expect(body.storage).toBeNull()
+    expect(logs.join('\n')).toContain('connection refused')
   })
 
   it('has nothing else, in particular no way to delete', async () => {
