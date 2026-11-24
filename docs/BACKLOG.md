@@ -333,6 +333,18 @@ An editor who spots a typo or an outdated date on the site has to open the CMS, 
 
 **AC:** logged in as an editor, every page, post and event shows a "Bearbeiten" button that opens that entry's edit view in the CMS; a visitor who isn't logged in sees no button and no trace of it in the page; an editor without the right to edit that entry sees no button; the statically published site never contains it *(optional: only if the static publisher is used; move to its own story if needed)*; the button doesn't cover content at 375 px.
 
+### ⏳ S5.9 — Visitors page through the events archive (S)
+**Source:** IDEAS.md 2026-11-24 ("pagination archive").
+The events archive shows all past events, about 200, on one long page. It loads slowly on a phone, and a visitor looking for a year has to scroll through everything before it.
+
+**AC:** the archive shows a page of events at a time, newest first, with links to the next and previous page and the page number; each page has its own address that can be shared and is found by search engines; a visitor can jump to a year; old links to the archive still open its first page; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*; readable and usable at 375 px.
+
+### ⏳ S5.10 — Visitors reach older blog posts (S)
+**Source:** IDEAS.md 2026-11-24 ("pagination archive"; the blog list was found to stop at the newest 20).
+The blog page lists only the 20 newest posts. The other 57 can only be found through search engines or old links, so most of the Verein's history is invisible from the site itself.
+
+**AC:** from the blog page a visitor can page back to the oldest post; each page has its own address; the newest posts stay on the first page as today; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*; usable at 375 px.
+
 ---
 
 ## E6 — Playbook retrofit
@@ -435,6 +447,13 @@ The review box showed a stale status (still "Freigegeben" over a new draft), off
 **AC:** the box shows Entwurf / In Prüfung / Abgelehnt with the reason / Veröffentlicht, and whether the live version stays online; the main button reads "Zur Prüfung einreichen" for editors and "(Freigeben &) Veröffentlichen" for reviewers; a compare button against the last publication appears only when there is one; rejecting needs a reason; reviewers see "Zur Freigabe" on the start page.
 
 **Implementation notes:** `src/plugins/editorial/` (ReviewPanel, PublishButton, publishGate resets approval on a draft save and clears the reason on publish, transition requires the reason, ReviewDashboard loads the user with permissions). Compare link: Payload's version view with `?versionFrom=<last published>`. Dev only: one-click logins as editor@test.de / reviewer@test.de (`pnpm dev:users`, DEV_USER_PASSWORD). `c2d4172`.
+
+
+### ⏳ S9.5 — Editors find drafts that nobody has submitted yet (S)
+**Source:** IDEAS.md 2026-11-24.
+Drafts that Claude writes through the CMS connection, or that an editor saves and forgets, show up nowhere: the start page lists only entries in review or sent back. On 2026-11-24 four page drafts on staging waited unseen because of this.
+
+**AC:** the admin start page lists open drafts (pages, posts, events, workshops) with title, who last changed them and when, newest first, each linking to its draft; drafts written by Claude are recognisable as such; a draft disappears from the list once it is submitted, published or discarded; an editor sees the drafts they may edit, a reviewer all of them; the list stays short when empty ("Keine offenen Entwürfe").
 
 ---
 

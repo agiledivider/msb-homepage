@@ -4,8 +4,6 @@
 
 <!-- Once an idea is sliced into BACKLOG.md, remove it from here. -->
 
-- pagination archive
-- Drafts Claude writes through the CMS connection (MCP) show up nowhere until someone submits them: editors should see open drafts on the admin start page (Falk 2026-11-24).
 
 # Ideas for later
 

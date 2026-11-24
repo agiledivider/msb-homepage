@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**22 open · 30 done** · ✅ 30 · 🟡 1 · ⏳ 18 · ⏭️ 1 · 🚨 2
+**25 open · 30 done** · ✅ 30 · 🟡 1 · ⏳ 21 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -29,7 +29,7 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L274)
 
-## E5 — Visitor and editor features (2/8 done)
+## E5 — Visitor and editor features (2/10 done)
 
 - ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L294)
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L299)
@@ -37,23 +37,25 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L310)
 - ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L316)
 - ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L330)
+- ⏳ [S5.9 — Visitors page through the events archive (S)](BACKLOG.md#L336)
+- ⏳ [S5.10 — Visitors reach older blog posts (S)](BACKLOG.md#L342)
 
 ## E6 — Playbook retrofit (2/7 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L361)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L366)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L371)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L376)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L381)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L373)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L378)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L383)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L388)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L393)
 
 ## E7 — Legacy migration (1/1 done)
 
 All done.
 
-## E9 — Admin area polish (4/4 done)
+## E9 — Admin area polish (4/5 done)
 
-All done.
+- ⏳ [S9.5 — Editors find drafts that nobody has submitted yet (S)](BACKLOG.md#L452)
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L453)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L472)
