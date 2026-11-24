@@ -449,11 +449,13 @@ The review box showed a stale status (still "Freigegeben" over a new draft), off
 **Implementation notes:** `src/plugins/editorial/` (ReviewPanel, PublishButton, publishGate resets approval on a draft save and clears the reason on publish, transition requires the reason, ReviewDashboard loads the user with permissions). Compare link: Payload's version view with `?versionFrom=<last published>`. Dev only: one-click logins as editor@test.de / reviewer@test.de (`pnpm dev:users`, DEV_USER_PASSWORD). `c2d4172`.
 
 
-### ⏳ S9.5 — Editors find drafts that nobody has submitted yet (S)
+### ✅ S9.5 — Editors find drafts that nobody has submitted yet (S) — 2026-11-24
 **Source:** IDEAS.md 2026-11-24.
 Drafts that Claude writes through the CMS connection, or that an editor saves and forgets, show up nowhere: the start page lists only entries in review or sent back. On 2026-11-24 four page drafts on staging waited unseen because of this.
 
 **AC:** the admin start page lists open drafts (pages, posts, events, workshops) with title, who last changed them and when, newest first, each linking to its draft; drafts written by Claude are recognisable as such; a draft disappears from the list once it is submitted, published or discarded; an editor sees the drafts they may edit, a reviewer all of them; the list stays short when empty ("Keine offenen Entwürfe").
+
+**Implementation notes:** workflow fields `lastEditedBy` and `lastEditedViaClaude` (set in `beforeChange` from `req.user` and `req.payloadAPI === 'MCP'`, never from the body; migration `20261124_014146_open_drafts_last_editor`). `loadOpenDrafts()` in `src/plugins/editorial/components/ReviewDashboard.tsx`: latest version `_status` draft and `reviewStatus` draft, newest first; falls back to `createdBy` for older saves. Tests: `tests/integration/open-drafts.test.ts`, flag through the real MCP path in `mcp.test.ts`. b5016ae.
 
 ---
 

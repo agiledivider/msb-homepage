@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**25 open · 30 done** · ✅ 30 · 🟡 1 · ⏳ 21 · ⏭️ 1 · 🚨 2
+**24 open · 31 done** · ✅ 31 · 🟡 1 · ⏳ 20 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -52,10 +52,10 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 
 All done.
 
-## E9 — Admin area polish (4/5 done)
+## E9 — Admin area polish (5/5 done)
 
-- ⏳ [S9.5 — Editors find drafts that nobody has submitted yet (S)](BACKLOG.md#L452)
+All done.
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L472)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L474)
