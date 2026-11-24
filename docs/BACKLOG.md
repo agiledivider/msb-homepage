@@ -76,10 +76,12 @@ The site goes public on its real domain, findable, legally checked, and without 
 
 **Status:** proposed 2026-11-20 from the pre-launch review. Not blockers on their own, but they should land before the site goes public. Also needed before launch: B1, B2, S6.1 (lint green) and S6.2 (CI gate).
 
-### ⏳ S1.1 — Search engines find and present every page well (M)
+### ✅ S1.1 — Search engines find and present every page well (M) — 2026-11-24
 The site has no `robots.txt` and no sitemap, and normal content pages show no page-specific title or description in search results or link previews (blog posts and events do). Search engines should get a robots file and a sitemap of every public page, post and event; every public page has its own title and description, and sharing a link shows a sensible preview.
 
 **AC:** `/robots.txt` and `/sitemap.xml` load on the live site (static bundle *(optional: only if the static publisher is used; move to its own story if needed)*); the sitemap lists a newly published page and leaves out drafts; a page like `/verein` shows its own title in the browser tab and in a link preview.
+
+**Implementation notes:** `src/app/robots.ts` (must sit at the app root; inside the `(frontend)` route group Next serves a 404) and `src/app/(frontend)/sitemap.ts` (force-dynamic, reads via `findPublic`, so only published + approved pages/posts/events/workshops). Content pages get title, description, canonical and og tags in `[slug]/page.tsx`; the description is the first PageIntro lede (`src/lib/seo.ts`, cut at 160 chars), no new CMS field. `/blog` and `/events` got static metadata. The static bundle already wrote robots.txt + sitemap.xml (`scripts/publish-static.ts` `writeSeoFiles`). Tests: `tests/integration/public-data-boundary.test.ts`, `tests/unit/seo.test.ts` (baf19ba).
 
 ### ⏳ S1.2 — The Verein has checked the legal pages (S)
 Impressum and Datenschutzerklärung were written as a baseline by the developers. Nobody responsible for the Verein has confirmed they're correct, and the privacy statement must describe what the live site actually does. The Vorstand (or whoever they name) reviews both pages against the live setup and signs them off.
