@@ -268,7 +268,7 @@ export async function seedSiteContent(payload: Payload) {
       accent: 'green',
       cornerLabel: '45°',
       headline: 'Bau, was du dir\nvorstellst.',
-      lede: 'A place to make things — for everyone in Bonn.',
+      lede: 'Ein Ort zum Selbermachen — für alle in Bonn.',
       description:
         'Löten, schweißen, fräsen, nähen, 3D-drucken. Sechs Werkstätten, über 40 Maschinen und eine Community, die mit anpackt.',
       primaryStyle: 'white',
@@ -297,7 +297,7 @@ export async function seedSiteContent(payload: Payload) {
       headerCta: { label: 'Mitglied werden', url: '/mitmachen' },
       footer: {
         tagline: 'Eine offene Werkstatt für Bonn. Für alle.',
-        phone: '+49 228 81 28 69 80',
+        phone: '0228 81286980',
         email: 'office@makerspacebonn.de',
         social: [
           { platform: 'discord', url: 'https://discord.gg/example' },
@@ -328,7 +328,7 @@ export async function seedSiteContent(payload: Payload) {
         tagColor: 'green',
         meta: 'seit 03.03.2018 · gemeinnützig',
         headline: 'Eine offene Werkstatt für Bonn. Für alle.',
-        lede: 'An open workshop where a curious community creates, gets inspired and learns from one another.',
+        lede: 'Eine offene Werkstatt, in der eine neugierige Community Neues erschafft, sich inspirieren lässt und voneinander lernt.',
       },
       ...vereinIntroToBlocks({
         body: rt([
@@ -363,7 +363,7 @@ export async function seedSiteContent(payload: Payload) {
         tagColor: 'orange',
         meta: '6 Werkstätten · 40+ Maschinen',
         headline: 'Werkzeug & Räume',
-        lede: "Everything you need to build — you may use all tools once you've been briefed.",
+        lede: 'Alles, was du zum Bauen brauchst — nach einer Einweisung darfst du alle Maschinen nutzen.',
       },
       {
         blockType: 'workshops',
@@ -428,7 +428,7 @@ export async function seedSiteContent(payload: Payload) {
         tagColor: 'orange',
         meta: 'Mitglied · Fördern · Spenden',
         headline: 'Mach mit. Bau mit.',
-        lede: 'Join us, support us as a sustaining member, or donate — every bit helps.',
+        lede: 'Werde Mitglied, unterstütze uns als Fördermitglied oder spende — jeder Beitrag hilft.',
       },
       {
         blockType: 'joinOptions',
@@ -461,7 +461,7 @@ export async function seedSiteContent(payload: Payload) {
         location: {
           eyebrow: 'SO FINDEST DU UNS',
           title: 'Kennedyallee 18',
-          line: '53175 Bonn · Tel +49 (228) 81 28 69 80',
+          line: '53175 Bonn · Tel 0228 81286980',
           transit: 'Linie 16 / 63 → Hochkreuz / Deutsches Museum\nLinie 610 / 611 → Kennedyallee',
           mapPlaceholder: 'Karte / Foto vom Eingang',
         },

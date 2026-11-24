@@ -13,14 +13,22 @@ const DEFAULT_LINKS: NavItem[] = [
 ]
 
 const DEFAULT_TAGLINE = 'Eine offene Werkstatt für Bonn. Für alle.'
-const DEFAULT_PHONE = '+49 228 81 28 69 80'
+const DEFAULT_PHONE = '0228 81286980'
 const DEFAULT_EMAIL = 'office@makerspacebonn.de'
 
-/** `tel:` target from a display number: keep the leading + and the digits. */
-const telHref = (phone: string) => `tel:${phone.trim().startsWith('+') ? '+' : ''}${phone.replace(/\D/g, '')}`
+/**
+ * `tel:` target from a display number, always international: "0228 81286980"
+ * (DIN 5008, as shown on the site) → tel:+4922881286980; a "+…" number keeps its prefix.
+ */
+export const telHref = (phone: string) => {
+  const digits = phone.replace(/\D/g, '')
+  if (phone.trim().startsWith('+')) return `tel:+${digits}`
+  if (digits.startsWith('00')) return `tel:+${digits.slice(2)}`
+  return digits.startsWith('0') ? `tel:+49${digits.slice(1)}` : `tel:${digits}`
+}
 
 export function Footer({
-  logoSrc = '/logo/logo-horizontal-white.png',
+  logoSrc = '/logo/logo-horizontal-no-claim-negativ.png',
   links = DEFAULT_LINKS,
   tagline = DEFAULT_TAGLINE,
   phone = DEFAULT_PHONE,

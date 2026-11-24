@@ -30,7 +30,7 @@ export default async function EventsPage() {
         tag="TERMINE"
         meta="Workshops · offene Türen · Treffs"
         headline="Events & Workshops"
-        lede="Come by, learn something, meet the community."
+        lede="Komm vorbei, lern was Neues, triff die Community."
       />
       <EventsClient events={res.docs.map(toEventDTO)} nowIso={new Date().toISOString()} />
     </main>

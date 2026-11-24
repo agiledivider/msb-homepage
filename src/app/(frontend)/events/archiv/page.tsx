@@ -35,7 +35,7 @@ export default async function EventsArchivePage() {
         tag="ARCHIV"
         meta="Vergangene Termine"
         headline="Event-Archiv"
-        lede="A look back at past workshops, open days and meetups at the MakerSpace."
+        lede="Ein Blick zurück auf vergangene Workshops, Tage der offenen Tür und Treffen im MakerSpace."
       />
       <div className="mb-8 mt-6">
         <Link href="/events" className={MONO_LINK}>

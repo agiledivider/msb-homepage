@@ -51,7 +51,7 @@ export const SiteSettings: GlobalConfig = {
               name: 'phone',
               type: 'text',
               label: 'Telefon',
-              admin: { width: '50%', description: 'Wie angezeigt, z. B. +49 228 81 28 69 80.' },
+              admin: { width: '50%', description: 'Wie angezeigt, z. B. 0228 81286980.' },
             },
             { name: 'email', type: 'email', label: 'E-Mail', admin: { width: '50%' } },
           ],

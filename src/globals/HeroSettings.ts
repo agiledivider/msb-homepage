@@ -60,7 +60,7 @@ export const HeroSettings: GlobalConfig = {
               name: 'lede',
               type: 'text',
               label: 'Unterzeile',
-              defaultValue: 'A place to make things — for everyone in Bonn.',
+              defaultValue: 'Ein Ort zum Selbermachen — für alle in Bonn.',
             },
             {
               name: 'description',

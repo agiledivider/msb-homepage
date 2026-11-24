@@ -27,7 +27,7 @@ export default async function BlogIndexPage() {
         tag="AUS DER WERKSTATT"
         meta="Build-Logs · Berichte · Anleitungen"
         headline="Blog"
-        lede="What we build, how we build it — logs from the workshop."
+        lede="Was wir bauen und wie wir es bauen — Berichte aus der Werkstatt."
       />
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {res.docs.map((post) => (

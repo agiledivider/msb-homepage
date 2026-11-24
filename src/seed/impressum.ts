@@ -9,12 +9,7 @@ const impressumBody = doc([
   p(t('Kennedyallee 18'), br(), t('53175 Bonn'), br(), t('Deutschland')),
 
   h2('Kontakt'),
-  p(
-    t('Telefon: +49 (228) 81 28 69 80'),
-    br(),
-    t('E-Mail: '),
-    a('office@makerspacebonn.de', 'mailto:office@makerspacebonn.de'),
-  ),
+  p(t('Telefon: 0228 81286980'), br(), t('E-Mail: '), a('office@makerspacebonn.de', 'mailto:office@makerspacebonn.de')),
 
   h2('Vertretungsberechtigter Vorstand'),
   p(t('Vorstand nach § 26 BGB:'), br(), t('Salim Deeb, Jan Benzenberg')),
