@@ -10,6 +10,7 @@ const FALLBACK_MAP: MediaResource = {
   alt: 'Karte: MakerSpace Bonn, Kennedyallee 18, 53175 Bonn',
   width: 1400,
   height: 939,
+  aiLabel: 'edited', // the old OSM screenshot recoloured with an AI image editor
 }
 /** The MakerSpace's own OpenStreetMap entry ("Makerspace Bonn", Kennedyallee 18;
  *  checked via Nominatim 2026-11-22). The main map link: open data, no tracking. */

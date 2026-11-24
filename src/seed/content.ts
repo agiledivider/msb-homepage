@@ -221,7 +221,7 @@ const rt = (paragraphs: string[]) => ({
 })
 
 /** Ensure an image from uploads/ exists in the media library (idempotent by filename). */
-const mediaId = async (payload: Payload, file: string, alt: string) => {
+const mediaId = async (payload: Payload, file: string, alt: string, aiLabel?: 'generated' | 'edited') => {
   const ex = await payload.find({ collection: 'media', where: { filename: { equals: file } }, limit: 1 })
   if (ex.totalDocs) return ex.docs[0].id
   // overwriteExistingFiles: a leftover file of the same name would otherwise make
@@ -229,7 +229,7 @@ const mediaId = async (payload: Payload, file: string, alt: string) => {
   return (
     await payload.create({
       collection: 'media',
-      data: { alt },
+      data: { alt, aiLabel },
       filePath: path.resolve(UP, file),
       overwriteExistingFiles: true,
     })
@@ -250,7 +250,12 @@ const upsertBySlug = async (payload: Payload, collection: 'pages', slug: string,
 
 export async function seedSiteContent(payload: Payload) {
   // 1 · media
-  const werkstattImg = await mediaId(payload, 'hero-werkstatt.jpg', 'Maker bei der Arbeit in der Werkstatt')
+  const werkstattImg = await mediaId(
+    payload,
+    'hero-werkstatt.jpg',
+    'Maker bei der Arbeit in der Werkstatt',
+    'generated',
+  )
 
   // 2 · globals (hero drives the front-page hero; site settings drive nav + footer)
   await payload.updateGlobal({
