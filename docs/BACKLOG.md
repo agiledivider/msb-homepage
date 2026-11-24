@@ -112,6 +112,12 @@ The Datenschutzerklärung only covers visitors of the website. Members also give
 
 **AC:** a member (or someone about to join) finds, from the Datenschutz page and from Mitmachen, what member data the Verein keeps, why, for how long, who sees it and whom to ask; the Vorstand has confirmed the text (like S1.2); readable at 375 px.
 
+### ⏳ S1.7 — Browser tabs, bookmarks and home screens show the MakerSpace signet (S)
+**Source:** IDEAS.md 2026-11-24.
+The site has no favicon, so its tabs, bookmarks and search results show a blank page icon, and saving it to a phone's home screen gives a screenshot tile. Visitors with many tabs open can't spot the site, and the CMS tab looks the same as any other admin tool.
+
+**AC:** the public site shows the MakerSpace signet in browser tabs and bookmarks, readable in both light and dark browser themes; saving the site to an iPhone or Android home screen gives a proper signet icon with the site's name; the CMS tab shows the signet too, distinguishable from the public site; the statically published site has the same icons *(optional: only if the static publisher is used; move to its own story if needed)*.
+
 ---
 
 ## E2 — Security hardening (audit 2026-11-20)
