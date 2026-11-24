@@ -6,7 +6,8 @@
  *
  * Each admin nav entry has an id (`nav-<collection slug>`, `nav-global-<slug>`,
  * or a custom link's own id); custom.scss masks its `::before` with
- * `--msb-icon`. This turns the table below into those rules, from the Font
+ * `--msb-icon`; the closed-sidebar rail (NavRail.tsx) uses the same ids as
+ * `data-nav-icon`. This turns the table below into those rules, from the Font
  * Awesome free-solid icons the site already uses. To give a new entry an icon,
  * add a line here and run the script.
  */
@@ -17,10 +18,12 @@ import {
   faBoxArchive,
   faCalendarDays,
   faFileLines,
+  faFolder,
   faHouse,
   faImage,
   faKey,
   faPenNib,
+  faScrewdriverWrench,
   faSliders,
   faTableColumns,
   faUserShield,
@@ -30,9 +33,12 @@ import {
 
 export const NAV_ICONS: [id: string, icon: IconDefinition, name: string][] = [
   ['nav-start', faTableColumns, 'faTableColumns'],
+  // the rail's "Browse by Folder" (the sidebar button keeps Payload's own folder icon)
+  ['nav-folders', faFolder, 'faFolder'],
   ['nav-blog', faPenNib, 'faPenNib'],
   ['nav-events', faCalendarDays, 'faCalendarDays'],
   ['nav-pages', faFileLines, 'faFileLines'],
+  ['nav-workshops', faScrewdriverWrench, 'faScrewdriverWrench'],
   ['nav-media', faImage, 'faImage'],
   ['nav-global-heroSettings', faHouse, 'faHouse'],
   ['nav-global-siteSettings', faSliders, 'faSliders'],
@@ -55,7 +61,7 @@ const svg = ({ icon: [width, height, , , d] }: IconDefinition) =>
 export function renderBlock() {
   const rules = NAV_ICONS.map(
     ([id, icon, name]) =>
-      `#${id} { --msb-icon: url("data:image/svg+xml,${encodeURIComponent(svg(icon))}"); } // ${name}`,
+      `#${id}, [data-nav-icon='${id}'] { --msb-icon: url("data:image/svg+xml,${encodeURIComponent(svg(icon))}"); } // ${name}`,
   )
   return [HEADER, NOTE, ...rules].join('\n')
 }

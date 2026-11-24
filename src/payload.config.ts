@@ -41,6 +41,8 @@ export default buildConfig({
       afterLogin: ['/components/auth/KanidmLoginButton#KanidmLoginButton', '/components/auth/DevLogin#DevLogin'],
       // MSB branding + "Start" link at the top of the sidebar; look in custom.scss.
       beforeNavLinks: ['/components/admin/NavBrand#NavBrand'],
+      // Payload's sidebar plus an icon rail while it's closed (S9.1).
+      Nav: '/components/admin/Nav#Nav',
       graphics: {
         Icon: '/components/admin/Graphics#AdminIcon',
         Logo: '/components/admin/Graphics#AdminLogo',
