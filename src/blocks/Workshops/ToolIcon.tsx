@@ -118,15 +118,82 @@ function Drawing({ name }: { name: ToolIconName }) {
           <path {...LINE} d="M50 70 V188" />
         </>
       )
+    case 'laser':
+      // Laser head on a ring: green housing, steel nozzle, beam and a spark on the workpiece.
+      return (
+        <>
+          <circle {...LINE4} cx="50" cy="16" r="10" />
+          <path {...LINE4} d="M50 26 V40" />
+          <rect {...GREEN} x="24" y="40" width="52" height="58" rx="8" />
+          <path {...LINE} d="M32 54 H68 M32 64 H68" />
+          <circle fill={INK} cx="64" cy="84" r="4" />
+          <path {...STEEL} d="M38 98 H62 L56 132 H44 Z" />
+          <path {...STEEL} d="M44 132 H56 L52 146 H48 Z" />
+          <path fill="none" stroke={INK} strokeWidth={7} strokeLinecap="round" d="M50 150 V204" />
+          <path fill="none" stroke="var(--color-orange)" strokeWidth={3} strokeLinecap="round" d="M50 150 V204" />
+          <path
+            {...ORANGE}
+            strokeLinejoin="round"
+            d="M50 196 L55 208 L68 210 L57 216 L60 230 L50 222 L40 230 L43 216 L32 210 L45 208 Z"
+          />
+          <path {...LINE} d="M16 232 H84" />
+        </>
+      )
     default:
       return name satisfies never
   }
 }
 
+/**
+ * Pencil look (trial 2026-11-24): the same drawings, as if sketched with
+ * graphite and coloured pencils. One filter wobbles the lines and breaks
+ * strokes and fills up with paper grain; a second, fainter outline-only pass
+ * with another wobble gives the doubled line of a quick sketch. Ids are per
+ * drawing, so two cards with the same tool share an identical definition.
+ */
+function PencilFilters({ id }: { id: string }) {
+  return (
+    <defs>
+      {[
+        { key: 'a', seed: 3, scale: 4 },
+        { key: 'b', seed: 11, scale: 8 },
+      ].map(({ key, seed, scale }) => (
+        <filter key={key} id={`${id}-${key}`} x="-15%" y="-8%" width="130%" height="116%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed={seed} result="wobble" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="wobble"
+            scale={scale}
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="drawn"
+          />
+          {/* streaks along one direction: the strokes of a coloured pencil */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.09 1.3" numOctaves="2" seed={seed + 4} result="paper" />
+          <feColorMatrix
+            in="paper"
+            type="matrix"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 2.15"
+            result="grain"
+          />
+          <feComposite in="drawn" in2="grain" operator="in" />
+        </filter>
+      ))}
+    </defs>
+  )
+}
+
 export function ToolIcon({ name, className = '' }: { name: ToolIconName; className?: string }) {
+  const id = `msb-pencil-${name}`
   return (
     <svg viewBox="0 0 100 240" className={className} aria-hidden="true" focusable="false">
-      <Drawing name={name} />
+      <PencilFilters id={id} />
+      <g filter={`url(#${id}-a)`}>
+        <Drawing name={name} />
+      </g>
+      <g filter={`url(#${id}-b)`} opacity={0.6} className="[&_*]:fill-none">
+        <Drawing name={name} />
+      </g>
     </svg>
   )
 }

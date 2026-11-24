@@ -40,7 +40,7 @@ describe('workshops', () => {
 
     await upsertWorkshops(payload)
     const first = await findPublic({ collection: 'workshops', sort: 'order', limit: 50 })
-    expect(first.docs.map((w) => w.slug)).toEqual(['elektronik', 'metall', 'holz', 'textil', '3d-druck-cnc', 'cad'])
+    expect(first.docs.map((w) => w.slug)).toEqual(['elektronik', 'metall', 'holz', 'textil', '3d-druck', 'laser-cnc'])
 
     const holz = first.docs.find((w) => w.slug === 'holz')
     expect(holz?.verbs).toBe('Hobeln und leimen')
