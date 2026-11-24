@@ -79,7 +79,7 @@ The site goes public on its real domain, findable, legally checked, and without 
 ### ⏳ S1.1 — Search engines find and present every page well (M)
 The site has no `robots.txt` and no sitemap, and normal content pages show no page-specific title or description in search results or link previews (blog posts and events do). Search engines should get a robots file and a sitemap of every public page, post and event; every public page has its own title and description, and sharing a link shows a sensible preview.
 
-**AC:** `/robots.txt` and `/sitemap.xml` load on the live site and in the static bundle; the sitemap lists a newly published page and leaves out drafts; a page like `/verein` shows its own title in the browser tab and in a link preview.
+**AC:** `/robots.txt` and `/sitemap.xml` load on the live site (static bundle *(optional: only if the static publisher is used; move to its own story if needed)*); the sitemap lists a newly published page and leaves out drafts; a page like `/verein` shows its own title in the browser tab and in a link preview.
 
 ### ⏳ S1.2 — The Verein has checked the legal pages (S)
 Impressum and Datenschutzerklärung were written as a baseline by the developers. Nobody responsible for the Verein has confirmed they're correct, and the privacy statement must describe what the live site actually does. The Vorstand (or whoever they name) reviews both pages against the live setup and signs them off.
@@ -124,7 +124,8 @@ A person taken out of every CMS role group in Kanidm kept the CMS roles they had
 
 **Implementation notes:** roles are overwritten at every Kanidm login; a missing `cms_roles` claim (Kanidm omits it when the user is in no role group) means no roles. Logins without `email_verified: true` are refused (`src/plugins/oidc/claims.ts`). Covered by `tests/integration/kanidm-login.test.ts`, which drives the real payload-oauth2 callback with Kanidm faked at `fetch`. Verified by Falk with a real Kanidm login. Caveats in `DEPLOY.md`: a wrong claim name strips Kanidm users' roles (keep the local password admin), and removal takes effect at the next login, not immediately.
 
-### ⏳ S2.2 — The publish service only accepts authenticated requests and runs unprivileged (S)
+### ⏭️ S2.2 — The publish service only accepts authenticated requests and runs unprivileged (S)
+**Status:** postponed 2026-11-24 (Falk): the static publisher may not be used. Pick up again only if it goes into production.
 The publish service accepts every request when its shared token is not configured, and its container runs as root while holding the registry token and the deploy key. It should refuse to start without a token, check it in constant time, and run as an unprivileged user.
 
 **AC:** starting the publisher without a token fails with a clear message; a request with a wrong or missing token gets 401; the publisher container's process is not root.
@@ -248,7 +249,7 @@ Focus was only visible as the browser default; many buttons and pills were 30–
 ### ⏳ S4.5 — Visitors can tell which images are AI-generated (M)
 Hero photos, event thumbnails and the location map are AI-generated or AI-edited, but the styleguide requires such images to be labelled and they aren't. Editors should mark an image as "generated" or "edited" in the CMS, and the site shows the styleguide's label ("Bild generiert" / "Bild bearbeitet") wherever that image appears.
 
-**AC:** a marked image shows its label in every place it appears, including polaroid frames and the static export; unmarked images show nothing; existing AI images are marked.
+**AC:** a marked image shows its label in every place it appears, including polaroid frames (static export *(optional: only if the static publisher is used; move to its own story if needed)*); unmarked images show nothing; existing AI images are marked.
 
 ### ⏳ S4.6 — Visitors can switch the site to dark mode (L)
 The styleguide now defines a dark "Tannen" palette, but the site has none. The site should follow the visitor's system setting, offer a toggle that is remembered, and use the styleguide's dark palette and Negativ logo.
@@ -291,7 +292,7 @@ The blog and event slides in the start-page carousel, and the lists next to it, 
 **AC:** an editor changes each visible label on one event and one blog post and sees the change in the hero preview and on the start page; a paid event no longer shows "kostenlos"; posts and events nobody edits look exactly as they do today.
 
 ### ⏳ S5.4 — Visitors buy tickets or register on the event page (M)
-Events that need registration or a ticket only say so in the text, so visitors have to go somewhere else (mail, another site) to sign up. An editor should be able to link an event to its pretix shop or event, and the event page then shows the pretix order form, so visitors register or buy right there. Events without a pretix link look as they do today. This also works on the statically published site.
+Events that need registration or a ticket only say so in the text, so visitors have to go somewhere else (mail, another site) to sign up. An editor should be able to link an event to its pretix shop or event, and the event page then shows the pretix order form, so visitors register or buy right there. Events without a pretix link look as they do today. Static site: *(optional: only if the static publisher is used; move to its own story if needed)*.
 
 **AC:** an editor adds a pretix event to an event, and on the published page a visitor can complete an order without leaving the site; an event without pretix shows no form; the Datenschutzerklärung covers pretix before it goes live.
 
@@ -305,7 +306,7 @@ There's no way to apply for membership online. Applications arrive on paper or b
 **Source:** IDEAS.md 2026-11-22.
 The site names the nearby stops and lines, but visitors coming by public transport still have to look up departures somewhere else.
 
-**AC:** the footer on every page links to the bus and train timetables for the MakerSpace's stops (opening in the transit provider's journey planner or departure board); editors can change the links in the CMS; the links work on a 375 px phone and in the static bundle.
+**AC:** the footer on every page links to the bus and train timetables for the MakerSpace's stops (opening in the transit provider's journey planner or departure board); editors can change the links in the CMS; the links work on a 375 px phone (static bundle *(optional: only if the static publisher is used; move to its own story if needed)*).
 
 ### ✅ S5.7 — Cropped images keep their subject in view (S) — 2026-11-22
 **Source:** chat 2026-11-22.
@@ -319,7 +320,7 @@ Wherever the site crops an image to fit a frame (hero, cards, polaroids, especia
 **Source:** IDEAS.md 2026-11-23.
 An editor who spots a typo or an outdated date on the site has to open the CMS, find the right collection and search for the entry. Logged-in editors should see an edit button on every page, blog post and event that opens exactly that entry in the CMS. Visitors never see it.
 
-**AC:** logged in as an editor, every page, post and event shows a "Bearbeiten" button that opens that entry's edit view in the CMS; a visitor who isn't logged in sees no button and no trace of it in the page; an editor without the right to edit that entry sees no button; the statically published site never contains it; the button doesn't cover content at 375 px.
+**AC:** logged in as an editor, every page, post and event shows a "Bearbeiten" button that opens that entry's edit view in the CMS; a visitor who isn't logged in sees no button and no trace of it in the page; an editor without the right to edit that entry sees no button; the statically published site never contains it *(optional: only if the static publisher is used; move to its own story if needed)*; the button doesn't cover content at 375 px.
 
 ---
 
@@ -362,7 +363,7 @@ The gate is four commands with no evidence file; there are no `qa`, `deps:check`
 **AC:** `pnpm qa` exits non-zero on any failing stage and leaves `summary.json`.
 
 ### ⏳ S6.6 — Key user journeys are covered end to end (L)
-No e2e tests; hero, navigation, events views and the static bundle are only checked by hand. Needed: Playwright-in-Docker e2e for the public site (start page hero, blog/event detail, events views, legacy 301s) and for the static `dist/` bundle.
+No e2e tests; hero, navigation, events views and the static bundle are only checked by hand. Needed: Playwright-in-Docker e2e for the public site (start page hero, blog/event detail, events views, legacy 301s); the static `dist/` bundle *(optional: only if the static publisher is used; move to its own story if needed)*.
 
 **AC:** `pnpm test:e2e` runs in Docker and is part of the gate.
 
