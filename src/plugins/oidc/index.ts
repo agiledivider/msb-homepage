@@ -1,6 +1,7 @@
 import { extractJWT, type PayloadRequest, type Plugin, parseCookies } from 'payload'
 import { OAuth2Plugin } from 'payload-oauth2'
 import { parseKanidmUserInfo } from './claims'
+import { kanidmFetch, providerError } from './http'
 
 /**
  * Kanidm (OIDC) sign-in for the Payload admin. On servers it is the only way in:
@@ -57,7 +58,7 @@ const getToken = async (code: string, req: PayloadRequest): Promise<string> => {
   })
   if (codeVerifier) body.append('code_verifier', codeVerifier)
 
-  const res = await fetch(tokenEndpoint, {
+  const res = await kanidmFetch(tokenEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -70,7 +71,7 @@ const getToken = async (code: string, req: PayloadRequest): Promise<string> => {
 
   const data = (await res.json().catch(() => ({}))) as { access_token?: unknown }
   if (!res.ok || typeof data.access_token !== 'string') {
-    throw new Error(`Kanidm token exchange failed (${res.status}): ${JSON.stringify(data)}`)
+    throw providerError('Kanidm token exchange', res.status, data)
   }
   return data.access_token
 }
@@ -95,11 +96,11 @@ const baseKanidmOAuth = OAuth2Plugin({
   pkceEnabled: true,
   getToken,
   getUserInfo: async (accessToken: string, req: PayloadRequest) => {
-    const res = await fetch(userinfoEndpoint, {
+    const res = await kanidmFetch(userinfoEndpoint, {
       headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
     })
     if (!res.ok) {
-      throw new Error(`Kanidm userinfo request failed (${res.status})`)
+      throw providerError('Kanidm userinfo request', res.status, await res.json().catch(() => null))
     }
     // Verified email + roles that always follow Kanidm group membership (claims.ts).
     const { email, sub, name, roleNames } = parseKanidmUserInfo(await res.json(), rolesClaim)
@@ -130,7 +131,9 @@ const baseKanidmOAuth = OAuth2Plugin({
   },
   successRedirect: () => '/admin',
   failureRedirect: (req: PayloadRequest, err?: unknown) => {
-    req.payload.logger.error({ err }, 'Kanidm OIDC login failed')
+    // Message only: no stack or provider response in the log (S2.4).
+    const reason = err instanceof Error ? (err.name === 'TimeoutError' ? 'Kanidm timed out' : err.message) : 'unknown'
+    req.payload.logger.error({ reason }, 'Kanidm OIDC login failed')
     return '/admin/login?error=oauth'
   },
 })

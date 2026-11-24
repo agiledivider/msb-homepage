@@ -29,9 +29,10 @@ src/payload-types.ts
 *.db-shm
 *.db-wal
 
-# env
+# env: every real env file; only the *.example templates are committed (S2.4)
 .env
-.env*.local
+.env.*
+!.env.*.example
 
 # backup SSH key for an sftp: restic repository (DEPLOY.md "Backups")
 backup-ssh/
