@@ -417,11 +417,13 @@ The backups view shows each backup and its size, but not how much room the backu
 
 **Implementation notes:** `GET /backups` of the backup API (`scripts/backup/backup-api.mjs`) adds `storage`: used from `restic stats --mode raw-data`, size/free from `statfs` (local repo) or the SFTP `df` command (`sftp:host:path`); other backends report no limit. A failing figure leaves the list intact (`storage: null`). Warning rule `storageState()` in `src/plugins/backups/load.ts` (under 10 % free or less than the newest backup's size). Checked over sftp in `pnpm backup:test`. Open: what a real Hetzner Storage Box answers to `df` (check `/admin/backups` on staging). `6b710da`.
 
-### ⏳ S9.3 — Backups that changed nothing are recognisable (S)
+### ✅ S9.3 — Backups that changed nothing are recognisable (S) — 2026-11-24
 **Source:** IDEAS.md 2026-11-22 ("delete byte-identical backups").
 On quiet days the nightly backup stores the same content as the night before. Identical content already takes up no extra storage, but the list fills with entries an admin can't tell apart, which makes picking the right backup to restore harder.
 
 **AC:** a backup whose content is the same as the previous one is marked as unchanged in the backups view; an admin can tell at a glance which backups contain changes; restoring and downloading work for every backup as before; no backup is deleted because of this.
+
+**Implementation notes:** each snapshot in `GET /backups` carries `unchanged` (true/false/null): `restic diff --json` against the next older one, unchanged when no file is added, removed or changed (the nightly DB copy only changes file times). Results cached in `/work/diffs.json` (`makeComparer` in `scripts/backup/backup-api.mjs`), missing ones computed with an 8 s wait, then in the background. Table greys those rows and labels them. With 7-daily retention the neighbour is usually the previous night. Checked in `pnpm backup:test`. `51f960b`.
 
 ### ✅ S9.4 — Editors and reviewers see what state a version is in and what each button does (S) — 2026-11-24
 **Source:** Falk 2026-11-24.

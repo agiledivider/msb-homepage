@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**24 open · 28 done** · ✅ 28 · 🟡 1 · ⏳ 20 · ⏭️ 1 · 🚨 2
+**23 open · 29 done** · ✅ 29 · 🟡 1 · ⏳ 19 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -51,10 +51,10 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 
 All done.
 
-## E9 — Admin area polish (3/4 done)
+## E9 — Admin area polish (4/4 done)
 
-- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L420)
+All done.
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L448)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L450)
