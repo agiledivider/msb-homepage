@@ -401,11 +401,13 @@ Small improvements for the people running the CMS: finding their way in the admi
 
 **Status:** proposed 2026-11-22 from `docs/IDEAS.md`.
 
-### ⏳ S9.1 — The closed admin sidebar still shows its links as icons (S)
+### ✅ S9.1 — The closed admin sidebar still shows its links as icons (S) — 2026-11-24
 **Source:** IDEAS.md 2026-11-22.
 When an editor closes the admin sidebar, its links disappear completely, so every jump to another collection means opening it again. The sidebar entries already have icons.
 
 **AC:** with the sidebar closed, a narrow strip shows one icon per sidebar entry; clicking an icon opens that collection, global or view; hovering or focusing an icon shows its name; the current section is highlighted; on a phone the sidebar behaves as today.
+
+**Implementation notes:** Payload makes the closed sidebar `inert`, so `admin.components.Nav` (`src/components/admin/Nav.tsx`) renders Payload's `DefaultNav` plus a separate fixed rail (`NavRail.tsx`, entries and active rule in `railEntries.ts`); styles in `custom.scss`, hidden ≤768px. Icons come from `scripts/nav-icons.ts` via `data-nav-icon`; Werkstätten and Browse by Folder got icons. `tests/integration/nav-icons-coverage.test.ts` fails when a visible collection/global has no icon. `3adda8e`.
 
 ### ⏳ S9.2 — Admins see how much backup storage is left (S)
 **Source:** IDEAS.md 2026-11-22.

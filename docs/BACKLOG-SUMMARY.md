@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**26 open · 26 done** · ✅ 26 · 🟡 1 · ⏳ 22 · ⏭️ 1 · 🚨 2
+**25 open · 27 done** · ✅ 27 · 🟡 1 · ⏳ 21 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -51,12 +51,11 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 
 All done.
 
-## E9 — Admin area polish (1/4 done)
+## E9 — Admin area polish (2/4 done)
 
-- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L404)
-- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L410)
-- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L416)
+- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L412)
+- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L418)
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L444)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L446)
