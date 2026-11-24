@@ -200,11 +200,17 @@ async function saveRoute(routePath: string): Promise<boolean> {
 
 type Doc = { slug?: string; legacyId?: number | null }
 
-/** Fetch published docs from a collection. Anonymous → `publicRead` hides drafts. */
+/**
+ * Query for live docs: anonymous `publicRead` already hides drafts, and the
+ * reviewStatus filter matches `PUBLIC_WHERE` in src/lib/publicData.ts, so the
+ * crawl list never names a page the app itself would 404.
+ */
+export const LIVE_DOCS_QUERY =
+  'limit=2000&depth=0&pagination=false&select[slug]=true&select[legacyId]=true&where[reviewStatus][equals]=approved'
+
+/** Fetch live (published + approved) docs from a collection. */
 async function publishedDocs(collection: string): Promise<Doc[]> {
-  const res = await fetch(
-    `${ORIGIN}/api/${collection}?limit=2000&depth=0&pagination=false&select[slug]=true&select[legacyId]=true`,
-  )
+  const res = await fetch(`${ORIGIN}/api/${collection}?${LIVE_DOCS_QUERY}`)
   if (!res.ok) {
     console.warn(`  ! /api/${collection} returned ${res.status}`)
     return []

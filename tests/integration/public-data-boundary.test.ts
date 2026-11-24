@@ -205,3 +205,18 @@ describe('robots.txt', () => {
     expect(JSON.stringify(r.rules)).toContain('/admin')
   })
 })
+
+describe('static publisher crawl list', () => {
+  it('asks the REST API for the same live docs the app shows', async () => {
+    const { LIVE_DOCS_QUERY } = await import('../../scripts/publish-static')
+    expect(new URLSearchParams(LIVE_DOCS_QUERY).get('where[reviewStatus][equals]')).toBe('approved')
+    // Anonymous (no user, access enforced) like the publisher's fetch: published + that filter.
+    const res = await payload.find({
+      collection: 'pages',
+      where: { reviewStatus: { equals: 'approved' } },
+      overrideAccess: false,
+      depth: 0,
+    })
+    expect(res.docs.map((d) => d.slug)).toEqual(['live-page'])
+  })
+})
