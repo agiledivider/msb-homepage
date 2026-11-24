@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**27 open · 25 done** · ✅ 25 · 🟡 1 · ⏳ 23 · ⏭️ 1 · 🚨 2
+**26 open · 26 done** · ✅ 26 · 🟡 1 · ⏳ 22 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -25,28 +25,27 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S3.8 — The retired Verein Intro block is gone (S)](BACKLOG.md#L205)
 - ⏳ [S3.6 — Visitors jump to a section of the Verein page (S)](BACKLOG.md#L211)
 
-## E4 — Styleguide 2026-11 (design audit 2026-11-22) (5/8 done)
+## E4 — Styleguide 2026-11 (design audit 2026-11-22) (6/8 done)
 
-- ⏳ [S4.6 — Visitors can switch the site to dark mode (L)](BACKLOG.md#L260)
-- ⏳ [S4.7 — Footer, logo and wording follow the styleguide (S)](BACKLOG.md#L265)
-- ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L270)
+- ⏳ [S4.7 — Footer, logo and wording follow the styleguide (S)](BACKLOG.md#L267)
+- ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L272)
 
 ## E5 — Visitor and editor features (2/8 done)
 
-- ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L289)
-- ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L294)
-- ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L300)
-- ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L305)
-- ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L311)
-- ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L325)
+- ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L291)
+- ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L296)
+- ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L302)
+- ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L307)
+- ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L313)
+- ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L327)
 
 ## E6 — Playbook retrofit (2/7 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L356)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L361)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L366)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L371)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L376)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L358)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L363)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L368)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L373)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L378)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -54,10 +53,10 @@ All done.
 
 ## E9 — Admin area polish (1/4 done)
 
-- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L402)
-- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L408)
-- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L414)
+- ⏳ [S9.1 — The closed admin sidebar still shows its links as icons (S)](BACKLOG.md#L404)
+- ⏳ [S9.2 — Admins see how much backup storage is left (S)](BACKLOG.md#L410)
+- ⏳ [S9.3 — Backups that changed nothing are recognisable (S)](BACKLOG.md#L416)
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L442)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L444)

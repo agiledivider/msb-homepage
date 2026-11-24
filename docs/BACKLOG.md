@@ -257,10 +257,12 @@ Hero photos, event thumbnails and the location map are AI-generated or AI-edited
 
 **Implementation notes:** media field `aiLabel` (none/generated/edited, fe0ad1d) and `components/Media.tsx` draws the label over every crop; all content images render through it (hero and rich-text polaroids, covers, workshop pages, map), so the static bundle gets it from the HTML. 1419a7f marks the built-in fallback map (`MapCard.tsx`, AI-edited OSM screenshot) and the seeded hero photo. Tests: `tests/unit/ki-label.test.tsx`. **Open content item:** on staging, media 1 `hero-werkstatt-3.jpg` and 3 `hero-event-3.jpg` are AI-generated but still unmarked (checked 2026-11-24); an editor sets them to "Bild generiert" in the CMS.
 
-### ⏳ S4.6 — Visitors can switch the site to dark mode (L)
+### ✅ S4.6 — Visitors can switch the site to dark mode (L) — 2026-11-24
 The styleguide now defines a dark "Tannen" palette, but the site has none. The site should follow the visitor's system setting, offer a toggle that is remembered, and use the styleguide's dark palette and Negativ logo.
 
 **AC:** with the system set to dark, every page renders in the Tannen palette and passes the same contrast check as light; the toggle overrides the system setting and survives a reload; the browser bar colour matches.
+
+**Implementation notes:** dark values override the colour tokens in `src/styles/globals.css` (system setting unless `data-theme` forces light/dark), plus a matching `dark:` variant; new role tokens `button*`, `link-hover` and constants `tinte` (text on Markengrün/yellow/orange), `creme` (polaroid paper stays light), `green-600`. `src/lib/theme.ts` holds the head script (applies the stored pick before first paint), theme-color handling and the mode cycle; `ThemeToggle` sits in the header; header swaps to the Negativ logo. Lochwand dark colours are our own pick (styleguide gap). Tests: `tests/unit/theme-palette.test.ts` (styleguide contrast pairs for both palettes, identical dark blocks, toggle). Leftovers: Telekom Stiftung logo faint on dark; map image stays light (d749ee4).
 
 ### ⏳ S4.7 — Footer, logo and wording follow the styleguide (S)
 The footer shows the all-white logo instead of the Negativ variant; pages carry English sub-ledes although the guide says German; the phone number appears in two formats; one image text spells "Makerspace Bonn". The footer should use the Negativ logo, visible copy is German (or English is a deliberate, marked exception), and names and numbers are written one way everywhere.
