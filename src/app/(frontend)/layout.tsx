@@ -52,6 +52,16 @@ export const metadata: Metadata = {
     template: '%s · MakerSpace Bonn',
   },
   description: 'Eine offene Werkstatt für Bonn. Für alle. Sechs Werkstätten, über 40 Maschinen.',
+  // S1.7: files in public/ (pnpm icons), so the static bundle serves the same ones.
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+    ],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
+  },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: { title: 'MakerSpace' },
 }
 
 export const viewport: Viewport = {

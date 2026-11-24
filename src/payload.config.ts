@@ -34,7 +34,14 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
-    meta: { titleSuffix: '· MakerSpace Bonn' },
+    meta: {
+      titleSuffix: '· MakerSpace Bonn',
+      // S1.7: the signet on a dark tile, so the CMS tab differs from the site's (pnpm icons)
+      icons: [
+        { rel: 'icon', type: 'image/svg+xml', url: '/icons/admin-icon.svg' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', url: '/icons/admin-icon-32.png' },
+      ],
+    },
     // "Sign in with Kanidm" button under the password form (renders nothing
     // when Kanidm SSO isn't configured — see src/plugins/oidc).
     components: {
