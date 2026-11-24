@@ -264,12 +264,15 @@ The styleguide now defines a dark "Tannen" palette, but the site has none. The s
 
 **Implementation notes:** dark values override the colour tokens in `src/styles/globals.css` (system setting unless `data-theme` forces light/dark), plus a matching `dark:` variant; new role tokens `button*`, `link-hover` and constants `tinte` (text on Markengrün/yellow/orange), `creme` (polaroid paper stays light), `green-600`. `src/lib/theme.ts` holds the head script (applies the stored pick before first paint), theme-color handling and the mode cycle; `ThemeToggle` sits in the header; header swaps to the Negativ logo. Lochwand dark colours are our own pick (styleguide gap). Tests: `tests/unit/theme-palette.test.ts` (styleguide contrast pairs for both palettes, identical dark blocks, toggle). Leftovers: Telekom Stiftung logo faint on dark; map image stays light (d749ee4).
 
-### ⏳ S4.7 — Footer, logo and wording follow the styleguide (S)
+### ✅ S4.7 — Footer, logo and wording follow the styleguide (S) — 2026-11-24
 The footer shows the all-white logo instead of the Negativ variant; pages carry English sub-ledes although the guide says German; the phone number appears in two formats; one image text spells "Makerspace Bonn". The footer should use the Negativ logo, visible copy is German (or English is a deliberate, marked exception), and names and numbers are written one way everywhere.
 
 **AC:** footer shows the Negativ logo; no unmarked English copy on any page; one phone format; "MakerSpace Bonn" spelled correctly everywhere.
 
+**Implementation notes:** footer uses `logo-horizontal-no-claim-negativ.png` (the white logo's claim doubled the tagline); English ledes on Events/Archiv/Blog and in the hero and seeded page defaults are German (hero default via migration `20261124_012207_german_hero_lede`); phone written as DIN 5008 `0228 81286980`, `telHref()` dials `+49…`, enforced by `tests/fitness/one-phone-format.test.ts`. Staging: Verein, Werkzeug, Mitmachen and Impressum fixed as drafts via MCP. **Changed by Falk:** old archive posts/events and their image texts keep their original "Makerspace Bonn" spelling (members' historic texts). **Open content items (editor, CMS):** submit the 4 drafts; Hero → Unterzeile "Ein Ort zum Selbermachen — für alle in Bonn."; Website-Einstellungen → Footer → Telefon `0228 81286980`. f88f0e8.
+
 ### ⏳ S4.8 — Feed site patterns back into the styleguide (S)
+**Status:** decision sheet for the styleguide team sent to Falk 2026-11-24 (Claude Docs "Styleguide-Lücken: Entscheidungsvorlage"): 5 of 11 decided, 6 open (polaroid, pegboard, carousel pills/date blocks, event tags, radius scale, map style).
 The site has patterns the styleguide doesn't cover (polaroids, pegboard, status strip, carousel pills, event tags, radius scale, icon library, map style, English copy), and two of them conflict with it. The styleguide team decides on each pattern: adopt it into the guide or drop it from the site.
 
 **AC:** each gap listed in the audit has a decision recorded in the styleguide or in this backlog.
