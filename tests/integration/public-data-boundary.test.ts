@@ -40,6 +40,14 @@ const anEvent = (slug: string, status: Status, overrides: Record<string, unknown
   ...overrides,
 })
 
+const aPage = (slug: string, status: Status, overrides: Record<string, unknown> = {}) => ({
+  title: `${LEAK} title ${slug}`,
+  slug,
+  layout: [{ blockType: 'pageIntro', headline: `${LEAK} headline`, lede: `${LEAK} lede ${slug}` }],
+  ...status,
+  ...overrides,
+})
+
 const params = (slug: string) => ({ params: Promise.resolve({ slug }) })
 
 /** Next's notFound() throws an error whose digest names the 404 fallback. */
@@ -66,6 +74,17 @@ beforeAll(async () => {
   await payload.create({
     collection: 'events',
     data: anEvent('live-event', LIVE, { title: 'Live event', description: 'Live description' }) as never,
+    ...SKIP,
+  })
+
+  await payload.create({ collection: 'pages', data: aPage('draft-page', DRAFT) as never, ...SKIP })
+  await payload.create({ collection: 'pages', data: aPage('unapproved-page', UNAPPROVED) as never, ...SKIP })
+  await payload.create({
+    collection: 'pages',
+    data: aPage('live-page', LIVE, {
+      title: 'Live page',
+      layout: [{ blockType: 'pageIntro', headline: 'Wir sind', lede: '  Live lede  ' }],
+    }) as never,
     ...SKIP,
   })
 
@@ -146,5 +165,43 @@ describe('events/calendar.ics feed', () => {
     const ics = await (await GET()).text()
     expect(ics).toContain('Live event')
     expect(ics).not.toContain(LEAK)
+  })
+})
+
+describe('content page /[slug]', () => {
+  it.each(['draft-page', 'unapproved-page'])('generateMetadata(%s) returns nothing', async (slug) => {
+    const { generateMetadata } = await import('@/app/(frontend)/[slug]/page')
+    const meta = await generateMetadata(params(slug))
+    expect(JSON.stringify(meta)).not.toContain(LEAK)
+    expect(meta).toEqual({})
+  })
+
+  it('a live page has its own title, description and link preview', async () => {
+    const { generateMetadata } = await import('@/app/(frontend)/[slug]/page')
+    const meta = await generateMetadata(params('live-page'))
+    expect(meta.title).toBe('Live page')
+    expect(meta.description).toBe('Live lede')
+    expect(meta.alternates?.canonical).toBe('/live-page')
+    expect(meta.openGraph).toMatchObject({ title: 'Live page', description: 'Live lede', url: '/live-page' })
+  })
+})
+
+describe('sitemap.xml', () => {
+  it('lists live pages, posts and events and nothing unpublished or unapproved', async () => {
+    const { default: sitemap } = await import('@/app/(frontend)/sitemap')
+    const urls = (await sitemap()).map((e) => new URL(e.url).pathname)
+    expect(urls).toEqual(
+      expect.arrayContaining(['/', '/blog', '/events', '/live-page', '/blog/live-post', '/events/live-event']),
+    )
+    expect(urls.filter((u) => /draft|unapproved/.test(u))).toEqual([])
+  })
+})
+
+describe('robots.txt', () => {
+  it('points crawlers at the sitemap and keeps them out of the CMS', async () => {
+    const { default: robots } = await import('@/app/robots')
+    const r = robots()
+    expect(String(r.sitemap)).toMatch(/\/sitemap\.xml$/)
+    expect(JSON.stringify(r.rules)).toContain('/admin')
   })
 })

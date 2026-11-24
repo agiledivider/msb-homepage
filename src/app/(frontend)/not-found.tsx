@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { CuttingMat } from '@/components/CuttingMat'
 import { BTN_ON_DARK_HOVER, BTN_ON_DARK_SECONDARY, CARD_LINK, CARD_TITLE, SectionHeading } from '@/components/ui'
 
-export const metadata: Metadata = { title: 'Seite nicht gefunden · MakerSpace Bonn' }
+export const metadata: Metadata = { title: 'Seite nicht gefunden' }
 
 /** Where people coming from a dead (often old Joomla) link most likely want to go. */
 const PLACES: Array<{ href: string; title: string; text: string; icon: IconDefinition }> = [

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { Media } from '@/components/Media'
@@ -5,6 +6,11 @@ import { CARD_LINK, CARD_TITLE } from '@/components/ui'
 import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Blog',
+  description: 'Build-Logs, Berichte und Anleitungen aus der offenen Werkstatt des MakerSpace Bonn.',
+}
 
 export default async function BlogIndexPage() {
   const res = await findPublic({

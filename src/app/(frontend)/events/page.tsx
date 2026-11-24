@@ -1,9 +1,16 @@
+import type { Metadata } from 'next'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { EventsClient } from '@/components/events/EventsClient'
 import { toEventDTO } from '@/components/events/model'
 import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Events & Workshops',
+  description:
+    'Workshops, offene Türen und Treffs im MakerSpace Bonn: vorbeikommen, etwas lernen, die Community treffen.',
+}
 
 export default async function EventsPage() {
   // Every published event, past included — the calendar view can page back into
