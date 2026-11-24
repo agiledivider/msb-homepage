@@ -36,7 +36,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
             <div
               // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
               key={i}
-              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-ink [--focus-ring:var(--color-ink)]' : 'border border-line bg-card'}`}
+              className={`rounded-[14px] p-[26px] ${green ? 'bg-brand text-tinte [--focus-ring:var(--color-tinte)]' : 'border border-line bg-card'}`}
             >
               <div className={`mb-2.5 font-mono text-[14px] tracking-[.06em] ${green ? '' : 'text-muted'}`}>
                 {o.number ? `${o.number} · ` : ''}
@@ -51,7 +51,7 @@ export function JoinOptionsComponent({ options, location }: JoinOptionsBlock) {
                   href={o.link.url || '#'}
                   className={`inline-flex min-h-11 items-center rounded-[9px] px-[18px] text-[14px] ${
                     green
-                      ? 'bg-white font-bold text-brand-text no-underline transition-colors hover:bg-green-deep hover:text-white'
+                      ? 'bg-white font-bold text-green-600 no-underline transition-colors hover:bg-green-deep hover:text-white'
                       : `${BTN_SECONDARY} font-semibold`
                   }`}
                 >

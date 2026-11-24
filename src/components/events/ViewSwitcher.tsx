@@ -23,7 +23,7 @@ export function ViewSwitcher({ current, onChange }: { current: ViewKey; onChange
             onClick={() => onChange(key)}
             aria-current={active ? 'page' : undefined}
             className={`rounded-[7px] px-3.5 py-1.5 transition-colors ${
-              active ? 'bg-brand-text text-white' : 'text-muted hover:text-ink'
+              active ? 'bg-button text-button-text' : 'text-muted hover:text-ink'
             }`}
           >
             {LABELS[key]}

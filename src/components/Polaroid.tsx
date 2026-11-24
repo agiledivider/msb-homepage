@@ -50,7 +50,7 @@ export function Polaroid({
           and spare space shows the mat, not stretched cream. Tapes live inside the
           frame so they track it as it shrinks. */}
       <div
-        className={`relative mx-auto bg-fond px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] max-md:w-full max-md:max-w-[var(--pl-max,calc((100svh_-_176px)_/_1.5_+_14px))] md:px-2.5 md:pt-2.5 md:pb-[42px]`}
+        className={`relative mx-auto bg-creme px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] max-md:w-full max-md:max-w-[var(--pl-max,calc((100svh_-_176px)_/_1.5_+_14px))] md:px-2.5 md:pt-2.5 md:pb-[42px]`}
       >
         <TapeStrip className="-top-2 left-4 h-4 w-12 -rotate-5 md:-top-[13px] md:left-6 md:h-[26px] md:w-[78px]" />
         <TapeStrip className="-bottom-2 right-5 h-4 w-11 -rotate-4 md:-bottom-[11px] md:right-[30px] md:h-6 md:w-[70px]" />
@@ -64,7 +64,7 @@ export function Polaroid({
         {caption ? (
           // Sits in the bottom white margin band (== the frame's pb) and centres
           // within it, so the line box never rides up over the photo on small frames.
-          <div className="absolute inset-x-0 bottom-0 flex h-7 items-center justify-center overflow-hidden px-2 text-center font-hand text-[18px] font-bold leading-none whitespace-nowrap text-ink max-md:[@media(max-height:700px)]:text-[15px] md:h-[42px] md:text-[20px]">
+          <div className="absolute inset-x-0 bottom-0 flex h-7 items-center justify-center overflow-hidden px-2 text-center font-hand text-[18px] font-bold leading-none whitespace-nowrap text-tinte max-md:[@media(max-height:700px)]:text-[15px] md:h-[42px] md:text-[20px]">
             {caption}
           </div>
         ) : null}

@@ -46,7 +46,7 @@ const TEXT_BADGE =
  *  third-party badges. Hover/focus flip to Markengrün with ink (styleguide:
  *  text on Markengrün is ink). */
 const ICON_BADGE =
-  'flex h-11 w-11 items-center justify-center rounded-full bg-green-deep text-kreide shadow-[0_2px_6px_rgba(0,0,0,0.25)] transition-colors hover:bg-brand hover:text-ink focus-visible:bg-brand focus-visible:text-ink focus-visible:outline-green-deep'
+  'flex h-11 w-11 items-center justify-center rounded-full bg-green-deep text-kreide shadow-[0_2px_6px_rgba(0,0,0,0.25)] transition-colors hover:bg-brand hover:text-tinte focus-visible:bg-brand focus-visible:text-tinte focus-visible:outline-green-deep'
 
 /**
  * The location map card. A click anywhere on the map opens OpenStreetMap; a

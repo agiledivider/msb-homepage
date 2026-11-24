@@ -79,7 +79,7 @@ export function CalendarView({
                   {day ? (
                     <div
                       className={`mb-1 flex h-6 w-6 items-center justify-center rounded-full font-mono text-[14px] ${
-                        isToday(day) ? 'bg-brand font-bold text-ink' : 'text-muted'
+                        isToday(day) ? 'bg-brand font-bold text-tinte' : 'text-muted'
                       }`}
                     >
                       {day}

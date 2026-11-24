@@ -26,8 +26,15 @@
   --color-green-pale: #f0f7ea;   /* Grüner Fond · Grün 50 — status OK, selected row, tags */
   --color-fond-gelb: #fdf3d7;    /* Gelber Fond — status "Achtung", soft yellow tags */
   --color-text-gelb: #8a5a00;    /* Gelbe Schrift · Ocker — text on Gelber Fond */
+  --color-button: #33791a;       /* Button · Grün 600 — main button surface */
+  --color-button-hover: #325725; /* Button Hover · Grün 800 */
+  --color-button-text: #ffffff;  /* Button-Schrift · Weiß */
+  --color-link-hover: #325725;   /* green text link under the pointer · Grün 800 */
 
-  /* Brand colours */
+  /* Brand colours: the same in light and dark mode */
+  --color-tinte: #1e1c19;        /* Tinte — text on Markengrün, yellow, orange; also in dark mode (ink flips, tinte doesn't) */
+  --color-green-600: #33791a;    /* Grün 600 — green text on white that must stay green in dark mode too */
+  --color-creme: #faf2e4;        /* Creme — polaroid paper; a photo print stays light in dark mode too */
   --color-brand: #5eb130;        /* Markengrün · Grün 500 — logo, bars, surfaces; text on it is ink, never white */
   --color-green-300: #9cd27d;    /* Grün 300 — light green text on Grün 800/900 */
   --color-green-deep: #325725;   /* Grün 800 — brand surfaces: cutting mat, footer, CTA band; text on it Kreide */
@@ -70,6 +77,69 @@
       opacity: 1;
       transform: none;
     }
+  }
+}
+
+/* ===== Dark mode "Tannen" (styleguide 2026-11, src/build.py MODI) =====
+   Follows the system unless the visitor picked a mode: the toggle sets
+   data-theme="light" | "dark" on <html> (ThemeToggle, script in the layout head).
+   The two blocks must stay identical (tests/unit/theme-palette.test.ts). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-paper: #0c1511;        /* Tannennacht */
+    --color-raster: #111e13;       /* Tanne Raster */
+    --color-card: #13201a;         /* Tannenschwarz */
+    --color-fond: #213129;         /* Tanne hell */
+    --color-line: #2a3c33;         /* Tanne Linie */
+    --color-ink: #ede8de;          /* Kreide */
+    --color-muted: #9ba6a0;        /* Salbei */
+    --color-brand-text: #9cd27d;   /* Grün 300 */
+    --color-green-pale: #1b3714;   /* Grün 900 */
+    --color-fond-gelb: #33280f;    /* Gelb-Fond dunkel */
+    --color-text-gelb: #fcbd30;    /* Mitglieder-Gelb */
+    --color-mint: #152d37;         /* MINT-Fond dunkel */
+    --color-button: #5eb130;       /* Grün 500 */
+    --color-button-hover: #9cd27d; /* Grün 300 */
+    --color-button-text: #1e1c19;  /* Tinte */
+    --color-link-hover: #ede8de;   /* Kreide */
+    --color-pegboard: #1f2b26;    /* Tanne Feld (Lochwand, not in the styleguide yet) */
+    --color-pegboard-edge: #2a3c33; /* Tanne Linie */
+    --color-pegboard-peg: #0c1511; /* Tannennacht */
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: #0c1511;        /* Tannennacht */
+  --color-raster: #111e13;       /* Tanne Raster */
+  --color-card: #13201a;         /* Tannenschwarz */
+  --color-fond: #213129;         /* Tanne hell */
+  --color-line: #2a3c33;         /* Tanne Linie */
+  --color-ink: #ede8de;          /* Kreide */
+  --color-muted: #9ba6a0;        /* Salbei */
+  --color-brand-text: #9cd27d;   /* Grün 300 */
+  --color-green-pale: #1b3714;   /* Grün 900 */
+  --color-fond-gelb: #33280f;    /* Gelb-Fond dunkel */
+  --color-text-gelb: #fcbd30;    /* Mitglieder-Gelb */
+  --color-mint: #152d37;         /* MINT-Fond dunkel */
+  --color-button: #5eb130;       /* Grün 500 */
+  --color-button-hover: #9cd27d; /* Grün 300 */
+  --color-button-text: #1e1c19;  /* Tinte */
+  --color-link-hover: #ede8de;   /* Kreide */
+  --color-pegboard: #1f2b26;     /* Tanne Feld (Lochwand, not in the styleguide yet) */
+  --color-pegboard-edge: #2a3c33; /* Tanne Linie */
+  --color-pegboard-peg: #0c1511; /* Tannennacht */
+}
+
+/* `dark:` utilities follow the same rule (system dark unless forced light, or forced dark). */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where(:root[data-theme="dark"] *) {
+    @slot;
   }
 }
 

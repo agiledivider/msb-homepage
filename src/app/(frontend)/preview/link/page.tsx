@@ -34,7 +34,7 @@ export default async function PreviewLinkPage({
 
   return (
     <>
-      <div className="bg-ink px-4 py-2 text-center font-mono text-[14px] tracking-[.06em] text-white">
+      <div className="bg-tinte px-4 py-2 text-center font-mono text-[14px] tracking-[.06em] text-white">
         VORSCHAU · ENTWURF · NICHT ÖFFENTLICH
       </div>
       {hero}

@@ -113,7 +113,7 @@ export function WorkshopPage({
                 <p className="m-0 max-w-[34em] text-[17px] leading-[1.55] md:text-[18px]">{w.promise || w.verbs}</p>
               ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className={`${CHIP} bg-yellow text-ink`}>Für Mitglieder</span>
+                <span className={`${CHIP} bg-yellow text-tinte`}>Für Mitglieder</span>
                 <span className={`${CHIP} bg-green-pale text-brand-text`}>Offene Tür: für alle &amp; kostenlos</span>
                 {chip ? <span className={`${CHIP} bg-fond-gelb text-text-gelb`}>{chip}</span> : null}
               </div>
@@ -301,7 +301,7 @@ export function WorkshopPage({
                 <ol className="m-0 flex list-none flex-col gap-2.5 p-0">
                   {STEPS.map((s, i) => (
                     <li key={s.strong} className="flex items-center gap-2.5 text-[15px]">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand font-mono text-[14px] text-ink">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand font-mono text-[14px] text-tinte">
                         {i + 1}
                       </span>
                       <span>

@@ -58,6 +58,7 @@ Collected 2026-11-12 from `LEARNINGS.md` and the session notes kept since July 2
 
 | When you… | Check… | Why / source | Version · date |
 |---|---|---|---|
+| edit `src/styles/globals.css` (new `@theme` tokens, dark blocks, `@custom-variant`) and the dev server doesn't show it | check the served CSS (`curl` the `/_next/static/…css` chunk and grep a new value); if it's missing, `pnpm dev:stop && rm -rf .next/dev && pnpm dev:start` | Turbopack kept serving the old `globals.css` while new class names from components did arrive, so new tokens had no definition and the page looked half-applied. A plain restart didn't help; clearing `.next/dev` did. Found during S4.6 (dark mode) | Next 16.4.6, Tailwind 4.3.2 · 2026-11-24 |
 | touch the prism's 3D transforms | tilt and spin live on **one** `preserve-3d` element | nesting two `preserve-3d` levels breaks `backface-visibility` culling; rear faces show mirrored | Chrome / Safari · 2026-07 |
 | position the prism element | `.msb-flip` is `position: relative; width/height: 100%` inside a fixed-height scene, not `position: absolute; inset: 0` | the absolutely positioned prism flattened in WKWebView (`LEARNINGS.md` §3) | WKWebView · 2026-07 |
 | add `will-change: transform` to the prism | don't | breaks backface culling in WebKit | Safari · 2026-07 |

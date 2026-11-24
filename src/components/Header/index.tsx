@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { ThemeToggle } from '../ThemeToggle'
 import { BTN_PRIMARY } from '../ui'
 
 export type NavItem = { label: string; href: string }
@@ -26,10 +27,13 @@ const NAV_CURRENT =
 
 export function Header({
   logoSrc = '/logo/logo-horizontal-no-claim.png',
+  logoDarkSrc = '/logo/logo-horizontal-no-claim-negativ.png',
   nav = DEFAULT_NAV,
   cta = { label: 'Mitglied werden', href: '/mitmachen' },
 }: {
   logoSrc?: string
+  /** Negativ variant for dark mode (styleguide logo swap) */
+  logoDarkSrc?: string
   nav?: NavItem[]
   cta?: NavItem
 }) {
@@ -42,7 +46,9 @@ export function Header({
       <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:gap-4 md:px-8 md:py-3.5 lg:gap-6">
         <Link href="/" className="flex items-center no-underline">
           {/* biome-ignore lint/performance/noImgElement: static logo PNG sized by CSS height; next/image needs fixed dimensions and adds nothing here */}
-          <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto" />
+          <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto dark:hidden" />
+          {/* biome-ignore lint/performance/noImgElement: same as the light logo above */}
+          <img src={logoDarkSrc} alt="MakerSpace Bonn" className="hidden h-9 w-auto dark:block" />
         </Link>
 
         <nav
@@ -69,6 +75,8 @@ export function Header({
             {cta.label} →
           </Link>
         </nav>
+
+        <ThemeToggle className="ml-auto md:ml-0" />
 
         <Link
           href={cta.href}

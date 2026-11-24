@@ -42,7 +42,7 @@ export function SocialLinks({ items }: { items: SocialLink[] }) {
             rel="noopener noreferrer me"
             aria-label={`${socialLabel(s.platform)} (öffnet in neuem Tab)`}
             title={socialLabel(s.platform)}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-kreide ring-1 ring-kreide hover:bg-brand hover:text-ink transition-colors hover:ring-brand"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-kreide ring-1 ring-kreide hover:bg-brand hover:text-tinte transition-colors hover:ring-brand"
           >
             {s.platform === 'matrix' ? (
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true">

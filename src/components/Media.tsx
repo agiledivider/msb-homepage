@@ -108,8 +108,8 @@ function KiLabel({ kind }: { kind: keyof typeof KI_TEXT }) {
       aria-label={`KI · ${KI_TEXT[kind]}`}
       className="pointer-events-none absolute bottom-[clamp(4px,2.5cqw,24px)] left-[clamp(4px,2.5cqw,24px)] flex h-[clamp(13px,3cqw,26px)] font-mono text-[clamp(8px,1.4cqw,12px)] font-medium uppercase leading-none tracking-[.06em]"
     >
-      <span className="flex items-center bg-brand px-[.5em] text-ink">KI</span>
-      <span className="flex items-center bg-ink px-[.6em] text-white @max-[240px]:hidden">{KI_TEXT[kind]}</span>
+      <span className="flex items-center bg-brand px-[.5em] text-tinte">KI</span>
+      <span className="flex items-center bg-tinte px-[.6em] text-white @max-[240px]:hidden">{KI_TEXT[kind]}</span>
     </div>
   )
 }

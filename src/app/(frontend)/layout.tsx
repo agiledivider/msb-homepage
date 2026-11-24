@@ -1,5 +1,5 @@
 import { config } from '@fortawesome/fontawesome-svg-core'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Archivo, Caveat, IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { draftMode } from 'next/headers'
@@ -11,6 +11,7 @@ config.autoAddCss = false
 
 import { RefreshRouteOnSave } from '@/components/RefreshRouteOnSave'
 import { getPayloadClient } from '@/lib/getPayload'
+import { THEME_COLOR, THEME_INIT_SCRIPT } from '@/lib/theme'
 
 // self-hosted, Turbopack-safe fonts; each exposes a --font-* CSS var that the
 // Tailwind theme references. IBM Plex Sans is the MSB brand typeface for body/UI;
@@ -53,13 +54,25 @@ export const metadata: Metadata = {
   description: 'Eine offene Werkstatt für Bonn. Für alle. Sechs Werkstätten, über 40 Maschinen.',
 }
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: THEME_COLOR.light },
+    { media: '(prefers-color-scheme: dark)', color: THEME_COLOR.dark },
+  ],
+}
+
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled: draft } = await draftMode()
   const payload = await getPayloadClient()
   const site = await payload.findGlobal({ slug: 'siteSettings', draft }).catch(() => null)
 
   return (
-    <html lang="de" className={fontVars}>
+    // suppressHydrationWarning: the head script may set data-theme before React hydrates
+    <html lang="de" className={fontVars} suppressHydrationWarning>
+      <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: our own constant (lib/theme.ts), applies the stored light/dark pick before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="m-0 bg-paper font-sans text-ink [background-image:linear-gradient(var(--color-raster)_1px,transparent_1px),linear-gradient(90deg,var(--color-raster)_1px,transparent_1px)] [background-size:27px_27px]">
         {draft ? <RefreshRouteOnSave /> : null}
         <TopStrip status={site?.topStrip?.status ?? undefined} address={site?.topStrip?.address ?? undefined} />

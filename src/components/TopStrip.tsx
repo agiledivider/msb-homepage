@@ -17,7 +17,7 @@ export function TopStrip({
   const labels = state ? stateLabels(state) : { short: status, full: status }
   // Open: Markengrün with ink (never white). Closed: Sicherheitsrot with white,
   // red on purpose so a closed space is unmistakable (Falk, 2026-11-22).
-  const bg = state && !state.open ? 'bg-red text-white' : 'bg-brand text-ink'
+  const bg = state && !state.open ? 'bg-red text-white' : 'bg-brand text-tinte'
 
   return (
     <div

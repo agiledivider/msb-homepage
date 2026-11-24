@@ -20,7 +20,7 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
     <aside className="flex flex-col gap-[18px] lg:sticky lg:top-24">
       {sidebar?.hours?.length ? (
         <div className="overflow-hidden rounded-[14px] border border-line bg-card shadow-[0_18px_40px_-28px_rgba(60,52,30,.4)]">
-          <div className="flex items-center justify-between bg-brand px-[18px] py-3.5 text-ink">
+          <div className="flex items-center justify-between bg-brand px-[18px] py-3.5 text-tinte">
             <span className="font-sans text-[16px] font-bold">{sidebar.hoursTitle}</span>
             <span className="font-mono text-[14px] opacity-85">{sidebar.hoursBadge}</span>
           </div>

@@ -62,7 +62,7 @@ function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boole
     'cursor-pointer rounded-[10px] no-underline flex min-h-11 flex-1 items-center justify-center px-2 py-2 text-center text-[13px] leading-tight md:block md:min-h-0 md:flex-none md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
   const cls = primary
     ? style === 'orange'
-      ? `bg-orange text-ink font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // Maker-Orange: actions/events
+      ? `bg-orange text-tinte font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // Maker-Orange: actions/events
       : `bg-kreide text-green-deep font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // on the mat: Kreide, Grün 800 text
     : `${BTN_ON_DARK_SECONDARY} font-semibold`
   return (
@@ -346,7 +346,7 @@ export function HeroComponent({
             <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>
               {face.badge ? (
                 <div
-                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-orange px-[15px] py-[9px] font-sans text-[14px] font-bold tracking-[.03em] text-ink shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
+                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-orange px-[15px] py-[9px] font-sans text-[14px] font-bold tracking-[.03em] text-tinte shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
                   style={{ top: -20, left: -16, transform: `rotate(${badgeRot[i]})` }}
                 >
                   {face.badge}

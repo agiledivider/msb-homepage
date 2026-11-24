@@ -87,7 +87,7 @@ export function Footer({
             </p>
             <Link
               href="/mitmachen"
-              className="inline-flex min-h-11 items-center rounded-[8px] bg-brand px-4 text-[14px] font-bold text-ink no-underline transition-colors hover:bg-kreide hover:text-green-deep"
+              className="inline-flex min-h-11 items-center rounded-[8px] bg-brand px-4 text-[14px] font-bold text-tinte no-underline transition-colors hover:bg-kreide hover:text-green-deep"
             >
               Jetzt unterstützen →
             </Link>
