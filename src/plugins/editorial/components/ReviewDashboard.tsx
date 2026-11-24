@@ -36,6 +36,112 @@ const loadSection = async (
   return { ...base, groups, total: groups.reduce((n, g) => n + g.docs.length, 0) }
 }
 
+/** S9.5: a draft nobody has submitted yet, with who saved it last. */
+export type OpenDraft = {
+  collection: string
+  collectionLabel: string
+  id: string | number
+  title: string
+  updatedAt: string
+  /** null: saved without a logged-in user (seed, script) or before S9.5 */
+  editor: string | null
+  viaClaude: boolean
+}
+
+const userName = (u: unknown): string | null => {
+  if (!u || typeof u !== 'object') return null
+  const { name, email } = u as { name?: unknown; email?: unknown }
+  return typeof name === 'string' && name ? name : typeof email === 'string' && email ? email : null
+}
+
+/**
+ * S9.5: the latest version is a draft that hasn't been submitted (reviewStatus
+ * 'draft'), across the given collections, newest first. Drafts in review or
+ * sent back have their own boxes.
+ */
+export async function loadOpenDrafts(payload: Payload, collections: string[], limit = 25): Promise<OpenDraft[]> {
+  const perCollection = await Promise.all(
+    collections.map(async (slug) => {
+      const res = await payload.find({
+        collection: slug as never,
+        where: { and: [{ reviewStatus: { equals: 'draft' } }, { _status: { equals: 'draft' } }] } as never,
+        draft: true,
+        overrideAccess: true,
+        depth: 1,
+        sort: '-updatedAt',
+        limit,
+      })
+      const label = payload.config.collections.find((c) => c.slug === slug)?.labels?.plural
+      return (res.docs as Record<string, unknown>[]).map((d) => ({
+        collection: slug,
+        collectionLabel: typeof label === 'string' ? label : slug,
+        id: d.id as string | number,
+        title: typeof d.title === 'string' && d.title ? d.title : `#${String(d.id)}`,
+        updatedAt: String(d.updatedAt),
+        editor: userName(d.lastEditedBy) ?? userName(d.createdBy),
+        viaClaude: d.lastEditedViaClaude === true,
+      }))
+    }),
+  )
+  return perCollection
+    .flat()
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+    .slice(0, limit)
+}
+
+const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
+
+function DraftsBox({ drafts }: { drafts: OpenDraft[] }) {
+  return (
+    <div style={{ border: '1px solid var(--theme-elevation-150)', borderRadius: 8, padding: '18px 20px' }}>
+      <h2 style={{ margin: '0 0 4px', fontSize: 18 }}>Offene Entwürfe</h2>
+      <p style={{ margin: '0 0 12px', color: 'var(--theme-elevation-500)', fontSize: 13 }}>
+        Gespeichert, aber noch nicht zur Prüfung eingereicht.
+      </p>
+      {drafts.length === 0 ? (
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--theme-elevation-450)' }}>Keine offenen Entwürfe.</p>
+      ) : (
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {drafts.map((d) => (
+            <li key={`${d.collection}-${d.id}`} style={{ minWidth: 0 }}>
+              <a
+                href={`/admin/collections/${d.collection}/${d.id}`}
+                style={{
+                  display: 'block',
+                  color: 'var(--theme-text)',
+                  textDecoration: 'none',
+                  fontSize: 14,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                › {d.title}
+              </a>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-500)', paddingLeft: 12 }}>
+                {d.collectionLabel} · {BERLIN.format(new Date(d.updatedAt))} Uhr · {d.editor ?? 'unbekannt'}
+                {d.viaClaude ? (
+                  <span
+                    style={{
+                      marginLeft: 6,
+                      padding: '0 6px',
+                      borderRadius: 4,
+                      border: '1px solid var(--theme-elevation-250)',
+                      fontSize: 11,
+                    }}
+                  >
+                    über Claude
+                  </span>
+                ) : null}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 function SectionBox({ section }: { section: Section }) {
   return (
     <div style={{ border: '1px solid var(--theme-elevation-150)', borderRadius: 8, padding: '18px 20px' }}>
@@ -99,7 +205,8 @@ function SectionBox({ section }: { section: Section }) {
 /**
  * Admin dashboard (beforeDashboard). Shows one box per editorial role the user
  * holds — a reviewer sees "Zur Freigabe" (in_review), an editor sees "Zu
- * überarbeiten" (changes_requested); someone with both roles sees both.
+ * überarbeiten" (changes_requested); someone with both roles sees both. Both
+ * also see "Offene Entwürfe": drafts nobody has submitted yet (S9.5).
  */
 export async function ReviewDashboard({ payload, user: sessionUser }: Props) {
   const collections = workflowCollections(payload)
@@ -133,7 +240,14 @@ export async function ReviewDashboard({ payload, user: sessionUser }: Props) {
   }
   if (bases.length === 0) return null
 
-  const sections = await Promise.all(bases.map((b) => loadSection(payload, collections, b)))
+  // S9.5: reviewers see every open draft, editors those in collections they may edit.
+  const draftCollections = canReview
+    ? collections
+    : collections.filter((slug) => hasPermission(user as never, `${slug}:update`))
+  const [sections, drafts] = await Promise.all([
+    Promise.all(bases.map((b) => loadSection(payload, collections, b))),
+    loadOpenDrafts(payload, draftCollections),
+  ])
 
   return (
     <div
@@ -147,6 +261,7 @@ export async function ReviewDashboard({ payload, user: sessionUser }: Props) {
       {sections.map((s) => (
         <SectionBox key={s.key} section={s} />
       ))}
+      <DraftsBox drafts={drafts} />
     </div>
   )
 }

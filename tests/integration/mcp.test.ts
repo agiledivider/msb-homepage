@@ -158,6 +158,8 @@ describe('Claude via MCP', () => {
     expect(draft?.title).toBe('Von Claude')
     // the new draft isn't approved: it waits for an editor to submit it (S9.4)
     expect(draft?.reviewStatus).toBe('draft')
+    // S9.5: the start page shows it as an open draft written through Claude
+    expect(draft?.lastEditedViaClaude).toBe(true)
   })
 
   it('fills a live workshop page as a draft, the live page stays as it was (S10.1)', async () => {

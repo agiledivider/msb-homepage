@@ -121,6 +121,39 @@ export const reviewFields = (): Field[] => {
       },
       admin: { position: 'sidebar', readOnly: true, condition: whenSet('createdBy') },
     },
+    // S9.5: who saved last, and whether through Claude (the CMS connection), so
+    // the start page can list open drafts with their author. Set from the
+    // request on every save, never from the body; a save without a logged-in
+    // user (seeds, scripts) keeps the previous value.
+    {
+      name: 'lastEditedBy',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Zuletzt bearbeitet von',
+      access: { create: () => false, update: () => false },
+      hooks: {
+        beforeChange: [
+          ({ req, originalDoc }) =>
+            req.user?.collection === 'users' ? req.user.id : (originalDoc?.lastEditedBy ?? null),
+        ],
+      },
+      admin: { position: 'sidebar', readOnly: true, hidden: true },
+    },
+    {
+      name: 'lastEditedViaClaude',
+      type: 'checkbox',
+      label: 'Zuletzt über Claude bearbeitet',
+      access: { create: () => false, update: () => false },
+      hooks: {
+        beforeChange: [
+          ({ req, originalDoc }) =>
+            req.user?.collection === 'users'
+              ? (req.payloadAPI as string) === 'MCP'
+              : (originalDoc?.lastEditedViaClaude ?? false),
+        ],
+      },
+      admin: { position: 'sidebar', readOnly: true, hidden: true },
+    },
     {
       name: 'reviewedBy',
       type: 'relationship',

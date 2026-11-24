@@ -18,6 +18,7 @@ import * as migration_20261123_203510_workshop_cards from './20261123_203510_wor
 import * as migration_20261123_212816_workshops_collection from './20261123_212816_workshops_collection';
 import * as migration_20261123_214954_mcp_workshops from './20261123_214954_mcp_workshops';
 import * as migration_20261124_012207_german_hero_lede from './20261124_012207_german_hero_lede';
+import * as migration_20261124_014146_open_drafts_last_editor from './20261124_014146_open_drafts_last_editor';
 
 export const migrations = [
   {
@@ -118,6 +119,11 @@ export const migrations = [
   {
     up: migration_20261124_012207_german_hero_lede.up,
     down: migration_20261124_012207_german_hero_lede.down,
-    name: '20261124_012207_german_hero_lede'
+    name: '20261124_012207_german_hero_lede',
+  },
+  {
+    up: migration_20261124_014146_open_drafts_last_editor.up,
+    down: migration_20261124_014146_open_drafts_last_editor.down,
+    name: '20261124_014146_open_drafts_last_editor'
   },
 ];
