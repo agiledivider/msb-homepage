@@ -250,10 +250,12 @@ Focus was only visible as the browser default; many buttons and pills were 30–
 
 **Implementation notes:** one link system (rest/hover/focus per link type, shared classes in `src/components/ui.tsx`), a global 3px `:focus-visible` ring (Kreide on dark surfaces), text links underlined, link targets ≥ 44px. **Changed by Falk:** footer links are not underlined at rest (hover only), a deliberate exception to styleguide §7. **Accepted by Falk:** a few buttons stay under 44px: hero carousel pills (37px) and pause button (30px), the List/Kalender/Kacheln switcher on /events (33px), the mobile menu button (42px).
 
-### ⏳ S4.5 — Visitors can tell which images are AI-generated (M)
+### ✅ S4.5 — Visitors can tell which images are AI-generated (M) — 2026-11-24
 Hero photos, event thumbnails and the location map are AI-generated or AI-edited, but the styleguide requires such images to be labelled and they aren't. Editors should mark an image as "generated" or "edited" in the CMS, and the site shows the styleguide's label ("Bild generiert" / "Bild bearbeitet") wherever that image appears.
 
 **AC:** a marked image shows its label in every place it appears, including polaroid frames (static export *(optional: only if the static publisher is used; move to its own story if needed)*); unmarked images show nothing; existing AI images are marked.
+
+**Implementation notes:** media field `aiLabel` (none/generated/edited, fe0ad1d) and `components/Media.tsx` draws the label over every crop; all content images render through it (hero and rich-text polaroids, covers, workshop pages, map), so the static bundle gets it from the HTML. 1419a7f marks the built-in fallback map (`MapCard.tsx`, AI-edited OSM screenshot) and the seeded hero photo. Tests: `tests/unit/ki-label.test.tsx`. **Open content item:** on staging, media 1 `hero-werkstatt-3.jpg` and 3 `hero-event-3.jpg` are AI-generated but still unmarked (checked 2026-11-24); an editor sets them to "Bild generiert" in the CMS.
 
 ### ⏳ S4.6 — Visitors can switch the site to dark mode (L)
 The styleguide now defines a dark "Tannen" palette, but the site has none. The site should follow the visitor's system setting, offer a toggle that is remembered, and use the styleguide's dark palette and Negativ logo.
