@@ -137,7 +137,7 @@ Neither the CMS nor the static site sends security headers, so other sites can f
 
 **Implementation notes:** one list in `src/lib/securityHeaders.mjs` (CSP, X-Frame-Options SAMEORIGIN, nosniff, Referrer-Policy, Permissions-Policy, HSTS max-age 1y without includeSubDomains; no HSTS and a relaxed CSP in dev). The app sends it via `next.config.mjs` `headers()`; `publish-static.ts` writes it into nginx.conf (repeated in locations with their own add_header, nginx doesn't merge) and .htaccess (`Header always set`). CSP keeps `'unsafe-inline'` (Next/Payload inline scripts have no nonces); connect-src allows the SpaceAPI. Checked 2026-11-24: nginx:alpine serves all headers on pages, `/_next/static` and 404; a local production build showed no CSP violations on start page, workshop page, blog post, admin, live preview and hero preview. Open: header scan on the live deployments after deploy; Apache only covered by a test.
 
-### ⏳ S2.4 — Small hardening follow-ups (S)
+### ✅ S2.4 — Small hardening follow-ups (S) — 2026-11-24
 Several small gaps:
 - the draft-preview link can be made to redirect to another site;
 - a hanging Kanidm server hangs the login request;
@@ -147,6 +147,8 @@ Several small gaps:
 Preview should only redirect within the site; Kanidm calls give up after a few seconds; login-failure logs contain only status and error code; no real env file can be committed by accident.
 
 **AC:** `/next/preview?path=//example.com` is rejected; a login against an unreachable Kanidm fails within seconds; `git status` ignores a new `.env.production`.
+
+**Implementation notes:** `src/lib/safePath.ts` (`isSafeRedirectPath`: one leading slash, no backslash or control characters, same origin) guards `/next/preview`; `src/plugins/oidc/http.ts` gives Kanidm token/userinfo calls a 5 s `AbortSignal.timeout` and turns failures into "<what> failed (<status> <error code>)"; the failure log carries only that reason. `.gitignore` ignores `.env.*` except `*.example`. Tests: `tests/unit/hardening.test.ts`. Checked 2026-11-24: dev server answers 400 for `//example.com`, `/\example.com`, `https://example.com`. The timeout is tested with a fake Kanidm, not a real one.
 
 ---
 
