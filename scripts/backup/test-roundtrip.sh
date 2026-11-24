@@ -138,6 +138,10 @@ ok=$(api api-test-only)
 [[ $ok == *" 200" && $(grep -o '"shortId"' <<<"$ok" | wc -l | tr -d ' ') == 2 ]] || fail "API did not list the 2 snapshots: $ok"
 [[ $(api wrong-token) == *" 401" ]] || fail "API accepted a wrong token"
 pass "scheduler serves the backups API: lists snapshots for the token, 401 otherwise, refuses to start without one"
+# S9.3: the second backup (step 6, nothing changed in between) is marked unchanged by restic diff.
+[[ $(grep -o '"unchanged":[a-z]*' <<<"$ok" | tr '\n' ' ') == '"unchanged":true "unchanged":null ' ]] ||
+  fail "second backup of unchanged data not marked unchanged: $ok"
+pass "the second backup of unchanged data is marked unchanged (restic diff), the oldest has nothing to compare"
 
 # 9. A backup started through the API (S8.5): runs once, a second start while
 #    it runs is refused, and the finished run records who started it.

@@ -83,7 +83,7 @@ function StorageLine({ storage }: { storage: StorageState }) {
   }
 }
 
-/** /admin/backups: the site's backups, for admins only (E8: S8.1 list, S8.5 backup now; S9.2 storage). */
+/** /admin/backups: the site's backups, for admins only (E8: S8.1 list, S8.5 backup now; S9.2 storage, S9.3 unchanged backups). */
 export async function BackupsView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { req, locale, permissions, visibleEntities } = initPageResult
   const result = await loadBackups(req.user, {
@@ -142,7 +142,8 @@ export async function BackupsView({ initPageResult, params, searchParams }: Admi
             <UploadRestore apiRoute={req.payload.config.routes.api} />
             <p style={{ marginTop: 16, color: 'var(--theme-elevation-600)' }}>
               {result.snapshots.length === 1 ? '1 Backup' : `${result.snapshots.length} Backups`} von Datenbank und
-              Medien. Aufbewahrt werden 7 tägliche, 4 wöchentliche und 12 monatliche.
+              Medien. Aufbewahrt werden 7 tägliche, 4 wöchentliche und 12 monatliche. Grau: gleicher Inhalt wie das
+              Backup davor (an ruhigen Tagen); auch diese lassen sich herunterladen und wiederherstellen.
             </p>
           </>
         )}

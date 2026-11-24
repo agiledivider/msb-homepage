@@ -9,6 +9,8 @@
 //
 //   GET  /backups  → { snapshots: [{ id, shortId, time, sizeBytes }], lastRun, running, storage }   (S8.1)
 //        storage: { usedBytes, totalBytes, freeBytes } (null where unknown), or null   (S9.2)
+//        each snapshot also has `unchanged`: same content as the next older one
+//        (true/false), or null while not compared yet   (S9.3)
 //   GET  /status   → { lastRun, running }      cheap: no restic call, for polling
 //   POST /backups  { by } → 202 { started: true }, or 409 { running } if one runs   (S8.5)
 //   POST /backups/<id>/download { passphrase, by } → the whole backup (database
@@ -38,13 +40,14 @@
 // Env: BACKUP_API_TOKEN (required), BACKUP_API_PORT (default 8081),
 //      BACKUP_STATUS_FILE (default /work/last-run.json, written by msb-backup),
 //      BACKUP_LOCK_DIR (default /work/backup.lock, held by msb-backup while a backup runs),
-//      RESTIC_REPOSITORY (where the free space is read from, S9.2).
+//      RESTIC_REPOSITORY (where the free space is read from, S9.2),
+//      BACKUP_DIFF_CACHE (default /work/diffs.json: comparisons already made, S9.3).
 // Plain JS without dependencies: the backup image has Node but no node_modules.
 
 import { execFile, spawn } from 'node:child_process'
 import { createCipheriv, createDecipheriv, createHash, pbkdf2, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createReadStream, createWriteStream } from 'node:fs'
-import { mkdir, open, readFile, rm, stat, statfs } from 'node:fs/promises'
+import { mkdir, open, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { PassThrough, pipeline } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
@@ -152,6 +155,76 @@ export function parseSftpDf(text) {
     return { totalBytes, freeBytes }
   }
   return null
+}
+
+/**
+ * `restic diff --json older newer` → true when the newer backup holds the same
+ * content: no file added, removed or changed. Only file times differ then
+ * (the database is copied fresh every night), which isn't a change (S9.3).
+ * @returns {boolean}
+ */
+export function parseDiffUnchanged(text) {
+  const stats = String(text)
+    .split('\n')
+    .filter((l) => l.trim())
+    .map((l) => JSON.parse(l))
+    .find((m) => m?.message_type === 'statistics')
+  if (!stats || !Number.isSafeInteger(stats.changed_files) || !stats.added || !stats.removed) {
+    throw new Error('restic diff: no statistics')
+  }
+  const none = (side) => side.files === 0 && side.dirs === 0 && side.others === 0
+  return stats.changed_files === 0 && none(stats.added) && none(stats.removed)
+}
+
+/** The pairs to compare: each snapshot with the next older one (list is newest first). */
+export function neighbourPairs(snapshots) {
+  return snapshots.slice(0, -1).map((s, i) => ({ newer: s.id, older: snapshots[i + 1].id }))
+}
+
+/**
+ * Remembers which neighbours have the same content and fills in the missing
+ * comparisons one at a time. Snapshots never change, so a result stays true;
+ * the cache only grows by the pairs still in the list.
+ * @param {{ diff: (older: string, newer: string) => Promise<boolean>, load: () => Promise<Record<string, boolean>>, save: (cache: Record<string, boolean>) => Promise<void>, log: (msg: string) => void }} deps
+ */
+export function makeComparer({ diff, load, save, log }) {
+  /** @type {Record<string, boolean> | null} */
+  let cache = null
+  /** @type {Promise<void>} */
+  let queue = Promise.resolve()
+  const key = (p) => `${p.older}..${p.newer}`
+  const ready = async () => {
+    if (!cache) cache = await load().catch(() => ({}))
+    return cache
+  }
+  /**
+   * Annotate the list; missing comparisons are started and awaited for at most
+   * `waitMs`, then keep running for the next visit.
+   * @param {Snapshot[]} snapshots newest first
+   */
+  return async (snapshots, waitMs = 8000) => {
+    const known = await ready()
+    const pairs = neighbourPairs(snapshots)
+    const missing = pairs.filter((p) => !(key(p) in known))
+    if (missing.length) {
+      queue = queue.then(async () => {
+        for (const p of missing) {
+          if (key(p) in known) continue
+          try {
+            known[key(p)] = await diff(p.older, p.newer)
+          } catch (err) {
+            log(`comparing ${p.older} with ${p.newer} failed: ${err instanceof Error ? err.message : String(err)}`)
+          }
+        }
+        const keep = new Set(pairs.map(key))
+        for (const k of Object.keys(known)) if (!keep.has(k)) delete known[k]
+        await save(known).catch((err) => log(`saving comparisons failed: ${err.message}`))
+      })
+      await Promise.race([queue, new Promise((r) => setTimeout(r, waitMs).unref?.())])
+    }
+    const byNewer = new Map(pairs.map((p) => [p.newer, known[key(p)] ?? null]))
+    return snapshots.map((s) => ({ ...s, unchanged: byNewer.get(s.id) ?? null }))
+  }
 }
 
 /**
@@ -342,6 +415,7 @@ async function readJsonBody(req) {
  *   token: string,
  *   listSnapshots: () => Promise<Snapshot[]>,
  *   readStorage?: () => Promise<Storage>,
+ *   compare?: (snapshots: Snapshot[]) => Promise<(Snapshot & { unchanged: boolean | null })[]>,
  *   readLastRun: () => Promise<LastRun | null>,
  *   readRunning: () => Promise<Running | null>,
  *   startBackup: (by: string | null) => 'started' | 'running',
@@ -363,6 +437,7 @@ export function makeHandler({
   token,
   listSnapshots,
   readStorage = async () => null,
+  compare = async (snapshots) => snapshots.map((s) => ({ ...s, unchanged: null })),
   readLastRun,
   readRunning,
   startBackup,
@@ -394,7 +469,7 @@ export function makeHandler({
           readRunning(),
           readLastRestore(),
         ])
-        return send(200, { snapshots, lastRun, running, lastRestore, storage: await storage })
+        return send(200, { snapshots: await compare(snapshots), lastRun, running, lastRestore, storage: await storage })
       }
       if (req.method === 'GET' && path === '/status') {
         const [lastRun, running, lastRestore] = await Promise.all([readLastRun(), readRunning(), readLastRestore()])
@@ -542,6 +617,29 @@ async function main() {
     )
     return parseSnapshots(JSON.parse(stdout))
   }
+  const diffCache = process.env.BACKUP_DIFF_CACHE || '/work/diffs.json'
+  const compare = makeComparer({
+    diff: async (older, newer) => {
+      const { stdout } = await execFileAsync('restic', ['diff', '--json', '--no-lock', older, newer], {
+        timeout: 120_000,
+        maxBuffer: 64 * 1024 * 1024,
+      })
+      return parseDiffUnchanged(stdout)
+    },
+    load: async () => {
+      const text = await readOptional(diffCache)
+      const parsed = text === null ? {} : JSON.parse(text)
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? Object.fromEntries(Object.entries(parsed).filter(([, v]) => typeof v === 'boolean'))
+        : {}
+    },
+    save: async (cache) => {
+      const tmp = `${diffCache}.tmp`
+      await writeFile(tmp, JSON.stringify(cache))
+      await rename(tmp, diffCache)
+    },
+    log,
+  })
   const readStorage = async () => {
     const [stats, space] = await Promise.all([
       execFileAsync('restic', ['stats', '--mode', 'raw-data', '--json', '--no-lock'], {
@@ -704,6 +802,7 @@ async function main() {
       token,
       listSnapshots,
       readStorage,
+      compare,
       readLastRun,
       readRunning,
       startBackup,

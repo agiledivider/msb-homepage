@@ -6,7 +6,15 @@ import { fmtSize } from '../format'
 import { generatePassphrase } from '../passphrase'
 import { RestorePanel } from './RestorePanel'
 
-type Row = { id: string; shortId: string; time: string; sizeBytes: number | null; beforeRestore: boolean }
+type Row = {
+  id: string
+  shortId: string
+  time: string
+  sizeBytes: number | null
+  beforeRestore: boolean
+  /** S9.3: same content as the backup below it */
+  unchanged: boolean | null
+}
 
 const BERLIN = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Berlin' })
 const fmtWhen = (iso: string) => `${BERLIN.format(new Date(iso))} Uhr`
@@ -17,6 +25,9 @@ const cell: CSSProperties = {
   textAlign: 'left',
 }
 const mono: CSSProperties = { fontFamily: 'var(--font-mono, monospace)' }
+const note: CSSProperties = { display: 'block', fontSize: 12, color: 'var(--theme-elevation-600)' }
+/** S9.3: backups without changes step back, so the ones with changes stand out. */
+const quiet: CSSProperties = { color: 'var(--theme-elevation-500)' }
 const ITERATIONS = 600000
 
 /** Backups list with an encrypted download per backup (S8.1 list, S8.2 download). */
@@ -36,15 +47,12 @@ export function BackupTable({ apiRoute, snapshots }: { apiRoute: string; snapsho
         <tbody>
           {snapshots.map((s) => (
             <tr key={s.id}>
-              <td style={cell}>{fmtWhen(s.time)}</td>
-              <td style={cell}>{fmtSize(s.sizeBytes)}</td>
+              <td style={s.unchanged ? { ...cell, ...quiet } : cell}>{fmtWhen(s.time)}</td>
+              <td style={s.unchanged ? { ...cell, ...quiet } : cell}>{fmtSize(s.sizeBytes)}</td>
               <td style={cell}>
-                <span style={mono}>{s.shortId}</span>
-                {s.beforeRestore ? (
-                  <span style={{ display: 'block', fontSize: 12, color: 'var(--theme-elevation-600)' }}>
-                    vor Wiederherstellung
-                  </span>
-                ) : null}
+                <span style={s.unchanged ? { ...mono, ...quiet } : mono}>{s.shortId}</span>
+                {s.beforeRestore ? <span style={note}>vor Wiederherstellung</span> : null}
+                {s.unchanged ? <span style={note}>unverändert zum Backup davor</span> : null}
               </td>
               <td style={{ ...cell, display: 'flex', gap: 6 }}>
                 <Button

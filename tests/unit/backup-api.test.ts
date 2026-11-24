@@ -16,8 +16,11 @@ import {
   decryptFile,
   downloadName,
   encryptStream,
+  makeComparer,
   makeHandler,
+  neighbourPairs,
   PBKDF2_ITERATIONS,
+  parseDiffUnchanged,
   parseLastRestore,
   parseLastRun,
   parsePreview,
@@ -130,6 +133,102 @@ describe('storage figures (S9.2)', () => {
     ['human-readable units', '   512GB    301GB    184GB    210GB          58%\n'],
   ])('gives null for %s', (_label, out) => {
     expect(parseSftpDf(out)).toBeNull()
+  })
+})
+
+describe('unchanged backups (S9.3)', () => {
+  const stats = (over: Record<string, unknown> = {}) =>
+    JSON.stringify({
+      message_type: 'statistics',
+      changed_files: 0,
+      added: { files: 0, dirs: 0, others: 0, data_blobs: 0, tree_blobs: 3, bytes: 2699 },
+      removed: { files: 0, dirs: 0, others: 0, data_blobs: 0, tree_blobs: 3, bytes: 2699 },
+      ...over,
+    })
+  const side = (files: number, dirs = 0) => ({ files, dirs, others: 0, data_blobs: 0, tree_blobs: 0, bytes: 0 })
+
+  it.each([
+    // real output of two back-to-back backups without edits: only file times differ
+    ['nothing changed but file times', stats(), true],
+    [
+      'a changed file',
+      `{"message_type":"change","path":"/work/db/msb.db","modifier":"M"}\n${stats({ changed_files: 1 })}`,
+      false,
+    ],
+    ['a new file', stats({ added: side(1) }), false],
+    ['a removed file', stats({ removed: side(1) }), false],
+    ['a removed folder', stats({ removed: side(0, 1) }), false],
+  ])('%s → unchanged: %s', (_label, out, unchanged) => {
+    expect(parseDiffUnchanged(out)).toBe(unchanged)
+  })
+
+  it('refuses output without statistics instead of guessing', () => {
+    expect(() => parseDiffUnchanged('')).toThrow()
+  })
+
+  const snaps = (...ids: string[]) =>
+    ids.map((id) => ({ id, shortId: id, time: '2026-11-21T02:30:00.000Z', sizeBytes: 1, beforeRestore: false }))
+
+  it('pairs each backup with the next older one', () => {
+    expect(neighbourPairs(snaps('c', 'b', 'a'))).toEqual([
+      { newer: 'c', older: 'b' },
+      { newer: 'b', older: 'a' },
+    ])
+    expect(neighbourPairs(snaps('a'))).toEqual([])
+  })
+
+  it('marks the backups, compares each pair once, and forgets pairs no longer listed', async () => {
+    const calls: string[] = []
+    const saved: Record<string, boolean>[] = []
+    const compare = makeComparer({
+      diff: async (older: string, newer: string) => {
+        calls.push(`${older}..${newer}`)
+        return newer === 'c'
+      },
+      load: async () => ({ 'x..y': true }),
+      save: async (c: Record<string, boolean>) => {
+        saved.push({ ...c })
+      },
+      log: () => {},
+    })
+    const out = await compare(snaps('c', 'b', 'a'))
+    expect(out.map((s: { id: string; unchanged: boolean | null }) => [s.id, s.unchanged])).toEqual([
+      ['c', true],
+      ['b', false],
+      ['a', null],
+    ])
+    await compare(snaps('c', 'b', 'a'))
+    expect(calls).toEqual(['b..c', 'a..b'])
+    expect(saved.at(-1)).toEqual({ 'b..c': true, 'a..b': false })
+  })
+
+  it('answers without waiting for slow comparisons, and has them on the next visit', async () => {
+    let finish: (v: boolean) => void = () => {}
+    const compare = makeComparer({
+      diff: () => new Promise<boolean>((r) => (finish = r)),
+      load: async () => ({}),
+      save: async () => {},
+      log: () => {},
+    })
+    const first = await compare(snaps('b', 'a'), 20)
+    expect(first[0].unchanged).toBeNull()
+    finish(true)
+    await new Promise((r) => setTimeout(r, 0))
+    expect((await compare(snaps('b', 'a'), 20))[0].unchanged).toBe(true)
+  })
+
+  it('leaves a pair unmarked when restic fails, and logs it', async () => {
+    const logs: string[] = []
+    const compare = makeComparer({
+      diff: async () => {
+        throw new Error('repository is locked')
+      },
+      load: async () => ({}),
+      save: async () => {},
+      log: (m: string) => logs.push(m),
+    })
+    expect((await compare(snaps('b', 'a')))[0].unchanged).toBeNull()
+    expect(logs.join()).toContain('repository is locked')
   })
 })
 
@@ -275,6 +374,15 @@ describe('GET /backups', () => {
     expect(res.status).toBe(502)
     expect(await res.text()).not.toContain('password')
     expect(logs.join('\n')).toContain('wrong password')
+  })
+
+  it('marks each backup with whether it changed (S9.3), unmarked by default', async () => {
+    const { get } = await start()
+    expect((await (await get('/backups', 'secret-token')).json()).snapshots[0].unchanged).toBeNull()
+    const marked = await start({
+      compare: async (list) => list.map((s) => ({ ...s, unchanged: true })),
+    })
+    expect((await (await marked.get('/backups', 'secret-token')).json()).snapshots[0].unchanged).toBe(true)
   })
 
   it('adds the storage figures to the list (S9.2)', async () => {

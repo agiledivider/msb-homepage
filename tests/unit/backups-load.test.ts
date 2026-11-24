@@ -539,3 +539,21 @@ describe('storageState (S9.2)', () => {
     expect(out.kind === 'ok' && out.storage).toEqual({ kind: 'unknown' })
   })
 })
+
+describe('unchanged backups (S9.3)', () => {
+  it('passes the mark through, and treats an older backup service without it as unknown', async () => {
+    const out = await load(
+      admin,
+      fakeFetch({
+        snapshots: [
+          snapshot('2026-11-22T02:30:00.000Z', { unchanged: true }),
+          { id: 'old', shortId: 'old00000', time: '2026-11-21T02:30:00.000Z', sizeBytes: 1, beforeRestore: false },
+        ],
+        lastRun: null,
+        running: null,
+        lastRestore: null,
+      }),
+    )
+    expect(out.kind === 'ok' && out.snapshots.map((s) => s.unchanged)).toEqual([true, null])
+  })
+})

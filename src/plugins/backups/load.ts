@@ -24,6 +24,8 @@ const SnapshotSchema = z.object({
   /** The safety backup a restore took of the state it replaced (S8.3). */
   beforeRestore: z.boolean(),
 })
+/** In the list only (S9.3): same content as the next older backup; null = not compared (yet), or the oldest. */
+const ListedSnapshotSchema = SnapshotSchema.extend({ unchanged: z.boolean().nullable().default(null) })
 const LastRunSchema = z.object({
   status: z.enum(['ok', 'failed']),
   at: z.string().datetime(),
@@ -87,13 +89,14 @@ const bytes = z.number().int().nonnegative().nullable()
 /** S9.2: null figures are ones the storage doesn't report (e.g. S3 has no limit to tell). */
 const StorageSchema = z.object({ usedBytes: bytes, totalBytes: bytes, freeBytes: bytes })
 const BackupListSchema = StatusSchema.extend({
-  snapshots: z.array(SnapshotSchema),
+  snapshots: z.array(ListedSnapshotSchema),
   /** null: the backup service couldn't read the figures this time. */
   storage: StorageSchema.nullable().default(null),
 })
 const ConflictSchema = z.object({ running: RunningSchema.nullable() })
 
 export type Snapshot = z.infer<typeof SnapshotSchema>
+export type ListedSnapshot = z.infer<typeof ListedSnapshotSchema>
 export type Storage = z.infer<typeof StorageSchema>
 /**
  * What the view says about the backup storage:
@@ -119,7 +122,7 @@ export type BackupsResult =
   | Denied
   | {
       kind: 'ok'
-      snapshots: Snapshot[]
+      snapshots: ListedSnapshot[]
       lastRun: LastRun | null
       running: Running | null
       lastRestore: LastRestore | null

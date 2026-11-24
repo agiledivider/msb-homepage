@@ -265,6 +265,11 @@ use and, where the storage reports it, how much is left, with a warning under
 10 % free or less room than one more full backup (S9.2): a local repository
 reports its disk, an `sftp:host:path` one the server's `df` (a Storage Box
 answers with its quota), S3/B2/`rest:` report no limit, and the page says so.
+A backup with the same content as the one before it (a quiet day) is greyed
+out and marked "unverändert" (S9.3): the backup service compares neighbours
+with `restic diff` (only file times differ → unchanged) and keeps the results
+in `/work/diffs.json`; after a container recreate it compares them again.
+Nothing is deleted because of it.
 "Jetzt sichern" there starts a backup at
 once (one at a time: a lock in the script also covers the nightly run; the log
 and the page name who started it). "Herunterladen" next to a backup gives
