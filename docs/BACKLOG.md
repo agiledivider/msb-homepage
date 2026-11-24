@@ -409,11 +409,13 @@ When an editor closes the admin sidebar, its links disappear completely, so ever
 
 **Implementation notes:** Payload makes the closed sidebar `inert`, so `admin.components.Nav` (`src/components/admin/Nav.tsx`) renders Payload's `DefaultNav` plus a separate fixed rail (`NavRail.tsx`, entries and active rule in `railEntries.ts`); styles in `custom.scss`, hidden ≤768px. Icons come from `scripts/nav-icons.ts` via `data-nav-icon`; Werkstätten and Browse by Folder got icons. `tests/integration/nav-icons-coverage.test.ts` fails when a visible collection/global has no icon. `3adda8e`.
 
-### ⏳ S9.2 — Admins see how much backup storage is left (S)
+### ✅ S9.2 — Admins see how much backup storage is left (S) — 2026-11-24
 **Source:** IDEAS.md 2026-11-22.
 The backups view shows each backup and its size, but not how much room the backup storage has left, so a full storage would only be noticed when a nightly backup fails.
 
 **AC:** the backups view shows how much space the backups use in total and, where the storage reports it, how much is left; when little space is left, the view warns clearly before backups start failing; when the storage reports no limit, the view says so instead of showing a made-up number.
+
+**Implementation notes:** `GET /backups` of the backup API (`scripts/backup/backup-api.mjs`) adds `storage`: used from `restic stats --mode raw-data`, size/free from `statfs` (local repo) or the SFTP `df` command (`sftp:host:path`); other backends report no limit. A failing figure leaves the list intact (`storage: null`). Warning rule `storageState()` in `src/plugins/backups/load.ts` (under 10 % free or less than the newest backup's size). Checked over sftp in `pnpm backup:test`. Open: what a real Hetzner Storage Box answers to `df` (check `/admin/backups` on staging). `6b710da`.
 
 ### ⏳ S9.3 — Backups that changed nothing are recognisable (S)
 **Source:** IDEAS.md 2026-11-22 ("delete byte-identical backups").
