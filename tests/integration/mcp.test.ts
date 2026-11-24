@@ -154,7 +154,10 @@ describe('Claude via MCP', () => {
     const published = (await findBySlug('pages', slug)) as Doc
     expect(published._status).toBe('published')
     expect(published.title).toBe('Live-Titel')
-    expect((await findBySlug('pages', slug, true))?.title).toBe('Von Claude')
+    const draft = await findBySlug('pages', slug, true)
+    expect(draft?.title).toBe('Von Claude')
+    // the new draft isn't approved: it waits for an editor to submit it (S9.4)
+    expect(draft?.reviewStatus).toBe('draft')
   })
 
   it('fills a live workshop page as a draft, the live page stays as it was (S10.1)', async () => {
