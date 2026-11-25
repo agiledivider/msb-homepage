@@ -46,7 +46,7 @@ describe('parseOpeningHours', () => {
 
   it('works when the feed lacks its VTIMEZONE block', () => {
     ICAL.TimezoneService.reset() // forget the zone an earlier test registered
-    const noTz = ICS.replace(/BEGIN:VTIMEZONE[\s\S]*?END:VTIMEZONE\r\n/, '')
+    const noTz = ICS.replace(/BEGIN:VTIMEZONE[\s\S]*?END:VTIMEZONE\r?\n/, '')
     expect(noTz).not.toContain('VTIMEZONE')
     expect(parseOpeningHours(noTz, WED_NOON)).toEqual(EXPECTED)
   })
