@@ -41,6 +41,9 @@ importers:
       graphql:
         specifier: ^16.9.0
         version: 16.14.2
+      ical.js:
+        specifier: 2.2.1
+        version: 2.2.1
       next:
         specifier: 16.4.6
         version: 16.4.6(@types/node@24.13.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)(sass@1.77.4)
@@ -2340,6 +2343,9 @@ packages:
   http-status@2.1.0:
     resolution: {integrity: sha512-O5kPr7AW7wYd/BBiOezTwnVAnmSNFY+J7hlZD2X5IOxVBetjcHAiTXhzj0gMrnojQlwy+UT1/Y3H3vJ3UlmvLA==}
     engines: {node: '>= 0.4.0'}
+
+  ical.js@2.2.1:
+    resolution: {integrity: sha512-yK/UlPbEs316igb/tjRgbFA8ZV75rCsBJp/hWOatpyaPNlgw0dGDmU+FoicOcwX4xXkeXOkYiOmCqNPFpNPkQg==}
 
   iconv-lite@0.7.3:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
@@ -5623,6 +5629,8 @@ snapshots:
       toidentifier: 1.0.1
 
   http-status@2.1.0: {}
+
+  ical.js@2.2.1: {}
 
   iconv-lite@0.7.3:
     dependencies:

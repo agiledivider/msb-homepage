@@ -19,6 +19,8 @@ import * as migration_20261123_212816_workshops_collection from './20261123_2128
 import * as migration_20261123_214954_mcp_workshops from './20261123_214954_mcp_workshops';
 import * as migration_20261124_012207_german_hero_lede from './20261124_012207_german_hero_lede';
 import * as migration_20261124_014146_open_drafts_last_editor from './20261124_014146_open_drafts_last_editor';
+import * as migration_20261125_224032_site_opening_hours_calendar from './20261125_224032_site_opening_hours_calendar';
+import * as migration_20261125_231747_site_opening_hours_show from './20261125_231747_site_opening_hours_show';
 
 export const migrations = [
   {
@@ -124,6 +126,16 @@ export const migrations = [
   {
     up: migration_20261124_014146_open_drafts_last_editor.up,
     down: migration_20261124_014146_open_drafts_last_editor.down,
-    name: '20261124_014146_open_drafts_last_editor'
+    name: '20261124_014146_open_drafts_last_editor',
+  },
+  {
+    up: migration_20261125_224032_site_opening_hours_calendar.up,
+    down: migration_20261125_224032_site_opening_hours_calendar.down,
+    name: '20261125_224032_site_opening_hours_calendar',
+  },
+  {
+    up: migration_20261125_231747_site_opening_hours_show.up,
+    down: migration_20261125_231747_site_opening_hours_show.down,
+    name: '20261125_231747_site_opening_hours_show'
   },
 ];

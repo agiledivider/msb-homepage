@@ -9,9 +9,27 @@ import { SectionHeading } from '@/components/ui'
 import { startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
+import { loadOpeningHours, pickHourRows } from '@/lib/openingHours'
 import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic' // always reflect the latest content
+
+/**
+ * Rows for the Öffnungszeiten box (S5.12): the calendar feed from the site
+ * settings, else the editors' fallback rows. The feed URL may be secret, so it
+ * is read here on the server (local API, full access) and never passed on.
+ */
+async function openingHoursRows() {
+  const payload = await getPayloadClient()
+  const site = await payload.findGlobal({ slug: 'siteSettings', depth: 0 }).catch(() => null)
+  const url = site?.openingHours?.icsUrl
+  const show = site?.openingHours?.show ?? 'all'
+  const live = await loadOpeningHours(url, { now: new Date(), show }).catch(() => null)
+  // Never log the URL itself: it may be a secret address.
+  if (url && live === null)
+    payload.logger.warn('opening hours: calendar link gives no usable feed, showing fallback rows')
+  return pickHourRows(live, site?.openingHours?.fallback)
+}
 
 export default async function StartPage() {
   const { isEnabled: draft } = await draftMode()
@@ -19,7 +37,7 @@ export default async function StartPage() {
   // Day-only events stay "upcoming" for their whole Berlin day (see eventTime).
   const since = startOfTodayBerlin().toISOString()
 
-  const [hero, blogRes, upcomingRes, feedRes] = await Promise.all([
+  const [hero, blogRes, upcomingRes, feedRes, hours] = await Promise.all([
     payload.findGlobal({ slug: 'heroSettings', depth: 2, draft }),
     findPublic({
       collection: 'blog',
@@ -43,6 +61,7 @@ export default async function StartPage() {
       limit: 25,
       depth: 2,
     }),
+    openingHoursRows(),
   ])
 
   // fallback: if nothing upcoming, use the most recent past event
@@ -84,14 +103,8 @@ export default async function StartPage() {
         <EventFeedSidebar
           sidebar={{
             hoursTitle: 'Öffnungszeiten',
-            hoursBadge: 'DIESE WOCHE',
-            hours: [
-              { day: 'Do 02.', note: 'Offen', time: '18–21' },
-              { day: 'Sa 05.', note: 'Handarbeit', time: '10–14' },
-              { day: 'Mo 06.', note: 'Offene Tür', time: 'ab 10', highlight: true },
-              { day: 'Di 07.', note: 'Offen', time: '18–21' },
-              { day: 'Mi 08.', note: 'Offen', time: '18:30–21' },
-            ],
+            hoursBadge: 'NÄCHSTE 14 TAGE',
+            hours,
             hoursFootnote: '„Offen" = für Mitglieder. Die Offene Tür ist für alle & kostenlos.',
             infoEyebrow: 'NEU HIER?',
             infoText: 'Komm einfach zur Offenen Tür — unverbindliche Führung durch alle Werkstätten inklusive.',

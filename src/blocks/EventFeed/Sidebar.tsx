@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Fragment } from 'react'
 import { MONO_LINK } from '../../components/ui'
 import type { LinkValue } from '../fields'
 
@@ -14,6 +15,24 @@ export type EventFeedSidebarData = {
   infoLink?: LinkValue | null
 } | null
 
+type DayGroup = { day: string; entries: HourRow[]; highlight: boolean }
+
+/**
+ * Consecutive rows of the same day become one group, so the date shows once
+ * (e.g. Monday with 10–14 and 18–21). A group is highlighted when any entry is.
+ */
+export function groupByDay(rows: HourRow[]): DayGroup[] {
+  const groups: DayGroup[] = []
+  for (const row of rows) {
+    const day = row.day?.trim() ?? ''
+    const last = groups.at(-1)
+    if (last && day && last.day === day) last.entries.push(row)
+    else groups.push({ day, entries: [row], highlight: false })
+  }
+  for (const g of groups) g.highlight = g.entries.some((e) => e.highlight)
+  return groups
+}
+
 /** The sticky right column of the "Was läuft" feed: opening hours + info card. */
 export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }) {
   return (
@@ -25,20 +44,24 @@ export function EventFeedSidebar({ sidebar }: { sidebar?: EventFeedSidebarData }
             <span className="font-mono text-[14px] opacity-85">{sidebar.hoursBadge}</span>
           </div>
           <div className="px-[18px] pb-3.5 pt-1.5">
-            {sidebar.hours.map((r, i) => (
+            {groupByDay(sidebar.hours).map((g, gi) => (
               <div
-                // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered CMS list in editor order, items have no client state
-                key={i}
-                className={`flex items-center justify-between border-b border-line py-[11px] ${
-                  r.highlight ? '-mx-[18px] bg-green-pale px-[18px]' : ''
+                // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered list in date order, a day can repeat in editor rows
+                key={gi}
+                className={`grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-x-3 gap-y-1.5 border-b border-line py-[11px] text-[14px] ${
+                  g.highlight ? '-mx-[18px] bg-green-pale px-[18px] text-brand-text' : ''
                 }`}
               >
-                <span className={`text-[14px] ${r.highlight ? 'text-brand-text' : ''}`}>
-                  <strong>{r.day}</strong> {r.highlight ? r.note : <span className="text-muted">{r.note}</span>}
-                </span>
-                <span className={`font-mono text-[14px] ${r.highlight ? 'text-brand-text' : 'text-muted'}`}>
-                  {r.time}
-                </span>
+                {g.entries.map((e, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: server-rendered list, entries have no client state
+                  <Fragment key={i}>
+                    <strong className="whitespace-nowrap">{i === 0 ? g.day : null}</strong>
+                    <span className={g.highlight ? '' : 'text-muted'}>{e.note}</span>
+                    <span className={`whitespace-nowrap font-mono ${g.highlight ? 'text-brand-text' : 'text-muted'}`}>
+                      {e.time}
+                    </span>
+                  </Fragment>
+                ))}
               </div>
             ))}
             {sidebar.hoursFootnote ? (

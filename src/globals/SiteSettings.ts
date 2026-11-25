@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { linkField } from '../blocks/fields'
+import { IcsUrlSchema } from '../lib/icsUrl'
 import { generatePreviewPath } from '../lib/preview'
 import { SOCIAL_PLATFORMS } from '../lib/socialPlatforms'
 
@@ -39,6 +40,61 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
     linkField('headerCta', 'Header-Button'),
+    {
+      name: 'openingHours',
+      type: 'group',
+      label: 'Öffnungszeiten (Startseite)',
+      fields: [
+        {
+          name: 'icsUrl',
+          type: 'text',
+          label: 'Kalender-Link (iCal)',
+          // The secret Google address grants read access to the calendar: only CMS users see it.
+          access: { read: ({ req }) => Boolean(req.user) },
+          admin: {
+            description:
+              'Google Kalender → Einstellungen → Kalender integrieren → „Öffentliche Adresse im iCal-Format" (oder die geheime Adresse). Die Box zeigt alle Termine der nächsten 14 Tage, Änderungen nach spätestens 15 Minuten. Leer = die Zeilen unten.',
+          },
+          validate: (v: unknown) =>
+            !v || IcsUrlSchema.safeParse(v).success ? true : 'Bitte einen https://- oder webcal://-Link angeben.',
+        },
+        {
+          name: 'show',
+          type: 'select',
+          label: 'Welche Termine',
+          defaultValue: 'all',
+          options: [
+            { label: 'Alle Termine aus dem Kalender', value: 'all' },
+            {
+              label: 'Nur Öffnungszeiten (Titel mit „offen", „geöffnet", „Offene Tür", „macht auf")',
+              value: 'opening',
+            },
+          ],
+          admin: { description: 'Termine mit „geschlossen" im Titel zählen nie als Öffnungszeit.' },
+        },
+        {
+          name: 'fallback',
+          type: 'array',
+          label: 'Ersatz-Zeilen',
+          labels: { singular: 'Zeile', plural: 'Zeilen' },
+          admin: {
+            description:
+              'Erscheinen, wenn kein Kalender eingetragen ist, er nicht erreichbar ist oder in den nächsten 14 Tagen nichts drinsteht.',
+          },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                { name: 'day', type: 'text', label: 'Tag', admin: { width: '30%', placeholder: 'Mi' } },
+                { name: 'note', type: 'text', label: 'Was', admin: { width: '40%', placeholder: 'Offen' } },
+                { name: 'time', type: 'text', label: 'Zeit', admin: { width: '30%', placeholder: '18–21' } },
+              ],
+            },
+            { name: 'highlight', type: 'checkbox', label: 'Hervorheben (Offene Tür)' },
+          ],
+        },
+      ],
+    },
     {
       name: 'footer',
       type: 'group',

@@ -48,6 +48,7 @@
     "@payloadcms/richtext-lexical": "3.94.1",
     "@payloadcms/ui": "3.94.1",
     "graphql": "^16.9.0",
+    "ical.js": "2.2.1",
     "next": "16.4.6",
     "payload": "3.94.1",
     "payload-oauth2": "1.0.21",
