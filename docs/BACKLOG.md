@@ -431,6 +431,25 @@ Dockerfiles use floating tags (`node:22-slim`, `nginx:1.27-alpine`). Base images
 
 **AC:** rebuilding the same commit yields the same base layers.
 
+
+### ⏳ S6.8 — The app and publisher images are much smaller (M)
+**Source:** IDEAS.md 2026-11-26. Measured 2026-11-26 (compressed, linux/amd64): app 560 MB, publisher 325 MB, backup 47 MB, static 26 MB.
+Every deploy pulls the full app image onto the server, and GHCR keeps up to 30 versions of each image. Large images make deploys and rollbacks slow, use server disk and registry space, and carry more packages that security scans flag.
+
+**AC:** the app image is at most half its current compressed size and the publisher image clearly smaller; the site, admin, migrations, seeds and static publishing work exactly as before on staging; the image scan reports no more findings than before; the new sizes are recorded with the date.
+
+### ⏳ S6.9 — Tests give feedback faster (M)
+**Source:** IDEAS.md 2026-11-26. Measured 2026-11-26: `pnpm test` 41 s locally (1043 tests), CI gate job 2 min 11 s.
+The full test run happens before every commit and on every push. At 41 s locally, plus the rest of the gate, it gets skipped or run late, and CI feedback on a push takes minutes.
+
+**AC:** the full local test run takes at most half as long; the CI gate job is faster too; no test is dropped or weakened and the same rules are still checked; tests stay independent of each other (same result in any order); the new times are recorded with the date.
+
+### ⏳ S6.10 — A push reaches staging-ready images sooner (M)
+**Source:** IDEAS.md 2026-11-26. Measured 2026-11-26: app image build 5 min 4 s in CI, about 7½ min from push to all images pushed.
+After a push, a new image is ready for staging only after the app image has been rebuilt from scratch, even when only content code changed. That slows down every "check it on staging" round.
+
+**AC:** from push to all images pushed takes clearly less time than today for an ordinary code change; a change to dependencies still produces a correct image; the images behave exactly as before on staging; the new times are recorded with the date.
+
 ---
 
 ## E7 — Legacy migration
