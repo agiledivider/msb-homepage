@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**24 open · 48 done** · ✅ 48 · ⏳ 23 · ⏭️ 1
+**25 open · 48 done** · ✅ 48 · ⏳ 24 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -28,7 +28,7 @@ All done.
 
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L284)
 
-## E5 — Visitor and editor features (11/21 done)
+## E5 — Visitor and editor features (11/22 done)
 
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L320)
 - ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L326)
@@ -40,14 +40,15 @@ All done.
 - ⏳ [S5.19 — The start page invites to an event the way that event actually works (S)](BACKLOG.md#L436)
 - ⏳ [S5.20 — Any member's AI writes CMS content the way the Verein wants it (M)](BACKLOG.md#L441)
 - ⏳ [S5.21 — Members hand their AI a photo of any size (S)](BACKLOG.md#L446)
+- ⏳ [S5.22 — Editors schedule content to go live at a set time (M)](BACKLOG.md#L451)
 
 ## E6 — Playbook retrofit (5/10 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L476)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L481)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L486)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L491)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L496)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L482)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L487)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L492)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L497)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L502)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -55,7 +56,7 @@ All done.
 
 ## E9 — Admin area polish (5/6 done)
 
-- ⏳ [S9.6 — Editors can log out with the admin sidebar closed (S)](BACKLOG.md#L597)
+- ⏳ [S9.6 — Editors can log out with the admin sidebar closed (S)](BACKLOG.md#L603)
 
 ## E10 — Werkstätten (4/4 done)
 

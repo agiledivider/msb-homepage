@@ -448,6 +448,12 @@ An AI working in the CMS can only add images from a public web address or as tex
 
 **AC:** a member asks their AI to use a phone photo (several MB) for an event; the AI gives them a simple way to hand over the photo, the photo ends up in the media library at web size with alt text, and the AI sets it on the event; nobody without a valid key can upload this way; works from a phone.
 
+### ⏳ S5.22 — Editors schedule content to go live at a set time (M)
+**Source:** Falk 2026-11-26.
+Blog posts, events and pages go live only when someone presses "publish" at that moment. A post announcing something on a given day, or a page that should appear after a Mitgliederversammlung, needs someone at the computer at that time. The publish date on a blog post does not help: a post with a future date is visible right away. Editors should be able to choose a date and time when approved content goes live by itself.
+
+**AC:** for a blog post, event or page, the editor or reviewer can choose a date and time for it to go live; content that has not been approved never goes live this way; until that time the content is not visible on the website (start page, lists, search, its own address), and from that time it is, without anyone doing anything; the CMS shows which items are scheduled and for when, and a schedule can be changed or cancelled; scheduled changes to content that is already live replace the live version only at the chosen time; times are entered and shown in German local time, also across the change to and from summer time.
+
 ---
 
 ## E6 — Playbook retrofit

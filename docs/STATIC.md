@@ -137,3 +137,27 @@ when something links to them directly (PDFs, rich-text file links).
 - Only `_status: published` docs are crawled. Anything stuck in editorial review
   is simply absent — compare the route count in the publish summary against the
   admin.
+
+## If we keep static publishing: open checks
+
+**Status (2026-11-26, Falk):** the static export may be dropped. Until that is
+decided, features are built for the live app only and anything the static
+bundle would still need is listed here. If we keep it, each item gets checked
+(and fixed or moved into a backlog story); if we drop it, this section goes
+together with the code.
+
+| Area | What to check or update | Source |
+|---|---|---|
+| Scheduled publishing | a scheduled item going live must also trigger a republish, or the bundle never shows it | S5.22 |
+| Site search | switched off in the bundle; decide whether static needs a client-side index or no search | S5.17 |
+| Publish service | must only accept authenticated requests and run unprivileged before it goes to production | S2.2 (postponed) |
+| Freshness | the hero's "next event", opening hours from the Google Calendar and new content stay frozen until the next publish; needs a scheduled republish | S5.12, "What a static bundle can't do" |
+| Edit button | the bundle must never contain the editor's "Bearbeiten" button or a trace of it | S5.8 |
+| Security headers | the nginx / `.htaccess` of the bundle must send the same headers as the app | S2.3 |
+| Robots / sitemap | `/robots.txt` and `/sitemap.xml` in the bundle point at the public origin | S1.1 |
+| Paged lists | `/blog/seite/N` and `/events/archiv/<year>` are all in `dist/` and the sitemap | S5.10, S5.9 |
+| Images | KI label and focal point render in the bundle; image ladder covers every width used | S4.5, S5.7, `static-image-ladder` |
+| Documents | PDFs from the Verein page are copied into the bundle | S3.3 |
+| Legacy redirects | the bundle carries the same 301 rules as `src/proxy.ts` | S1.3, S7.1 |
+| e2e | the `dist/` bundle gets its own e2e run | S6.6 |
+| Release / images | `release:static`, the publisher image and the static demo on GHCR stay maintained | S6.8 |
