@@ -23,6 +23,7 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import sharp from 'sharp'
+import { blogPageCount, blogPagePath } from '../src/lib/blogPages'
 import { ALL_WIDTHS } from '../src/lib/imageWidths.mjs'
 import legacyPaths from '../src/lib/legacy-paths.json'
 import { legacyMenuPaths, legacyViews } from '../src/lib/legacyMenu'
@@ -232,7 +233,10 @@ async function collectRoutes() {
     ['events', '/events'],
     ['workshops', '/werkzeug'],
   ] as const) {
-    for (const doc of await publishedDocs(collection)) {
+    const docs = await publishedDocs(collection)
+    // Older blog list pages (S5.10): /blog/seite/2 … , same paging as the app.
+    if (collection === 'blog') for (let n = 2; n <= blogPageCount(docs.length); n++) routes.add(blogPagePath(n))
+    for (const doc of docs) {
       if (!doc.slug) continue
       const target = `${base}/${doc.slug}`
       routes.add(target)

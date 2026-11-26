@@ -1,10 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { PageIntroComponent } from '@/blocks/PageIntro/Component'
-import { Media } from '@/components/Media'
-import { CARD_LINK, CARD_TITLE } from '@/components/ui'
-import { postMeta } from '@/lib/postMeta'
-import { findPublic } from '@/lib/publicData'
+import { BlogIndex } from '@/components/blog/BlogIndex'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,51 +8,6 @@ export const metadata: Metadata = {
   description: 'Build-Logs, Berichte und Anleitungen aus der offenen Werkstatt des MakerSpace Bonn.',
 }
 
-export default async function BlogIndexPage() {
-  const res = await findPublic({
-    collection: 'blog',
-    sort: '-publishedAt',
-    limit: 20,
-    depth: 2,
-  })
-
-  return (
-    <main className="mx-auto max-w-shell px-4 pb-[72px] md:px-8">
-      <PageIntroComponent
-        blockType="pageIntro"
-        tag="AUS DER WERKSTATT"
-        meta="Build-Logs · Berichte · Anleitungen"
-        headline="Blog"
-        lede="Was wir bauen und wie wir es bauen — Berichte aus der Werkstatt."
-      />
-      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {res.docs.map((post) => (
-          <Link
-            key={post.id}
-            href={`/blog/${post.slug}`}
-            className={`${CARD_LINK} overflow-hidden rounded-[14px] border border-line bg-card shadow-[0_18px_40px_-28px_rgba(60,52,30,.4)]`}
-          >
-            <Media
-              resource={typeof post.cover === 'object' ? post.cover : undefined}
-              placeholder={post.title}
-              className="h-[180px] w-full"
-              sizes="(max-width:640px) 100vw, 380px"
-            />
-            <div className="p-5">
-              <PostByline text={postMeta(post, { readingTime: false })} />
-              <h3 className={`m-0 mb-1.5 font-sans text-[19px] font-bold text-ink ${CARD_TITLE}`}>{post.title}</h3>
-              {post.excerpt ? (
-                <p className="m-0 line-clamp-3 text-[14px] leading-[1.55] text-muted">{post.excerpt}</p>
-              ) : null}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </main>
-  )
-}
-
-/** Date · author above a card's title; nothing when both are unknown. */
-function PostByline({ text }: { text: string }) {
-  return text ? <div className="mb-2 font-mono text-[14px] text-muted">{text}</div> : null
+export default function BlogIndexPage() {
+  return <BlogIndex page={1} />
 }

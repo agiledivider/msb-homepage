@@ -32,6 +32,8 @@ export type PublicFindArgs<S extends PublicCollection> = {
   where?: Where
   sort?: Sort
   limit?: number
+  /** 1-based page of `limit` docs (blog paging, S5.10). */
+  page?: number
   depth?: number
 }
 
