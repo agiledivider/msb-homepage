@@ -11,6 +11,7 @@ import { People } from './People/config'
 import { Press } from './Press/config'
 import { Prose } from './Prose/config'
 import { Quote } from './Quote/config'
+import { SectionHeadingBlock } from './SectionHeading/config'
 import { Supporters } from './Supporters/config'
 import { Timeline } from './Timeline/config'
 import { Values } from './Values/config'
@@ -33,6 +34,7 @@ export const msbBlocks = [
   EventsList,
   JoinOptions,
   Prose,
+  SectionHeadingBlock,
   People,
   Press,
   Documents,
@@ -66,6 +68,7 @@ export {
   Press,
   Prose,
   Quote,
+  SectionHeadingBlock,
   Supporters,
   Timeline,
   Values,

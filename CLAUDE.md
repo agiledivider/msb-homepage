@@ -57,6 +57,7 @@ tests/                integration/ (boots Payload on a temp DB), fitness/ (grep-
 | Topic | File |
 |---|---|
 | Backlog, go-live blockers | `docs/BACKLOG.md` |
+| What only the Vorstand can do (accounts, documents, sign-offs) | `docs/VORSTAND.md` |
 | Traps ("when X → check Y") | `docs/runtime-traps.md` |
 | Library choices | `docs/stack.md` |
 | Decisions | `docs/DECISIONS.md` |

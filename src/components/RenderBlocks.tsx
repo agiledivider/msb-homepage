@@ -12,6 +12,7 @@ import { type PeopleBlock, PeopleComponent } from '../blocks/People/Component'
 import { type PressBlock, PressComponent } from '../blocks/Press/Component'
 import { type ProseBlock, ProseComponent } from '../blocks/Prose/Component'
 import { type QuoteBlock, QuoteComponent } from '../blocks/Quote/Component'
+import { type SectionHeadingBlock, SectionHeadingComponent } from '../blocks/SectionHeading/Component'
 import { type SupportersBlock, SupportersComponent } from '../blocks/Supporters/Component'
 import { type TimelineBlock, TimelineComponent } from '../blocks/Timeline/Component'
 import { type ValuesBlock, ValuesComponent } from '../blocks/Values/Component'
@@ -28,6 +29,7 @@ export type MsbBlock =
   | EventsListBlock
   | JoinOptionsBlock
   | ProseBlock
+  | SectionHeadingBlock
   | PeopleBlock
   | PressBlock
   | DocumentsBlock
@@ -51,6 +53,7 @@ const REGISTRY: {
   eventsList: EventsListComponent,
   joinOptions: JoinOptionsComponent,
   prose: ProseComponent,
+  sectionHeading: SectionHeadingComponent,
   people: PeopleComponent,
   press: PressComponent,
   documents: DocumentsComponent,

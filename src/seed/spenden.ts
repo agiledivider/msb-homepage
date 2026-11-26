@@ -48,10 +48,10 @@ export const spendenPage = {
       paypalUrl: '',
       betterplaceUrl: '',
     },
+    { blockType: 'sectionHeading' as const, tag: 'SACHSPENDE', tagColor: 'green' as const, heading: 'Das suchen wir' },
     {
       blockType: 'prose' as const,
       body: doc([
-        h2('Sachspenden: Das suchen wir'),
         p(
           t(
             'Gebrauchte Maschinen und Material sind herzlich willkommen, wenn sie funktionieren und in die Werkstatt passen:',
