@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**25 open · 33 done** · ✅ 33 · 🟡 1 · ⏳ 21 · ⏭️ 1 · 🚨 2
+**27 open · 33 done** · ✅ 33 · 🟡 1 · ⏳ 23 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -29,7 +29,7 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L282)
 
-## E5 — Visitor and editor features (3/12 done)
+## E5 — Visitor and editor features (3/14 done)
 
 - ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L302)
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L307)
@@ -40,14 +40,16 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S5.9 — Visitors page through the events archive (S)](BACKLOG.md#L344)
 - ⏳ [S5.10 — Visitors reach older blog posts (S)](BACKLOG.md#L350)
 - ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L356)
+- ⏳ [S5.13 — Readers see when a blog post was written and by whom (S)](BACKLOG.md#L370)
+- ⏳ [S5.14 — People who want to support the Verein find a real donation page (M)](BACKLOG.md#L377)
 
 ## E6 — Playbook retrofit (2/7 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L395)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L400)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L405)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L410)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L415)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L409)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L414)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L419)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L424)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L429)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -59,4 +61,4 @@ All done.
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L496)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L510)

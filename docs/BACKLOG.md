@@ -367,6 +367,20 @@ Editors type each week's opening hours into the start-page box by hand, so they 
 
 **Implementation notes:** Website-Einstellungen → "Öffnungszeiten (Startseite)": `icsUrl` (readable by CMS users only, never passed to the page), `show` (`all` | `opening`: titles with offen/geöffnet/Offene Tür/macht auf, never "geschlossen"), editable fallback rows. `src/lib/openingHours.ts` fetches server-side (Google sends no CORS header), 5 s timeout, 15-min cache, last good copy kept for a day, 1-min backoff after a failure; `ical.js` expands RRULE/EXDATE/moved/cancelled dates in Berlin time, titles cut at " - ". `src/lib/icsUrl.ts` turns Google's "add calendar" (`?cid=`) and embed (`?src=`) links into the public feed: Falk's first paste was a cid link and Google answered with an HTML page. Same-day entries are grouped in `src/blocks/EventFeed/Sidebar.tsx`; the time never wraps. Migrations `20261125_224032_site_opening_hours_calendar`, `20261125_231747_site_opening_hours_show`. Tests: `tests/unit/opening-hours.test.ts` (fixture `tests/fixtures/opening-hours.ics`: DST, EXDATE, moved/cancelled dates, missing VTIMEZONE, runs under any server TZ), `tests/integration/opening-hours-url.test.ts` (link hidden from anonymous API reads). Checked in Blink at 1440 and 375 px against the real calendar.
 
+### ⏳ S5.13 — Readers see when a blog post was written and by whom (S)
+**Source:** IDEAS.md 2026-11-26.
+Blog posts show neither a date nor an author, so a reader can't tell a fresh report from one written years ago, or who in the Verein is behind it. With 77 posts going back to 2017, that matters for nearly every post.
+
+**AC:** every post shows its publication date and, where known, its author, both on the post itself and in the blog list; a new post gets its author without the editor having to type it, and the editor can change it (e.g. for a guest post); old imported posts show the original author where the old site had one, and no empty author line otherwise; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*; readable at 375 px.
+**Priority (Falk, 2026-11-26):** dates first; authors for old posts only as far as the old site's data allows.
+
+### ⏳ S5.14 — People who want to support the Verein find a real donation page (M)
+**Source:** IDEAS.md 2026-11-26.
+"Spenden" on the start page leads to the Mitmachen page, and the donation card there links nowhere. Someone ready to give money or things has no account details, no idea what the money is used for and no way to ask for a donation receipt, so the Verein loses donations it could get.
+
+**AC:** every "Spenden" link on the site leads to a donation page; the page says what donations make possible, how to give money (account details, any online option the Verein offers) and things (what is wanted, what isn't, whom to contact), and how to get a donation receipt; all facts (account, receipt threshold, wish list, contact) come from the Vorstand, nothing is guessed; editors can update the page in the CMS; usable at 375 px.
+**Needs:** account details, receipt rules and a wish list from the Vorstand.
+
 ---
 
 ## E6 — Playbook retrofit
