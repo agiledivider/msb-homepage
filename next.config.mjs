@@ -14,7 +14,7 @@ const nextConfig = {
   // allow testing the dev server from a physical device over the LAN — Next
   // otherwise treats the LAN-IP origin as cross-origin and blocks /_next/*
   // (HMR socket + JS chunks). Add your Mac's LAN IP / subnet here.
-  allowedDevOrigins: ['192.168.178.46', '192.168.178.*', '192.168.10.*'],
+  allowedDevOrigins: ['192.168.178.46', '192.168.178.*', '192.168.10.*', '192.168.2.*'],
   // The default bottom-left "N" badge sits exactly on Payload's logout icon at
   // the foot of the admin sidebar, which made logout look missing in dev.
   devIndicators: { position: 'bottom-right' },

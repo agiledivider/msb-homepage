@@ -18,7 +18,7 @@ import type { Blog, Event } from '@/payload-types'
 const PROSE = `text-[17px] leading-[1.7] text-ink ${PROSE_LINKS} [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:font-display [&_h2]:text-[24px] [&_h2]:font-extrabold [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:font-sans [&_h3]:text-[20px] [&_h3]:font-bold [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1`
 
 const TITLE =
-  'm-0 mb-3 font-display text-[clamp(40px,5vw,48px)] font-black leading-[1.02] tracking-[-.02em] break-words'
+  'm-0 mb-3 font-display text-[clamp(40px,5vw,48px)] font-black leading-[1.02] tracking-[-.02em] break-words hyphens-auto [hyphenate-limit-chars:10_4_4]'
 
 const SUBTITLE = 'm-0 mb-4 font-serif text-[20px] italic leading-[1.4] text-muted max-w-[34em]'
 

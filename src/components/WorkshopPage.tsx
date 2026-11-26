@@ -115,7 +115,7 @@ export function WorkshopPage({
               <div className="mb-3">
                 <TapeTag color="orange">WERKSTATT</TapeTag>
               </div>
-              <h1 className="m-0 mb-3.5 font-display text-[clamp(36px,6vw,52px)] font-black leading-[1.02] tracking-[-.02em] break-words">
+              <h1 className="m-0 mb-3.5 font-display text-[clamp(36px,6vw,52px)] font-black leading-[1.02] tracking-[-.02em] break-words hyphens-auto [hyphenate-limit-chars:10_4_4]">
                 {w.title}
               </h1>
               {w.promise || w.verbs ? (

@@ -296,11 +296,14 @@ At some page widths the logo in the header is squeezed and looks distorted. The 
 
 **Implementation notes:** the header logo no longer shrinks as a flex item; between `md` and `lg` it shows only the signet, since the nav leaves no room for the wordmark. The footer logo scales with its column (`c32893f`).
 
-### ⏳ S4.10 — Long words in page titles break at a sensible place (S)
+### ✅ S4.10 — Long words in page titles break at a sensible place (S) — 2026-11-26
+**Status:** ✅ done 2026-11-26 (Falk, checked on iPhone).
 **Source:** seen 2026-11-26 during S5.19.
 On a 375 px phone a long word in a large page title is cut at the screen edge with a single letter on the next line (event page "Demystifizierung Lebkuchenhaus bauen" shows "Demystifizierun / g"). Visitors read a broken word in the most prominent line of the page.
 
 **AC:** on event, blog and content pages at 360 and 375 px, long German words in the title either fit or break at a syllable with a hyphen, never leaving one or two letters alone on a line; short titles look as today; the start-page hero is unchanged.
+
+**Implementation notes:** the three page titles (`Article.tsx` for events and posts, `PageIntro`, `WorkshopPage`) add `hyphens-auto` and `[hyphenate-limit-chars:10_4_4]` (words of 10+ letters, 4+ on each side) to `break-words`, which stays as the fallback; the site already sets `lang="de"`. A fixed longer word limit doesn't work: at 360 px even "Lebkuchenhaus" doesn't fit a line. Chrome also hyphenates a word that would fit on the next line ("Lebku-chenhaus"); Safari ignores the limit. Fitness: `tests/fitness/title-hyphens.test.ts`. Checked in Blink at 360/375 px and by Falk on iPhone. `next.config` allows the `192.168.2.*` dev origin for phone checks.
 
 ---
 
