@@ -288,10 +288,14 @@ The site has patterns the styleguide doesn't cover (polaroids, pegboard, status 
 **AC:** each gap listed in the audit has a decision recorded in the styleguide or in this backlog.
 
 
-### ⏳ S4.9 — The MakerSpace logo keeps its shape at every screen width (S)
+### ✅ S4.9 — The MakerSpace logo keeps its shape at every screen width (S) — 2026-11-26
+**Status:** ✅ done 2026-11-26 (Falk).
 At some page widths the logo in the header is squeezed and looks distorted. The logo is a fixed brand element; a visitor should never see it stretched or compressed, whatever the width of their screen or window.
 
 **AC:** stepping the window from 320 px to 1920 px, the logo in header and footer keeps its proportions at every width (light and dark mode); where space runs short the logo shrinks evenly or other header items give way; nothing overlaps at 375 px.
+
+**Implementation notes:** the header logo no longer shrinks as a flex item; between `md` and `lg` it shows only the signet, since the nav leaves no room for the wordmark. The footer logo scales with its column (`c32893f`).
+
 ---
 
 ## E5 — Visitor and editor features
