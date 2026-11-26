@@ -59,6 +59,10 @@ services:
       B2_ACCOUNT_KEY: ${B2_ACCOUNT_KEY:-}
       BACKUP_AT: ${BACKUP_AT:-03:30}
       BACKUP_PING_URL: ${BACKUP_PING_URL:-}
+      # push messages on failed backups and on restores (ntfy, DEPLOY.md "Alerts")
+      BACKUP_NTFY_URL: ${BACKUP_NTFY_URL:-}
+      BACKUP_NTFY_TOKEN: ${BACKUP_NTFY_TOKEN:-}
+      BACKUP_NTFY_TITLE: ${BACKUP_NTFY_TITLE:-Homepage-Backup}
       # internal API for the CMS backups view; same value as in `web`
       BACKUP_API_TOKEN: ${BACKUP_API_TOKEN:?set BACKUP_API_TOKEN in .env}
     volumes:

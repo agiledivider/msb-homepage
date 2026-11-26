@@ -305,9 +305,21 @@ lock; the nightly prune waits for it (`--retry-lock 2h`). Set `BACKUP_API_TOKEN`
 starts without it. The "last run" line is unknown after the backup container
 restarts until its next nightly run.
 
-**Alerts:** not set up yet. Set `BACKUP_PING_URL` to a healthchecks.io-style URL
-and that service alerts when a backup fails *or doesn't run*. Until then, look at
-`snapshots` now and then.
+**Alerts:** two optional channels, best both.
+- **ntfy** (`BACKUP_NTFY_URL`): a push message to the ntfy app when a backup
+  fails (nightly or "Jetzt sichern"), when a restore fails, and when a restore
+  replaced the site (who, and the safety backup that undoes it). Subscribe to the
+  topic in the ntfy app on the phones that should hear about it. On `ntfy.sh`
+  anyone who knows the topic name can read and send, so make it unguessable
+  (`msb-backup-$(openssl rand -hex 8)`); `BACKUP_NTFY_TOKEN` for a protected
+  topic or your own ntfy server; `BACKUP_NTFY_TITLE` names the server. Test it:
+  `docker compose -f docker-compose.prod.yml exec backup sh -c 'curl -d test "$BACKUP_NTFY_URL"'`.
+- **healthchecks** (`BACKUP_PING_URL`, a healthchecks.io-style URL): also
+  notices a backup that *never runs* (container down, server off), which ntfy
+  can't, since nothing is left to send the message.
+
+Without either, look at `/admin/backups` now and then: it warns when the newest
+backup is older than 36 h.
 
 **Restore** (onto a fresh server or after data loss). The web service must be
 stopped, so nothing writes to the database meanwhile:

@@ -18,7 +18,7 @@ VOLS=("$P-db" "$P-media" "$P-repo" "$P-db2" "$P-media2" "$P-ssh" "$P-dl")
 fail() { printf '\033[31mFAIL\033[0m %s\n' "$*" >&2; exit 1; }
 pass() { printf '\033[32mok\033[0m   %s\n' "$*"; }
 cleanup() {
-  docker rm -f "$P-sftp" "$P-sched" >/dev/null 2>&1 || true
+  docker rm -f "$P-sftp" "$P-sched" "$P-ntfy" >/dev/null 2>&1 || true
   docker network rm "$P-net" >/dev/null 2>&1 || true
   docker volume rm -f "${VOLS[@]}" >/dev/null 2>&1 || true
 }
@@ -357,5 +357,16 @@ diff <(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db .dump; cd /volumes/m
 out=$(rfile file-test-only --apply 2>&1 || true)
 [[ $out == *"not empty"* ]] || fail "restore-file over existing data was not refused: $out"
 pass "a downloaded backup file restores onto empty volumes without any repository (dry run first, wrong password and non-empty volumes refused)"
+
+# 15. A failed backup sends an ntfy push (B1). A throwaway ntfy server on the
+#     test network; the backup fails because the db volume has no database.
+docker run -d --name "$P-ntfy" --network "$P-net" binwiederhier/ntfy serve >/dev/null
+for _ in $(seq 30); do docker run --rm --network "$P-net" curlimages/curl -fs "http://$P-ntfy/v1/health" >/dev/null 2>&1 && break; sleep 1; done
+docker volume create "$P-empty" >/dev/null; VOLS+=("$P-empty")
+docker run --rm "${ENV[@]}" --network "$P-net" -e BACKUP_NTFY_URL="http://$P-ntfy/msb-test" -e BACKUP_NTFY_TITLE="Homepage-Backup (test)" \
+  -v "$P-empty:/volumes/db" -v "$P-media:/volumes/media" -v "$P-repo:/repo" "$IMG" backup >/dev/null 2>&1 && fail "a backup without a database should fail"
+msg=$(docker run --rm --network "$P-net" curlimages/curl -fs "http://$P-ntfy/msb-test/json?poll=1")
+[[ $msg == *'"title":"Homepage-Backup (test)"'* && $msg == *"fehlgeschlagen"* && $msg == *'"priority":4'* ]] || fail "no ntfy message for the failed backup: $msg"
+pass "a failed backup sends an ntfy push with title and high priority"
 
 echo "backup round trip: all checks passed"

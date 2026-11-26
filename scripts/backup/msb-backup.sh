@@ -36,7 +36,14 @@
 #   BACKUP_AT        daily time, HH:MM in $TZ          (default 03:30)
 #   BACKUP_KEEP      restic forget policy              (default 7 daily, 4 weekly, 12 monthly)
 #   BACKUP_PING_URL  optional healthchecks-style URL: pinged at start (/start),
-#                    on success, and on failure (/fail)
+#                    on success, and on failure (/fail). Also notices a backup
+#                    that never runs (container down), which ntfy can't.
+#   BACKUP_NTFY_URL  optional ntfy topic URL (https://ntfy.sh/<secret topic> or
+#                    your own server): a push message when a backup or restore
+#                    fails, and when a restore replaced the site
+#   BACKUP_NTFY_TOKEN  optional ntfy access token for a protected topic
+#   BACKUP_NTFY_TITLE  message title (default "Homepage-Backup"), e.g. to name
+#                    the server: "Homepage-Backup (staging)"
 #   BACKUP_API_TOKEN required by `schedule`: it also starts the internal API the
 #                    CMS uses to list backups (backup-api.mjs, port $BACKUP_API_PORT)
 set -eu
@@ -48,6 +55,8 @@ WORK=/work
 BACKUP_AT="${BACKUP_AT:-03:30}"
 BACKUP_KEEP="${BACKUP_KEEP:---keep-daily 7 --keep-weekly 4 --keep-monthly 12}"
 BACKUP_PING_URL="${BACKUP_PING_URL:-}"
+BACKUP_NTFY_URL="${BACKUP_NTFY_URL:-}"
+BACKUP_NTFY_TITLE="${BACKUP_NTFY_TITLE:-Homepage-Backup}"
 BACKUP_STATUS_FILE="${BACKUP_STATUS_FILE:-$WORK/last-run.json}"
 BACKUP_LOCK_DIR="${BACKUP_LOCK_DIR:-$WORK/backup.lock}"
 RESTORE_STATUS_FILE="${RESTORE_STATUS_FILE:-$WORK/last-restore.json}"
@@ -98,6 +107,17 @@ take_lock() { # take_lock <pid> [backup|restore] [snapshot]
   echo "$1" >"$BACKUP_LOCK_DIR/pid"
 }
 drop_lock() { rm -rf "$BACKUP_LOCK_DIR"; }
+
+# notify <priority: high|default> <tags> <message>: an ntfy push (if set up).
+# Never fails or holds up the backup. The token goes to curl on stdin, not argv.
+notify() {
+  [ -n "$BACKUP_NTFY_URL" ] || return 0
+  printf 'Authorization: Bearer %s\n' "${BACKUP_NTFY_TOKEN:-}" |
+    curl -fsS -m 10 --retry 2 -o /dev/null \
+      -H "Title: $BACKUP_NTFY_TITLE" -H "Priority: $1" -H "Tags: $2" \
+      $([ -n "${BACKUP_NTFY_TOKEN:-}" ] && echo '-H @-') \
+      --data-binary "$3" "$BACKUP_NTFY_URL" || log "ntfy message failed (ignored)"
+}
 
 ping() { # ping <suffix>; never fails the backup, never hangs
   [ -n "$BACKUP_PING_URL" ] || return 0
@@ -156,6 +176,7 @@ backup_locked() {
     log "BACKUP FAILED"
     record_run failed
     ping /fail
+    notify high warning "Die Sicherung ist fehlgeschlagen${BACKUP_BY:+ (gestartet von $BACKUP_BY)}. Details: docker compose logs backup"
     exit 1
   fi
 }
@@ -450,7 +471,12 @@ restore_upload() {
   apply_restore "$tmp"
 }
 
-abort() { log "RESTORE FAILED: $2"; record_restore failed "$id" "$safety" "$1" "$2"; exit 1; } # abort <code> <message>
+abort() { # abort <code> <message>
+  log "RESTORE FAILED: $2"
+  record_restore failed "$id" "$safety" "$1" "$2"
+  notify high warning "Wiederherstellung von $id fehlgeschlagen${BACKUP_BY:+ (gestartet von $BACKUP_BY)}: $2"
+  exit 1
+}
 
 # The restore itself, from a directory laid out like the backup ($tmp/work/db,
 # $tmp/volumes/media): check, safety backup, media, database, leftover media.
@@ -498,6 +524,7 @@ apply_restore() {
   fi
 
   record_restore ok "$id" "$safety" restored "restored"
+  notify default rewind "Die Website wurde auf die Sicherung $id zurückgesetzt${BACKUP_BY:+ von $BACKUP_BY}. Rückgängig: Sicherung $safety (\"vor Wiederherstellung\")."
   log "restore of $id finished (safety backup $safety)"
 }
 
