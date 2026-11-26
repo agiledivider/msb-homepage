@@ -18,6 +18,7 @@ pnpm publish:static          # snapshot the public site into dist/ (docs/STATIC.
 pnpm release:app | release:static    # build + push images (DEPLOY.md); release:app runs migrate:check first
 pnpm migrate:check [backup.enc|msb.db]   # migrations + prod seed on a copy of real data
 pnpm hero:shots [url-path]           # screenshot the hero at every phone size (Blink), review before showing Falk
+pnpm ghcr:prune [--apply] [pkg]   # delete old GHCR image versions (dry run by default); run when working on releases
 ```
 
 ## Gate
