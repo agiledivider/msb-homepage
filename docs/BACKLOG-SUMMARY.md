@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**26 open · 49 done** · ✅ 49 · ⏳ 25 · ⏭️ 1
+**25 open · 50 done** · ✅ 50 · ⏳ 24 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -55,9 +55,9 @@ All done.
 
 All done.
 
-## E9 — Admin area polish (5/6 done)
+## E9 — Admin area polish (6/6 done)
 
-- ⏳ [S9.6 — Editors can log out with the admin sidebar closed (S)](BACKLOG.md#L618)
+All done.
 
 ## E10 — Werkstätten (4/4 done)
 

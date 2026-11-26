@@ -10,7 +10,7 @@ import { isActive, type RailGroup } from './railEntries'
  * src/components/admin/Nav.tsx. Desktop only: on phones the sidebar is an
  * overlay and custom.scss hides the rail. The name appears on hover/focus.
  */
-export function NavRail({ groups }: { groups: RailGroup[] }) {
+export function NavRail({ groups, logout }: { groups: RailGroup[]; logout: { href: string; label: string } }) {
   const { hydrated, navOpen } = useNav()
   const pathname = usePathname()
   if (!hydrated || navOpen) return null
@@ -40,6 +40,18 @@ export function NavRail({ groups }: { groups: RailGroup[] }) {
           })}
         </ul>
       ))}
+      {/* S9.6: logout stays reachable while the sidebar is closed */}
+      <Link
+        href={logout.href}
+        prefetch={false}
+        className="msb-rail__link msb-rail__logout"
+        data-nav-icon="nav-logout"
+        aria-label={logout.label}
+      >
+        <span className="msb-rail__tip" aria-hidden="true">
+          {logout.label}
+        </span>
+      </Link>
     </nav>
   )
 }

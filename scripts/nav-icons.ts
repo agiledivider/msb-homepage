@@ -23,6 +23,7 @@ import {
   faImage,
   faKey,
   faPenNib,
+  faRightFromBracket,
   faScrewdriverWrench,
   faSliders,
   faTableColumns,
@@ -31,7 +32,7 @@ import {
   faWandMagicSparkles,
 } from '@fortawesome/free-solid-svg-icons'
 
-export const NAV_ICONS: [id: string, icon: IconDefinition, name: string][] = [
+export const NAV_ICONS: [id: string, icon: IconDefinition, name: string, alsoFor?: string][] = [
   ['nav-start', faTableColumns, 'faTableColumns'],
   // the rail's "Browse by Folder" (the sidebar button keeps Payload's own folder icon)
   ['nav-folders', faFolder, 'faFolder'],
@@ -49,6 +50,8 @@ export const NAV_ICONS: [id: string, icon: IconDefinition, name: string][] = [
   ['nav-payload-mcp-api-keys', faWandMagicSparkles, 'faWandMagicSparkles'],
   // Backups view (E8), link from src/plugins/backups/components/BackupsNavLink.tsx.
   ['nav-backups', faBoxArchive, 'faBoxArchive'],
+  // logout: the rail's button (S9.6) and Payload's own button in the open sidebar
+  ['nav-logout', faRightFromBracket, 'faRightFromBracket', '.nav__log-out'],
 ]
 
 const HEADER = '// ── Nav icons (Font Awesome 7 free-solid; generated, one per entry id) ─────'
@@ -60,8 +63,8 @@ const svg = ({ icon: [width, height, , , d] }: IconDefinition) =>
 
 export function renderBlock() {
   const rules = NAV_ICONS.map(
-    ([id, icon, name]) =>
-      `#${id}, [data-nav-icon='${id}'] { --msb-icon: url("data:image/svg+xml,${encodeURIComponent(svg(icon))}"); } // ${name}`,
+    ([id, icon, name, alsoFor]) =>
+      `#${id}, [data-nav-icon='${id}']${alsoFor ? `, ${alsoFor}` : ''} { --msb-icon: url("data:image/svg+xml,${encodeURIComponent(svg(icon))}"); } // ${name}`,
   )
   return [HEADER, NOTE, ...rules].join('\n')
 }

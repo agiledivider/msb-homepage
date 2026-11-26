@@ -615,10 +615,13 @@ Drafts that Claude writes through the CMS connection, or that an editor saves an
 **Implementation notes:** workflow fields `lastEditedBy` and `lastEditedViaClaude` (set in `beforeChange` from `req.user` and `req.payloadAPI === 'MCP'`, never from the body; migration `20261124_014146_open_drafts_last_editor`). `loadOpenDrafts()` in `src/plugins/editorial/components/ReviewDashboard.tsx`: latest version `_status` draft and `reviewStatus` draft, newest first; falls back to `createdBy` for older saves. Tests: `tests/integration/open-drafts.test.ts`, flag through the real MCP path in `mcp.test.ts`. b5016ae.
 
 
-### ⏳ S9.6 — Editors can log out with the admin sidebar closed (S)
+### ✅ S9.6 — Editors can log out with the admin sidebar closed (S) — 2026-11-26
+**Status:** ✅ done 2026-11-26 (Falk).
 With the admin sidebar collapsed to icons, the logout is no longer visible, so an editor on a shared computer or a small screen has to open the sidebar first, or doesn't find a way to log out at all.
 
 **AC:** with the sidebar collapsed, logging out is one visible, labelled control (icon with a tooltip or text for screen readers); it behaves like the existing logout; with the sidebar open nothing changes; usable at 375 px.
+
+**Implementation notes:** the closed-sidebar rail (S9.1) ends with a logout link at the bottom (`NavRail.tsx`), same URL and label as Payload's own button (`admin.routes.logout`, `authentication:logOut`), tooltip on hover/focus. Payload's button in the open sidebar now uses the same Font Awesome icon (`faRightFromBracket`, `nav-logout` in `scripts/nav-icons.ts`). Phones keep the overlay menu, logout at its bottom as before. Test: `tests/unit/nav-rail-logout.test.tsx`. Checked in Blink at 1280 px (logout ends the session) and 375 px.
 ---
 
 ## E10 — Werkstätten

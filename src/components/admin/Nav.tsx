@@ -1,6 +1,7 @@
 import { DefaultNav } from '@payloadcms/next/rsc'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import type { ServerProps, StaticLabel } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import { isAdmin } from '@/plugins/editorial/access'
 import { NavRail } from './NavRail'
 import type { RailGroup } from './railEntries'
@@ -15,7 +16,7 @@ type NavProps = ServerProps & { visibleEntities?: { collections: string[]; globa
  * version of the sidebar. Its entries mirror the sidebar: "Start" from
  * NavBrand, "Browse by Folder", the collection/global groups Payload shows this user, and
  * "Backups" for admins (src/plugins/backups). Icons come from the same
- * `nav-*` ids (scripts/nav-icons.ts).
+ * `nav-*` ids (scripts/nav-icons.ts). At the bottom: "Abmelden" (S9.6).
  */
 export function Nav(props: NavProps) {
   const { i18n, payload, permissions, user, visibleEntities } = props
@@ -69,10 +70,16 @@ export function Nav(props: NavProps) {
       : []),
   ]
 
+  // S9.6: the same link as Payload's own logout button in the open sidebar.
+  const logout = {
+    href: formatAdminURL({ adminRoute: admin, path: payload.config.admin.routes.logout }),
+    label: i18n.t('authentication:logOut'),
+  }
+
   return (
     <>
       <DefaultNav {...props} />
-      <NavRail groups={rail} />
+      <NavRail groups={rail} logout={logout} />
     </>
   )
 }
