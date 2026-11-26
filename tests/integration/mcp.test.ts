@@ -360,3 +360,44 @@ describe('an MCP key used directly against REST', () => {
     ).rejects.toThrow(/not allowed/i)
   })
 })
+
+describe('key lifetime (S2.6)', () => {
+  const keyDoc = async (label: string) =>
+    (
+      await payload.find({
+        collection: 'payload-mcp-api-keys' as never,
+        where: { label: { equals: `Claude ${label}` } },
+        overrideAccess: true,
+        limit: 1,
+      })
+    ).docs[0] as unknown as Doc & { lastUsedAt?: string | null }
+
+  it('shows when a key was last used', async () => {
+    const owner = await aUserWithKey('stamp', EDITOR_PERMS)
+    expect((await keyDoc('stamp')).lastUsedAt ?? null).toBeNull()
+
+    expect((await mcp(owner.key, 'tools/list')).status).toBe(200)
+
+    const stamped = (await keyDoc('stamp')).lastUsedAt
+    expect(stamped).toBeTruthy()
+    expect(Date.now() - new Date(stamped as string).getTime()).toBeLessThan(60_000)
+  })
+
+  it('stops working after its end date, and works before it', async () => {
+    const owner = await aUserWithKey('expiring', EDITOR_PERMS)
+    const doc = await keyDoc('expiring')
+    const setEnd = (expiresAt: string) =>
+      payload.update({
+        collection: 'payload-mcp-api-keys' as never,
+        id: doc.id,
+        data: { expiresAt } as never,
+        overrideAccess: true,
+      })
+
+    await setEnd(new Date(Date.now() + 86_400_000).toISOString())
+    expect((await mcp(owner.key, 'tools/list')).status).toBe(200)
+
+    await setEnd(new Date(Date.now() - 1000).toISOString())
+    expect((await mcp(owner.key, 'tools/list')).status).toBe(401)
+  })
+})

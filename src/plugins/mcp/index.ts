@@ -1,5 +1,13 @@
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
-import type { CollectionBeforeDeleteHook, CollectionConfig, Config, Field, Plugin } from 'payload'
+import {
+  type CollectionBeforeDeleteHook,
+  type CollectionConfig,
+  type Config,
+  type Field,
+  type Plugin,
+  UnauthorizedError,
+} from 'payload'
+import { type KeyLifetime, keyIsValid, keyLifetimeFields, shouldStampLastUsed } from './keyLifetime'
 import { makePreviewLinkTool } from './previewLink'
 import { makeUploadMediaTool } from './uploadMedia'
 
@@ -72,6 +80,20 @@ const basePlugin = mcpPlugin({
   // fail. Reload it with roles and their permissions, as a session login has.
   overrideAuth: async (req, getDefaultMcpAccessSettings) => {
     const settings = await getDefaultMcpAccessSettings()
+    // S2.6: expired keys are refused (counts as a failed attempt), use is stamped.
+    const key = settings as unknown as KeyLifetime & { id: number | string }
+    const now = new Date()
+    if (!keyIsValid(key, now)) throw new UnauthorizedError()
+    if (shouldStampLastUsed(key, now)) {
+      await req.payload.update({
+        collection: 'payload-mcp-api-keys' as never,
+        id: key.id,
+        data: { lastUsedAt: now.toISOString() } as never,
+        overrideAccess: true,
+        depth: 0,
+        req,
+      })
+    }
     const user = await req.payload.findByID({
       collection: 'users',
       id: settings.user.id,
@@ -83,11 +105,12 @@ const basePlugin = mcpPlugin({
   },
   overrideApiKeyCollection: (collection: CollectionConfig): CollectionConfig => ({
     ...collection,
-    fields: collection.fields.map(allowByDefault),
+    fields: [...collection.fields.map(allowByDefault), ...keyLifetimeFields],
     labels: { singular: 'KI-Zugang', plural: 'KI-Zugänge' },
     admin: {
       ...collection.admin,
       group: 'Verwaltung',
+      defaultColumns: ['label', 'user', 'lastUsedAt', 'expiresAt'],
       description:
         'Persönliche Schlüssel, mit denen Claude in deinem Namen Entwürfe anlegt. Claude kann nichts veröffentlichen.',
     },
