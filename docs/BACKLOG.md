@@ -479,6 +479,8 @@ The full test run happens before every commit and on every push. At 41 s locally
 
 **Result (2026-11-26):** `pnpm test` locally (M1 Max, 10 cores) 44.5 s → ~15 s, 1134 tests; CI gate job 2 min 52 s → 2 min 36 s, test step 2 min 05 s → 1 min 45 s. The private-repo runner is short on CPU, so parallel files help little there; Falk chose not to split CI tests across jobs (extra runner minutes) since push → `latest` is set by the app image build anyway.
 
+**Update 2026-11-26, repo public (4-vCPU runners):** CI test step 1 min 45 s → 61 s, gate job 2 min 36 s → 1 min 37 s (run for `b6c9518`).
+
 **Implementation notes:** test files run in parallel (`tests/setup.ts` already gives each file its own temp DB and media dir), with at least two workers (Vitest's default of cores − 1 leaves a 2-core runner with one). Every run shuffles files and tests and prints its seed, so order dependencies can't creep back; shuffling found two (`legacy-authors`, `workshops`), and each test now sets up its own state. Next lever if CI feedback matters: build the test schema once and copy the DB per file, or shard the CI tests.
 
 ### ✅ S6.10 — A push reaches staging-ready images sooner (M) — 2026-11-26
