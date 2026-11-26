@@ -28,6 +28,7 @@ import * as migration_20261126_102415_donate_bank_notice from './20261126_102415
 import * as migration_20261126_131630_hide_from_hero from './20261126_131630_hide_from_hero';
 import * as migration_20261126_160623_event_free_signup from './20261126_160623_event_free_signup';
 import * as migration_20261126_175125_mcp_key_lifetime from './20261126_175125_mcp_key_lifetime';
+import * as migration_20261126_184836_site_stats from './20261126_184836_site_stats';
 
 export const migrations = [
   {
@@ -178,6 +179,11 @@ export const migrations = [
   {
     up: migration_20261126_175125_mcp_key_lifetime.up,
     down: migration_20261126_175125_mcp_key_lifetime.down,
-    name: '20261126_175125_mcp_key_lifetime'
+    name: '20261126_175125_mcp_key_lifetime',
+  },
+  {
+    up: migration_20261126_184836_site_stats.up,
+    down: migration_20261126_184836_site_stats.down,
+    name: '20261126_184836_site_stats'
   },
 ];

@@ -3,6 +3,8 @@
 **Research-Dokument · Stand: Juli 2026**
 **Fokus: Plausible Analytics (Community Edition) vs. Matomo (On-Premise)**
 
+> Entschieden 2026-11-26: keines der Tools, sondern ein eigener Zähler in der App (D-012 in `docs/DECISIONS.md`, Story S5.11).
+
 ---
 
 ## 1. Zusammenfassung (TL;DR)

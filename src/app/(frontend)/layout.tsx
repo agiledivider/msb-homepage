@@ -9,6 +9,7 @@ import '@/styles/globals.css'
 config.autoAddCss = false
 
 import { RefreshRouteOnSave } from '@/components/RefreshRouteOnSave'
+import { StatsBeacon } from '@/components/StatsBeacon'
 import { getPayloadClient } from '@/lib/getPayload'
 import { isDraftRequest } from '@/lib/publicData'
 import { THEME_COLOR, THEME_INIT_SCRIPT } from '@/lib/theme'
@@ -89,6 +90,9 @@ export default async function FrontendLayout({ children }: { children: React.Rea
         <Header nav={navFrom(site)} cta={ctaFrom(site)} search={process.env.STATIC_EXPORT !== 'true'} />
         {children}
         <Footer links={footerLinksFrom(site)} {...footerFrom(site)} />
+        {/* S5.11: counts page views without cookies (D-012). Not in drafts/previews, and not in the
+            static bundle, which has no app to count to (docs/STATIC.md checklist). */}
+        {draft || process.env.STATIC_EXPORT === 'true' ? null : <StatsBeacon />}
       </body>
     </html>
   )

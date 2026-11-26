@@ -26,3 +26,4 @@ Stand: 26.11.2026
 ## Vor dem Start der Website
 
 - [ ] **Impressum und Datenschutzerklärung prüfen** und schriftlich bestätigen (Story S1.2 in `docs/BACKLOG.md`).
+- [ ] **Abschnitt „Reichweitenmessung“ der Datenschutzerklärung bestätigen** (26.11.2026, S5.11): die Website zählt Aufrufe ohne Cookies und ohne Besucherdaten; der Text beschreibt, was gezählt wird und warum. Die Zahlen stehen im CMS unter „Statistik“.

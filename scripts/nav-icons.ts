@@ -17,6 +17,7 @@ import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import {
   faBoxArchive,
   faCalendarDays,
+  faChartColumn,
   faFileLines,
   faFolder,
   faHouse,
@@ -49,6 +50,8 @@ export const NAV_ICONS: [id: string, icon: IconDefinition, name: string, alsoFor
   // Verwaltung → KI-Zugänge: the MCP plugin's API keys (Claude in the CMS).
   ['nav-payload-mcp-api-keys', faWandMagicSparkles, 'faWandMagicSparkles'],
   // Backups view (E8), link from src/plugins/backups/components/BackupsNavLink.tsx.
+  // S5.11: site statistics, for every CMS user
+  ['nav-statistik', faChartColumn, 'faChartColumn'],
   ['nav-backups', faBoxArchive, 'faBoxArchive'],
   // logout: the rail's button (S9.6) and Payload's own button in the open sidebar
   ['nav-logout', faRightFromBracket, 'faRightFromBracket', '.nav__log-out'],

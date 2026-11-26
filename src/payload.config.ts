@@ -28,6 +28,7 @@ import { isAdmin } from './plugins/editorial/access'
 import { claudeMcp } from './plugins/mcp'
 import { kanidmEnabled, kanidmOAuth } from './plugins/oidc'
 import { sitePublishing } from './plugins/publish'
+import { siteStats } from './plugins/stats'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -98,6 +99,8 @@ export default buildConfig({
     autofilePlugin(),
     // Backups view for admins (/admin/backups); data from the backup container. See docs/BACKLOG.md E8.
     backupsAdmin(),
+    // Statistik view (/admin/statistik) + the public beacon endpoint, no visitor data (S5.11, D-012).
+    siteStats(),
     // UI-configurable roles & permissions (Roles + Permissions collections).
     // Locked to admins so the permission system can't be edited by others. Any
     // logged-in user may read role names, or their own account shows "Untitled".

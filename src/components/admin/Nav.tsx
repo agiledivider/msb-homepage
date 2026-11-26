@@ -15,7 +15,7 @@ type NavProps = ServerProps & { visibleEntities?: { collections: string[]; globa
  * closed sidebar `inert`, so the rail is a separate element, not a narrow
  * version of the sidebar. Its entries mirror the sidebar: "Start" from
  * NavBrand, "Browse by Folder", the collection/global groups Payload shows this user, and
- * "Backups" for admins (src/plugins/backups). Icons come from the same
+ * "Statistik" (src/plugins/stats) and "Backups" for admins (src/plugins/backups). Icons come from the same
  * `nav-*` ids (scripts/nav-icons.ts). At the bottom: "Abmelden" (S9.6).
  */
 export function Nav(props: NavProps) {
@@ -65,6 +65,8 @@ export function Nav(props: NavProps) {
           : { id: `nav-${slug}`, href: `${admin}/collections/${slug}`, label: label(l) },
       ),
     })),
+    // S5.11: every CMS user sees the site statistics.
+    { label: 'Statistik', entries: [{ id: 'nav-statistik', href: `${admin}/statistik`, label: 'Statistik' }] },
     ...(isAdmin(user)
       ? [{ label: 'Backups', entries: [{ id: 'nav-backups', href: `${admin}/backups`, label: 'Backups' }] }]
       : []),

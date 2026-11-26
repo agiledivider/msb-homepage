@@ -43,10 +43,12 @@ const PLACES: Array<{ href: string; title: string; text: string; icon: IconDefin
  *
  * Server Component only, no live data: Next ships the root not-found with every
  * route, and a static 404.html would show stale events until the next publish.
+ * Not counted in the statistics (`data-stats-skip`, S5.11).
  */
 export default function NotFound() {
   return (
-    <main className="mx-auto max-w-shell px-4 pb-[72px] pt-6 md:px-8 md:pt-10">
+    // data-stats-skip: dead links are not counted as page views (S5.11, StatsBeacon)
+    <main data-stats-skip="" className="mx-auto max-w-shell px-4 pb-[72px] pt-6 md:px-8 md:pt-10">
       <section>
         <CuttingMat>
           <div className="relative z-[1] grid items-center gap-6 pl-3 md:grid-cols-[1.25fr_.75fr] md:pl-2.5">

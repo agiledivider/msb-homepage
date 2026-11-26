@@ -33,11 +33,13 @@ import { AdminIcon as AdminIcon_80ebcb12978a9db9a1c04af0af89c7ec } from '../../.
 import { AdminLogo as AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec } from '../../../components/admin/Graphics'
 import { KanidmLoginButton as KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27 } from '../../../components/auth/KanidmLoginButton'
 import { DevLogin as DevLogin_c5a4fbfcec91834b45506686890fddc0 } from '../../../components/auth/DevLogin'
+import { StatsNavLink as StatsNavLink_de33cb6e3be258cc59835bffe04f947a } from '../../../plugins/stats/components/StatsNavLink'
 import { BackupsNavLink as BackupsNavLink_9fb487cc8e1eb156f1048abdeed6649c } from '../../../plugins/backups/components/BackupsNavLink'
 import { ReviewDashboard as ReviewDashboard_eaaae8e46032f1445a954959095ac5e4 } from '../../../plugins/editorial/components/ReviewDashboard'
 import { PublishSite as PublishSite_a4c7146036cdb0d0c6483019f622d27e } from '../../../plugins/publish/components/PublishSite'
 import { NavBrand as NavBrand_d7dd6c791c113ce8ff240c7282294e70 } from '../../../components/admin/NavBrand'
 import { BackupsView as BackupsView_51b8e52c7315dd6a437f9e6a7eff7074 } from '../../../plugins/backups/components/BackupsView'
+import { StatsView as StatsView_c9a79a1bffe2972b8963b0327ae5b3e7 } from '../../../plugins/stats/components/StatsView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -77,10 +79,12 @@ export const importMap = {
   "/components/admin/Graphics#AdminLogo": AdminLogo_80ebcb12978a9db9a1c04af0af89c7ec,
   "/components/auth/KanidmLoginButton#KanidmLoginButton": KanidmLoginButton_03bcb8f67202ba1581e10df9d6806a27,
   "/components/auth/DevLogin#DevLogin": DevLogin_c5a4fbfcec91834b45506686890fddc0,
+  "/plugins/stats/components/StatsNavLink#StatsNavLink": StatsNavLink_de33cb6e3be258cc59835bffe04f947a,
   "/plugins/backups/components/BackupsNavLink#BackupsNavLink": BackupsNavLink_9fb487cc8e1eb156f1048abdeed6649c,
   "/plugins/editorial/components/ReviewDashboard#ReviewDashboard": ReviewDashboard_eaaae8e46032f1445a954959095ac5e4,
   "/plugins/publish/components/PublishSite#PublishSite": PublishSite_a4c7146036cdb0d0c6483019f622d27e,
   "/components/admin/NavBrand#NavBrand": NavBrand_d7dd6c791c113ce8ff240c7282294e70,
   "/plugins/backups/components/BackupsView#BackupsView": BackupsView_51b8e52c7315dd6a437f9e6a7eff7074,
+  "/plugins/stats/components/StatsView#StatsView": StatsView_c9a79a1bffe2972b8963b0327ae5b3e7,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

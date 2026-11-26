@@ -160,4 +160,5 @@ together with the code.
 | Documents | PDFs from the Verein page are copied into the bundle | S3.3 |
 | Legacy redirects | the bundle carries the same 301 rules as `src/proxy.ts` | S1.3, S7.1 |
 | e2e | the `dist/` bundle gets its own e2e run | S6.6 |
+| Statistics | the bundle has no beacon (nothing to count to); counting needs the beacon pointed at the app's `/api/stats/hit` (cross-origin: CORS + CSP `connect-src`) or nginx-log counting | S5.11 |
 | Release / images | `release:static`, the publisher image and the static demo on GHCR stay maintained | S6.8 |

@@ -1,8 +1,8 @@
 import { a, br, doc, h2, p, t, ul } from './lexical'
 
 /* Datenschutzerklärung — a DSGVO baseline. Covers the processing this site
-   actually does today (hosting server-logs, e-mail contact, no tracking, local
-   fonts). MUST be extended if analytics, a newsletter, embedded third-party
+   actually does today (hosting server-logs, e-mail contact, the cookie-free
+   page counter of S5.11 / D-012, local fonts). MUST be extended if a newsletter, embedded third-party
    content or cookies are added. Not legal advice. */
 
 const datenschutzBody = doc([
@@ -107,10 +107,32 @@ const datenschutzBody = doc([
     ),
   ),
 
-  h2('Cookies, Reichweitenmessung & Schriftarten'),
+  h2('Reichweitenmessung'),
   p(
     t(
-      'Diese Website setzt derzeit keine Cookies zu Analyse- oder Marketingzwecken und keine Drittanbieter-Tracking-Dienste ein. Verwendete Schriftarten werden lokal von unserem Server ausgeliefert; es besteht dabei keine Verbindung zu einem externen Font-Anbieter.',
+      'Um zu erfahren, welche Inhalte gelesen werden und wie Besucher zu uns finden, zählen wir die Aufrufe dieser Website mit einer eigenen, einfachen Statistik. Sie läuft vollständig auf unserem Server; es ist kein Analyse-Dienstleister beteiligt und es werden keine Daten an Dritte übermittelt.',
+    ),
+  ),
+  p(t('Beim Aufruf einer Seite sendet Ihr Browser dafür nur:')),
+  ul([
+    'die Adresse der aufgerufenen Seite (ohne Suchbegriffe oder sonstige Parameter)',
+    'bei der ersten Seite eines Besuchs die Website, von der Sie gekommen sind (nur deren Domain, z. B. „google.de“, nicht die genaue Adresse)',
+  ]),
+  p(
+    t(
+      'Daraus erhöhen wir lediglich Zähler pro Tag: wie oft eine Seite aufgerufen wurde und wie viele Besuche von welcher Domain kamen. Wir speichern dabei weder Ihre IP-Adresse noch Angaben zu Browser oder Gerät, keine Kennung und keinen daraus berechneten Wert. Es werden keine Cookies gesetzt und keine Daten auf Ihrem Gerät gespeichert. Ein Wiedererkennen von Besuchern, auch über mehrere Tage oder Websites hinweg, ist dadurch nicht möglich. Die gespeicherten Tageszähler enthalten keine personenbezogenen Daten.',
+    ),
+  ),
+  p(
+    t(
+      'Rechtsgrundlage für die kurzzeitige Verarbeitung der Anfrage ist Art. 6 Abs. 1 lit. f DSGVO; unser berechtigtes Interesse liegt darin, unser Angebot an den Interessen der Besucher auszurichten. Haben Sie in Ihrem Browser „Do Not Track“ oder „Global Privacy Control“ eingeschaltet, wird Ihr Besuch nicht gezählt.',
+    ),
+  ),
+
+  h2('Cookies & Schriftarten'),
+  p(
+    t(
+      'Diese Website setzt keine Cookies zu Analyse- oder Marketingzwecken und keine Drittanbieter-Tracking-Dienste ein. Verwendete Schriftarten werden lokal von unserem Server ausgeliefert; es besteht dabei keine Verbindung zu einem externen Font-Anbieter.',
     ),
   ),
 ])
