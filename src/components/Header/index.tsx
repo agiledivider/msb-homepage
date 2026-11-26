@@ -1,8 +1,11 @@
 'use client'
 
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { SearchDialog, useSearchShortcut } from '../search/SearchDialog'
 import { ThemeToggle } from '../ThemeToggle'
 import { BTN_PRIMARY } from '../ui'
 
@@ -30,20 +33,30 @@ export function Header({
   logoDarkSrc = '/logo/logo-horizontal-no-claim-negativ.png',
   nav = DEFAULT_NAV,
   cta = { label: 'Mitglied werden', href: '/mitmachen' },
+  search = true,
 }: {
   logoSrc?: string
   /** Negativ variant for dark mode (styleguide logo swap) */
   logoDarkSrc?: string
   nav?: NavItem[]
   cta?: NavItem
+  /** Site search (S5.17). Off in the static snapshot, which has no server to search. */
+  search?: boolean
 }) {
   const [open, setOpen] = useState(false)
+  const [searching, setSearching] = useState(false)
+  const openSearch = useCallback(() => {
+    if (!search) return
+    setOpen(false)
+    setSearching(true)
+  }, [search])
+  useSearchShortcut(openSearch)
   const pathname = usePathname()
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname?.startsWith(href))
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-card">
-      <div className="relative mx-auto flex max-w-shell items-center justify-between gap-6 px-4 py-4 md:gap-4 md:px-8 md:py-3.5 lg:gap-6">
+      <div className="relative mx-auto flex max-w-shell items-center justify-between gap-2 px-4 py-4 md:gap-4 md:px-8 md:py-3.5 lg:gap-6">
         <Link href="/" className="flex items-center no-underline">
           {/* biome-ignore lint/performance/noImgElement: static logo PNG sized by CSS height; next/image needs fixed dimensions and adds nothing here */}
           <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto dark:hidden" />
@@ -67,6 +80,16 @@ export function Header({
               {item.label}
             </Link>
           ))}
+          {search ? (
+            <button
+              type="button"
+              onClick={openSearch}
+              className="flex items-center gap-3 border-b border-line px-[22px] py-3.5 text-left text-[16px] font-medium text-ink transition-colors -outline-offset-4 hover:bg-fond md:hidden"
+            >
+              <FontAwesomeIcon icon={faMagnifyingGlass} className="h-4 w-4 text-brand-text" aria-hidden="true" />
+              Suchen
+            </button>
+          ) : null}
           <Link
             href={cta.href}
             onClick={() => setOpen(false)}
@@ -76,7 +99,19 @@ export function Header({
           </Link>
         </nav>
 
-        <ThemeToggle className="ml-auto md:ml-0" />
+        {search ? (
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Website durchsuchen"
+            title="Suchen (/)"
+            className="ml-auto flex h-11 w-11 items-center justify-center rounded-[10px] text-ink transition-colors hover:bg-fond hover:text-brand-text md:ml-0"
+          >
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="h-[18px] w-[18px]" />
+          </button>
+        ) : null}
+
+        <ThemeToggle className={search ? '' : 'ml-auto md:ml-0'} />
 
         <Link
           href={cta.href}
@@ -101,6 +136,7 @@ export function Header({
           />
         </button>
       </div>
+      {search ? <SearchDialog open={searching} onClose={() => setSearching(false)} /> : null}
     </header>
   )
 }

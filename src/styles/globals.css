@@ -26,6 +26,9 @@
   --color-green-pale: #f0f7ea;   /* Grüner Fond · Grün 50 — status OK, selected row, tags */
   --color-fond-gelb: #fdf3d7;    /* Gelber Fond — status "Achtung", soft yellow tags */
   --color-text-gelb: #8a5a00;    /* Gelbe Schrift · Ocker — text on Gelber Fond */
+  --color-feld: #ffffff;         /* Feld · Weiß — input background (styleguide 2026-11 Formulare) */
+  --color-feld-rand: #948d81;    /* Feld-Rand · Kiesel — input border, 3:1 on Fläche and Hintergrund */
+  --color-marker: #fbe3a0;       /* Textmarker — search hits (S5.17); not Mitglieder-Gelb, text on it ink */
   --color-button: #33791a;       /* Button · Grün 600 — main button surface */
   --color-button-hover: #325725; /* Button Hover · Grün 800 */
   --color-button-text: #ffffff;  /* Button-Schrift · Weiß */
@@ -67,6 +70,18 @@
 
   --container-shell: 1180px;
 
+  /* Quick search panel (S5.17): drops a few px from under the header. */
+  --animate-search-drop: search-drop 0.16s ease-out both;
+  @keyframes search-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   --animate-msbfade: msbfade 0.4s ease both;
   @keyframes msbfade {
     from {
@@ -98,6 +113,9 @@
     --color-green-pale: #1b3714;   /* Grün 900 */
     --color-fond-gelb: #33280f;    /* Gelb-Fond dunkel */
     --color-text-gelb: #fcbd30;    /* Mitglieder-Gelb */
+    --color-marker: #5a4512;       /* Textmarker dunkel */
+    --color-feld: #13201a;         /* Feld · Tannenschwarz */
+    --color-feld-rand: #606e67;    /* Feld-Rand · Flechte */
     --color-mint: #152d37;         /* MINT-Fond dunkel */
     --color-button: #5eb130;       /* Grün 500 */
     --color-button-hover: #9cd27d; /* Grün 300 */
@@ -121,6 +139,9 @@
   --color-green-pale: #1b3714;   /* Grün 900 */
   --color-fond-gelb: #33280f;    /* Gelb-Fond dunkel */
   --color-text-gelb: #fcbd30;    /* Mitglieder-Gelb */
+  --color-marker: #5a4512;       /* Textmarker dunkel */
+  --color-feld: #13201a;         /* Feld · Tannenschwarz */
+  --color-feld-rand: #606e67;    /* Feld-Rand · Flechte */
   --color-mint: #152d37;         /* MINT-Fond dunkel */
   --color-button: #5eb130;       /* Grün 500 */
   --color-button-hover: #9cd27d; /* Grün 300 */

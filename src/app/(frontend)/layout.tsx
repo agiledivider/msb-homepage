@@ -86,7 +86,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
       <body className="m-0 bg-paper font-sans text-ink [background-image:linear-gradient(var(--color-raster)_1px,transparent_1px),linear-gradient(90deg,var(--color-raster)_1px,transparent_1px)] [background-size:27px_27px]">
         {draft ? <RefreshRouteOnSave /> : null}
         <TopStrip status={site?.topStrip?.status ?? undefined} address={site?.topStrip?.address ?? undefined} />
-        <Header nav={navFrom(site)} cta={ctaFrom(site)} />
+        <Header nav={navFrom(site)} cta={ctaFrom(site)} search={process.env.STATIC_EXPORT !== 'true'} />
         {children}
         <Footer links={footerLinksFrom(site)} {...footerFrom(site)} />
       </body>
