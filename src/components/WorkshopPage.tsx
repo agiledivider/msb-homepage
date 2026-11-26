@@ -42,6 +42,12 @@ const STEPS = [
 const H2 = 'm-0 mb-4 font-display text-[24px] font-extrabold md:text-[26px]'
 const BOX = 'rounded-[12px] border border-line bg-card p-4'
 const BOX_LABEL = 'mb-3 font-mono text-[14px] tracking-[.06em] text-muted'
+// Quick-facts strip: as many columns as facts, so no cell stays empty (literal classes for Tailwind).
+const FACT_COLS: Record<number, string> = {
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-3',
+  4: 'sm:grid-cols-2 lg:grid-cols-4',
+}
 const CHIP = 'inline-flex items-center rounded-[5px] px-2 py-1 font-mono text-[14px]'
 const BTN = 'inline-flex min-h-11 items-center justify-center rounded-[8px] px-4 text-[14px] font-bold'
 
@@ -154,7 +160,7 @@ export function WorkshopPage({
           {/* Quick facts */}
           {facts.length ? (
             <dl
-              className={`m-0 mt-8 grid gap-px overflow-hidden rounded-[12px] border border-line bg-line sm:grid-cols-2 ${facts.length > 2 ? 'lg:grid-cols-4' : ''}`}
+              className={`m-0 mt-8 grid gap-px overflow-hidden rounded-[12px] border border-line bg-line ${FACT_COLS[facts.length] ?? ''}`}
             >
               {facts.map((f) => (
                 <div key={f.label} className="bg-fond px-4 py-3">
