@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**30 open · 34 done** · ✅ 34 · 🟡 1 · ⏳ 26 · ⏭️ 1 · 🚨 2
+**29 open · 35 done** · ✅ 35 · 🟡 1 · ⏳ 25 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -29,7 +29,7 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L282)
 
-## E5 — Visitor and editor features (4/15 done)
+## E5 — Visitor and editor features (5/15 done)
 
 - ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L302)
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L307)
@@ -41,18 +41,17 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S5.10 — Visitors reach older blog posts (S)](BACKLOG.md#L350)
 - ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L356)
 - ⏳ [S5.14 — People who want to support the Verein find a real donation page (M)](BACKLOG.md#L379)
-- ⏳ [S5.15 — Visitors see at a glance which events are only for members (S)](BACKLOG.md#L386)
 
 ## E6 — Playbook retrofit (2/10 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L417)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L422)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L427)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L432)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L437)
-- ⏳ [S6.8 — The app and publisher images are much smaller (M)](BACKLOG.md#L443)
-- ⏳ [S6.9 — Tests give feedback faster (M)](BACKLOG.md#L449)
-- ⏳ [S6.10 — A push reaches staging-ready images sooner (M)](BACKLOG.md#L455)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L419)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L424)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L429)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L434)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L439)
+- ⏳ [S6.8 — The app and publisher images are much smaller (M)](BACKLOG.md#L445)
+- ⏳ [S6.9 — Tests give feedback faster (M)](BACKLOG.md#L451)
+- ⏳ [S6.10 — A push reaches staging-ready images sooner (M)](BACKLOG.md#L457)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -64,4 +63,4 @@ All done.
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L537)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L539)

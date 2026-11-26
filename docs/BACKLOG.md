@@ -383,11 +383,13 @@ Blog posts show neither a date nor an author, so a reader can't tell a fresh rep
 **AC:** every "Spenden" link on the site leads to a donation page; the page says what donations make possible, how to give money (account details, any online option the Verein offers) and things (what is wanted, what isn't, whom to contact), and how to get a donation receipt; all facts (account, receipt threshold, wish list, contact) come from the Vorstand, nothing is guessed; editors can update the page in the CMS; usable at 375 px.
 **Needs:** account details, receipt rules and a wish list from the Vorstand.
 
-### ⏳ S5.15 — Visitors see at a glance which events are only for members (S)
+### ✅ S5.15 — Visitors see at a glance which events are only for members (S) — 2026-11-26
 **Source:** Falk, 2026-11-26.
 Members-only events (Mitgliedertreffen, internal workshops) look like public ones: the only hint is a free-text label that editors type differently each time ("nur für Mitglieder", "WORKSHOP · MITGLIEDER" …), and the start-page hero even invites visitors with "kostenlos" and "Platz sichern". Guests turn up to closed events, or skip ones they could join.
 
 **AC:** editors mark an event as members-only with one switch; members-only events carry the same clear marker everywhere they appear (start-page hero, event lists, calendar, tiles, the event page and the exported calendar); the hero shows no public invitation on them ("kostenlos", "Platz sichern") and points to membership instead; the existing members-only events are marked; readable at 375 px; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*.
+
+**Implementation notes:** event field `membersOnly` ("Nur für Mitglieder"); design B "Mitglieder-Gelb", chosen by Falk from three designer drafts (A label strip, B yellow, C door sign): `MembersOnlyBadge` is a Mitglieder-Gelb flag with a notch, 12 px (exception in `tests/fitness/min-text-size.test.ts`); yellow bar on list rows, yellow border + band on tiles, yellow calendar chip, members box with yellow edge and button on the event page (button right from `md`, hover Tinte/yellow), hero face swaps orange for yellow (sticker, tape, "Mitglied werden"/"Zum Termin", no hand note); workshop sidebar shows the flag. `labelBesideMarker` drops the repeated "Mitglieder" part of the free-text label; calendar export appends "(Nur für Mitglieder)". Migration `20261126_022737_events_members_only` adds the column and marks existing events (and their versions) whose label says members only, once. Styleguide card "Mitglieder-Fahne · Nur für Mitglieder" written in `msb-styleguide` (2026-11.13), not committed there. Tests: `tests/unit/members-only.test.tsx`. Checked at 1440 and 375 px. `b3e3755`.
 
 ---
 
