@@ -327,4 +327,35 @@ after=$(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db "select group_conca
 [[ $after == '20260101_000000_a,20260102_000000_b,20260103_000000_c' ]] || fail "backup lost its migration history: $after"
 pass "a backup with its own migration history keeps it"
 
+# 14. A downloaded backup file onto a fresh server, without any repository (B1).
+#     Built like an admin download: tar of work/db + volumes/media, encrypted.
+VOLS+=("$P-db3" "$P-media3" "$P-file")
+for v in "$P-db3" "$P-media3" "$P-file"; do docker volume create "$v" >/dev/null; done
+docker run --rm -v "$P-db:/volumes/db:ro" -v "$P-media:/volumes/media:ro" --user root -v "$P-file:/file" --entrypoint sh "$IMG" -c '
+  mkdir -p /tmp/b/work/db /tmp/b/volumes && cp /volumes/db/msb.db /tmp/b/work/db/ && cp -a /volumes/media /tmp/b/volumes/
+  tar -czf /tmp/b.tar.gz -C /tmp/b work volumes
+  node --input-type=module -e "
+    import { createReadStream, createWriteStream } from \"node:fs\"
+    import { pipeline } from \"node:stream/promises\"
+    const { encryptStream } = await import(\"/usr/local/lib/msb/backup-api.mjs\")
+    await pipeline(await encryptStream(createReadStream(\"/tmp/b.tar.gz\"), \"file-test-only\"), createWriteStream(\"/file/msb-backup-20261126T0000Z-abcdef12.tar.gz.enc\"))"'
+F=/file/msb-backup-20261126T0000Z-abcdef12.tar.gz.enc
+rfile() { # rfile <password> <args...>: no RESTIC_* at all, like a server whose storage is gone
+  local pw=$1; shift
+  docker run --rm -e BACKUP_FILE_PASSWORD="$pw" -v "$P-db3:/volumes/db" -v "$P-media3:/volumes/media" -v "$P-file:/file:ro" "$IMG" restore-file "$F" "$@"
+}
+out=$(rfile wrong-password 2>&1 || true)
+[[ $out == *"wrong password"* ]] || fail "a wrong file password was not refused: $out"
+out=$(rfile file-test-only 2>&1)
+[[ $out == *"nothing changed"* && $out == *'"pages":3'* ]] || fail "restore-file without --apply should only preview: $out"
+left=$(shell "$P-db3" "$P-media3" 'ls -A /volumes/db /volumes/media | grep -v "^/\|^$" || true')
+[[ -z $left ]] || fail "the dry run wrote to the volumes: $left"
+rfile file-test-only --apply >/dev/null
+diff <(shell "$P-db" "$P-media" 'sqlite3 /volumes/db/msb.db .dump; cd /volumes/media && find . -type f -exec md5sum {} + | sort') \
+  <(shell "$P-db3" "$P-media3" 'sqlite3 /volumes/db/msb.db .dump; cd /volumes/media && find . -type f -exec md5sum {} + | sort') >/dev/null \
+  || fail "restore-file data differs from the original"
+out=$(rfile file-test-only --apply 2>&1 || true)
+[[ $out == *"not empty"* ]] || fail "restore-file over existing data was not refused: $out"
+pass "a downloaded backup file restores onto empty volumes without any repository (dry run first, wrong password and non-empty volumes refused)"
+
 echo "backup round trip: all checks passed"

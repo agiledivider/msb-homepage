@@ -20,6 +20,11 @@
 #   msb-backup stage-upload UPLOAD   check and unpack an uploaded, already
 #                                    decrypted backup (S8.4); prints the preview
 #   msb-backup restore-upload UPLOAD restore it like restore-live (S8.4)
+#   msb-backup restore-file FILE [--apply] [--overwrite]
+#                                    a file downloaded from /admin/backups onto
+#                                    a fresh server, without any repository (B1);
+#                                    dry run without --apply. Password: prompt
+#                                    (run -it) or BACKUP_FILE_PASSWORD
 #
 # Volumes (mounted by compose):
 #   /volumes/db     the app's `db` volume     (msb.db)
@@ -225,6 +230,105 @@ restore() {
   log "restored snapshot '$id'. Start the web service again."
 }
 
+# --- Restore a downloaded backup file onto a fresh server (B1) -------------
+# For when the server *and* the backup storage are gone and only a file from
+# /admin/backups → "Herunterladen" is left. Needs no restic repository, no
+# running site and no live database: it fills empty volumes, and the first
+# start of the web service (`payload migrate`) brings the schema up to date.
+# Same rails as `restore`: a dry run unless --apply, refuses non-empty volumes
+# unless --overwrite (the old database is then kept). The file's password comes
+# from BACKUP_FILE_PASSWORD or a prompt (docker compose run -it), never argv.
+restore_file() {
+  file='' apply=0 overwrite=0
+  for arg in "$@"; do
+    case "$arg" in
+      --apply) apply=1 ;;
+      --overwrite) overwrite=1 ;;
+      -*) die "unknown option $arg" ;;
+      *) file=$arg ;;
+    esac
+  done
+  [ -n "$file" ] || die "usage: restore-file <backup file> [--apply] [--overwrite]"
+  [ -f "$file" ] || die "no file at $file (mount it into the container, see DEPLOY.md)"
+  # The file name ends in the backup's id (msb-backup-<time>-<id>.tar.gz.enc).
+  id=$(basename "$file" | sed -n 's/.*-\([0-9a-f]\{8,64\}\)\.tar\.gz\.enc$/\1/p')
+  [ -n "$id" ] || id=$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n')
+
+  has_db=0 has_media=0
+  [ -f "$DB_DIR/$DB_FILE" ] && has_db=1
+  [ -n "$(ls -A "$MEDIA_DIR" 2>/dev/null)" ] && has_media=1
+  if [ $((has_db + has_media)) -gt 0 ] && [ $overwrite -eq 0 ]; then
+    die "the volumes are not empty (database: $has_db, media: $has_media). On a running site use /admin/backups → \"Aus einer Backup-Datei wiederherstellen\"; or add --overwrite (the current database is kept as $DB_FILE.before-restore-<time>)."
+  fi
+
+  pass=${BACKUP_FILE_PASSWORD:-}
+  if [ -z "$pass" ]; then
+    [ -r /dev/tty ] || die "no password: set BACKUP_FILE_PASSWORD or run with -it to be asked"
+    printf 'Password of %s: ' "$(basename "$file")" >/dev/tty
+    stty -echo </dev/tty 2>/dev/null || true
+    read -r pass </dev/tty || true
+    stty echo </dev/tty 2>/dev/null || true
+    printf '\n' >/dev/tty
+  fi
+  [ -n "$pass" ] || die "no password given"
+
+  mkdir -p "$UPLOAD_DIR"
+  rm -rf "${UPLOAD_DIR:?}/$id" "$UPLOAD_DIR/$id.tar.gz"
+  trap 'rm -rf "${UPLOAD_DIR:?}/$id" "$UPLOAD_DIR/$id.tar.gz"' EXIT
+  # Same decryption as the admin upload (backup-api.mjs). The password goes in
+  # through the environment of this one node process only.
+  result=$(MSB_FILE="$file" MSB_OUT="$UPLOAD_DIR/$id.tar.gz" MSB_PASS="$pass" node --input-type=module -e "
+    const { decryptFile } = await import('/usr/local/lib/msb/backup-api.mjs')
+    process.stdout.write(await decryptFile(process.env.MSB_FILE, process.env.MSB_OUT, process.env.MSB_PASS))") ||
+    die "could not decrypt $file"
+  unset pass
+  case "$result" in
+    ok) ;;
+    wrong-password) die "wrong password, or the file is damaged" ;;
+    not-a-backup) die "$file is not a backup downloaded from /admin/backups" ;;
+    *) die "could not decrypt $file ($result)" ;;
+  esac
+  # Same archive check as an upload: only plain files below work/db and volumes/media.
+  rc=0
+  # (unpack only: stage-upload's preview opens the live database, and sqlite3
+  # would create an empty msb.db there, so --apply would then see "not empty")
+  "$0" unpack-upload "$id" || rc=$?
+  case $rc in
+    0) ;;
+    3) die "the decrypted file is not a readable archive (damaged download?)" ;;
+    4) die "the archive is not one of our backups (unexpected paths or no database)" ;;
+    *) die "checking the archive failed ($rc)" ;;
+  esac
+  src="$UPLOAD_DIR/$id"
+  db="$src$WORK/db/$DB_FILE"
+  [ "$(sqlite3 "$db" 'PRAGMA integrity_check;')" = ok ] || die "the database in the backup is damaged; nothing changed"
+  files=$(find "$src$MEDIA_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
+  log "backup $id: $(counts_json "$db"), $files media files"
+  # The schema version the backup was made with. Restore with an app image at
+  # least this new (normally: latest); its first start migrates the rest.
+  migration=$(sqlite3 "$db" "select name from payload_migrations where name <> 'dev' order by name desc limit 1;" 2>/dev/null || true)
+  log "newest migration in the backup: ${migration:-none (a dev backup)}. Use an app image at least this new (latest is)."
+
+  if [ $apply -eq 0 ]; then
+    log "plan: put this backup into $DB_DIR and $MEDIA_DIR (overwrite: $overwrite)"
+    log "nothing changed. Re-run with --apply, before the first start of the web service."
+    return 0
+  fi
+
+  if [ $has_db -eq 1 ]; then
+    keep="$DB_DIR/$DB_FILE.before-restore-$(date +%Y%m%d-%H%M%S)"
+    mv "$DB_DIR/$DB_FILE" "$keep"
+    log "previous database kept as $keep"
+  fi
+  # Media first, then the database via copy + rename: never a half-written DB.
+  if [ -d "$src$MEDIA_DIR" ]; then
+    cp -a "$src$MEDIA_DIR/." "$MEDIA_DIR/"
+  fi
+  cp "$db" "$DB_DIR/.$DB_FILE.restoring"
+  mv "$DB_DIR/.$DB_FILE.restoring" "$DB_DIR/$DB_FILE"
+  log "restored backup file $id. Now start the stack: docker compose -f docker-compose.prod.yml up -d"
+}
+
 # --- Restore while the site runs (S8.3) ------------------------------------
 
 # Content counts of a database, as JSON: what the restore preview shows.
@@ -289,7 +393,7 @@ inspect() {
 # An uploaded backup (S8.4), already decrypted by the API to $UPLOAD_DIR/ID.tar.gz.
 # Exit 3: not a readable .tar.gz (wrong password or damaged file);
 # exit 4: readable, but not one of our backups. Nothing is unpacked then.
-stage_upload() {
+unpack_upload() { # check and unpack $UPLOAD_DIR/ID.tar.gz; exit 3/4 as below
   id=$1
   valid_id "$id"
   archive="$UPLOAD_DIR/$id.tar.gz" dir="$UPLOAD_DIR/$id"
@@ -308,6 +412,10 @@ stage_upload() {
   tar -xzf "$archive" -C "$dir" || { rm -rf "$dir" "$archive" "$archive.list"; exit 3; }
   rm -f "$archive" "$archive.list"
   [ -f "$dir$WORK/db/$DB_FILE" ] || { rm -rf "$dir"; exit 4; }
+}
+stage_upload() {
+  unpack_upload "$1"
+  dir="$UPLOAD_DIR/$1"
   preview_json "$dir$WORK/db/$DB_FILE" "$(find "$dir$MEDIA_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')"
 }
 
@@ -402,9 +510,11 @@ case "$cmd" in
   backup-once) do_backup ;; # internal, called by backup_locked
   snapshots) require_config; restic snapshots --host msb-homepage --tag msb ;;
   restore) require_config; restore "$@" ;;
+  restore-file) restore_file "$@" ;; # no restic needed: a downloaded file onto a fresh server
   inspect) require_config; inspect "${1:-}" ;;
   restore-live) require_config; restore_live "${1:-}" ;;
   stage-upload) stage_upload "${1:-}" ;;
+  unpack-upload) unpack_upload "${1:-}" ;; # internal, called by restore-file
   restore-upload) require_config; restore_upload "${1:-}" ;;
-  *) die "unknown command '$cmd' (schedule | backup | snapshots | restore | inspect | restore-live | stage-upload | restore-upload)" ;;
+  *) die "unknown command '$cmd' (schedule | backup | snapshots | restore | restore-file | inspect | restore-live | stage-upload | restore-upload)" ;;
 esac

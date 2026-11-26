@@ -349,6 +349,40 @@ old `PAYLOAD_SECRET` and the backup settings, restore the latest backup
 offline as above **before** the first `up -d`, then start the stack and
 publish the static site again.
 
+**App version:** restore with the current image (`latest`), never one older
+than the backup. A backup carries its database's migration history; the first
+start runs `payload migrate` and brings an older backup up to date, while an
+older image doesn't know a newer backup's tables. `restore-file` (below) prints
+the backup's newest migration.
+
+### Only a downloaded backup file is left
+
+When the backup storage is gone too, a file from `/admin/backups` →
+"Herunterladen" (`msb-backup-<time>-<id>.tar.gz.enc`) and its password are
+enough. `restore-file` needs no repository, no running site and no backup
+settings that work: it fills the empty volumes, and the first start does the
+rest. Set up the new server as above (`.env` with the old `PAYLOAD_SECRET`;
+`RESTIC_REPOSITORY` / `RESTIC_PASSWORD` must be set for compose to start, so
+put in the new backup storage, or any placeholder until you have one), then,
+**before** the first `up -d`:
+
+```bash
+f=msb-backup-20261126T0414Z-38345bb8.tar.gz.enc   # next to docker-compose.prod.yml
+docker compose -f docker-compose.prod.yml run --rm --no-deps -it \
+  -v "$PWD/$f:/restore/$f:ro" backup restore-file "/restore/$f"           # dry run: asks for the password, shows what's inside
+docker compose -f docker-compose.prod.yml run --rm --no-deps -it \
+  -v "$PWD/$f:/restore/$f:ro" backup restore-file "/restore/$f" --apply   # puts database and media into the volumes
+docker compose -f docker-compose.prod.yml up -d
+```
+
+It refuses volumes that already hold data (add `--overwrite`; the old database
+is kept as `msb.db.before-restore-<time>`). On a running site use the admin
+instead ("Aus einer Backup-Datei wiederherstellen"). Then set up real backup
+storage before the next night, and publish the static site again. Tested
+2026-11-26 with a real staging backup (7 pages, 77 posts, 231 events, 949
+media files) onto an empty stack: same rows and update times, every media file
+byte-identical, site and images served (B1); `pnpm backup:test` covers it.
+
 ## Schema changes
 
 The app uses SQLite `push` in **dev only**. In prod it applies **migrations**.
