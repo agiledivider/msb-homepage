@@ -347,11 +347,13 @@ The events archive shows all past events, about 200, on one long page. It loads 
 
 **AC:** the archive shows a page of events at a time, newest first, with links to the next and previous page and the page number; each page has its own address that can be shared and is found by search engines; a visitor can jump to a year; old links to the archive still open its first page; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*; readable and usable at 375 px.
 
-### ⏳ S5.10 — Visitors reach older blog posts (S)
+### ✅ S5.10 — Visitors reach older blog posts (S) — 2026-11-26
 **Source:** IDEAS.md 2026-11-24 ("pagination archive"; the blog list was found to stop at the newest 20).
 The blog page lists only the 20 newest posts. The other 57 can only be found through search engines or old links, so most of the Verein's history is invisible from the site itself.
 
 **AC:** from the blog page a visitor can page back to the oldest post; each page has its own address; the newest posts stay on the first page as today; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*; usable at 375 px.
+
+**Implementation notes:** `/blog` is page 1, older posts on `/blog/seite/N` (20 per page, `src/lib/blogPages.ts`), list + pager in `src/components/blog/BlogIndex.tsx` (pager shows numbers from `sm`, "Seite N von M" on phones; rel prev/next; own title and canonical). `/blog/seite/1` → 308 `/blog`, invalid or empty pages 404. `findPublic` takes `page`. The static publisher adds `/blog/seite/2…N` from the published post count (checked: 320/320 routes, pages 2–4 in `dist/` and the sitemap). Tests: `tests/unit/blog-pages.test.tsx`. Checked at 1440 and 375 px. `da38f41`.
 
 ### ⏳ S5.11 — The Verein sees how the site is used, without tracking visitors (M)
 **Source:** IDEAS.md 2026-11-24. Background: `docs/analytics-dsgvo-research.md` (2026-07).
