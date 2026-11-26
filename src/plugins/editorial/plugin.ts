@@ -63,6 +63,11 @@ export const editorialWorkflow =
             edit: {
               ...col.admin?.components?.edit,
               PublishButton: '/plugins/editorial/components/PublishButton#PublishButton',
+              // the review status sits in the controls bar, in reach with the live preview open
+              beforeDocumentControls: [
+                '/plugins/editorial/components/ReviewPanel#ReviewPanel',
+                ...(col.admin?.components?.edit?.beforeDocumentControls ?? []),
+              ],
             },
           },
         },

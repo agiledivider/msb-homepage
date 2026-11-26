@@ -60,18 +60,8 @@ export const reviewFields = (): Field[] => {
   const whenSet = (name: string) => (data: Record<string, unknown> | undefined) =>
     data?.[name] !== undefined && data?.[name] !== null && data?.[name] !== ''
   return [
-    // The panel comes first: its badge already shows the status, so the raw
-    // `reviewStatus` select below stays hidden (it is still stored and locked).
-    {
-      name: 'reviewPanel',
-      type: 'ui',
-      admin: {
-        position: 'sidebar',
-        components: {
-          Field: '/plugins/editorial/components/ReviewPanel#ReviewPanel',
-        },
-      },
-    },
+    // The status chip in the controls bar (ReviewPanel) shows the status, so
+    // the raw `reviewStatus` select stays hidden (it is still stored and locked).
     {
       name: 'reviewStatus',
       type: 'select',

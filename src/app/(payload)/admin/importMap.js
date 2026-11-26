@@ -22,9 +22,9 @@ import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b99
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { ReviewPanel as ReviewPanel_812323546135d17338b9452fd3f00174 } from '../../../plugins/editorial/components/ReviewPanel'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { ReviewPanel as ReviewPanel_812323546135d17338b9452fd3f00174 } from '../../../plugins/editorial/components/ReviewPanel'
 import { HeroPreviewButton as HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95 } from '../../../components/HeroPreviewButton'
 import { PublishButton as PublishButton_7d02673e38ba1662132c2fde10adbd73 } from '../../../plugins/editorial/components/PublishButton'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
@@ -66,9 +66,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "/plugins/editorial/components/ReviewPanel#ReviewPanel": ReviewPanel_812323546135d17338b9452fd3f00174,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "/plugins/editorial/components/ReviewPanel#ReviewPanel": ReviewPanel_812323546135d17338b9452fd3f00174,
   "/components/HeroPreviewButton#HeroPreviewButton": HeroPreviewButton_03026fad8d70bf6dd501024a562f1d95,
   "/plugins/editorial/components/PublishButton#PublishButton": PublishButton_7d02673e38ba1662132c2fde10adbd73,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,

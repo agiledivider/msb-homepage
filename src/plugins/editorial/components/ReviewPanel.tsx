@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth, useDocumentInfo } from '@payloadcms/ui'
+import { Popup, useAuth, useDocumentInfo } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -14,15 +14,16 @@ const TONE: Record<Tone, string> = {
 }
 
 const box: React.CSSProperties = {
-  border: '1px solid var(--theme-elevation-150)',
-  borderRadius: 6,
   padding: 12,
-  marginTop: 8,
+  width: 300,
+  maxWidth: 'calc(100vw - 32px)',
   display: 'flex',
   flexDirection: 'column',
   gap: 8,
 }
 const text: React.CSSProperties = { margin: 0, fontSize: 13, lineHeight: 1.5 }
+/** Rejecting is the one destructive step here, so its buttons are red. */
+const rejectButton: React.CSSProperties = { margin: 0, border: `1px solid ${TONE.rejected}` }
 const hint: React.CSSProperties = { ...text, fontSize: 12, color: 'var(--theme-elevation-500)' }
 
 const dateTime = (iso: unknown) =>
@@ -92,7 +93,8 @@ function usePublishedComparison(slug: string | undefined, id: string | number | 
 }
 
 /**
- * Sidebar "Redaktion" panel: shows the state of the version in the form
+ * "Redaktion" status chip in the document controls bar (it stays in reach while
+ * the live preview is open, unlike the sidebar). Its popup shows the state of the version in the form
  * (Entwurf / In Prüfung / Abgelehnt + reason / Veröffentlicht), what the main
  * button does for this user, a diff link when a newer draft differs from the
  * live version, and — for reviewers — rejecting with a required reason.
@@ -146,23 +148,11 @@ export function ReviewPanel() {
       : '„Veröffentlichen“ speichert und stellt diese Version sofort online.'
     : `„${status === 'in_review' ? 'Erneut zur Prüfung einreichen' : 'Zur Prüfung einreichen'}“ speichert und gibt den Entwurf an die Redaktion. Online geht er erst nach der Freigabe.`
 
-  return (
-    <div style={box}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <strong style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '.05em' }}>Redaktion</strong>
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: '#fff',
-            background: TONE[state.tone],
-            borderRadius: 4,
-            padding: '2px 8px',
-          }}
-        >
-          {state.label}
-        </span>
-      </div>
+  // data-popup-prevent-close: the popup closes on any button click inside it,
+  // which would hide the rejection form the moment it opens.
+  const details = (
+    <div style={box} data-popup-prevent-close>
+      <strong style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '.05em' }}>Redaktion</strong>
 
       {state.tone === 'rejected' && reviewNote ? (
         <p style={{ ...text, borderLeft: `3px solid ${TONE.rejected}`, paddingLeft: 8 }}>
@@ -210,6 +200,7 @@ export function ReviewPanel() {
               <button
                 type="button"
                 className="btn btn--style-primary btn--size-small"
+                style={{ ...rejectButton, background: TONE.rejected, color: '#fff' }}
                 disabled={busy || !reason.trim()}
                 onClick={reject}
               >
@@ -218,6 +209,7 @@ export function ReviewPanel() {
               <button
                 type="button"
                 className="btn btn--style-secondary btn--size-small"
+                style={{ margin: 0 }}
                 disabled={busy}
                 onClick={() => setRejecting(false)}
               >
@@ -229,6 +221,7 @@ export function ReviewPanel() {
           <button
             type="button"
             className="btn btn--style-secondary btn--size-small"
+            style={{ ...rejectButton, background: 'transparent', color: TONE.rejected }}
             disabled={busy}
             onClick={() => setRejecting(true)}
           >
@@ -239,5 +232,46 @@ export function ReviewPanel() {
 
       {error ? <p style={{ ...text, fontSize: 12, color: TONE.rejected }}>{error}</p> : null}
     </div>
+  )
+
+  const chip = (
+    <span
+      title={state.tone === 'rejected' && reviewNote ? `Abgelehnt: ${reviewNote}` : `Redaktion: ${state.label}`}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        height: 32,
+        padding: '0 10px',
+        border: `1px solid ${TONE[state.tone]}`,
+        borderRadius: 16,
+        fontSize: 13,
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+        color: 'var(--theme-text)',
+        cursor: 'pointer',
+      }}
+    >
+      <span aria-hidden="true" style={{ width: 8, height: 8, borderRadius: 4, background: TONE[state.tone] }} />
+      {state.label}
+      <span aria-hidden="true" style={{ fontSize: 10, color: 'var(--theme-elevation-500)' }}>
+        ▾
+      </span>
+    </span>
+  )
+
+  return (
+    <Popup
+      button={chip}
+      buttonType="custom"
+      horizontalAlign="right"
+      verticalAlign="bottom"
+      size="fit-content"
+      caret={false}
+      id="editorial-review"
+      portalClassName="editorial-review-popup"
+    >
+      {details}
+    </Popup>
   )
 }

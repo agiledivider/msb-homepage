@@ -26,7 +26,7 @@ export function HeroPreviewButton() {
       target="_blank"
       rel="noreferrer"
       className="btn btn--style-secondary btn--size-small"
-      style={{ margin: 0 }}
+      style={{ margin: 0, whiteSpace: 'nowrap' }}
     >
       Hero-Vorschau ↗
     </a>
