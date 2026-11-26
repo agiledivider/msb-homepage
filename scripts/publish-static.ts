@@ -23,7 +23,9 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import sharp from 'sharp'
+import { archiveYearPath, archiveYears } from '../src/lib/archiveYears'
 import { blogPageCount, blogPagePath } from '../src/lib/blogPages'
+import { startOfTodayBerlin } from '../src/lib/eventTime'
 import { ALL_WIDTHS } from '../src/lib/imageWidths.mjs'
 import legacyPaths from '../src/lib/legacy-paths.json'
 import { legacyMenuPaths, legacyViews } from '../src/lib/legacyMenu'
@@ -199,7 +201,7 @@ async function saveRoute(routePath: string): Promise<boolean> {
   return true
 }
 
-type Doc = { slug?: string; legacyId?: number | null }
+type Doc = { slug?: string; legacyId?: number | null; date?: string }
 
 /**
  * Query for live docs: anonymous `publicRead` already hides drafts, and the
@@ -210,8 +212,8 @@ export const LIVE_DOCS_QUERY =
   'limit=2000&depth=0&pagination=false&select[slug]=true&select[legacyId]=true&where[reviewStatus][equals]=approved'
 
 /** Fetch live (published + approved) docs from a collection. */
-async function publishedDocs(collection: string): Promise<Doc[]> {
-  const res = await fetch(`${ORIGIN}/api/${collection}?${LIVE_DOCS_QUERY}`)
+async function publishedDocs(collection: string, extraSelect = ''): Promise<Doc[]> {
+  const res = await fetch(`${ORIGIN}/api/${collection}?${LIVE_DOCS_QUERY}${extraSelect}`)
   if (!res.ok) {
     console.warn(`  ! /api/${collection} returned ${res.status}`)
     return []
@@ -236,6 +238,14 @@ async function collectRoutes() {
     const docs = await publishedDocs(collection)
     // Older blog list pages (S5.10): /blog/seite/2 … , same paging as the app.
     if (collection === 'blog') for (let n = 2; n <= blogPageCount(docs.length); n++) routes.add(blogPagePath(n))
+    // Older years of the events archive (S5.9): /events/archiv/2024 … , same split as the app.
+    if (collection === 'events') {
+      const cutoff = startOfTodayBerlin()
+      const dated = await publishedDocs('events', '&select[date]=true')
+      const past = dated.flatMap((d) => (d.date ? [new Date(d.date)] : [])).filter((d) => d < cutoff)
+      const years = archiveYears(past)
+      for (const y of years.slice(1)) routes.add(archiveYearPath(y, years[0]))
+    }
     for (const doc of docs) {
       if (!doc.slug) continue
       const target = `${base}/${doc.slug}`

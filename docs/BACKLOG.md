@@ -343,11 +343,13 @@ An editor who spots a typo or an outdated date on the site has to open the CMS, 
 
 **AC:** logged in as an editor, every page, post and event shows a "Bearbeiten" button that opens that entry's edit view in the CMS; a visitor who isn't logged in sees no button and no trace of it in the page; an editor without the right to edit that entry sees no button; the statically published site never contains it *(optional: only if the static publisher is used; move to its own story if needed)*; the button doesn't cover content at 375 px.
 
-### ⏳ S5.9 — Visitors page through the events archive (S)
+### ✅ S5.9 — Visitors page through the events archive (S) — 2026-11-26
 **Source:** IDEAS.md 2026-11-24 ("pagination archive").
 The events archive shows all past events, about 200, on one long page. It loads slowly on a phone, and a visitor looking for a year has to scroll through everything before it.
 
 **AC:** the archive shows a page of events at a time, newest first, with links to the next and previous page and the page number; each page has its own address that can be shared and is found by search engines; a visitor can jump to a year; old links to the archive still open its first page; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*; readable and usable at 375 px.
+
+**Implementation notes:** one page per Berlin calendar year (Falk's choice over numbered pages): `/events/archiv` is the newest year, older ones `/events/archiv/<year>`; `/events/archiv/<newest>` 308s to the archive, unknown years 404. A year row on every page is the year jump and page indicator (`aria-current`), newer/older links at the bottom. Each year has its own title and canonical and is in the sitemap; `publish:static` adds the year pages (not run yet). Helpers in `src/lib/archiveYears.ts`, page in `src/components/events/EventsArchive.tsx`; S5.16's per-year sections became pages, rows keep their year. Tests: `tests/unit/archive-years.test.tsx`. Checked in Blink at 375 px and desktop; confirmed by Falk.
 
 ### ✅ S5.10 — Visitors reach older blog posts (S) — 2026-11-26
 **Source:** IDEAS.md 2026-11-24 ("pagination archive"; the blog list was found to stop at the newest 20).

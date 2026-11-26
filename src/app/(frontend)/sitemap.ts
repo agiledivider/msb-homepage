@@ -1,4 +1,6 @@
 import type { MetadataRoute } from 'next'
+import { loadArchiveYears } from '@/components/events/EventsArchive'
+import { archiveYearPath } from '@/lib/archiveYears'
 import { findPublic, type PublicCollection } from '@/lib/publicData'
 import { pagePath, siteUrl } from '@/lib/seo'
 
@@ -31,6 +33,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const { prefix, res } of details) {
     for (const d of res.docs) if (d.slug) entries.set(`${prefix}/${d.slug}`, new Date(d.updatedAt))
   }
+
+  // Older years of the events archive, one page each (S5.9); the newest is /events/archiv.
+  const years = await loadArchiveYears()
+  for (const y of years.slice(1)) entries.set(archiveYearPath(y, years[0]), undefined)
 
   return [...entries].map(([path, lastModified]) => ({ url: `${base}${path}`, lastModified }))
 }

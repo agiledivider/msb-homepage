@@ -1,12 +1,14 @@
 /**
- * S5.16: the events archive shows which year each event took place and where
- * one year ends and the next begins. The upcoming list stays as it is.
+ * The events archive, one page per year (S5.9), each row with its year (S5.16).
+ * The newest year is /events/archiv; years count in Berlin time.
  */
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { YearNav } from '@/components/events/EventsArchive'
 import { ListView } from '@/components/events/ListView'
-import { groupByYear, toEventVM } from '@/components/events/model'
+import { toEventVM } from '@/components/events/model'
+import { archiveYearPath, archiveYears, berlinYear, berlinYearRange, parseArchiveYear } from '@/lib/archiveYears'
 import type { Event } from '@/payload-types'
 
 let nextId = 1
@@ -21,25 +23,46 @@ const anEvent = (overrides: Partial<Event> = {}): Event =>
     ...overrides,
   }) as Event
 
-const vm = (date: string, title = 'Repair-Café') => toEventVM(anEvent({ date, title }))
+const vm = (date: string) => toEventVM(anEvent({ date }))
 
 describe('archive years', () => {
-  it('groups events by year and keeps their order', () => {
-    const groups = groupByYear([
-      vm('2025-03-01T10:00:00.000Z', 'C'),
-      vm('2025-01-10T10:00:00.000Z', 'B'),
-      vm('2019-12-05T17:00:00.000Z', 'A'),
-    ])
-    expect(groups.map((g) => [g.year, g.events.map((e) => e.title)])).toEqual([
-      ['2025', ['C', 'B']],
-      ['2019', ['A']],
-    ])
+  it('lists each year once, newest first', () => {
+    const dates = ['2019-12-05T17:00:00Z', '2025-03-01T10:00:00Z', '2025-01-10T10:00:00Z', '2022-06-01T10:00:00Z']
+    expect(archiveYears(dates.map((d) => new Date(d)))).toEqual([2025, 2022, 2019])
   })
 
   it('counts the year in Berlin time, not UTC', () => {
     // 23:30 UTC on New Year's Eve is already 00:30 on 1 January in Bonn.
-    const [group] = groupByYear([vm('2024-12-31T23:30:00.000Z')])
-    expect(group.year).toBe('2025')
+    expect(berlinYear(new Date('2024-12-31T23:30:00Z'))).toBe(2025)
+    const { start, end } = berlinYearRange(2025)
+    expect(start.toISOString()).toBe('2024-12-31T23:00:00.000Z')
+    expect(end.toISOString()).toBe('2025-12-31T23:00:00.000Z')
+  })
+
+  it('puts the newest year on the archive itself and older years on their own address', () => {
+    expect(archiveYearPath(2026, 2026)).toBe('/events/archiv')
+    expect(archiveYearPath(2019, 2026)).toBe('/events/archiv/2019')
+  })
+
+  it.each([
+    ['2019', 2019],
+    ['2026', 2026],
+    ['19', null],
+    ['2019a', null],
+    ['seite', null],
+    ['3019', null],
+  ])('reads %s from the address as %s', (raw, year) => {
+    expect(parseArchiveYear(raw)).toBe(year)
+  })
+
+  it('links every other year and marks the one shown', () => {
+    const html = renderToStaticMarkup(
+      createElement(YearNav, { years: [2026, 2025, 2019], current: 2025, newest: 2026 }),
+    )
+    expect(html).toContain('href="/events/archiv"')
+    expect(html).toContain('href="/events/archiv/2019"')
+    expect(html).not.toContain('href="/events/archiv/2025"')
+    expect(html).toMatch(/aria-current="page"[^>]*>2025</)
   })
 
   it('shows the year on every archive row', () => {

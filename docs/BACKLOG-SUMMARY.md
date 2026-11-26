@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**23 open · 43 done** · ✅ 43 · 🟡 1 · ⏳ 21 · ⏭️ 1
+**22 open · 44 done** · ✅ 44 · 🟡 1 · ⏳ 20 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -28,7 +28,7 @@ All done.
 
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L284)
 
-## E5 — Visitor and editor features (8/17 done)
+## E5 — Visitor and editor features (9/17 done)
 
 - ⏳ [S5.2 — Editors choose which events appear in the start-page carousel (S)](BACKLOG.md#L304)
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L309)
@@ -36,17 +36,16 @@ All done.
 - ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L320)
 - ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L326)
 - ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L340)
-- ⏳ [S5.9 — Visitors page through the events archive (S)](BACKLOG.md#L346)
-- ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L360)
-- ⏳ [S5.17 — Visitors search the whole site (M)](BACKLOG.md#L409)
+- ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L362)
+- ⏳ [S5.17 — Visitors search the whole site (M)](BACKLOG.md#L411)
 
 ## E6 — Playbook retrofit (5/10 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L440)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L445)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L450)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L455)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L460)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L442)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L447)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L452)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L457)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L462)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -58,4 +57,4 @@ All done.
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L574)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L576)
