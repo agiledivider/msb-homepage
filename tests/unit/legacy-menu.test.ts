@@ -34,7 +34,7 @@ describe('old Joomla menu and list URLs', () => {
     ['/index.php/downloads', '/verein'],
     ['/index.php/der-verein/mitglied-werden', '/mitmachen'],
     ['/index.php/der-verein/offener-handarbeitstreff', '/mitmachen'],
-    ['/index.php/uns-unterstuetzen', '/mitmachen'],
+    ['/index.php/uns-unterstuetzen', '/spenden'], // S5.14: own donation page
     ['/index.php/werkeug-und-raeume', '/werkzeug'],
     ['/index.php/werkeug-und-raeume/geraete-maschinen-werkzeug', '/werkzeug'],
     ['/index.php/werkeug-und-raeume/zu-uns-raeumlichkeiten', '/werkzeug'],

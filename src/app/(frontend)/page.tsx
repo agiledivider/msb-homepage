@@ -130,7 +130,7 @@ export default async function StartPage() {
         heading="Mach mit. Bau mit."
         text="Werde Mitglied, unterstütze als Fördermitglied oder spende — jede Hilfe zählt."
         primary={{ label: 'Mitglied werden →', url: '/mitmachen' }}
-        secondary={{ label: 'Spenden', url: '/mitmachen' }}
+        secondary={{ label: 'Spenden', url: '/spenden' }}
       />
     </main>
   )

@@ -1,6 +1,7 @@
 import { Columns } from './Columns/config'
 import { CtaBand } from './CtaBand/config'
 import { Documents } from './Documents/config'
+import { Donate } from './Donate/config'
 import { EventFeed } from './EventFeed/config'
 import { EventsList } from './EventsList/config'
 import { Hero } from './Hero/config'
@@ -35,6 +36,7 @@ export const msbBlocks = [
   People,
   Press,
   Documents,
+  Donate,
   Supporters,
   Columns,
   Quote,
@@ -54,6 +56,7 @@ export {
   Columns,
   CtaBand,
   Documents,
+  Donate,
   EventFeed,
   EventsList,
   Hero,

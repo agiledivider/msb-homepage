@@ -30,7 +30,7 @@ export const legacyMenuPaths: Readonly<Record<string, string>> = {
   downloads: '/verein',
   'der-verein/mitglied-werden': '/mitmachen',
   'der-verein/offener-handarbeitstreff': '/mitmachen',
-  'uns-unterstuetzen': '/mitmachen',
+  'uns-unterstuetzen': '/spenden',
   'werkeug-und-raeume': '/werkzeug',
   'werkeug-und-raeume/geraete-maschinen-werkzeug': '/werkzeug',
   'werkeug-und-raeume/zu-uns-raeumlichkeiten': '/werkzeug',

@@ -2,6 +2,7 @@ import { Fragment, type ReactNode } from 'react'
 import { type ColumnsBlock, ColumnsComponent } from '../blocks/Columns/Component'
 import { type CtaBandBlock, CtaBandComponent } from '../blocks/CtaBand/Component'
 import { type DocumentsBlock, DocumentsComponent } from '../blocks/Documents/Component'
+import { type DonateBlock, DonateComponent } from '../blocks/Donate/Component'
 import { type EventFeedBlock, EventFeedComponent } from '../blocks/EventFeed/Component'
 import { type EventsListBlock, EventsListComponent } from '../blocks/EventsList/Component'
 import { type HeroBlock, HeroComponent } from '../blocks/Hero/Component'
@@ -30,6 +31,7 @@ export type MsbBlock =
   | PeopleBlock
   | PressBlock
   | DocumentsBlock
+  | DonateBlock
   | SupportersBlock
   | ColumnsBlock
   | QuoteBlock
@@ -52,6 +54,7 @@ const REGISTRY: {
   people: PeopleComponent,
   press: PressComponent,
   documents: DocumentsComponent,
+  donate: DonateComponent,
   supporters: SupportersComponent,
   columns: ColumnsComponent,
   quote: QuoteComponent,

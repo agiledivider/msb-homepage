@@ -22,6 +22,7 @@ import * as migration_20261124_014146_open_drafts_last_editor from './20261124_0
 import * as migration_20261125_224032_site_opening_hours_calendar from './20261125_224032_site_opening_hours_calendar';
 import * as migration_20261125_231747_site_opening_hours_show from './20261125_231747_site_opening_hours_show';
 import * as migration_20261126_022737_events_members_only from './20261126_022737_events_members_only';
+import * as migration_20261126_031240_pages_donate_block from './20261126_031240_pages_donate_block';
 
 export const migrations = [
   {
@@ -142,6 +143,11 @@ export const migrations = [
   {
     up: migration_20261126_022737_events_members_only.up,
     down: migration_20261126_022737_events_members_only.down,
-    name: '20261126_022737_events_members_only'
+    name: '20261126_022737_events_members_only',
+  },
+  {
+    up: migration_20261126_031240_pages_donate_block.up,
+    down: migration_20261126_031240_pages_donate_block.down,
+    name: '20261126_031240_pages_donate_block'
   },
 ];

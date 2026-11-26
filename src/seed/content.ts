@@ -1,6 +1,7 @@
 import path from 'node:path'
 import type { Payload } from 'payload'
 import { EDITORIAL_SKIP } from '../plugins/editorial/types'
+import { spendenPage } from './spenden'
 import { convertLayout, vereinIntroToBlocks } from './vereinLayout'
 
 /**
@@ -455,7 +456,7 @@ export async function seedSiteContent(payload: Payload) {
             tint: 'light',
             title: 'Geld- & Sachspende',
             text: 'Über Geld- und Sachspenden freuen wir uns immer. Ab 100 € gern auch gegen Spendenquittung.',
-            link: { label: 'Spenden →', url: '#' },
+            link: { label: 'Spenden →', url: '/spenden' },
           },
         ],
         location: {
@@ -468,6 +469,8 @@ export async function seedSiteContent(payload: Payload) {
       },
     ],
   })
+
+  await upsertBySlug(payload, 'pages', 'spenden', spendenPage) // S5.14
 
   payload.logger.info('✓ site content seeded (globals, pages, blog, events, media)')
 }

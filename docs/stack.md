@@ -20,6 +20,7 @@ Last reviewed: 2026-11-12 (versions from `package.json`)
 | brand logos missing from FA (OpenStreetMap, Google Maps, Matrix) | Simple Icons 13.21.0 paths, inlined as `<svg>` (CC0-1.0) | adding the `simple-icons` package | only three paths needed; no dependency for that. Everything else stays Font Awesome | 2026-11-22 |
 | fonts | `next/font/google` (Archivo Black, IBM Plex Sans) | CSS `@import` | Turbopack strips remote `@import` | 2026-07 |
 | calendar feeds in (iCal parsing, RRULE expansion) | `ical.js` 2.2.1 | `node-ical` (pulls in `rrule`, `moment-timezone`), hand-written parser | no dependencies, handles VTIMEZONE, EXDATE and moved/cancelled single dates; used server-side only for the start-page opening hours (S5.12) | 2026-11-25 |
+| QR codes (donation page: bank-transfer GiroCode, PayPal link) | `uqr` 0.1.3 (unjs) | `qrcode` (pulls in yargs/pngjs), online generators | no dependencies, SVG on the server; the EPC payload is built and IBAN-checked in `src/lib/epcQr.ts`, so the code always matches the CMS (S5.14) | 2026-11-26 |
 | lint + format | Biome 2.5 | eslint, prettier | one fast tool | 2026-07 |
 | tests | vitest 5 (integration on a temp SQLite per file, fitness tests) | jest | Payload boots in-process | 2026-11 |
 | script runner | `tsx` | ts-node | runs `scripts/*.ts` | 2026-07 |
