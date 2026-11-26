@@ -471,11 +471,15 @@ The full test run happens before every commit and on every push. At 41 s locally
 
 **AC:** the full local test run takes at most half as long; the CI gate job is faster too; no test is dropped or weakened and the same rules are still checked; tests stay independent of each other (same result in any order); the new times are recorded with the date.
 
-### ⏳ S6.10 — A push reaches staging-ready images sooner (M)
+### ✅ S6.10 — A push reaches staging-ready images sooner (M) — 2026-11-26
 **Source:** IDEAS.md 2026-11-26. Measured 2026-11-26: app image build 5 min 4 s in CI, about 7½ min from push to all images pushed.
 After a push, a new image is ready for staging only after the app image has been rebuilt from scratch, even when only content code changed. That slows down every "check it on staging" round.
 
 **AC:** from push to all images pushed takes clearly less time than today for an ordinary code change; a change to dependencies still produces a correct image; the images behave exactly as before on staging; the new times are recorded with the date.
+
+**Result (2026-11-26, CI run for `e7a3492`, an ordinary code change):** push → `latest` 7 min 20 s → 3 min 49 s; app image build 4 min 23 s → 3 min 20 s, now alongside the gate instead of after it. A code change adds ~32 MB (app) / 9 MB (publisher) of new compressed layers; docs- or test-only commits reuse every layer. Checked on staging by Falk.
+
+**Implementation notes:** `build` no longer needs the gate and pushes only `sha-<short>`; the new `promote` job moves `latest` once gate and build are green (`docker buildx imagetools create`), so `latest` stays gate-checked. Runtime layers are ordered from rarely to often changed, with assets copied from the context so their cache key is their content. The builder starts `FROM deps` instead of copying node_modules. `.dockerignore` is an allowlist, which also keeps `.backup-dev` and the `deploy/` key out of locally built images (`docs/runtime-traps.md`). The publisher no longer ships `uploads/`. Server source maps stay (Falk). Next lever: reuse `next build`'s cache across CI runs; the app build is now the critical path.
 
 ---
 
