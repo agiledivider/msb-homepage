@@ -471,11 +471,15 @@ Every deploy pulls the full app image onto the server, and GHCR keeps up to 30 v
 
 **Implementation notes:** app runtime gets `pnpm prune --prod` node_modules, no `.next/cache`, no `@next/swc-*` (only `next build` loads it) and a plain `node` base without npm/corepack/pnpm. `typescript` is a runtime dependency now: `@payloadcms/plugin-mcp` imports it, and the pruned image crashed without it. Publisher drops biome and the vitest/vite toolchain plus `tests/` and `vitest.config.ts` (its `next build` type-checks every included `.ts`). A different package manager would not help: the size is in what Next and Payload pull in. Next lever if needed: let the publisher share its node_modules layer with the app image.
 
-### ⏳ S6.9 — Tests give feedback faster (M)
+### ✅ S6.9 — Tests give feedback faster (M) — 2026-11-26
 **Source:** IDEAS.md 2026-11-26. Measured 2026-11-26: `pnpm test` 41 s locally (1043 tests), CI gate job 2 min 11 s.
 The full test run happens before every commit and on every push. At 41 s locally, plus the rest of the gate, it gets skipped or run late, and CI feedback on a push takes minutes.
 
 **AC:** the full local test run takes at most half as long; the CI gate job is faster too; no test is dropped or weakened and the same rules are still checked; tests stay independent of each other (same result in any order); the new times are recorded with the date.
+
+**Result (2026-11-26):** `pnpm test` locally (M1 Max, 10 cores) 44.5 s → ~15 s, 1134 tests; CI gate job 2 min 52 s → 2 min 36 s, test step 2 min 05 s → 1 min 45 s. The private-repo runner is short on CPU, so parallel files help little there; Falk chose not to split CI tests across jobs (extra runner minutes) since push → `latest` is set by the app image build anyway.
+
+**Implementation notes:** test files run in parallel (`tests/setup.ts` already gives each file its own temp DB and media dir), with at least two workers (Vitest's default of cores − 1 leaves a 2-core runner with one). Every run shuffles files and tests and prints its seed, so order dependencies can't creep back; shuffling found two (`legacy-authors`, `workshops`), and each test now sets up its own state. Next lever if CI feedback matters: build the test schema once and copy the DB per file, or shard the CI tests.
 
 ### ✅ S6.10 — A push reaches staging-ready images sooner (M) — 2026-11-26
 **Source:** IDEAS.md 2026-11-26. Measured 2026-11-26: app image build 5 min 4 s in CI, about 7½ min from push to all images pushed.
