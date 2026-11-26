@@ -162,6 +162,38 @@ Preview should only redirect within the site; Kanidm calls give up after a few s
 
 **Implementation notes:** `src/lib/safePath.ts` (`isSafeRedirectPath`: one leading slash, no backslash or control characters, same origin) guards `/next/preview`; `src/plugins/oidc/http.ts` gives Kanidm token/userinfo calls a 5 s `AbortSignal.timeout` and turns failures into "<what> failed (<status> <error code>)"; the failure log carries only that reason. `.gitignore` ignores `.env.*` except `*.example`. Tests: `tests/unit/hardening.test.ts`. Checked 2026-11-24: dev server answers 400 for `//example.com`, `/\example.com`, `https://example.com`. The timeout is tested with a fake Kanidm, not a real one.
 
+
+### ⏳ S2.5 — The CMS only offers the interfaces the site actually uses (S)
+**Source:** Falk 2026-11-26 (admin hardening).
+The CMS is reachable by anyone on the internet and answers on more doors than the site needs: a query interface and its interactive playground nobody uses, and requests from other sites are not limited to our own address. Every unused door is attack surface when the next CMS vulnerability appears.
+
+**AC:** interfaces the site, the admin, the publish step and Claude (MCP) don't use answer "not found"; requests that change data are only accepted when they come from the site's own address; a login session ends after a reasonable idle time and its cookie is only sent over HTTPS to our own site; editors notice no difference in their daily work.
+
+### ⏳ S2.6 — Logins and AI keys can't be hammered (S)
+**Source:** Falk 2026-11-26 (admin hardening).
+Nothing limits how often someone can try the login, the Kanidm sign-in or the AI access (MCP) for the CMS. A stolen or guessed AI key also works forever. Repeated attempts should be slowed down, and keys should not live forever.
+
+**AC:** many failed attempts from one address within a short time are refused for a while, without locking out editors working normally; an AI key can be given an end date and stops working after it, and the CMS shows when each key was last used; an admin sees refused attempts (log or notification).
+
+### ⏳ S2.7 — Only signed-in Verein members can reach the CMS at all (M)
+**Source:** Falk 2026-11-26 (admin hardening).
+The CMS login page and its interface are public; only the login itself protects them. A security hole in the CMS software can be used by anyone before they ever log in. Visitors who aren't signed in with their Verein account (Kanidm) should not reach the CMS at all, while the public website keeps working for everyone.
+
+**AC:** someone without a Kanidm session who opens the CMS address or its interface is sent to the Kanidm sign-in and never reaches the CMS; signed-in editors work as today, with no second password; the public website, its images, the calendar feed, search and Claude's access (MCP) keep working for everyone they work for today; a break-glass way for an admin is documented for when Kanidm is down.
+
+### ⏳ S2.8 — People with CMS access sign in with a second factor (S)
+**Source:** Falk 2026-11-26 (admin hardening).
+CMS access depends on one Kanidm password. A phished or reused password is enough to change the public website. Everyone with CMS rights should confirm their sign-in with a second factor.
+
+**AC:** every Kanidm account in a CMS group needs a passkey or one-time code to sign in; an account without one can't reach the CMS and is told how to set it up; a short guide for editors exists; the break-glass admin account is covered too.
+
+### ⏳ S2.9 — The CMS runs apart from the public website (M)
+**Source:** Falk 2026-11-26 (admin hardening).
+Website and CMS are one application at one address, so every visitor talks to the software that also holds the editing interface and all drafts. The public site should be served without any part of the CMS, and the CMS should live at its own address that only editors use.
+
+**Needs:** the decision on the static export (see `docs/STATIC.md`, "If we keep static publishing"); a static export would deliver this separation by itself.
+
+**AC:** the public website has no CMS login, admin pages or editing interface at its address; editors reach the CMS at its own address; published changes appear on the public site as they do today (or within an agreed delay); drafts can never be fetched from the public address.
 ---
 
 ## E3 — Der Verein page
