@@ -190,15 +190,12 @@ export function WorkshopPage({
                     {machines.map((m) => {
                       const a = ACCESS[m.access]
                       return (
-                        <li
-                          key={m.id ?? m.name}
-                          className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-3"
-                        >
-                          <span>
+                        <li key={m.id ?? m.name} className="flex items-center justify-between gap-4 px-4 py-3">
+                          <span className="min-w-0">
                             <span className="block text-[15px] font-semibold">{m.name}</span>
                             {m.note ? <span className="block text-[14px] text-muted">{m.note}</span> : null}
                           </span>
-                          <span className={`${CHIP} ${a.className}`}>{a.label}</span>
+                          <span className={`${CHIP} shrink-0 whitespace-nowrap ${a.className}`}>{a.label}</span>
                         </li>
                       )
                     })}
