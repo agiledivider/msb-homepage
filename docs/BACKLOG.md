@@ -466,6 +466,15 @@ Blog posts, events and pages go live only when someone presses "publish" at that
 
 **AC:** for a blog post, event or page, the editor or reviewer can choose a date and time for it to go live; content that has not been approved never goes live this way; until that time the content is not visible on the website (start page, lists, search, its own address), and from that time it is, without anyone doing anything; the CMS shows which items are scheduled and for when, and a schedule can be changed or cancelled; scheduled changes to content that is already live replace the live version only at the chosen time; times are entered and shown in German local time, also across the change to and from summer time.
 
+
+### ✅ S5.23 — The search button works when a map is underneath it (S) — 2026-11-26
+**Status:** ✅ done 2026-11-26 (Falk, checked on iPhone).
+**Source:** IDEAS.md 2026-11-26 (seen on iPhone).
+On an iPhone, when the page is scrolled so that a map sits under the search button in the header, tapping the search button doesn't open the search; the tap reaches the map's link instead. Visitors can't search from those spots and are taken somewhere they didn't ask to go.
+
+**AC:** on an iPhone (and at 375 px in other browsers), tapping the search button always opens the search, wherever the page is scrolled and whatever lies beneath the header (maps included); tapping the map itself still opens its link; the other header buttons behave the same.
+
+**Implementation notes:** the map card's link row has `z-20`, the same as the sticky header, and the card made no stacking context of its own, so both sat in the page's root layer; the map comes later in the page and WebKit (correctly) paints it over the header, including the OSM link's full-card tap area. Blink kept the header on top, so it never showed in Chrome. The card is now `isolate`. Test: `tests/unit/map-card-stacking.test.tsx`. Checked in Blink at 375 px (map links still work, search wins over the map) and by Falk on iPhone.
 ---
 
 ## E6 — Playbook retrofit

@@ -72,9 +72,12 @@ export function MapCard({
 }) {
   const icons = links === 'icons'
   return (
+    // `isolate`: the link row's z-index stays inside the card. Without it the row
+    // (z-20) ties with the sticky header (z-20) and, later in the page, wins in
+    // WebKit: on an iPhone a tap on the header's search button opened the map (S5.23).
     <div
       data-location-map
-      className={`relative grid aspect-[3/2] w-full overflow-hidden rounded-[14px] ring-1 ring-line ring-inset transition-shadow hover:shadow-md ${className}`}
+      className={`relative isolate grid aspect-[3/2] w-full overflow-hidden rounded-[14px] ring-1 ring-line ring-inset transition-shadow hover:shadow-md ${className}`}
     >
       <Media
         resource={map ?? FALLBACK_MAP}

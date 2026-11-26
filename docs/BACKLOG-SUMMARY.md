@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**23 open · 52 done** · ✅ 52 · ⏳ 22 · ⏭️ 1
+**23 open · 53 done** · ✅ 53 · ⏳ 22 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -28,7 +28,7 @@ All done.
 
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L284)
 
-## E5 — Visitor and editor features (12/22 done)
+## E5 — Visitor and editor features (13/23 done)
 
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L329)
 - ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L335)
@@ -43,11 +43,11 @@ All done.
 
 ## E6 — Playbook retrofit (6/11 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L494)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L499)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L504)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L509)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L514)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L503)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L508)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L513)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L518)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L523)
 
 ## E7 — Legacy migration (1/1 done)
 
