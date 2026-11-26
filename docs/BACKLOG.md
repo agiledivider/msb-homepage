@@ -404,6 +404,12 @@ The events archive lists about 200 past events from 2017 on, but each entry show
 
 **Implementation notes:** `/events/archiv` renders one section per year (`SectionHeading` with the year and an event count, `aria-labelledby`), and `ListView` takes `showYear` for a year line under the date; the upcoming list doesn't pass it. Years come from `groupByYear()` in `src/components/events/model.ts`, in Berlin time. Covered by `tests/unit/archive-years.test.tsx`. Checked in Blink at 375 px and desktop; confirmed by Falk.
 
+### ⏳ S5.17 — Visitors search the whole site (M)
+**Source:** IDEAS.md 2026-11-26 ("search").
+The site has around 300 blog posts and events plus the Verein and workshop pages, and the only way to find something is to browse the menus, the blog pages and the archive year by year. A visitor looking for "Lasercutter", "Repair-Café" or an event from two years ago has no way to type it in.
+
+**AC:** a search field reachable from every page (also in the phone menu); results cover pages, blog posts and events, upcoming and archived, each with title, kind (page, post or event), date where it has one and a short excerpt; only published content is ever found, never drafts; German words match regardless of upper/lower case and umlaut spelling ("Löten" finds "löten"); a search with no hits says so and points to the blog and events; each search has its own address that can be shared; usable at 375 px. The static snapshot is out of scope (Falk 2026-11-26).
+
 ---
 
 ## E6 — Playbook retrofit
