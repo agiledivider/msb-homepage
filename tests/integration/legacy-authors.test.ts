@@ -3,7 +3,7 @@
  * work. Tier B: Payload Local API on a throwaway SQLite DB.
  */
 import type { Payload } from 'payload'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { EDITORIAL_SKIP } from '@/plugins/editorial/types'
 import { fillLegacyAuthors, LEGACY_AUTHORS } from '@/seed/legacyAuthors'
 
@@ -26,7 +26,11 @@ const byLegacyId = async (legacyId: number, draft = false) =>
 beforeAll(async () => {
   const { getPayloadClient } = await import('@/lib/getPayload')
   payload = await getPayloadClient()
+})
 
+// Fresh legacy posts for every test, so each one stands alone in any order (S6.9).
+beforeEach(async () => {
+  await payload.delete({ collection: 'blog', where: { legacyId: { exists: true } }, ...SKIP })
   await payload.create({ collection: 'blog', data: aLegacyPost(1) as never, ...SKIP })
   await payload.create({ collection: 'blog', data: aLegacyPost(167) as never, ...SKIP })
   // an editor already set an author: keep it
@@ -65,6 +69,7 @@ describe('fillLegacyAuthors', () => {
   })
 
   it('changes nothing on a second run', async () => {
+    await fillLegacyAuthors(payload)
     expect(await fillLegacyAuthors(payload)).toBe(0)
   })
 })

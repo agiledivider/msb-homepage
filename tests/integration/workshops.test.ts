@@ -37,6 +37,8 @@ describe('workshops', () => {
   it('seeds six public workshops once, keeping what an editor wrote on /werkzeug', async () => {
     const { upsertWorkshops } = await import('@/seed/workshops')
     const { findPublic } = await import('@/lib/publicData')
+    // Start from no workshops, whatever ran before in this file (S6.9: order-independent).
+    await payload.delete({ collection: 'workshops', where: { id: { exists: true } }, context: SKIP })
 
     await upsertWorkshops(payload)
     const first = await findPublic({ collection: 'workshops', sort: 'order', limit: 50 })
