@@ -26,6 +26,7 @@ Collected 2026-11-12 from `LEARNINGS.md` and the session notes kept since July 2
 | block address ranges with `node:net` `BlockList` | never add `::ffff:0:0/96` | BlockList treats IPv4 and IPv4-mapped IPv6 as equal, so that rule blocks every IPv4 address; check mapped addresses as IPv4 yourself (`fetchPublicFile.ts`, caught by `tests/unit/media-upload.test.ts`) | Node 26 · 2026-11-22 |
 | rely on Payload's default access (no `access` set) | that "logged in" means a real CMS user | the default is "any authenticated principal"; auth collections like MCP API keys would count. `requireCmsUserByDefault` fills unset rules with `loggedIn` (`users` only) | Payload 3.93 · 2026-11-22 |
 | add a field editors change without editing content (e.g. `folder`) | that the editorial `publishGate` lets it through for published docs | the gate sees the merged doc as `_status: 'published'` and would unpublish a live page an editor merely filed into a folder. `onlyFiled()` in `publishGate.ts` exempts filing-only updates; `tests/integration/folders.test.ts` | Payload 3.93 · 2026-11-22 |
+| decide in the frontend whether to show drafts | call `isDraftRequest()` (`src/lib/publicData.ts`), never `draftMode()` alone | Next's draft-mode cookie outlives the CMS logout; a logged-out browser kept seeing an unpublished workshop draft. `isDraftRequest()` also requires a live Payload session. Enforced by `tests/fitness/frontend-reads.test.ts`, regression test `stale-draft-cookie.test.ts` | Next 16.4 · Payload 3.93 · 2026-11-26 |
 
 ## Build / deploy
 

@@ -45,4 +45,16 @@ describe('frontend data boundary (fitness)', () => {
     )
     expect(offending, `use findPublic/findForRequest from @/lib/publicData instead`).toEqual([])
   })
+
+  // The draft-mode cookie outlives logout; only isDraftRequest() also checks the
+  // CMS session. Only the routes that switch draft mode on/off may touch it.
+  const DRAFT_MODE_SWITCHES = new Set(['next/preview/route.ts', 'next/exit-preview/route.ts'])
+
+  it.each(
+    files.map((f) => [path.relative(FRONTEND, f), f]),
+  )('%s asks isDraftRequest(), not draftMode()', (rel, full) => {
+    if (DRAFT_MODE_SWITCHES.has(rel)) return
+    const src = readFileSync(full, 'utf8')
+    expect(src, 'use isDraftRequest() from @/lib/publicData').not.toMatch(/\bdraftMode\s*\(/)
+  })
 })

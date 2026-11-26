@@ -1,4 +1,4 @@
-import { draftMode } from 'next/headers'
+import { draftMode, headers } from 'next/headers'
 import type { DataFromCollectionSlug, PaginatedDocs, Sort, Where } from 'payload'
 import { getPayloadClient } from '@/lib/getPayload'
 import { verifyPreviewToken } from '@/lib/previewToken'
@@ -13,10 +13,11 @@ import { verifyPreviewToken } from '@/lib/previewToken'
  *   findPublic   published AND editorially approved, under the collection's own
  *                access control (`overrideAccess: false`, no user). Use this for
  *                page bodies, generateMetadata, listings, feeds, sitemaps.
- *   findPreview  privileged draft read for Next draft mode. Draft mode is only
- *                enabled by /next/preview after it has verified a logged-in
- *                Payload user, so this never runs for anonymous visitors.
- *   findForRequest  picks one of the two from the request's draft-mode cookie.
+ *   findPreview  privileged draft read for Next draft mode.
+ *   isDraftRequest  draft-mode cookie AND a live CMS session. The cookie alone
+ *                is not enough: it outlives logout (and the login it was set
+ *                under), so a logged-out browser would keep seeing drafts.
+ *   findForRequest  findPreview when isDraftRequest, findPublic otherwise.
  *   findByPreviewToken  privileged read of the one draft a signed preview link
  *                names (Claude has no CMS session); no draft mode involved.
  *
@@ -60,10 +61,22 @@ export async function findPreview<S extends PublicCollection>(args: PublicFindAr
   return payload.find({ ...args, draft: true, overrideAccess: true })
 }
 
-/** findPreview in draft mode, findPublic otherwise. */
-export async function findForRequest<S extends PublicCollection>(args: PublicFindArgs<S>): Promise<Docs<S>> {
+/**
+ * Should this request see drafts? Only with the draft-mode cookie *and* a valid
+ * CMS login. Use this instead of `draftMode()` everywhere in the frontend
+ * (tests/fitness/frontend-reads.test.ts enforces it).
+ */
+export async function isDraftRequest(): Promise<boolean> {
   const { isEnabled } = await draftMode()
-  return isEnabled ? findPreview(args) : findPublic(args)
+  if (!isEnabled) return false
+  const payload = await getPayloadClient()
+  const { user } = await payload.auth({ headers: await headers() })
+  return Boolean(user)
+}
+
+/** findPreview for a logged-in draft-mode request, findPublic otherwise. */
+export async function findForRequest<S extends PublicCollection>(args: PublicFindArgs<S>): Promise<Docs<S>> {
+  return (await isDraftRequest()) ? findPreview(args) : findPublic(args)
 }
 
 /** One doc by slug (draft-mode aware), or undefined when it isn't visible to this request. */

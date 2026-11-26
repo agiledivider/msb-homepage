@@ -2,7 +2,6 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import type { Metadata, Viewport } from 'next'
 import { Archivo, Caveat, IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google'
 import '@fortawesome/fontawesome-svg-core/styles.css'
-import { draftMode } from 'next/headers'
 import '@/styles/globals.css'
 
 // We import Font Awesome's CSS above manually, so stop the core from injecting
@@ -11,6 +10,7 @@ config.autoAddCss = false
 
 import { RefreshRouteOnSave } from '@/components/RefreshRouteOnSave'
 import { getPayloadClient } from '@/lib/getPayload'
+import { isDraftRequest } from '@/lib/publicData'
 import { THEME_COLOR, THEME_INIT_SCRIPT } from '@/lib/theme'
 
 // self-hosted, Turbopack-safe fonts; each exposes a --font-* CSS var that the
@@ -72,7 +72,7 @@ export const viewport: Viewport = {
 }
 
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isDraftRequest()
   const payload = await getPayloadClient()
   const site = await payload.findGlobal({ slug: 'siteSettings', draft }).catch(() => null)
 

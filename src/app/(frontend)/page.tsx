@@ -1,4 +1,3 @@
-import { draftMode } from 'next/headers'
 import { CtaBandComponent } from '@/blocks/CtaBand/Component'
 import { EventFeedSidebar } from '@/blocks/EventFeed/Sidebar'
 import { type Face, HeroComponent } from '@/blocks/Hero/Component'
@@ -10,7 +9,7 @@ import { startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
 import { loadOpeningHours, pickHourRows } from '@/lib/openingHours'
-import { findPublic } from '@/lib/publicData'
+import { findPublic, isDraftRequest } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic' // always reflect the latest content
 
@@ -32,7 +31,7 @@ async function openingHoursRows() {
 }
 
 export default async function StartPage() {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isDraftRequest()
   const payload = await getPayloadClient()
   // Day-only events stay "upcoming" for their whole Berlin day (see eventTime).
   const since = startOfTodayBerlin().toISOString()

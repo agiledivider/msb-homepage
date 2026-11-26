@@ -1,6 +1,5 @@
-import { draftMode } from 'next/headers'
 import { HeroPreview } from '@/components/HeroPreview'
-import { findForRequest } from '@/lib/publicData'
+import { findForRequest, isDraftRequest } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +21,7 @@ export default async function HeroPreviewPage({
   const collection = c === 'events' || c === 'hero' ? c : 'blog'
   const slug = pick(sp.slug)
   const bare = pick(sp.bare) === '1'
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isDraftRequest()
 
   const where = { slug: { equals: slug ?? '' } }
   const edited =
