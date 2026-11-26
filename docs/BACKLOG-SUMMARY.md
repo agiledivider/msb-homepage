@@ -2,12 +2,11 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**25 open · 41 done** · ✅ 41 · 🟡 1 · ⏳ 21 · ⏭️ 1 · 🚨 2
+**24 open · 42 done** · ✅ 42 · 🟡 1 · ⏳ 21 · ⏭️ 1 · 🚨 1
 
-## Blockers (0/2 done)
+## Blockers (1/2 done)
 
 - 🚨 [B1 — Site content survives a lost server (M)](BACKLOG.md#L26)
-- 🚨 [B2 — Public demo image ships real admin accounts with known passwords (S)](BACKLOG.md#L32)
 
 ## E1 — Launch (3/7 done)
 
