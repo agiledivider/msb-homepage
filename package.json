@@ -15,6 +15,7 @@
     "start": "next start",
     "publish:static": "tsx scripts/publish-static.ts",
     "hero:shots": "tsx scripts/hero-shots.ts",
+    "media:upload": "tsx scripts/media-upload.ts",
     "ghcr:prune": "tsx scripts/ghcr-prune.ts",
     "release:static": "scripts/release-static.sh",
     "release:app": "scripts/release-app.sh",

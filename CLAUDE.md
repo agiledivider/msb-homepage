@@ -17,6 +17,7 @@ pnpm payload migrate:create <name>   # after any schema change, then dev:restart
 pnpm publish:static          # snapshot the public site into dist/ (docs/STATIC.md)
 pnpm release:app | release:static    # build + push images (DEPLOY.md); release:app runs migrate:check first
 pnpm migrate:check [backup.enc|msb.db]   # migrations + prod seed on a copy of real data
+pnpm media:upload <file> --alt "…" [--ai generated|edited]   # image/PDF into the CMS via MCP (shrunk to 1600 px)
 pnpm hero:shots [url-path]           # screenshot the hero at every phone size (Blink), review before showing Falk
 pnpm ghcr:prune [--apply] [pkg]   # delete old GHCR image versions (dry run by default); run when working on releases
 ```

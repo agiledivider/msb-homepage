@@ -74,6 +74,10 @@ under KI-Zugänge if a device is lost.
   URLs go through `fetchPublicFile.ts`: https on port 443 only, every resolved
   address must be public (checked in the connection's own DNS lookup, so DNS
   rebinding can't slip through), max 3 redirects, 10 MB, 15 s.
+- `pnpm media:upload <file> --alt "…"` (`scripts/media-upload.ts`) calls the same
+  `uploadMedia` tool from the command line, for local files too large to send as
+  base64 through a chat. It shrinks images to 1600 px first. Needs `MSB_MCP_URL`
+  and `MSB_MCP_KEY` in `.env` (since 2026-11-26).
 - Deleting a user deletes their keys first (the plugin's `user_id` is NOT NULL
   with `ON DELETE set null`, which otherwise blocks the delete).
 - `previewLink` (`src/plugins/mcp/previewLink.ts`) signs a token (HMAC with a
