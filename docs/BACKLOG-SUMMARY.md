@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**27 open · 54 done** · ✅ 54 · ⏳ 26 · ⏭️ 1
+**26 open · 55 done** · ✅ 55 · ⏳ 25 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -32,26 +32,25 @@ All done.
 
 - ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L319)
 
-## E5 — Visitor and editor features (13/23 done)
+## E5 — Visitor and editor features (14/23 done)
 
 - ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L364)
 - ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L370)
 - ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L375)
 - ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L381)
 - ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L395)
-- ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L417)
-- ⏳ [S5.18 — The hero preview says when an item will not appear in the hero (S)](BACKLOG.md#L474)
-- ⏳ [S5.20 — Any member's AI writes CMS content the way the Verein wants it (M)](BACKLOG.md#L488)
-- ⏳ [S5.21 — Members hand their AI a photo of any size (S)](BACKLOG.md#L493)
-- ⏳ [S5.22 — Editors schedule content to go live at a set time (M)](BACKLOG.md#L498)
+- ⏳ [S5.18 — The hero preview says when an item will not appear in the hero (S)](BACKLOG.md#L476)
+- ⏳ [S5.20 — Any member's AI writes CMS content the way the Verein wants it (M)](BACKLOG.md#L490)
+- ⏳ [S5.21 — Members hand their AI a photo of any size (S)](BACKLOG.md#L495)
+- ⏳ [S5.22 — Editors schedule content to go live at a set time (M)](BACKLOG.md#L500)
 
 ## E6 — Playbook retrofit (6/11 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L538)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L543)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L548)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L553)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L558)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L540)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L545)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L550)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L555)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L560)
 
 ## E7 — Legacy migration (1/1 done)
 
