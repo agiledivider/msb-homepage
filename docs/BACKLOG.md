@@ -550,11 +550,14 @@ After a push, a new image is ready for staging only after the app image has been
 **Implementation notes:** `build` no longer needs the gate and pushes only `sha-<short>`; the new `promote` job moves `latest` once gate and build are green (`docker buildx imagetools create`), so `latest` stays gate-checked. Runtime layers are ordered from rarely to often changed, with assets copied from the context so their cache key is their content. The builder starts `FROM deps` instead of copying node_modules. `.dockerignore` is an allowlist, which also keeps `.backup-dev` and the `deploy/` key out of locally built images (`docs/runtime-traps.md`). The publisher no longer ships `uploads/`. Server source maps stay (Falk). Next lever: reuse `next build`'s cache across CI runs; the app build is now the critical path.
 
 
-### ⏳ S6.11 — The hero screenshot command shows every slide again (S)
+### ✅ S6.11 — The hero screenshot command shows every slide again (S) — 2026-11-26
+**Status:** ✅ done 2026-11-26 (Falk).
 **Source:** seen 2026-11-26 during S5.19.
 `pnpm hero:shots` should photograph each hero slide at every phone size, so hero changes can be reviewed before Falk sees them. It now returns the same slide three times: switching slides does not take effect, so the event and Werkstatt slides are never checked.
 
 **AC:** one run produces one contact sheet per slide, each showing that slide at every phone size; a run that cannot reach a slide says so and exits with an error instead of saving the wrong picture.
+
+**Implementation notes:** the clicks landed before React had hydrated (in dev the load event fires earlier), so nothing switched and the script saved whatever slide was showing. `showFace` in `scripts/hero-shots.ts` pauses the auto-flip and clicks until the pill reports itself current (20 s limit), checks again right before the shot, and throws otherwise; a page without a hero fails too. Checked: `pnpm hero:shots /` gives three different slides at all seven sizes, `pnpm hero:shots /verein` exits 1.
 ---
 
 ## E7 — Legacy migration

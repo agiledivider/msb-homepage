@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**24 open · 51 done** · ✅ 51 · ⏳ 23 · ⏭️ 1
+**23 open · 52 done** · ✅ 52 · ⏳ 22 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -41,14 +41,13 @@ All done.
 - ⏳ [S5.21 — Members hand their AI a photo of any size (S)](BACKLOG.md#L458)
 - ⏳ [S5.22 — Editors schedule content to go live at a set time (M)](BACKLOG.md#L463)
 
-## E6 — Playbook retrofit (5/11 done)
+## E6 — Playbook retrofit (6/11 done)
 
 - ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L494)
 - ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L499)
 - ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L504)
 - ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L509)
 - ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L514)
-- ⏳ [S6.11 — The hero screenshot command shows every slide again (S)](BACKLOG.md#L553)
 
 ## E7 — Legacy migration (1/1 done)
 

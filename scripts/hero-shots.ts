@@ -121,6 +121,39 @@ async function launch() {
   return { send, waitFor, evaluate, close }
 }
 
+// The hero's slide pills and its pause button (src/blocks/Hero/Component.tsx).
+const PILL = 'button[aria-current]'
+const PAUSE = 'button[aria-pressed][aria-label^="Automatisches Wechseln"]'
+const SHOW_TIMEOUT_MS = 20_000
+
+type Cdp = Awaited<ReturnType<typeof launch>>
+
+const isCurrent = (cdp: Cdp, face: number) =>
+  cdp.evaluate<boolean>(`document.querySelectorAll('${PILL}')[${face}]?.getAttribute('aria-current') === 'true'`)
+
+/**
+ * Bring `face` to the front with the auto-flip paused. Clicks before React has
+ * hydrated do nothing (the load event fires earlier in dev), so this retries
+ * until the pill reports itself current, and fails loudly instead of
+ * photographing whatever face happens to be showing.
+ */
+async function showFace(cdp: Cdp, face: number, phone: string) {
+  const until = Date.now() + SHOW_TIMEOUT_MS
+  while (Date.now() < until) {
+    await cdp.evaluate(`(() => {
+      const pause = document.querySelector('${PAUSE}');
+      if (pause?.getAttribute('aria-pressed') === 'false') pause.click();
+      document.querySelectorAll('${PILL}')[${face}]?.click();
+    })()`)
+    await sleep(400)
+    const paused = await cdp.evaluate<boolean>(
+      `document.querySelector('${PAUSE}')?.getAttribute('aria-pressed') === 'true'`,
+    )
+    if (paused && (await isCurrent(cdp, face))) return
+  }
+  throw new Error(`${phone}: could not show face ${face + 1} within ${SHOW_TIMEOUT_MS / 1000}s`)
+}
+
 type Shot = { phone: (typeof PHONES)[number]; face: number; file: string; overflow: number }
 
 async function main() {
@@ -140,14 +173,15 @@ async function main() {
       await cdp.send('Page.navigate', { url: target })
       await loaded
       await cdp.evaluate('document.fonts.ready.then(() => true)')
-      // stop the auto-flip so every shot shows a settled face
-      const faces = await cdp.evaluate<number>(`(() => {
-        document.querySelector('nextjs-portal')?.remove(); // dev badge covers the pause button
-        const pause = document.querySelector('button[aria-pressed="false"]'); pause?.click();
-        return document.querySelectorAll('button[aria-current]').length || 1 })()`)
+      await cdp.evaluate(`document.querySelector('nextjs-portal')?.remove()`) // dev badge covers the pause button
+      const faces = await cdp.evaluate<number>(`document.querySelectorAll('${PILL}').length`)
+      if (!faces) throw new Error(`${phone.name}: no hero on ${target}`)
+      // stop the auto-flip so every shot shows a settled face (after hydration, see showFace)
       for (let face = 0; face < faces; face++) {
-        await cdp.evaluate(`document.querySelectorAll('button[aria-current]')[${face}]?.click()`)
+        await showFace(cdp, face, phone.name)
         await sleep(FLIP_SETTLE_MS)
+        if (!(await isCurrent(cdp, face)))
+          throw new Error(`${phone.name}: face ${face + 1} flipped away before the shot`)
         const overflow = await cdp.evaluate<number>(
           'Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth',
         )
