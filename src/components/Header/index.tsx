@@ -57,11 +57,17 @@ export function Header({
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-card">
       <div className="relative mx-auto flex max-w-shell items-center justify-between gap-2 px-4 py-4 md:gap-4 md:px-8 md:py-3.5 lg:gap-6">
-        <Link href="/" className="flex items-center no-underline">
-          {/* biome-ignore lint/performance/noImgElement: static logo PNG sized by CSS height; next/image needs fixed dimensions and adds nothing here */}
-          <img src={logoSrc} alt="MakerSpace Bonn" className="block h-9 w-auto dark:hidden" />
-          {/* biome-ignore lint/performance/noImgElement: same as the light logo above */}
-          <img src={logoDarkSrc} alt="MakerSpace Bonn" className="hidden h-9 w-auto dark:block" />
+        {/* shrink-0: a squeezed flex item distorts the logo. Between md and lg the
+            nav leaves no room for the wordmark, so only the signet shows there. */}
+        <Link href="/" aria-label="MakerSpace Bonn" className="flex shrink-0 items-center no-underline">
+          <span className="flex md:hidden lg:flex">
+            {/* biome-ignore lint/performance/noImgElement: static logo PNG sized by CSS height; next/image needs fixed dimensions and adds nothing here */}
+            <img src={logoSrc} alt="" className="block h-9 w-auto dark:hidden" />
+            {/* biome-ignore lint/performance/noImgElement: same as the light logo above */}
+            <img src={logoDarkSrc} alt="" className="hidden h-9 w-auto dark:block" />
+          </span>
+          {/* biome-ignore lint/performance/noImgElement: static SVG signet, same reason as above */}
+          <img src="/logo/signet-green.svg" alt="" className="hidden h-9 w-auto md:block lg:hidden" />
         </Link>
 
         <nav

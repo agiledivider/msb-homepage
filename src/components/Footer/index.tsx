@@ -49,8 +49,14 @@ export function Footer({
         <div className="flex flex-col gap-6">
           <div>
             <div className="mb-3.5">
-              {/* biome-ignore lint/performance/noImgElement: static logo PNG sized by CSS height; next/image needs fixed dimensions and adds nothing here */}
-              <img src={logoSrc} alt="MakerSpace Bonn" className="block h-12 w-auto" />
+              {/* biome-ignore lint/performance/noImgElement: static logo PNG, scales with its column (never squeezed); next/image needs fixed dimensions and adds nothing here */}
+              <img
+                src={logoSrc}
+                alt="MakerSpace Bonn"
+                width={1059}
+                height={160}
+                className="block h-auto w-full max-w-[318px]"
+              />
             </div>
             <p className="m-0 max-w-[320px] text-[14px] leading-[1.65] text-kreide">{tagline}</p>
           </div>
