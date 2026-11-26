@@ -8,6 +8,14 @@ import { TITLE_MAX, titleField } from '../fields/title'
 import { generatePreviewPath } from '../lib/preview'
 
 /** Blog posts. The newest published post drives hero face 1. */
+/** A CMS user's name; a Claude (MCP) API key writes as the user it belongs to. */
+export const authorName = (user: unknown): string | undefined => {
+  const named = (u: unknown) =>
+    u && typeof u === 'object' && 'name' in u && typeof u.name === 'string' && u.name.trim() ? u.name.trim() : undefined
+  if (!user || typeof user !== 'object') return undefined
+  return named(user) ?? ('user' in user ? named(user.user) : undefined)
+}
+
 export const Blog: CollectionConfig = {
   slug: 'blog',
   labels: { singular: 'Blogbeitrag', plural: 'Blog' },
@@ -42,7 +50,14 @@ export const Blog: CollectionConfig = {
     {
       type: 'row',
       fields: [
-        { name: 'author', type: 'text', admin: { width: '50%' } },
+        {
+          name: 'author',
+          type: 'text',
+          label: 'Autor:in',
+          // New posts start with the writer's CMS name (S5.13); change it for a guest post.
+          defaultValue: ({ user }) => authorName(user),
+          admin: { width: '50%', description: 'Wird unter dem Titel und in der Blog-Liste angezeigt.' },
+        },
         {
           name: 'readingTime',
           type: 'text',

@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 import { seedSiteContent } from './content'
 import { upsertLegacyArticles } from './legacy'
+import { fillLegacyAuthors } from './legacyAuthors'
 import { upsertLegalPages } from './legal'
 import { convertVereinPage } from './vereinLayout'
 import { upsertWorkshops } from './workshops'
@@ -109,6 +110,8 @@ const run = async () => {
   // Workshops arrived after launch content (S10.1): create them on any DB that
   // has none yet, from the /werkzeug cards. No-op once one exists.
   await upsertWorkshops(payload)
+  // Old Joomla posts lost their author on import (S5.13): fill the empty ones.
+  await fillLegacyAuthors(payload)
 
   payload.logger.info('✓ prod seed done')
 }

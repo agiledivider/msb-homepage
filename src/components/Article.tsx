@@ -4,6 +4,7 @@ import { richTextConverters } from '@/blocks/richtext'
 import { Media } from '@/components/Media'
 import { PROSE_LINKS } from '@/components/ui'
 import { eventTimeText } from '@/lib/eventTime'
+import { postMeta } from '@/lib/postMeta'
 import type { Blog, Event } from '@/payload-types'
 
 /**
@@ -19,7 +20,7 @@ const TITLE =
 const SUBTITLE = 'm-0 mb-4 font-serif text-[20px] italic leading-[1.4] text-muted max-w-[34em]'
 
 export function BlogArticle({ post }: { post: Blog }) {
-  const meta = [post.author, post.readingTime].filter(Boolean).join(' · ')
+  const meta = postMeta(post)
   return (
     <main className="mx-auto max-w-[760px] px-4 py-14 md:px-8">
       <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-brand-text">AUS DER WERKSTATT · BLOG</div>

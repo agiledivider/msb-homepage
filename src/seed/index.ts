@@ -2,6 +2,7 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { seedSiteContent } from './content'
 import { upsertLegacyArticles } from './legacy'
+import { fillLegacyAuthors } from './legacyAuthors'
 import { upsertLegalPages } from './legal'
 import { upsertWorkshops } from './workshops'
 
@@ -36,6 +37,7 @@ const seed = async () => {
   await seedSiteContent(payload)
   await upsertLegalPages()
   await upsertLegacyArticles()
+  await fillLegacyAuthors(payload)
   await upsertWorkshops(payload)
 
   payload.logger.info('✓ Seed complete.')

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { Media } from '@/components/Media'
 import { CARD_LINK, CARD_TITLE } from '@/components/ui'
+import { postMeta } from '@/lib/postMeta'
 import { findPublic } from '@/lib/publicData'
 
 export const dynamic = 'force-dynamic'
@@ -43,6 +44,7 @@ export default async function BlogIndexPage() {
               sizes="(max-width:640px) 100vw, 380px"
             />
             <div className="p-5">
+              <PostByline text={postMeta(post, { readingTime: false })} />
               <h3 className={`m-0 mb-1.5 font-sans text-[19px] font-bold text-ink ${CARD_TITLE}`}>{post.title}</h3>
               {post.excerpt ? (
                 <p className="m-0 line-clamp-3 text-[14px] leading-[1.55] text-muted">{post.excerpt}</p>
@@ -53,4 +55,9 @@ export default async function BlogIndexPage() {
       </div>
     </main>
   )
+}
+
+/** Date · author above a card's title; nothing when both are unknown. */
+function PostByline({ text }: { text: string }) {
+  return text ? <div className="mb-2 font-mono text-[14px] text-muted">{text}</div> : null
 }
