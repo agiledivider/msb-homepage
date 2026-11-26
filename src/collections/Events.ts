@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
 import { publicRead } from '../access/publicRead'
+import { hideFromHeroField } from '../fields/hideFromHero'
 import { slugField } from '../fields/slug'
 import { TITLE_MAX, titleField } from '../fields/title'
 import { generatePreviewPath } from '../lib/preview'
@@ -106,6 +107,7 @@ export const Events: CollectionConfig = {
       },
     },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Bild' },
+    hideFromHeroField(),
     {
       name: 'workshops',
       type: 'relationship',

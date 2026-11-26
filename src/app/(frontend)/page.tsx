@@ -7,6 +7,7 @@ import { UpcomingList } from '@/components/events/UpcomingList'
 import { SectionHeading } from '@/components/ui'
 import { startOfTodayBerlin } from '@/lib/eventTime'
 import { getPayloadClient } from '@/lib/getPayload'
+import { heroContent } from '@/lib/heroContent'
 import { blogToFace, eventToFace, fallbackBlogFace, fallbackEventFace, heroToFace } from '@/lib/mappers'
 import { loadOpeningHours, pickHourRows } from '@/lib/openingHours'
 import { findPublic, isDraftRequest } from '@/lib/publicData'
@@ -36,21 +37,9 @@ export default async function StartPage() {
   // Day-only events stay "upcoming" for their whole Berlin day (see eventTime).
   const since = startOfTodayBerlin().toISOString()
 
-  const [hero, blogRes, upcomingRes, feedRes, hours] = await Promise.all([
+  const [hero, heroItems, feedRes, hours] = await Promise.all([
     payload.findGlobal({ slug: 'heroSettings', depth: 2, draft }),
-    findPublic({
-      collection: 'blog',
-      sort: '-publishedAt',
-      limit: 1,
-      depth: 2,
-    }),
-    findPublic({
-      collection: 'events',
-      where: { date: { greater_than_equal: since } },
-      sort: 'date',
-      limit: 1,
-      depth: 2,
-    }),
+    heroContent(since),
     // Deeper than the 5 displayed: the feed re-filters against the real clock in
     // the browser, so a published bundle needs spare events to fall back on.
     findPublic({
@@ -63,23 +52,11 @@ export default async function StartPage() {
     openingHoursRows(),
   ])
 
-  // fallback: if nothing upcoming, use the most recent past event
-  let nextEvent = upcomingRes.docs[0]
-  if (!nextEvent) {
-    const past = await findPublic({
-      collection: 'events',
-      sort: '-date',
-      limit: 1,
-      depth: 2,
-    })
-    nextEvent = past.docs[0]
-  }
-
   // ALWAYS exactly 3 faces (the carousel requires it)
   const faces: Face[] = [
     heroToFace(hero),
-    blogRes.docs[0] ? blogToFace(blogRes.docs[0]) : fallbackBlogFace,
-    nextEvent ? eventToFace(nextEvent) : fallbackEventFace,
+    heroItems.post ? blogToFace(heroItems.post) : fallbackBlogFace,
+    heroItems.event ? eventToFace(heroItems.event) : fallbackEventFace,
   ]
 
   const feedEvents = feedRes.docs.map(toEventDTO)

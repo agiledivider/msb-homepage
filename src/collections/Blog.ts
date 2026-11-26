@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { checkPermission } from 'payload-rbac-plugin'
 import { publicRead } from '../access/publicRead'
 import { PolaroidCard } from '../blocks/PolaroidCard/config'
+import { hideFromHeroField } from '../fields/hideFromHero'
 import { slugField } from '../fields/slug'
 import { TITLE_MAX, titleField } from '../fields/title'
 import { generatePreviewPath } from '../lib/preview'
@@ -82,6 +83,7 @@ export const Blog: CollectionConfig = {
     { name: 'subtitle', type: 'text', label: 'Untertitel (kursive Zeile im Hero)' },
     { name: 'excerpt', type: 'textarea', label: 'Anrisstext' },
     { name: 'badge', type: 'text', label: 'Hero-Badge', defaultValue: 'NEU IM BLOG' },
+    hideFromHeroField(),
     { name: 'cover', type: 'upload', relationTo: 'media', label: 'Titelbild' },
     {
       name: 'workshops',
