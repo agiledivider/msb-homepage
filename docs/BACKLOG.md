@@ -383,6 +383,12 @@ Blog posts show neither a date nor an author, so a reader can't tell a fresh rep
 **AC:** every "Spenden" link on the site leads to a donation page; the page says what donations make possible, how to give money (account details, any online option the Verein offers) and things (what is wanted, what isn't, whom to contact), and how to get a donation receipt; all facts (account, receipt threshold, wish list, contact) come from the Vorstand, nothing is guessed; editors can update the page in the CMS; usable at 375 px.
 **Needs:** account details, receipt rules and a wish list from the Vorstand.
 
+### ⏳ S5.15 — Visitors see at a glance which events are only for members (S)
+**Source:** Falk, 2026-11-26.
+Members-only events (Mitgliedertreffen, internal workshops) look like public ones: the only hint is a free-text label that editors type differently each time ("nur für Mitglieder", "WORKSHOP · MITGLIEDER" …), and the start-page hero even invites visitors with "kostenlos" and "Platz sichern". Guests turn up to closed events, or skip ones they could join.
+
+**AC:** editors mark an event as members-only with one switch; members-only events carry the same clear marker everywhere they appear (start-page hero, event lists, calendar, tiles, the event page and the exported calendar); the hero shows no public invitation on them ("kostenlos", "Platz sichern") and points to membership instead; the existing members-only events are marked; readable at 375 px; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*.
+
 ---
 
 ## E6 — Playbook retrofit
