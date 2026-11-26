@@ -376,12 +376,14 @@ Blog posts show neither a date nor an author, so a reader can't tell a fresh rep
 
 **Implementation notes:** byline "22. August 2017 · Heribert" (Berlin day) on the post and on each blog card, `src/lib/postMeta.ts`. Old posts: `src/seed/legacy-authors.json` maps the 77 legacy ids to the "Geschrieben von" name on the old site (fetched 2026-11-26: Heribert 54, Jan 21, Janto 1, Stefan 1); `fillLegacyAuthors` runs in the prod seed on every start and in `pnpm seed`, fills only empty authors and skips posts whose latest version is a draft. "Stand der Dinge" credits Stefan as its text says; Joomla names the account that moved older WordPress posts over, and Falk decided the other 2017–2019 Heribert credits stay. New posts default to the writer's CMS name (a Claude key → its owner), editable. Tests: `tests/unit/post-meta.test.ts`, `tests/integration/legacy-authors.test.ts`. Checked at 1440 and 375 px; verified on staging by Falk. `905087b`.
 
-### ⏳ S5.14 — People who want to support the Verein find a real donation page (M)
+### ✅ S5.14 — People who want to support the Verein find a real donation page (M) — 2026-11-26
 **Source:** IDEAS.md 2026-11-26.
 "Spenden" on the start page leads to the Mitmachen page, and the donation card there links nowhere. Someone ready to give money or things has no account details, no idea what the money is used for and no way to ask for a donation receipt, so the Verein loses donations it could get.
 
 **AC:** every "Spenden" link on the site leads to a donation page; the page says what donations make possible, how to give money (account details, any online option the Verein offers) and things (what is wanted, what isn't, whom to contact), and how to get a donation receipt; all facts (account, receipt threshold, wish list, contact) come from the Vorstand, nothing is guessed; editors can update the page in the CMS; usable at 375 px.
 **Needs:** account details, receipt rules and a wish list from the Vorstand.
+
+**Implementation notes:** page block `donate` ("Spenden", `src/blocks/Donate/`): account details + GiroCode (EPC069-12 v2 QR, built server-side in `src/lib/epcQr.ts`, IBAN mod-97 checked; an invalid IBAN gives no code rather than a wrong one), PayPal card with its own QR and betterplace card, each hidden until its link is set, receipt note (≤ 300 € the bank statement suffices, above that Zuwendungsbestätigung via office@). `/spenden` in the demo seed (`src/seed/spenden.ts`); the wish list items are examples Falk asked for, the Vorstand replaces them. "Spenden" links → `/spenden`, old `uns-unterstuetzen` 301s there. QR scanned by Falk with his banking app; decoded payload checked with zbarimg. Open, outside the code: PayPal and betterplace accounts (Vorstand), `/spenden` on staging as a draft after the deploy, a donor request form in the Vereinssoftware (its IDEAS.md, 2026-11-26). Tests: `tests/unit/epc-qr.test.ts`, `tests/unit/donate-block.test.tsx`. `75d0a08`.
 
 ### ✅ S5.15 — Visitors see at a glance which events are only for members (S) — 2026-11-26
 **Source:** Falk, 2026-11-26.
