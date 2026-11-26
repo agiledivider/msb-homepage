@@ -24,6 +24,7 @@ import * as migration_20261125_231747_site_opening_hours_show from './20261125_2
 import * as migration_20261126_022737_events_members_only from './20261126_022737_events_members_only';
 import * as migration_20261126_031240_pages_donate_block from './20261126_031240_pages_donate_block';
 import * as migration_20261126_034115_section_heading_block from './20261126_034115_section_heading_block';
+import * as migration_20261126_102415_donate_bank_notice from './20261126_102415_donate_bank_notice';
 
 export const migrations = [
   {
@@ -154,6 +155,11 @@ export const migrations = [
   {
     up: migration_20261126_034115_section_heading_block.up,
     down: migration_20261126_034115_section_heading_block.down,
-    name: '20261126_034115_section_heading_block'
+    name: '20261126_034115_section_heading_block',
+  },
+  {
+    up: migration_20261126_102415_donate_bank_notice.up,
+    down: migration_20261126_102415_donate_bank_notice.down,
+    name: '20261126_102415_donate_bank_notice'
   },
 ];

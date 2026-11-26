@@ -79,6 +79,15 @@ export const Donate: Block = {
           defaultValue: 'Spende MakerSpace Bonn',
           maxLength: 140,
         },
+        {
+          name: 'notice',
+          type: 'textarea',
+          label: 'Hinweis zum Konto',
+          admin: {
+            description:
+              'Erscheint als gelber Achtung-Kasten unter den Kontodaten, z. B. „Bitte keine Mitgliedsbeiträge auf dieses Konto.“ Leer = ausgeblendet.',
+          },
+        },
       ],
     },
     {

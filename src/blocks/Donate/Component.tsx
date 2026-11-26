@@ -1,5 +1,10 @@
 import { faPaypal } from '@fortawesome/free-brands-svg-icons'
-import { faBuildingColumns, faHandHoldingHeart, faReceipt } from '@fortawesome/free-solid-svg-icons'
+import {
+  faBuildingColumns,
+  faHandHoldingHeart,
+  faReceipt,
+  faTriangleExclamation,
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { BTN_PRIMARY, SectionHeading } from '../../components/ui'
 import { epcPayload, formatIban, qrSvg } from '../../lib/epcQr'
@@ -15,6 +20,7 @@ export type DonateBlock = {
     iban?: string | null
     bic?: string | null
     reference?: string | null
+    notice?: string | null
   } | null
   paypalUrl?: string | null
   betterplaceUrl?: string | null
@@ -77,13 +83,28 @@ export function DonateComponent({ tag, heading, intro, bank, paypalUrl, betterpl
                   </p>
                 </div>
               ) : null}
-              <dl className="m-0 min-w-0 flex-1">
-                <Row k="Empfänger" v={bank.holder} />
-                <Row k="IBAN" v={formatIban(bank.iban)} />
-                <Row k="BIC" v={bank.bic} />
-                <Row k="Bank" v={bank.bankName} />
-                <Row k="Verwendung" v={bank.reference} />
-              </dl>
+              <div className="flex min-w-0 flex-1 flex-col gap-4">
+                <dl className="m-0">
+                  <Row k="Empfänger" v={bank.holder} />
+                  <Row k="IBAN" v={formatIban(bank.iban)} />
+                  <Row k="BIC" v={bank.bic} />
+                  <Row k="Bank" v={bank.bankName} />
+                  <Row k="Verwendung" v={bank.reference} />
+                </dl>
+                {bank.notice?.trim() ? (
+                  <div
+                    role="note"
+                    className="flex gap-3 rounded-[8px] border-l-4 border-text-gelb bg-fond-gelb px-4 py-3 text-[15px] leading-[1.5] font-bold text-text-gelb"
+                  >
+                    <FontAwesomeIcon
+                      icon={faTriangleExclamation}
+                      className="mt-1 h-[1em] w-[1em] shrink-0"
+                      aria-hidden
+                    />
+                    <p className="m-0 whitespace-pre-line">{bank.notice.trim()}</p>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         ) : null}
