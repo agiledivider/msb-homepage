@@ -32,4 +32,6 @@ public/media
 scrap
 .playwright-mcp
 *.dc.html
-"MakerSpace Bonn Redesign (standalone).html"
+# (no quotes: .dockerignore patterns are literal)
+MakerSpace*Redesign*.html
+*.tsbuildinfo

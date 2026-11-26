@@ -16,6 +16,15 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # pnpm 11 blocks dependency build scripts (sharp, esbuild, …) and aborts; allow them
 RUN pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
 
+# ---- runtime dependencies only ----
+# The runtime needs no linter, test runner or CSS toolchain (S6.8). Payload's CLI
+# (migrate, run) brings its own tsx; typescript stays, plugin-mcp imports it.
+# Next's SWC compiler only compiles (`next build`); `next start` never loads it,
+# which is why Next's own standalone output leaves it out too.
+FROM deps AS prod-deps
+RUN pnpm prune --prod --config.dangerouslyAllowAllBuilds=true \
+  && rm -rf node_modules/.pnpm/@next+swc-*
+
 # ---- build ----
 FROM base AS builder
 WORKDIR /app
@@ -26,17 +35,23 @@ ENV PAYLOAD_SECRET=build-placeholder DATABASE_URI=file:/tmp/build.db
 # Generate Payload's types first: src/payload-types.ts is git-ignored, so it is
 # absent on a clean checkout (e.g. CI) and the type-checked build would fail on
 # `@/payload-types`. It is derived from the config, so regenerating is correct.
-RUN pnpm run generate:types && pnpm run build
+RUN pnpm run generate:types && pnpm run build \
+  # build-time cache only; `next start` never reads it (S6.8)
+  && rm -rf .next/cache
 
 # ---- runtime ----
 # Regular `next start` (not standalone) — most reliable for Payload's admin/api
 # routes and the Node-runtime proxy (legacy redirects).
-FROM base AS runner
+# Plain Node, no package manager: the CMD runs the binaries directly, and npm /
+# corepack only add size and scan findings (S6.8).
+FROM node:22-slim AS runner
 WORKDIR /app
-ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
-RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m nextjs
+ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 NEXT_TELEMETRY_DISABLED=1
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+     /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+  && groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m nextjs
 
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/src ./src

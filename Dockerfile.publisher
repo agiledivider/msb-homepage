@@ -19,12 +19,21 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
   && rm -rf /var/lib/apt/lists/*
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
+RUN pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
+  # `next build` needs the build toolchain (typescript, tailwind, @types), but not
+  # the linter or the test runner (S6.8). The image ships no tests (see below).
+  && rm -rf node_modules/@biomejs node_modules/vitest \
+     node_modules/.pnpm/@biomejs+* node_modules/.pnpm/vitest@* node_modules/.pnpm/@vitest+* \
+     node_modules/.pnpm/vite@* node_modules/.pnpm/rolldown@* node_modules/.pnpm/@rolldown+*
 
 # ---- runtime ----
-FROM base AS runner
+# Plain Node, no package manager: everything runs through node_modules/.bin,
+# and npm / corepack only add size and scan findings (S6.8).
+FROM node:22-slim AS runner
 WORKDIR /app
-ENV NODE_ENV=production TZ=Europe/Berlin
+ENV NODE_ENV=production TZ=Europe/Berlin NEXT_TELEMETRY_DISABLED=1
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+     /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 
 # crane: daemonless image assembly + push (static Go binary, ~20 MB).
 # The asset name must follow the image's own architecture — an x86_64 binary in
@@ -46,11 +55,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 # The publisher needs the whole app: it runs a real `next build` + crawl.
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# No test runner in this image, and `next build` type-checks every .ts file the
+# tsconfig includes, so the tests would fail it.
+RUN rm -rf tests vitest.config.ts
 
 # src/payload-types.ts is git-ignored (and excluded from the build context), so
 # generate it into the image — the runtime `next build` type-checks against it.
 # Placeholders are inline (not ENV) so no build value persists in the image.
-RUN PAYLOAD_SECRET=build-placeholder DATABASE_URI=file:/tmp/build.db pnpm run generate:types
+RUN PAYLOAD_SECRET=build-placeholder DATABASE_URI=file:/tmp/build.db node_modules/.bin/payload generate:types
 
 # Builds are CPU/RAM hungry; keep them off the Payload container's back.
 EXPOSE 8080
