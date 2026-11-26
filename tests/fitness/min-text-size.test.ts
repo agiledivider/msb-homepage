@@ -32,6 +32,8 @@ const sourceFiles = (dir: string): string[] =>
  */
 const ALLOWED: Record<string, string[]> = {
   'blocks/Hero/Component.tsx': ['text-[11px]', 'text-[12px]', 'text-[13px]'],
+  // Mitglieder-Fahne (S5.15): a 12 px bold label on Mitglieder-Gelb, Falk 2026-11-26.
+  'components/events/MembersOnlyBadge.tsx': ['text-[12px]'],
 }
 
 const TOO_SMALL = /(?<![\w-])text-(?:\[(\d+(?:\.\d+)?)px\]|xs)(?![\w-])/g

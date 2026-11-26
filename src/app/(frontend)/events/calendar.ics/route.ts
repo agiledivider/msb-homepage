@@ -1,5 +1,6 @@
 import { resolveEventTimes } from '@/lib/eventTime'
 import { buildICalendar, type ICalEvent } from '@/lib/ical'
+import { MEMBERS_ONLY_LABEL } from '@/lib/membersOnly'
 import { serverURL } from '@/lib/preview'
 import { findPublic } from '@/lib/publicData'
 
@@ -31,7 +32,8 @@ export async function GET() {
     return {
       uid: `event-${e.id}@${host}`,
       stamp: new Date(e.updatedAt ?? e.date),
-      summary: e.title,
+      // S5.15: calendar apps show only the title, so the marker goes into it.
+      summary: e.membersOnly ? `${e.title} (${MEMBERS_ONLY_LABEL})` : e.title,
       description: e.description,
       location: e.location,
       url: `${serverURL}${path}`,

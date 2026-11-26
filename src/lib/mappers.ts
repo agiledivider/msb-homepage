@@ -91,12 +91,16 @@ export function blogToFace(post: Blog): Face {
 /** Face 2 — next upcoming event. */
 export function eventToFace(ev: Event): Face {
   const d = new Date(ev.date)
+  // Members-only (S5.15): no public invitation, point to membership instead.
+  const members = ev.membersOnly === true
   return {
     badge: `${weekdayShort(d)} ${day2(d)}. ${monthLong(d)}`,
-    note: 'kostenlos ✦',
+    // Design B: no hand note on a members-only face, the yellow flag says it.
+    note: members ? undefined : 'kostenlos ✦',
+    membersOnly: members,
     accent: 'green',
     variant: 'event',
-    eyebrow: '◆ NÄCHSTER TERMIN · EVENT',
+    eyebrow: members ? '◆ NÄCHSTER TERMIN' : '◆ NÄCHSTER TERMIN · EVENT',
     pillLabel: 'EVENT',
     // No corner label on the event face (Falk 2026-11-22: the time in the corner can go).
     eventDay: day2(d),
@@ -105,9 +109,11 @@ export function eventToFace(ev: Event): Face {
     headline: ev.title,
     lede: ev.subtitle,
     description: ev.description,
-    primaryStyle: 'white',
-    primary: { label: 'Platz sichern', url: `/events/${ev.slug}` },
-    secondary: { label: 'Alle Events', url: '/events' },
+    primaryStyle: members ? 'yellow' : 'white',
+    primary: members
+      ? { label: 'Mitglied werden', url: '/mitmachen' }
+      : { label: 'Platz sichern', url: `/events/${ev.slug}` },
+    secondary: members ? { label: 'Zum Termin', url: `/events/${ev.slug}` } : { label: 'Alle Events', url: '/events' },
     image: asMedia(ev.image),
     imagePlaceholder: 'Foto vom Event',
     caption: ev.location ?? 'Kennedyallee 18',
@@ -157,7 +163,9 @@ export function eventsToFeed(events: Event[]): EventFeedBlock['events'] {
   })
 }
 
-export function eventsToList(events: Event[]): EventsListBlock['events'] {
+type EventListItem = NonNullable<EventsListBlock['events']>[number] & { membersOnly?: boolean }
+
+export function eventsToList(events: Event[]): EventListItem[] {
   return events.map((e) => {
     const d = new Date(e.date)
     return {
@@ -169,6 +177,7 @@ export function eventsToList(events: Event[]): EventsListBlock['events'] {
       title: e.title,
       text: e.description,
       link: { url: `/events/${e.slug}` },
+      membersOnly: e.membersOnly === true,
     }
   })
 }

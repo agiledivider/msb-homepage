@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { eventTagClasses } from '@/components/ui'
+import { MEMBERS_ONLY_LABEL, MembersOnlyBadge } from './MembersOnlyBadge'
 import { type EventVM, fmtMonthYear } from './model'
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
@@ -90,9 +91,10 @@ export function CalendarView({
                       <Link
                         key={e.id}
                         href={e.href}
-                        title={`${e.time} · ${e.title}`}
-                        className={`block truncate rounded-[4px] px-1.5 py-0.5 text-[14px] leading-tight no-underline decoration-2 underline-offset-2 hover:underline ${eventTagClasses(e.tagColor)}`}
+                        title={`${e.time} · ${e.title}${e.membersOnly ? ` · ${MEMBERS_ONLY_LABEL}` : ''}`}
+                        className={`block truncate rounded-[4px] px-1.5 py-0.5 text-[14px] leading-tight no-underline decoration-2 underline-offset-2 hover:underline ${e.membersOnly ? 'bg-yellow text-tinte' : eventTagClasses(e.tagColor)}`}
                       >
+                        {e.membersOnly ? <MembersOnlyBadge compact className="mr-1" /> : null}
                         <span className="font-semibold">{e.time}</span> {e.title}
                       </Link>
                     ))}

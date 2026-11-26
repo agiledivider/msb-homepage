@@ -5,6 +5,7 @@ import type { CSSProperties } from 'react'
 import { useEffect, useState } from 'react'
 import { Media } from '@/components/Media'
 import { CARD_LINK, CARD_TITLE, eventTagClasses } from '@/components/ui'
+import { MembersOnlyBadge } from './MembersOnlyBadge'
 import { type EventVM, fmtDay2, fmtMonthShort, fmtWeekdayShort } from './model'
 
 // Per-event aspect ratio keyed by id → a tile's height never changes, so it
@@ -28,7 +29,7 @@ function Tile({ e }: { e: EventVM }) {
   return (
     <Link
       href={e.href}
-      className={`${CARD_LINK} overflow-hidden rounded-[14px] border border-line bg-card shadow-[0_12px_34px_-22px_rgba(0,0,0,.5)]`}
+      className={`${CARD_LINK} overflow-hidden rounded-[14px] border ${e.membersOnly ? 'border-yellow' : 'border-line'} bg-card shadow-[0_12px_34px_-22px_rgba(0,0,0,.5)]`}
     >
       <Media
         resource={e.image}
@@ -37,12 +38,17 @@ function Tile({ e }: { e: EventVM }) {
         style={{ aspectRatio: ratioFor(e) } as CSSProperties}
         sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
       />
-      <div className="p-4">
-        {e.category ? (
-          <div
-            className={`mb-2 inline-block rounded-[5px] px-2 py-[3px] font-mono text-[14px] ${eventTagClasses(e.tagColor)}`}
-          >
-            {e.category}
+      <div className={`p-4 ${e.membersOnly ? 'border-t-[6px] border-yellow' : ''}`}>
+        {e.category || e.membersOnly ? (
+          <div className="mb-2 flex flex-wrap items-center gap-1.5">
+            {e.membersOnly ? <MembersOnlyBadge /> : null}
+            {e.category ? (
+              <span
+                className={`inline-block rounded-[5px] px-2 py-[3px] font-mono text-[14px] ${eventTagClasses(e.tagColor)}`}
+              >
+                {e.category}
+              </span>
+            ) : null}
           </div>
         ) : null}
         <div className="font-mono text-[14px] text-muted">

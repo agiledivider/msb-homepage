@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { CuttingMat } from '../../components/CuttingMat'
+import { MembersOnlyBadge } from '../../components/events/MembersOnlyBadge'
 import type { MediaResource } from '../../components/Media'
 import { Polaroid } from '../../components/Polaroid'
 import { BTN_ON_DARK_HOVER, BTN_ON_DARK_SECONDARY } from '../../components/ui'
@@ -23,7 +24,7 @@ export type Face = {
   lede?: string | null
   description?: string | null
   meta?: { value?: string | null }[] | null
-  primaryStyle?: 'white' | 'orange' | null
+  primaryStyle?: 'white' | 'orange' | 'yellow' | null
   primary?: LinkValue | null
   secondary?: LinkValue | null
   image?: MediaResource
@@ -31,6 +32,8 @@ export type Face = {
   caption?: string | null
   /** Phones: the photo may take more of the height (the Werkstatt face, which has little text). */
   largePhoto?: boolean
+  /** S5.15: members-only event — Mitglieder-Gelb accents and the members flag. */
+  membersOnly?: boolean
 }
 
 export type HeroBlock = { blockType: 'hero'; faces?: Face[] | null }
@@ -56,14 +59,24 @@ const FACE_TF = [
 const PILL_BASE =
   'relative inline-flex cursor-pointer items-center gap-[7px] overflow-hidden rounded-[20px] border px-2 py-[5px] font-mono text-[14px] tracking-normal transition-[border-color,color,background] duration-[250ms] md:px-[13px] md:py-[7px] md:tracking-[.06em] [&_b]:font-semibold'
 
-function Cta({ link, primary, style }: { link?: LinkValue | null; primary: boolean; style?: 'white' | 'orange' }) {
+function Cta({
+  link,
+  primary,
+  style,
+}: {
+  link?: LinkValue | null
+  primary: boolean
+  style?: 'white' | 'orange' | 'yellow'
+}) {
   if (!link?.label) return null
   const base =
     'cursor-pointer rounded-[10px] no-underline flex min-h-11 flex-1 items-center justify-center px-2 py-2 text-center text-[13px] leading-tight md:block md:min-h-0 md:flex-none md:w-auto md:px-6 md:py-3.5 md:text-left md:text-[15px]'
   const cls = primary
     ? style === 'orange'
       ? `bg-orange text-tinte font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // Maker-Orange: actions/events
-      : `bg-kreide text-green-deep font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // on the mat: Kreide, Grün 800 text
+      : style === 'yellow'
+        ? `bg-yellow text-tinte font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // Mitglieder-Gelb: members-only (S5.15)
+        : `bg-kreide text-green-deep font-bold shadow-none md:shadow-[0_8px_20px_-10px_rgba(0,0,0,.4)] ${BTN_ON_DARK_HOVER}` // on the mat: Kreide, Grün 800 text
     : `${BTN_ON_DARK_SECONDARY} font-semibold`
   return (
     <Link href={link.url || '#'} className={`${base} ${cls}`}>
@@ -93,10 +106,13 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
       <div className="relative z-[2] flex h-full flex-col items-stretch gap-[9px] max-md:pl-3 md:grid md:grid-cols-[1.06fr_.94fr] md:items-stretch md:gap-10 md:pl-2.5 md:pt-1.5">
         {/* On phones the eyebrow pill goes on top, above the photo. */}
         {face.eyebrow ? (
-          <div
-            className={`-order-1 mb-2 inline-flex items-center gap-1.5 self-start rounded-[20px] border px-1.5 py-px font-mono text-[11px] tracking-normal md:hidden ${eb}`}
-          >
-            {face.eyebrow}
+          <div className="-order-1 mb-2 flex flex-wrap items-center gap-2 self-start md:hidden">
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-[20px] border px-1.5 py-px font-mono text-[11px] tracking-normal ${eb}`}
+            >
+              {face.eyebrow}
+            </div>
+            {face.membersOnly ? <MembersOnlyBadge /> : null}
           </div>
         ) : null}
         {/* text column (mobile: stacked below the photo, order-2). Desktop: the
@@ -106,10 +122,13 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:block">
             {face.eyebrow ? (
               // Desktop only: on phones the pill sits above the photo (see above).
-              <div
-                className={`inline-flex items-center gap-2 self-start rounded-[20px] border font-mono tracking-normal max-md:hidden md:mb-[22px] md:px-[11px] md:py-[5px] md:text-[14px] md:tracking-[.06em] ${eb}`}
-              >
-                {face.eyebrow}
+              <div className="flex items-center gap-3 max-md:hidden md:mb-[22px]">
+                <div
+                  className={`inline-flex items-center gap-2 self-start rounded-[20px] border font-mono tracking-normal md:px-[11px] md:py-[5px] md:text-[14px] md:tracking-[.06em] ${eb}`}
+                >
+                  {face.eyebrow}
+                </div>
+                {face.membersOnly ? <MembersOnlyBadge /> : null}
               </div>
             ) : null}
 
@@ -187,6 +206,7 @@ function FaceContent({ face, priority = false }: { face: Face; priority?: boolea
               caption={face.caption}
               sizes="(max-width:767.98px) 100vw, 460px"
               priority={priority}
+              yellowTape={face.membersOnly}
             />
           </div>
           {isEvent && face.eventDay ? (
@@ -346,7 +366,7 @@ export function HeroComponent({
             <div key={i} className={`absolute inset-0 backface-hidden ${FACE_TF[i]}`}>
               {face.badge ? (
                 <div
-                  className="absolute z-[6] rounded-[22px] border-2 border-white bg-orange px-[15px] py-[9px] font-sans text-[14px] font-bold tracking-[.03em] text-tinte shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden"
+                  className={`absolute z-[6] rounded-[22px] border-2 border-white ${face.membersOnly ? 'bg-yellow' : 'bg-orange'} px-[15px] py-[9px] font-sans text-[14px] font-bold tracking-[.03em] text-tinte shadow-[0_6px_16px_-6px_rgba(60,52,30,.5)] max-md:hidden`}
                   style={{ top: -20, left: -16, transform: `rotate(${badgeRot[i]})` }}
                 >
                   {face.badge}

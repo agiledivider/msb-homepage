@@ -95,6 +95,16 @@ export const Events: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'membersOnly',
+      type: 'checkbox',
+      label: 'Nur für Mitglieder',
+      defaultValue: false,
+      admin: {
+        description:
+          'Zeigt überall das Zeichen „Nur für Mitglieder" und lädt auf der Startseite zur Mitgliedschaft ein statt zur Teilnahme.',
+      },
+    },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Bild' },
     {
       name: 'workshops',

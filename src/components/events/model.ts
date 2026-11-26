@@ -1,5 +1,6 @@
 import type { MediaResource } from '@/components/Media'
 import { BERLIN_TZ, eventTimeText } from '@/lib/eventTime'
+import { labelBesideMarker } from '@/lib/membersOnly'
 import type { Event, Media } from '@/payload-types'
 
 /** Page size for the list & tiles views (first batch rendered, rest revealed on scroll). */
@@ -21,6 +22,8 @@ export type EventVM = {
   location?: string | null
   category?: string | null
   tagColor?: string | null
+  /** S5.15: shown with the members-only marker everywhere. */
+  membersOnly: boolean
   description?: string | null
   image?: MediaResource
 }
@@ -51,8 +54,9 @@ export function toEventVM(e: Event): EventVM {
     date,
     time: eventTimeText(e.timeLabel),
     location: e.location,
-    category: e.category,
+    category: e.membersOnly ? labelBesideMarker(e.category) : e.category,
     tagColor: e.tagColor,
+    membersOnly: e.membersOnly === true,
     description: e.description,
     image: asMedia(e.image),
   }

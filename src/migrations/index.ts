@@ -21,6 +21,7 @@ import * as migration_20261124_012207_german_hero_lede from './20261124_012207_g
 import * as migration_20261124_014146_open_drafts_last_editor from './20261124_014146_open_drafts_last_editor';
 import * as migration_20261125_224032_site_opening_hours_calendar from './20261125_224032_site_opening_hours_calendar';
 import * as migration_20261125_231747_site_opening_hours_show from './20261125_231747_site_opening_hours_show';
+import * as migration_20261126_022737_events_members_only from './20261126_022737_events_members_only';
 
 export const migrations = [
   {
@@ -136,6 +137,11 @@ export const migrations = [
   {
     up: migration_20261125_231747_site_opening_hours_show.up,
     down: migration_20261125_231747_site_opening_hours_show.down,
-    name: '20261125_231747_site_opening_hours_show'
+    name: '20261125_231747_site_opening_hours_show',
+  },
+  {
+    up: migration_20261126_022737_events_members_only.up,
+    down: migration_20261126_022737_events_members_only.down,
+    name: '20261126_022737_events_members_only'
   },
 ];

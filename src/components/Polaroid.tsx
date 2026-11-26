@@ -2,9 +2,11 @@ import type { CSSProperties } from 'react'
 import { Media, type MediaResource } from './Media'
 
 /** A strip of "tape" holding a corner of the photo; size and place come from `className` (smaller on phones). */
-function TapeStrip({ className }: { className: string }) {
+function TapeStrip({ className, yellow = false }: { className: string; yellow?: boolean }) {
   return (
-    <div className={`absolute z-[3] bg-[rgba(251,247,236,.72)] shadow-[0_2px_6px_-3px_rgba(0,0,0,.3)] ${className}`} />
+    <div
+      className={`absolute z-[3] ${yellow ? 'bg-yellow' : 'bg-[rgba(251,247,236,.72)]'} shadow-[0_2px_6px_-3px_rgba(0,0,0,.3)] ${className}`}
+    />
   )
 }
 
@@ -25,6 +27,7 @@ export function Polaroid({
   mobileRotate,
   sizes = '100vw',
   priority = false,
+  yellowTape = false,
 }: {
   image?: MediaResource
   placeholder?: string
@@ -35,6 +38,8 @@ export function Polaroid({
   mobileRotate?: number
   sizes?: string
   priority?: boolean
+  /** Mitglieder-Gelb tape, for members-only events (S5.15) */
+  yellowTape?: boolean
 }) {
   return (
     <div
@@ -52,8 +57,14 @@ export function Polaroid({
       <div
         className={`relative mx-auto bg-creme px-[7px] pt-[7px] pb-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,.5)] max-md:w-full max-md:max-w-[var(--pl-max,calc((100svh_-_176px)_/_1.5_+_14px))] md:px-2.5 md:pt-2.5 md:pb-[42px]`}
       >
-        <TapeStrip className="-top-2 left-4 h-4 w-12 -rotate-5 md:-top-[13px] md:left-6 md:h-[26px] md:w-[78px]" />
-        <TapeStrip className="-bottom-2 right-5 h-4 w-11 -rotate-4 md:-bottom-[11px] md:right-[30px] md:h-6 md:w-[70px]" />
+        <TapeStrip
+          yellow={yellowTape}
+          className="-top-2 left-4 h-4 w-12 -rotate-5 md:-top-[13px] md:left-6 md:h-[26px] md:w-[78px]"
+        />
+        <TapeStrip
+          yellow={yellowTape}
+          className="-bottom-2 right-5 h-4 w-11 -rotate-4 md:-bottom-[11px] md:right-[30px] md:h-6 md:w-[70px]"
+        />
         <Media
           resource={image}
           placeholder={placeholder}

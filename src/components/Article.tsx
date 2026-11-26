@@ -1,8 +1,10 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import { RichText } from '@payloadcms/richtext-lexical/react'
+import Link from 'next/link'
 import { richTextConverters } from '@/blocks/richtext'
+import { MembersOnlyBadge } from '@/components/events/MembersOnlyBadge'
 import { Media } from '@/components/Media'
-import { PROSE_LINKS } from '@/components/ui'
+import { PROSE_LINKS, TEXT_LINK } from '@/components/ui'
 import { eventTimeText } from '@/lib/eventTime'
 import { postMeta } from '@/lib/postMeta'
 import type { Blog, Event } from '@/payload-types'
@@ -63,6 +65,27 @@ export function EventArticle({ ev }: { ev: Event }) {
         {fmt(ev.date)} · {eventTimeText(ev.timeLabel)}
         {ev.location ? ` · ${ev.location}` : ''}
       </div>
+      {ev.membersOnly ? (
+        <div className="mb-8 grid gap-3 rounded-[10px] border-l-8 border-yellow bg-card px-5 py-4 text-[15px] leading-[1.5] md:grid-cols-[1fr_auto] md:items-center md:gap-6">
+          <div className="grid justify-items-start gap-1.5">
+            <MembersOnlyBadge className="mb-1" />
+            <strong>Dieser Termin ist nur für Mitglieder.</strong>
+            <span className="text-muted">
+              Noch kein Mitglied? Komm zur{' '}
+              <Link href="/events" className={TEXT_LINK}>
+                Offenen Tür
+              </Link>{' '}
+              und lern uns kennen.
+            </span>
+          </div>
+          <Link
+            href="/mitmachen"
+            className="inline-flex min-h-11 items-center justify-self-start rounded-[8px] bg-yellow px-[18px] font-bold text-tinte no-underline ring-yellow ring-inset transition-colors hover:bg-tinte hover:text-yellow hover:ring-2 md:justify-self-end"
+          >
+            Mitglied werden
+          </Link>
+        </div>
+      ) : null}
       {ev.image && typeof ev.image === 'object' ? (
         <Media
           resource={ev.image}

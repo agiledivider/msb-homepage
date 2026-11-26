@@ -3,6 +3,7 @@ import { CtaBandComponent } from '@/blocks/CtaBand/Component'
 import { isToolIcon } from '@/blocks/Workshops/icons'
 import { ToolIcon } from '@/blocks/Workshops/ToolIcon'
 import type { MachineAccess } from '@/collections/Workshops'
+import { MembersOnlyBadge } from '@/components/events/MembersOnlyBadge'
 import { asMedia, eventsToList } from '@/lib/mappers'
 import type { Blog, Event, Workshop } from '@/payload-types'
 import { Media } from './Media'
@@ -253,6 +254,7 @@ export function WorkshopPage({
                             <span className="block font-mono text-[14px] text-muted">{e.sub?.split(' · ')[0]}</span>
                           </span>
                           <span>
+                            {e.membersOnly ? <MembersOnlyBadge className="mb-1" /> : null}
                             <span className={`block text-[15px] font-bold leading-snug ${CARD_TITLE}`}>{e.title}</span>
                             <span className="block text-[14px] text-muted">
                               {e.sub?.split(' · ')[1]} · {e.time}
