@@ -3,6 +3,7 @@ import type { EventsListBlock } from '@/blocks/EventsList/Component'
 import type { Face } from '@/blocks/Hero/Component'
 import type { NavItem } from '@/components/Header'
 import type { MediaResource } from '@/components/Media'
+import { eventSignup } from '@/lib/eventSignup'
 import { BERLIN_TZ, eventTimeText } from '@/lib/eventTime'
 import type { SocialPlatform } from '@/lib/socialPlatforms'
 import type { Blog, Event, HeroSetting, Media, SiteSetting } from '@/payload-types'
@@ -93,10 +94,19 @@ export function eventToFace(ev: Event): Face {
   const d = new Date(ev.date)
   // Members-only (S5.15): no public invitation, point to membership instead.
   const members = ev.membersOnly === true
+  // S5.19: "kostenlos" only when the event is free (unset = free, as before the
+  // switch); the main button goes to an external sign-up when there is one, and
+  // promises a seat only for free events without one.
+  const free = ev.free !== false
+  const signup = eventSignup(ev.signupUrl)
+  const eventPath = `/events/${ev.slug}`
+  const invite = signup
+    ? { label: `Anmelden auf ${signup.host}`, url: signup.url }
+    : { label: free ? 'Platz sichern' : 'Zum Termin', url: eventPath }
   return {
     badge: `${weekdayShort(d)} ${day2(d)}. ${monthLong(d)}`,
     // Design B: no hand note on a members-only face, the yellow flag says it.
-    note: members ? undefined : 'kostenlos ✦',
+    note: members || !free ? undefined : 'kostenlos ✦',
     membersOnly: members,
     accent: 'green',
     variant: 'event',
@@ -110,10 +120,9 @@ export function eventToFace(ev: Event): Face {
     lede: ev.subtitle,
     description: ev.description,
     primaryStyle: members ? 'yellow' : 'white',
-    primary: members
-      ? { label: 'Mitglied werden', url: '/mitmachen' }
-      : { label: 'Platz sichern', url: `/events/${ev.slug}` },
-    secondary: members ? { label: 'Zum Termin', url: `/events/${ev.slug}` } : { label: 'Alle Events', url: '/events' },
+    primary: members ? { label: 'Mitglied werden', url: '/mitmachen' } : invite,
+    // With the main button leaving the site, the second one keeps the way to the details.
+    secondary: members || signup ? { label: 'Zum Termin', url: eventPath } : { label: 'Alle Events', url: '/events' },
     image: asMedia(ev.image),
     imagePlaceholder: 'Foto vom Event',
     caption: ev.location ?? 'Kennedyallee 18',

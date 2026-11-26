@@ -296,6 +296,12 @@ At some page widths the logo in the header is squeezed and looks distorted. The 
 
 **Implementation notes:** the header logo no longer shrinks as a flex item; between `md` and `lg` it shows only the signet, since the nav leaves no room for the wordmark. The footer logo scales with its column (`c32893f`).
 
+### ⏳ S4.10 — Long words in page titles break at a sensible place (S)
+**Source:** seen 2026-11-26 during S5.19.
+On a 375 px phone a long word in a large page title is cut at the screen edge with a single letter on the next line (event page "Demystifizierung Lebkuchenhaus bauen" shows "Demystifizierun / g"). Visitors read a broken word in the most prominent line of the page.
+
+**AC:** on event, blog and content pages at 360 and 375 px, long German words in the title either fit or break at a syllable with a hyphen, never leaving one or two letters alone on a line; short titles look as today; the start-page hero is unchanged.
+
 ---
 
 ## E5 — Visitor and editor features
@@ -433,10 +439,13 @@ An editor can keep an event or blog post out of the start-page hero. The hero pr
 
 **AC:** for an event or post kept out of the hero, the hero preview clearly says that it will not appear in the start-page carousel, while still showing how it would look; for every other item the preview is unchanged; readable at 375 px.
 
-### ⏳ S5.19 — The start page invites to an event the way that event actually works (S)
+### ✅ S5.19 — The start page invites to an event the way that event actually works (S) — 2026-11-26
+**Status:** ✅ done 2026-11-26 (Falk).
 The hero always labels the next event "kostenlos" and offers "Platz sichern", even when the event is run by guests, costs something, or needs a registration somewhere else (e.g. the Teckids Campdays, registration on teckids.org, contribution chosen by each participant). Visitors are promised something the event doesn't offer. Editors should be able to say whether an event is free and where people sign up, and the hero and event page show only what is true for that event.
 
 **AC:** for an event with an external sign-up address, the hero's main button leads there and says so; an event not marked free shows no "kostenlos"; an event with neither shows a neutral invitation to the event page; events nobody edits look as today; readable at 375 px. Relation: S5.4 (pretix) may later provide the sign-up address.
+
+**Implementation notes:** two event fields: `free` ("Kostenlos", default on, existing rows on via the migration default) and `signupUrl` ("Anmeldung (Adresse)", https only, `src/lib/eventSignup.ts`). Hero (`eventToFace`): note "kostenlos" only when free; with a sign-up the main button is "Anmelden auf <host>" (external) and the second "Zum Termin"; not free and no sign-up → "Zum Termin"; members-only unchanged. The event page shows a sign-up box with the same button. Tests: `tests/unit/event-invite.test.tsx`. Checked in Blink at 360 px and 1280 px (hero) and 375 px (event page).
 
 ### ⏳ S5.20 — Any member's AI writes CMS content the way the Verein wants it (M)
 Editors can let their own AI (Claude Desktop, claude.ai or others) work in the CMS through their personal key. The AI only gets a short guide (German, drafts only, title lengths, no invented facts). What we learned while filling the site lives in one person's head and one local setup: which image format each place needs, when to set the KI label and remove recognisable people, that recurring events like the Offene Tür stay out of the hero, how workshop pages are filled, how to take over dates from the old site or partner sites and check them for contradictions. Every member's AI should get this editorial guide from the CMS itself, kept in one place and updated when the Verein's rules change.
@@ -537,6 +546,12 @@ After a push, a new image is ready for staging only after the app image has been
 
 **Implementation notes:** `build` no longer needs the gate and pushes only `sha-<short>`; the new `promote` job moves `latest` once gate and build are green (`docker buildx imagetools create`), so `latest` stays gate-checked. Runtime layers are ordered from rarely to often changed, with assets copied from the context so their cache key is their content. The builder starts `FROM deps` instead of copying node_modules. `.dockerignore` is an allowlist, which also keeps `.backup-dev` and the `deploy/` key out of locally built images (`docs/runtime-traps.md`). The publisher no longer ships `uploads/`. Server source maps stay (Falk). Next lever: reuse `next build`'s cache across CI runs; the app build is now the critical path.
 
+
+### ⏳ S6.11 — The hero screenshot command shows every slide again (S)
+**Source:** seen 2026-11-26 during S5.19.
+`pnpm hero:shots` should photograph each hero slide at every phone size, so hero changes can be reviewed before Falk sees them. It now returns the same slide three times: switching slides does not take effect, so the event and Werkstatt slides are never checked.
+
+**AC:** one run produces one contact sheet per slide, each showing that slide at every phone size; a run that cannot reach a slide says so and exits with an error instead of saving the wrong picture.
 ---
 
 ## E7 — Legacy migration

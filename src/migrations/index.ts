@@ -26,6 +26,7 @@ import * as migration_20261126_031240_pages_donate_block from './20261126_031240
 import * as migration_20261126_034115_section_heading_block from './20261126_034115_section_heading_block';
 import * as migration_20261126_102415_donate_bank_notice from './20261126_102415_donate_bank_notice';
 import * as migration_20261126_131630_hide_from_hero from './20261126_131630_hide_from_hero';
+import * as migration_20261126_160623_event_free_signup from './20261126_160623_event_free_signup';
 
 export const migrations = [
   {
@@ -166,6 +167,11 @@ export const migrations = [
   {
     up: migration_20261126_131630_hide_from_hero.up,
     down: migration_20261126_131630_hide_from_hero.down,
-    name: '20261126_131630_hide_from_hero'
+    name: '20261126_131630_hide_from_hero',
+  },
+  {
+    up: migration_20261126_160623_event_free_signup.up,
+    down: migration_20261126_160623_event_free_signup.down,
+    name: '20261126_160623_event_free_signup'
   },
 ];

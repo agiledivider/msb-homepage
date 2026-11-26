@@ -4,6 +4,7 @@ import { publicRead } from '../access/publicRead'
 import { hideFromHeroField } from '../fields/hideFromHero'
 import { slugField } from '../fields/slug'
 import { TITLE_MAX, titleField } from '../fields/title'
+import { validateSignupUrl } from '../lib/eventSignup'
 import { generatePreviewPath } from '../lib/preview'
 
 /** Events. The next upcoming event drives hero face 2; the collection also
@@ -105,6 +106,33 @@ export const Events: CollectionConfig = {
         description:
           'Zeigt überall das Zeichen „Nur für Mitglieder" und lädt auf der Startseite zur Mitgliedschaft ein statt zur Teilnahme.',
       },
+    },
+    // S5.19: the start page invites only the way the event really works.
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'free',
+          type: 'checkbox',
+          label: 'Kostenlos',
+          defaultValue: true,
+          admin: {
+            width: '50%',
+            description: 'Aus, wenn die Teilnahme etwas kostet oder jeder selbst einen Beitrag wählt.',
+          },
+        },
+        {
+          name: 'signupUrl',
+          type: 'text',
+          label: 'Anmeldung (Adresse)',
+          validate: (value: string | null | undefined) => validateSignupUrl(value),
+          admin: {
+            width: '50%',
+            description:
+              'Nur wenn die Anmeldung woanders läuft, z. B. https://teckids.org/…. Der Hauptknopf auf der Startseite führt dann dorthin.',
+          },
+        },
+      ],
     },
     { name: 'image', type: 'upload', relationTo: 'media', label: 'Bild' },
     hideFromHeroField(),

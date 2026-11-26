@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { richTextConverters } from '@/blocks/richtext'
 import { MembersOnlyBadge } from '@/components/events/MembersOnlyBadge'
 import { Media } from '@/components/Media'
-import { PROSE_LINKS, TEXT_LINK } from '@/components/ui'
+import { BTN_PRIMARY, PROSE_LINKS, TEXT_LINK } from '@/components/ui'
+import { eventSignup } from '@/lib/eventSignup'
 import { eventTimeText } from '@/lib/eventTime'
 import { postMeta } from '@/lib/postMeta'
 import type { Blog, Event } from '@/payload-types'
@@ -56,6 +57,8 @@ const fmt = (d: string) =>
   }).format(new Date(d))
 
 export function EventArticle({ ev }: { ev: Event }) {
+  // S5.19: an external sign-up shows on the page too (members-only events invite to membership instead).
+  const signup = ev.membersOnly ? undefined : eventSignup(ev.signupUrl)
   return (
     <main className="mx-auto max-w-[760px] px-4 py-14 md:px-8">
       <div className="mb-3 font-mono text-[14px] tracking-[.06em] text-brand-text">NÄCHSTER TERMIN · EVENT</div>
@@ -84,6 +87,20 @@ export function EventArticle({ ev }: { ev: Event }) {
           >
             Mitglied werden
           </Link>
+        </div>
+      ) : null}
+      {signup ? (
+        <div className="mb-8 grid gap-3 rounded-[10px] border-l-8 border-brand bg-card px-5 py-4 text-[15px] leading-[1.5] md:grid-cols-[1fr_auto] md:items-center md:gap-6">
+          <span>
+            Die Anmeldung läuft über <strong>{signup.host}</strong>.
+          </span>
+          <a
+            href={signup.url}
+            rel="noopener"
+            className={`inline-flex min-h-11 items-center justify-self-start rounded-[8px] px-[18px] font-bold md:justify-self-end ${BTN_PRIMARY}`}
+          >
+            Anmelden auf {signup.host}
+          </a>
         </div>
       ) : null}
       {ev.image && typeof ev.image === 'object' ? (
