@@ -453,11 +453,15 @@ Dockerfiles use floating tags (`node:22-slim`, `nginx:1.27-alpine`). Base images
 **AC:** rebuilding the same commit yields the same base layers.
 
 
-### ⏳ S6.8 — The app and publisher images are much smaller (M)
+### ✅ S6.8 — The app and publisher images are much smaller (M) — 2026-11-26
 **Source:** IDEAS.md 2026-11-26. Measured 2026-11-26 (compressed, linux/amd64): app 560 MB, publisher 325 MB, backup 47 MB, static 26 MB.
 Every deploy pulls the full app image onto the server, and GHCR keeps up to 30 versions of each image. Large images make deploys and rollbacks slow, use server disk and registry space, and carry more packages that security scans flag.
 
 **AC:** the app image is at most half its current compressed size and the publisher image clearly smaller; the site, admin, migrations, seeds and static publishing work exactly as before on staging; the image scan reports no more findings than before; the new sizes are recorded with the date.
+
+**Result (2026-11-26, GHCR, compressed, linux/amd64):** app 561 → 258 MB (−54 %), publisher 325 → 285 MB (−12 %). Trivy HIGH/CRITICAL (local scan): app 92 → 59, publisher 120 → 92. Checked on staging by Falk.
+
+**Implementation notes:** app runtime gets `pnpm prune --prod` node_modules, no `.next/cache`, no `@next/swc-*` (only `next build` loads it) and a plain `node` base without npm/corepack/pnpm. `typescript` is a runtime dependency now: `@payloadcms/plugin-mcp` imports it, and the pruned image crashed without it. Publisher drops biome and the vitest/vite toolchain plus `tests/` and `vitest.config.ts` (its `next build` type-checks every included `.ts`). A different package manager would not help: the size is in what Next and Payload pull in. Next lever if needed: let the publisher share its node_modules layer with the app image.
 
 ### ⏳ S6.9 — Tests give feedback faster (M)
 **Source:** IDEAS.md 2026-11-26. Measured 2026-11-26: `pnpm test` 41 s locally (1043 tests), CI gate job 2 min 11 s.

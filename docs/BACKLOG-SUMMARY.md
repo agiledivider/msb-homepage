@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**28 open · 37 done** · ✅ 37 · 🟡 1 · ⏳ 24 · ⏭️ 1 · 🚨 2
+**27 open · 38 done** · ✅ 38 · 🟡 1 · ⏳ 23 · ⏭️ 1 · 🚨 2
 
 ## Blockers (0/2 done)
 
@@ -41,16 +41,15 @@ Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't e
 - ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L358)
 - ⏳ [S5.16 — Visitors see which year an archived event took place (S)](BACKLOG.md#L398)
 
-## E6 — Playbook retrofit (2/10 done)
+## E6 — Playbook retrofit (3/10 done)
 
 - ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L430)
 - ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L435)
 - ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L440)
 - ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L445)
 - ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L450)
-- ⏳ [S6.8 — The app and publisher images are much smaller (M)](BACKLOG.md#L456)
-- ⏳ [S6.9 — Tests give feedback faster (M)](BACKLOG.md#L462)
-- ⏳ [S6.10 — A push reaches staging-ready images sooner (M)](BACKLOG.md#L468)
+- ⏳ [S6.9 — Tests give feedback faster (M)](BACKLOG.md#L466)
+- ⏳ [S6.10 — A push reaches staging-ready images sooner (M)](BACKLOG.md#L472)
 
 ## E7 — Legacy migration (1/1 done)
 
@@ -62,4 +61,4 @@ All done.
 
 ## E10 — Werkstätten (3/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L550)
+- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L554)
