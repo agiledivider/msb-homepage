@@ -9,6 +9,7 @@ import { generatePreviewPath } from '../lib/preview'
 export const MACHINE_ACCESS = [
   { value: 'free', label: 'Frei nutzbar' },
   { value: 'briefing', label: 'Nach Einweisung' },
+  { value: 'training', label: 'Nach Ausbildung' },
   { value: 'supervised', label: 'Nur mit Werkstattpat:in' },
 ] as const
 export type MachineAccess = (typeof MACHINE_ACCESS)[number]['value']

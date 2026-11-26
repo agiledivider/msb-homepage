@@ -17,7 +17,7 @@ import { BTN_PRIMARY, BTN_SECONDARY, CARD_LINK, CARD_TITLE, MONO_LINK, TapeTag }
  * workshops, closing band. Every section is CMS content and hides when empty.
  */
 
-/** Access badges (styleguide: green = OK, Gelber Fond = Achtung, outline = restricted). */
+/** Access badges (styleguide: green = OK, Gelber Fond = Achtung, Roter Fond = Ausbildung, outline = restricted). */
 const ACCESS: Record<MachineAccess, { label: string; className: string; hint: string }> = {
   free: {
     label: 'frei nutzbar',
@@ -25,6 +25,8 @@ const ACCESS: Record<MachineAccess, { label: string; className: string; hint: st
     hint: 'nach der allgemeinen Sicherheitsunterweisung',
   },
   briefing: { label: 'Einweisung nötig', className: 'bg-fond-gelb text-text-gelb', hint: 'einmal pro Maschine' },
+  // No hint yet: how the training works is still open (Metallwerkstatt, 2026-11-26).
+  training: { label: 'Ausbildung nötig', className: 'bg-fond-rot text-text-rot', hint: '' },
   supervised: {
     label: 'nur mit Werkstattpat:in',
     className: 'border border-dashed border-ink text-ink',

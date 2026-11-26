@@ -26,6 +26,8 @@
   --color-green-pale: #f0f7ea;   /* Grüner Fond · Grün 50 — status OK, selected row, tags */
   --color-fond-gelb: #fdf3d7;    /* Gelber Fond — status "Achtung", soft yellow tags */
   --color-text-gelb: #8a5a00;    /* Gelbe Schrift · Ocker — text on Gelber Fond */
+  --color-fond-rot: #fbe5e3;     /* Roter Fond — machine status "Ausbildung nötig" (Falk, 2026-11-26) */
+  --color-text-rot: #a61b1b;     /* Rote Schrift — text on Roter Fond (6.2:1) */
   --color-feld: #ffffff;         /* Feld · Weiß — input background (styleguide 2026-11 Formulare) */
   --color-feld-rand: #948d81;    /* Feld-Rand · Kiesel — input border, 3:1 on Fläche and Hintergrund */
   --color-marker: #fbe3a0;       /* Textmarker — search hits (S5.17); not Mitglieder-Gelb, text on it ink */
@@ -113,6 +115,8 @@
     --color-green-pale: #1b3714;   /* Grün 900 */
     --color-fond-gelb: #33280f;    /* Gelb-Fond dunkel */
     --color-text-gelb: #fcbd30;    /* Mitglieder-Gelb */
+    --color-fond-rot: #3a1414;     /* Rot-Fond dunkel */
+    --color-text-rot: #ff8a80;     /* Rote Schrift hell (7.1:1) */
     --color-marker: #5a4512;       /* Textmarker dunkel */
     --color-feld: #13201a;         /* Feld · Tannenschwarz */
     --color-feld-rand: #606e67;    /* Feld-Rand · Flechte */
@@ -139,6 +143,8 @@
   --color-green-pale: #1b3714;   /* Grün 900 */
   --color-fond-gelb: #33280f;    /* Gelb-Fond dunkel */
   --color-text-gelb: #fcbd30;    /* Mitglieder-Gelb */
+  --color-fond-rot: #3a1414;     /* Rot-Fond dunkel */
+  --color-text-rot: #ff8a80;     /* Rote Schrift hell (7.1:1) */
   --color-marker: #5a4512;       /* Textmarker dunkel */
   --color-feld: #13201a;         /* Feld · Tannenschwarz */
   --color-feld-rand: #606e67;    /* Feld-Rand · Flechte */
