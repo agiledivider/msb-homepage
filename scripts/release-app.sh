@@ -73,9 +73,10 @@ fi
 # natively here won't start on an amd64 server. --push in the same step because
 # a cross-platform image can't be loaded into the local daemon anyway.
 #
-# NEXT_PUBLIC_SERVER_URL is NOT needed here: unlike the static build it is not
-# inlined into this image — the app reads it from the runtime environment
-# (docker-compose.prod.yml). One image serves any origin.
+# NEXT_PUBLIC_SERVER_URL is NOT needed here: server code reads it from the
+# runtime environment (docker-compose.prod.yml). One image serves any origin.
+# Client components see only the build-time value (empty here), so they must
+# use window.location.origin instead (see RefreshRouteOnSave).
 step "Building + pushing the image"
 docker buildx build \
   --platform "$PLATFORM" \
