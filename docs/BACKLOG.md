@@ -287,6 +287,11 @@ The site has patterns the styleguide doesn't cover (polaroids, pegboard, status 
 
 **AC:** each gap listed in the audit has a decision recorded in the styleguide or in this backlog.
 
+
+### ⏳ S4.9 — The MakerSpace logo keeps its shape at every screen width (S)
+At some page widths the logo in the header is squeezed and looks distorted. The logo is a fixed brand element; a visitor should never see it stretched or compressed, whatever the width of their screen or window.
+
+**AC:** stepping the window from 320 px to 1920 px, the logo in header and footer keeps its proportions at every width (light and dark mode); where space runs short the logo shrinks evenly or other header items give way; nothing overlaps at 375 px.
 ---
 
 ## E5 — Visitor and editor features
@@ -423,6 +428,21 @@ The site has around 300 blog posts and events plus the Verein and workshop pages
 An editor can keep an event or blog post out of the start-page hero. The hero preview still shows that item in the carousel, as if it would appear there, so the preview suggests the opposite of what will happen on the live start page.
 
 **AC:** for an event or post kept out of the hero, the hero preview clearly says that it will not appear in the start-page carousel, while still showing how it would look; for every other item the preview is unchanged; readable at 375 px.
+
+### ⏳ S5.19 — The start page invites to an event the way that event actually works (S)
+The hero always labels the next event "kostenlos" and offers "Platz sichern", even when the event is run by guests, costs something, or needs a registration somewhere else (e.g. the Teckids Campdays, registration on teckids.org, contribution chosen by each participant). Visitors are promised something the event doesn't offer. Editors should be able to say whether an event is free and where people sign up, and the hero and event page show only what is true for that event.
+
+**AC:** for an event with an external sign-up address, the hero's main button leads there and says so; an event not marked free shows no "kostenlos"; an event with neither shows a neutral invitation to the event page; events nobody edits look as today; readable at 375 px. Relation: S5.4 (pretix) may later provide the sign-up address.
+
+### ⏳ S5.20 — Any member's AI writes CMS content the way the Verein wants it (M)
+Editors can let their own AI (Claude Desktop, claude.ai or others) work in the CMS through their personal key. The AI only gets a short guide (German, drafts only, title lengths, no invented facts). What we learned while filling the site lives in one person's head and one local setup: which image format each place needs, when to set the KI label and remove recognisable people, that recurring events like the Offene Tür stay out of the hero, how workshop pages are filled, how to take over dates from the old site or partner sites and check them for contradictions. Every member's AI should get this editorial guide from the CMS itself, kept in one place and updated when the Verein's rules change.
+
+**AC:** a member connects a fresh AI with their key and asks it to add an event from a flyer and a workshop photo; without further hints the AI picks a fitting image crop, sets the KI label where needed, keeps a recurring event out of the hero, leaves unknown facts empty and asks for them, and ends with "open the draft and submit it for review"; the guide is readable by the Vorstand without technical knowledge; changing it needs no change on the members' side.
+
+### ⏳ S5.21 — Members hand their AI a photo of any size (S)
+An AI working in the CMS can only add images from a public web address or as text-encoded file content inside the conversation. A phone photo is too large for the second way, and members don't have a public address for their own photos. Today only a developer with the code on their machine can upload such a photo. A member should be able to give their AI a photo of any normal size, and the AI then uses it for a post, event or workshop page.
+
+**AC:** a member asks their AI to use a phone photo (several MB) for an event; the AI gives them a simple way to hand over the photo, the photo ends up in the media library at web size with alt text, and the AI sets it on the event; nobody without a valid key can upload this way; works from a phone.
 
 ---
 
@@ -569,6 +589,11 @@ Drafts that Claude writes through the CMS connection, or that an editor saves an
 
 **Implementation notes:** workflow fields `lastEditedBy` and `lastEditedViaClaude` (set in `beforeChange` from `req.user` and `req.payloadAPI === 'MCP'`, never from the body; migration `20261124_014146_open_drafts_last_editor`). `loadOpenDrafts()` in `src/plugins/editorial/components/ReviewDashboard.tsx`: latest version `_status` draft and `reviewStatus` draft, newest first; falls back to `createdBy` for older saves. Tests: `tests/integration/open-drafts.test.ts`, flag through the real MCP path in `mcp.test.ts`. b5016ae.
 
+
+### ⏳ S9.6 — Editors can log out with the admin sidebar closed (S)
+With the admin sidebar collapsed to icons, the logout is no longer visible, so an editor on a shared computer or a small screen has to open the sidebar first, or doesn't find a way to log out at all.
+
+**AC:** with the sidebar collapsed, logging out is one visible, labelled control (icon with a tooltip or text for screen readers); it behaves like the existing logout; with the sidebar open nothing changes; usable at 375 px.
 ---
 
 ## E10 — Werkstätten
