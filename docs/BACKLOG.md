@@ -30,7 +30,7 @@ All content (the CMS database and uploaded media) lives only on the server's Doc
 **AC:** a backup runs without anyone triggering it; a restore onto an empty stack from the latest backup shows the same pages, posts, events and images; someone is notified when a backup fails.
 
 ### 🚨 B2 — Public demo image ships real admin accounts with known passwords (S)
-**Status:** 🟡 exposure removed 2026-07-22: `msb-demo.idiot.games` now serves the **static** site (no Node, no DB, no `/admin`), so there is nothing there to log into. Code side resolved 2026-11-23 (see **Resolved**). Open, outside the code: rotate `test` / `changeme123` wherever reused, delete the old CMS image versions on GHCR (pullable by digest), delete local `demo-seed/` copies.
+**Status:** 🟡 exposure removed 2026-07-22: `msb-demo.idiot.games` now serves the **static** site (no Node, no DB, no `/admin`), so there is nothing there to log into. Code side resolved 2026-11-23 (see **Resolved**). 2026-11-26: the 5 old CMS versions of `msb-demo` on GHCR (10–11 Jul, `next start`) are deleted and their digests no longer resolve; the local `demo-seed/` copy is deleted. Open, outside the code: rotate `test` / `changeme123` wherever reused (Falk).
 **Severity:** was Critical (full CMS takeover on the public demo) · **Source:** code review #2 (2026-07-11), confirmed live against the baked DB
 
 **Problem:** the public demo used to ship **four privileged accounts baked into the image with trivial dev passwords**, so anyone could open `/admin` and log in as an editorial admin.
