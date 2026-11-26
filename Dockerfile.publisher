@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true \
   # `next build` needs the build toolchain (typescript, tailwind, @types), but not
-  # the linter or the test runner (S6.8). The image ships no tests (see below).
+  # the linter or the test runner (S6.8). Tests stay out of the build context
+  # (.dockerignore), so its type-check never meets them.
   && rm -rf node_modules/@biomejs node_modules/vitest \
      node_modules/.pnpm/@biomejs+* node_modules/.pnpm/vitest@* node_modules/.pnpm/@vitest+* \
      node_modules/.pnpm/vite@* node_modules/.pnpm/rolldown@* node_modules/.pnpm/@rolldown+*
@@ -54,10 +55,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 # The publisher needs the whole app: it runs a real `next build` + crawl.
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-# No test runner in this image, and `next build` type-checks every .ts file the
-# tsconfig includes, so the tests would fail it.
-RUN rm -rf tests vitest.config.ts
+# Rarely changed assets first, then the code (S6.10), so a code change doesn't
+# re-ship them. uploads/ only feeds the app's seeds; the publisher never seeds.
+COPY public ./public
+COPY --exclude=uploads --exclude=public . .
 
 # src/payload-types.ts is git-ignored (and excluded from the build context), so
 # generate it into the image — the runtime `next build` type-checks against it.

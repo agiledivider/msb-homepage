@@ -26,9 +26,9 @@ RUN pnpm prune --prod --config.dangerouslyAllowAllBuilds=true \
   && rm -rf node_modules/.pnpm/@next+swc-*
 
 # ---- build ----
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Starts from deps rather than copying node_modules over: the copy took ~20 s
+# per build and stored a second ~1 GB layer in the build cache (S6.10).
+FROM deps AS builder
 COPY . .
 # placeholders so config init during `next build` doesn't complain; no DB is touched
 ENV PAYLOAD_SECRET=build-placeholder DATABASE_URI=file:/tmp/build.db
@@ -49,21 +49,24 @@ WORKDIR /app
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 NEXT_TELEMETRY_DISABLED=1
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
-  && groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m nextjs
+  && groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m nextjs \
+  # Volume mount points (named volumes inherit this ownership on first run).
+  && mkdir -p /app/data /app/public/media && chown -R nextjs:nodejs /app/data /app/public
 
+# Layers run from rarely to often changed (S6.10): a code change rebuilds only
+# the last two, so a deploy pulls a few MB of src plus .next, not the assets.
+# Assets come straight from the build context, not via the builder: their cache
+# key is then their own content, so a fresh CI checkout still hits the cache.
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 # uploads/ holds the seed's source images (hero photos, legacy article images,
 # Satzung PDF). The first-boot prod seed reads them from here and writes the
 # resulting media onto the `media` volume. Not served directly.
-COPY --from=builder --chown=nextjs:nodejs /app/uploads ./uploads
-COPY --from=builder --chown=nextjs:nodejs \
-  /app/package.json /app/next.config.mjs /app/tsconfig.json ./
-
-# Volume mount points (named volumes inherit this ownership on first run).
-RUN mkdir -p /app/data /app/public/media && chown -R nextjs:nodejs /app/data /app/public/media
+COPY --chown=nextjs:nodejs uploads ./uploads
+COPY --chown=nextjs:nodejs public ./public
+COPY --chown=nextjs:nodejs package.json next.config.mjs tsconfig.json ./
+# From the builder: it carries the generated src/payload-types.ts.
+COPY --from=builder --chown=nextjs:nodejs /app/src ./src
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 
 USER nextjs
 EXPOSE 3000

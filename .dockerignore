@@ -1,37 +1,29 @@
-node_modules
-.next
-.git
-# static snapshot — only Dockerfile.static needs it (see its own .dockerignore)
-dist
-.gitignore
-*.md
-Dockerfile
-.dockerignore
-docker-compose*.yml
+# Build context for Dockerfile (app) and Dockerfile.publisher: an allowlist.
+# Everything is out unless named below, so local-only files (backups in
+# .backup-dev, the deploy key in deploy/, .env, scratch) can never land in an
+# image, and a docs- or test-only commit leaves the context unchanged, letting
+# CI reuse every cached layer (S6.8, S6.10). Need a new file in the image?
+# Add it here. (Dockerfile.static and Dockerfile.backup have their own lists.)
+*
 
-# generated in-image (RUN generate:types) — don't ship a stale local copy
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!next.config.mjs
+!next-env.d.ts
+!postcss.config.mjs
+!tsconfig.json
+!src
+!public
+!uploads
+!scripts
+
+# generated in-image (generate:types): never ship a stale local copy
 src/payload-types.ts
-
-# local sqlite DBs (prod uses a volume)
-*.db
-*.db-journal
-*.db-shm
-*.db-wal
-
 # runtime uploads (prod uses a volume)
 public/media
-
-# local env & editor cruft
-.env
-.env.*
-.DS_Store
-.vscode
-.idea
-
-# scratch / design sources not needed in the image
-scrap
-.playwright-mcp
-*.dc.html
-# (no quotes: .dockerignore patterns are literal)
-MakerSpace*Redesign*.html
-*.tsbuildinfo
+# local cruft inside the allowed folders
+**/.DS_Store
+**/*.md
+**/*.db
+**/*.db-*
