@@ -163,11 +163,14 @@ Preview should only redirect within the site; Kanidm calls give up after a few s
 **Implementation notes:** `src/lib/safePath.ts` (`isSafeRedirectPath`: one leading slash, no backslash or control characters, same origin) guards `/next/preview`; `src/plugins/oidc/http.ts` gives Kanidm token/userinfo calls a 5 s `AbortSignal.timeout` and turns failures into "<what> failed (<status> <error code>)"; the failure log carries only that reason. `.gitignore` ignores `.env.*` except `*.example`. Tests: `tests/unit/hardening.test.ts`. Checked 2026-11-24: dev server answers 400 for `//example.com`, `/\example.com`, `https://example.com`. The timeout is tested with a fake Kanidm, not a real one.
 
 
-### ⏳ S2.5 — The CMS only offers the interfaces the site actually uses (S)
+### ✅ S2.5 — The CMS only offers the interfaces the site actually uses (S) — 2026-11-26
+**Status:** ✅ done 2026-11-26 (Falk, Kanidm login and editing checked on staging).
 **Source:** Falk 2026-11-26 (admin hardening).
 The CMS is reachable by anyone on the internet and answers on more doors than the site needs: a query interface and its interactive playground nobody uses, and requests from other sites are not limited to our own address. Every unused door is attack surface when the next CMS vulnerability appears.
 
 **AC:** interfaces the site, the admin, the publish step and Claude (MCP) don't use answer "not found"; requests that change data are only accepted when they come from the site's own address; a login session ends after a reasonable idle time and its cookie is only sent over HTTPS to our own site; editors notice no difference in their daily work.
+
+**Implementation notes:** GraphQL off (`graphQL.disable`) and its two routes deleted. `csrf` and `cors` list only the site's origin (`src/lib/requestSecurity.ts`, from `NEXT_PUBLIC_SERVER_URL`; plus localhost in dev): Payload then ignores a login cookie sent with a foreign `Origin`, or with neither `Origin` nor a same-site `Sec-Fetch-Site`. API-key clients (MCP, scripts) are unaffected. Login cookie `Secure` on https, `SameSite=Lax` (Kanidm redirect), `tokenExpiration` 2 h stated explicitly. Tests: `tests/unit/request-security.test.ts`, `tests/integration/stale-draft-cookie.test.ts`; trap in `docs/runtime-traps.md`. `a8192c0`.
 
 ### ⏳ S2.6 — Logins and AI keys can't be hammered (S)
 **Source:** Falk 2026-11-26 (admin hardening).

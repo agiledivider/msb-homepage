@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**28 open · 53 done** · ✅ 53 · ⏳ 27 · ⏭️ 1
+**27 open · 54 done** · ✅ 54 · ⏳ 26 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -15,44 +15,43 @@ All done.
 - ⏳ [S1.5 — The live site starts with the content prepared before launch (M)](BACKLOG.md#L105)
 - ⏳ [S1.6 — Members find out how the Verein handles their data (S)](BACKLOG.md#L111)
 
-## E2 — Security hardening (audit 2026-11-20) (3/9 done)
+## E2 — Security hardening (audit 2026-11-20) (4/9 done)
 
 - ⏭️ [S2.2 — The publish service only accepts authenticated requests and runs unprivileged (S)](BACKLOG.md#L139)
-- ⏳ [S2.5 — The CMS only offers the interfaces the site actually uses (S)](BACKLOG.md#L166)
-- ⏳ [S2.6 — Logins and AI keys can't be hammered (S)](BACKLOG.md#L172)
-- ⏳ [S2.7 — Only signed-in Verein members can reach the CMS at all (M)](BACKLOG.md#L178)
-- ⏳ [S2.8 — People with CMS access sign in with a second factor (S)](BACKLOG.md#L184)
-- ⏳ [S2.9 — The CMS runs apart from the public website (M)](BACKLOG.md#L190)
+- ⏳ [S2.6 — Logins and AI keys can't be hammered (S)](BACKLOG.md#L175)
+- ⏳ [S2.7 — Only signed-in Verein members can reach the CMS at all (M)](BACKLOG.md#L181)
+- ⏳ [S2.8 — People with CMS access sign in with a second factor (S)](BACKLOG.md#L187)
+- ⏳ [S2.9 — The CMS runs apart from the public website (M)](BACKLOG.md#L193)
 
 ## E3 — Der Verein page (6/8 done)
 
-- ⏳ [S3.8 — The retired Verein Intro block is gone (S)](BACKLOG.md#L247)
-- ⏳ [S3.6 — Visitors jump to a section of the Verein page (S)](BACKLOG.md#L253)
+- ⏳ [S3.8 — The retired Verein Intro block is gone (S)](BACKLOG.md#L250)
+- ⏳ [S3.6 — Visitors jump to a section of the Verein page (S)](BACKLOG.md#L256)
 
 ## E4 — Styleguide 2026-11 (design audit 2026-11-22) (9/10 done)
 
-- ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L316)
+- ⏳ [S4.8 — Feed site patterns back into the styleguide (S)](BACKLOG.md#L319)
 
 ## E5 — Visitor and editor features (13/23 done)
 
-- ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L361)
-- ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L367)
-- ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L372)
-- ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L378)
-- ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L392)
-- ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L414)
-- ⏳ [S5.18 — The hero preview says when an item will not appear in the hero (S)](BACKLOG.md#L471)
-- ⏳ [S5.20 — Any member's AI writes CMS content the way the Verein wants it (M)](BACKLOG.md#L485)
-- ⏳ [S5.21 — Members hand their AI a photo of any size (S)](BACKLOG.md#L490)
-- ⏳ [S5.22 — Editors schedule content to go live at a set time (M)](BACKLOG.md#L495)
+- ⏳ [S5.3 — Editors can set every label on the homepage carousel and lists (M)](BACKLOG.md#L364)
+- ⏳ [S5.4 — Visitors buy tickets or register on the event page (M)](BACKLOG.md#L370)
+- ⏳ [S5.5 — People apply for membership on the website (S)](BACKLOG.md#L375)
+- ⏳ [S5.6 — Visitors plan their trip by bus and train from the footer (S)](BACKLOG.md#L381)
+- ⏳ [S5.8 — Editors jump from a page on the site straight to editing it (S)](BACKLOG.md#L395)
+- ⏳ [S5.11 — The Verein sees how the site is used, without tracking visitors (M)](BACKLOG.md#L417)
+- ⏳ [S5.18 — The hero preview says when an item will not appear in the hero (S)](BACKLOG.md#L474)
+- ⏳ [S5.20 — Any member's AI writes CMS content the way the Verein wants it (M)](BACKLOG.md#L488)
+- ⏳ [S5.21 — Members hand their AI a photo of any size (S)](BACKLOG.md#L493)
+- ⏳ [S5.22 — Editors schedule content to go live at a set time (M)](BACKLOG.md#L498)
 
 ## E6 — Playbook retrofit (6/11 done)
 
-- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L535)
-- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L540)
-- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L545)
-- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L550)
-- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L555)
+- ⏳ [S6.3 — Stricter TypeScript catches missing data (M)](BACKLOG.md#L538)
+- ⏳ [S6.4 — Commits and edits are checked locally (S)](BACKLOG.md#L543)
+- ⏳ [S6.5 — One command proves "done" (S)](BACKLOG.md#L548)
+- ⏳ [S6.6 — Key user journeys are covered end to end (L)](BACKLOG.md#L553)
+- ⏳ [S6.7 — Images are reproducible (S)](BACKLOG.md#L558)
 
 ## E7 — Legacy migration (1/1 done)
 
