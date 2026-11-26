@@ -54,8 +54,14 @@ describe('draft-mode cookie without a CMS session', () => {
   })
 
   it('still shows drafts while the editor is logged in', async () => {
-    requestHeaders = new Headers({ cookie: `payload-token=${token}` })
+    // A browser navigation on the site itself (S2.5: Payload checks where a cookie request comes from).
+    requestHeaders = new Headers({ cookie: `payload-token=${token}`, 'sec-fetch-site': 'same-origin' })
     expect(await isDraftRequest()).toBe(true)
     expect((await findDraft()).map((d) => d.slug)).toEqual([slug])
+  })
+
+  it('shows no drafts when another site sends the login cookie along (S2.5)', async () => {
+    requestHeaders = new Headers({ cookie: `payload-token=${token}`, origin: 'https://evil.example' })
+    expect(await findDraft()).toEqual([])
   })
 })

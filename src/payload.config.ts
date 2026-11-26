@@ -20,6 +20,7 @@ import { SiteSettings } from './globals/SiteSettings'
 import { devLoginEnabled } from './lib/devLogin'
 import { passwordLoginEnabled } from './lib/passwordLogin'
 import { payloadSecret } from './lib/payloadSecret'
+import { trustedOrigins } from './lib/requestSecurity'
 import { autofilePlugin } from './plugins/autofile/plugin'
 import { backupsAdmin } from './plugins/backups'
 import { editorialWorkflow } from './plugins/editorial'
@@ -154,6 +155,12 @@ export default buildConfig({
   ],
   // Fails fast instead of running with an empty secret; see src/lib/payloadSecret.ts.
   secret: payloadSecret(process.env),
+  // S2.5: only the site itself may act with an editor's login cookie (Payload
+  // checks Origin / Sec-Fetch-Site against this list); API keys are unaffected.
+  csrf: trustedOrigins(process.env),
+  cors: trustedOrigins(process.env),
+  // S2.5: nothing uses GraphQL (admin, site, publisher and MCP all use REST or the Local API).
+  graphQL: { disable: true },
   onInit: async (payload) => {
     // Kanidm only (PASSWORD_LOGIN=off) but Kanidm not configured: nobody can log
     // into the CMS. Only a warning, because the publisher shares this config and

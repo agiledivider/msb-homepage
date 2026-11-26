@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { adminOnly, adminOrSelf, adminOrSelfField, hideForNonAdmins, loggedIn } from '../access/admin'
 import { passwordLoginEnabled } from '../lib/passwordLogin'
+import { authCookies, TOKEN_EXPIRATION_SECONDS } from '../lib/requestSecurity'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -11,6 +12,9 @@ export const Users: CollectionConfig = {
   // still issues the JWT cookie. See src/plugins/oidc.
   auth: {
     useSessions: false,
+    // S2.5: HTTPS-only cookie on https deployments; logins end after 2 h idle.
+    cookies: authCookies(process.env),
+    tokenExpiration: TOKEN_EXPIRATION_SECONDS,
     // PASSWORD_LOGIN=off (default on servers): Kanidm only. Payload then refuses
     // login, forgot/reset password and first-user registration, and the login
     // page shows only the SSO button. enableFields keeps email/hash/salt in the
