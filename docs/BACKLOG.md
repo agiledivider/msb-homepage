@@ -301,10 +301,12 @@ Writing a blog post or entering an event meant working through the CMS forms by 
 
 **Implementation notes:** `@payloadcms/plugin-mcp` at `/api/mcp` (`0ed742f`); editors connect their own Claude with a personal key (Verwaltung → KI-Zugänge) that acts as their CMS user. MCP writes are forced to drafts (`mcpDraftOnly`), no deletes; `uploadMedia` adds images/PDFs by URL or base64 (public at once, marked "Von Claude hochgeladen"). New "Erstellt von" on blog, events, pages. Verified by Falk on staging. Details and the known gap (a key keeps its owner's roles from their last login) in `docs/CLAUDE-MCP.md`.
 
-### ⏳ S5.2 — Editors choose which events appear in the start-page carousel (S)
+### ✅ S5.2 — Editors choose which events appear in the start-page carousel (S) — 2026-11-26
 The carousel's event slide always shows the next upcoming event, whatever it is. Editors can't keep a routine or minor event out of the banner, or let a more important one take its place. Each event should get a "show in the carousel" option, switched on by default. The carousel shows the next upcoming event that has it switched on; switched-off events still appear in the event lists and on the events page.
 
 **AC:** an editor switches the option off for the next event, and the carousel shows the next event that has it on, while the switched-off event is still in the upcoming list; new events and existing events nobody edits behave exactly as today.
+
+**Implementation notes:** a checkbox "Nicht im Startseiten-Hero zeigen" (off by default) on events **and blog posts** (`src/fields/hideFromHero.ts`, migration `20261126_131630_hide_from_hero`); `src/lib/heroContent.ts` picks the hero's post and next event (fallback: latest past event) skipping ticked items, lists and feeds are unchanged (`982dd88`). First use: the weekly Offene Tür. Test: `tests/integration/hide-from-hero.test.ts`. Confirmed by Falk on staging. Follow-up: S5.18 (hero preview hint).
 
 ### ⏳ S5.3 — Editors can set every label on the homepage carousel and lists (M)
 **Status:** the implementation needs a design discussion with Falk before work starts.
@@ -415,6 +417,12 @@ The site has around 300 blog posts and events plus the Verein and workshop pages
 **AC:** a search field reachable from every page (also in the phone menu); results cover pages, blog posts and events, upcoming and archived, each with title, kind (page, post or event), date where it has one and a short excerpt; only published content is ever found, never drafts; German words match regardless of upper/lower case and umlaut spelling ("Löten" finds "löten"); a search with no hits says so and points to the blog and events; each search has its own address that can be shared; usable at 375 px. The static snapshot is out of scope (Falk 2026-11-26).
 
 **Implementation notes:** in-memory index over `findPublic` (pages, workshops, blog, events; drafts and unapproved never), rebuilt at most once a minute, ~20 ms per query; no schema change, no new dependency (`src/lib/search/`). German-aware: lower case, umlauts as ae/oe/ue, ß as ss. Ranking: every word must match; title > lead > body; whole word > word start > inside a word (inside only from 4 letters); phrase bonus; upcoming events and matching workshops/pages lifted; ties newest first. Quick results drop from the header (button, phone-menu row, `/` or ⌘K; arrow keys, Enter, Esc; `/suche/schnell`), the results page `/suche?q=&typ=` has tabs with counts and is `noindex`. One glyph per kind (date stamp, photo or pen nib, tool icon, page sheet); matches drawn with a highlighter (new token `--color-marker`, Falk ok). Search field after styleguide 2026-11 "Formulare" (new tokens `--color-feld`, `--color-feld-rand`). Off in the static snapshot. Tests: `tests/unit/search-text.test.ts`, `search-ranking.test.ts`, `tests/integration/site-search.test.ts`. Checked in Blink at 375 px and 1280 px, light and dark; confirmed by Falk.
+
+### ⏳ S5.18 — The hero preview says when an item will not appear in the hero (S)
+**Priority:** low (Falk, 2026-11-26).
+An editor can keep an event or blog post out of the start-page hero. The hero preview still shows that item in the carousel, as if it would appear there, so the preview suggests the opposite of what will happen on the live start page.
+
+**AC:** for an event or post kept out of the hero, the hero preview clearly says that it will not appear in the start-page carousel, while still showing how it would look; for every other item the preview is unchanged; readable at 375 px.
 
 ---
 
