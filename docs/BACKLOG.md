@@ -612,13 +612,15 @@ Today each workshop is one card with a short machine list, and the cards lead on
 
 **Implementation notes:** `workshops` collection (Werkstätten; editorial review + static publish like pages; Reviewer/Admin edit, not Redakteur) and `/werkzeug/<slug>` in the UX mockup's D1 layout (`src/components/WorkshopPage.tsx`); every section hides while empty. The workshop wall block reads the collection, so cards always lead to a page; its old `items` list is hidden but kept because `src/seed/workshops.ts` reads it once (prod seed creates the six workshops on any DB without them); drop it with a migration later. Machines start as "nach Einweisung". Not in the MCP tools yet.
 
-### 🟡 S10.2 — A workshop page shows its next Einweisungen and workshops (S)
+### ✅ S10.2 — A workshop page shows its next Einweisungen and workshops (S) — 2026-11-26
 **Needs:** S10.1.
 People who want to use a machine need an Einweisung, but they have to search the event calendar to find the next one for "their" workshop.
 
 **AC:** a workshop page lists its upcoming Einweisungen and workshops from the calendar, soonest first, without editors entering them twice; past events disappear on their own; with nothing planned, the page says so and points to the Offene Tür.
 
-**Status:** 🟡 built 2026-11-23 with S10.1: events get a "Werkstätten" field and the page lists the next 3 linked events. Open: not yet seen with a real linked event, and no "nothing planned → Offene Tür" note in the box (the box just hides).
+**Status:** ✅ done 2026-11-26 (Falk).
+
+**Implementation notes:** built 2026-11-23 with S10.1: events get a "Werkstätten" field and the page lists the next 3 linked events from today on (Berlin). 2026-11-26: with nothing planned, the box stays and points to the Offene Tür (link to `/events`, which has no Offene-Tür filter). Checked with a real linked event on the dev DB. Test: `tests/unit/workshop-dates.test.tsx`.
 
 ### ✅ S10.3 — Visitors know whom to ask and what the rules are in a workshop (S) — 2026-11-23
 **Needs:** S10.1.

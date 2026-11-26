@@ -2,7 +2,7 @@
 
 Generated from [BACKLOG.md](BACKLOG.md) by `scripts/backlog-summary.sh`; don't edit by hand.
 
-**25 open · 47 done** · ✅ 47 · 🟡 1 · ⏳ 23 · ⏭️ 1
+**24 open · 48 done** · ✅ 48 · ⏳ 23 · ⏭️ 1
 
 ## Blockers (2/2 done)
 
@@ -57,6 +57,6 @@ All done.
 
 - ⏳ [S9.6 — Editors can log out with the admin sidebar closed (S)](BACKLOG.md#L597)
 
-## E10 — Werkstätten (3/4 done)
+## E10 — Werkstätten (4/4 done)
 
-- 🟡 [S10.2 — A workshop page shows its next Einweisungen and workshops (S)](BACKLOG.md#L615)
+All done.

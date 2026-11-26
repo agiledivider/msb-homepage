@@ -240,9 +240,9 @@ export function WorkshopPage({
 
             {/* Sidebar */}
             <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
-              {upcoming.length ? (
-                <div className={BOX}>
-                  <div className={BOX_LABEL}>NÄCHSTE TERMINE</div>
+              <div className={BOX}>
+                <div className={BOX_LABEL}>NÄCHSTE TERMINE</div>
+                {upcoming.length ? (
                   <ul className="m-0 list-none divide-y divide-line p-0">
                     {upcoming.map((e) => (
                       <li key={e.link?.url ?? e.title} className="py-2.5 first:pt-0 last:pb-0">
@@ -267,11 +267,15 @@ export function WorkshopPage({
                       </li>
                     ))}
                   </ul>
-                  <Link href="/events" className={`mt-2 ${MONO_LINK}`}>
-                    alle Termine →
-                  </Link>
-                </div>
-              ) : null}
+                ) : (
+                  <p className="m-0 text-[15px] leading-[1.5]">
+                    Gerade ist nichts geplant. Schau bei der <b>Offenen Tür</b> vorbei: für alle und kostenlos.
+                  </p>
+                )}
+                <Link href="/events" className={`mt-2 ${MONO_LINK}`}>
+                  {upcoming.length ? 'alle Termine →' : 'Offene Tür im Kalender →'}
+                </Link>
+              </div>
 
               {contact?.name || contact?.linkUrl ? (
                 <div className={BOX}>
