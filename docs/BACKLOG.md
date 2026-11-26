@@ -393,6 +393,13 @@ Members-only events (Mitgliedertreffen, internal workshops) look like public one
 
 **Implementation notes:** event field `membersOnly` ("Nur für Mitglieder"); design B "Mitglieder-Gelb", chosen by Falk from three designer drafts (A label strip, B yellow, C door sign): `MembersOnlyBadge` is a Mitglieder-Gelb flag with a notch, 12 px (exception in `tests/fitness/min-text-size.test.ts`); yellow bar on list rows, yellow border + band on tiles, yellow calendar chip, members box with yellow edge and button on the event page (button right from `md`, hover Tinte/yellow), hero face swaps orange for yellow (sticker, tape, "Mitglied werden"/"Zum Termin", no hand note); workshop sidebar shows the flag. `labelBesideMarker` drops the repeated "Mitglieder" part of the free-text label; calendar export appends "(Nur für Mitglieder)". Migration `20261126_022737_events_members_only` adds the column and marks existing events (and their versions) whose label says members only, once. Styleguide card "Mitglieder-Fahne · Nur für Mitglieder" written in `msb-styleguide` (2026-11.13), not committed there. Tests: `tests/unit/members-only.test.tsx`. Checked at 1440 and 375 px. `b3e3755`.
 
+### ⏳ S5.16 — Visitors see which year an archived event took place (S)
+**Source:** IDEAS.md 2026-11-26 ("year in archive event list").
+The events archive lists about 200 past events from 2017 on, but each entry shows only day, month and weekday. A visitor can't tell whether "05 DEZ" was last year or seven years ago, so the archive reads like one undated pile.
+
+**AC:** every event in the archive shows its year, and it is clear where one year ends and the next begins; the list of upcoming events stays as it is; readable at 375 px; works in the static bundle *(optional: only if the static publisher is used; move to its own story if needed)*.
+**Related:** S5.9 (paging through the archive).
+
 ---
 
 ## E6 — Playbook retrofit
