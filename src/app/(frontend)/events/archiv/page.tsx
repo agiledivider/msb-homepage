@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PageIntroComponent } from '@/blocks/PageIntro/Component'
 import { ListView } from '@/components/events/ListView'
-import { toEventVM } from '@/components/events/model'
-import { MONO_LINK } from '@/components/ui'
+import { groupByYear, toEventVM } from '@/components/events/model'
+import { MONO_LINK, SectionHeading } from '@/components/ui'
 import { startOfTodayBerlin } from '@/lib/eventTime'
 import { findPublic } from '@/lib/publicData'
 
@@ -43,7 +43,18 @@ export default async function EventsArchivePage() {
         </Link>
       </div>
       {events.length ? (
-        <ListView events={events} />
+        // One section per year, newest first, so the archive reads as a timeline (S5.16).
+        groupByYear(events).map((g) => (
+          <section key={g.year} aria-labelledby={`jahr-${g.year}`} className="mb-12 last:mb-0">
+            <SectionHeading
+              heading={g.year}
+              meta={g.events.length === 1 ? '1 Event' : `${g.events.length} Events`}
+              headingId={`jahr-${g.year}`}
+              className="mb-4"
+            />
+            <ListView events={g.events} showYear />
+          </section>
+        ))
       ) : (
         <p className="py-16 text-center font-mono text-sm text-muted">Noch keine vergangenen Termine.</p>
       )}

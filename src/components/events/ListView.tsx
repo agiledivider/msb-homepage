@@ -7,10 +7,13 @@ import { MembersOnlyBadge } from './MembersOnlyBadge'
 const MEMBERS_BAR =
   'before:absolute before:top-3.5 before:bottom-3.5 before:-left-3 before:w-1.5 before:rounded-[3px] before:bg-yellow'
 
-import { type EventVM, fmtDay2, fmtMonthShort, fmtWeekdayShort } from './model'
+import { type EventVM, fmtDay2, fmtMonthShort, fmtWeekdayShort, fmtYear } from './model'
 
-/** Dense date list with a small thumbnail per event. */
-export function ListView({ events }: { events: EventVM[] }) {
+/**
+ * Dense date list with a small thumbnail per event. `showYear` adds the year
+ * under the date (archive, S5.16); the upcoming list doesn't need it.
+ */
+export function ListView({ events, showYear = false }: { events: EventVM[]; showYear?: boolean }) {
   return (
     <div className="border-t border-line">
       {events.map((e) => (
@@ -28,6 +31,7 @@ export function ListView({ events }: { events: EventVM[] }) {
               <span className="max-md:hidden"> · </span>
               <span className="max-md:block">{fmtWeekdayShort(e.date)}</span>
             </div>
+            {showYear ? <div className="font-mono text-[14px] text-muted">{fmtYear(e.date)}</div> : null}
           </div>
 
           <Media

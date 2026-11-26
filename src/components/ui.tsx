@@ -62,6 +62,7 @@ export function SectionHeading({
   meta,
   link,
   className,
+  headingId,
 }: {
   tag?: string
   tagColor?: 'green' | 'orange'
@@ -69,12 +70,18 @@ export function SectionHeading({
   meta?: string
   link?: LinkValue | null
   className?: string
+  /** id on the <h2>, for a section's aria-labelledby */
+  headingId?: string
 }) {
   return (
     <div className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 ${className ?? ''}`}>
       <div className="flex items-center gap-3.5">
         {tag ? <TapeTag color={tagColor}>{tag}</TapeTag> : null}
-        {heading ? <h2 className="m-0 font-display text-[26px] font-extrabold">{heading}</h2> : null}
+        {heading ? (
+          <h2 id={headingId} className="m-0 font-display text-[26px] font-extrabold">
+            {heading}
+          </h2>
+        ) : null}
         {meta ? <span className="font-mono text-[14px] text-muted">{meta}</span> : null}
       </div>
       {link?.label ? (

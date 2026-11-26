@@ -76,3 +76,16 @@ export const fmtDay2 = (d: Date) => de({ day: '2-digit' }).format(d)
 export const fmtMonthShort = (d: Date) => strip(de({ month: 'short' }).format(d)).toUpperCase()
 export const fmtWeekdayShort = (d: Date) => strip(de({ weekday: 'short' }).format(d)).toUpperCase()
 export const fmtMonthYear = (d: Date) => de({ month: 'long', year: 'numeric' }).format(d)
+export const fmtYear = (d: Date) => de({ year: 'numeric' }).format(d)
+
+/** Consecutive runs of events by (Berlin) year, in the given order (archive, S5.16). */
+export function groupByYear(events: EventVM[]): { year: string; events: EventVM[] }[] {
+  const groups: { year: string; events: EventVM[] }[] = []
+  for (const e of events) {
+    const year = fmtYear(e.date)
+    const last = groups.at(-1)
+    if (last?.year === year) last.events.push(e)
+    else groups.push({ year, events: [e] })
+  }
+  return groups
+}
