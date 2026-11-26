@@ -34,7 +34,7 @@ pnpm ghcr:prune [--apply] [pkg]   # delete old GHCR image versions (dry run by d
 - **Seeds that write published content** pass `{ context: { [EDITORIAL_SKIP]: true } }` and `reviewStatus: 'approved'`, or the editorial publish gate silently turns them into drafts.
 - **Schema:** every database is built by migrations, dev included (`push` only for test DBs, D-010). Every schema change ships with a migration in `src/migrations/`; `pnpm test` fails without it. Migrations never use the Local API; content conversions go into `src/seed/prod.ts`.
 - **Code via git, content on the server (D-011):** never upload or restore a local database onto staging/prod; content Claude creates goes onto staging through the CMS (MCP) as drafts; local demo content stays local. Seeds and `prod.ts` conversions only add what's missing.
-- **No auth gate in front of the app** (Basic Auth removed 2026-07-22). Any Payload deployment is public; see the 🚨 go-live blocker in `docs/BACKLOG.md`.
+- **No auth gate in front of the app** (Basic Auth removed 2026-07-22). Any Payload deployment is public the moment it has a URL, and the repo is public too (2026-11-26): never commit real values.
 - **Styling:** Tailwind v4 utilities in the component, tokens only in `@theme` (`src/styles/globals.css`); mobile-first, hero/header switch at `md`; no `!important`. Icons: Font Awesome SVG React components.
 - **Hero prism:** design choices (true 3D prism on all widths, tilt, anticipation + overshoot) are confirmed by Falk; don't change them without asking. Render traps in `docs/runtime-traps.md`.
 - **Browser checks:** WebKit-based panes flatten the prism; verify the hero in Blink (headless Chrome over CDP) and iOS on a real iPhone.
